@@ -12,6 +12,7 @@ export default class CustomCategory {
     this.initializeHandlers();
   }
 
+  // Initialization
   initializeAttributes(attributes, level) {
     attributes.forEach(attr => {
       if (attr.attrition.enabled && attr.retention.enabled) {
@@ -41,10 +42,7 @@ export default class CustomCategory {
       });
   }
 
-  calculateMax(level, bonus, maxPerLevel) {
-    return (level * maxPerLevel) + bonus;
-  }
-
+  // adjustments to attributes
   adjustValue(attributeKey, value, type = 'increase') {
     const attr = this.attributes[attributeKey];
     if (!attr) {
@@ -52,12 +50,33 @@ export default class CustomCategory {
       return;
     }
 
+    const { values } = attr;
     const delta = type === 'increase' ? value : -value;
-    attr.current = Math.max(0, Math.min(attr.max, attr.current + delta));
+    values.current = Math.max(0, Math.min(values.max, values.current + delta));
     this.invalidateMaxScoreCache();
   }
 
+  adjustBonus(attribute, value, type = 'increase', global = false) {
+    const delta = type === 'increase' ? value : -value;
 
+    if (global) {
+      this.bonus += delta;
+      Object.values(this.attributes).forEach(attr => {
+        attr.current = Math.max(0, attr.current + delta);
+      });
+    } else {
+      const attr = this.attributes[attribute];
+      if (!attr) {
+        console.warn(`Attribute "${attribute}" does not exist.`);
+        return;
+      }
+      attr.values.bonus = Math.max(0, attr.values.bonus + delta);
+      attr.values.current = Math.min(attr.values.max, attr.values.current + delta);
+    }
+    this.invalidateMaxScoreCache();
+  }
+
+  // scoring and rating
   setScore(level, currentHealth, maxHealth, modifiers = {}) {
     const baseline = Object.values(this.attributes).reduce((acc, attr) => {
       const clampedCurrent = Math.min(attr.current, attr.max);
@@ -85,9 +104,9 @@ export default class CustomCategory {
     return this._maxScoreCache;
 }
 
-invalidateMaxScoreCache() {
+  invalidateMaxScoreCache() {
     this._maxScoreCache = null;
-}
+  }
 
   getRatingFromScore(rawScore) {
     const maxScore = this.calculateMaxScore();
@@ -96,6 +115,7 @@ invalidateMaxScoreCache() {
     return rating ? rating.label : "Unknown";
 }
 
+  // attrition and retention
   applyAttrition(trigger, daysPassed) {
     const relevantAttributes = Object.values(this.attributes).filter(attr => attr.attrition.enabled);
     relevantAttributes.forEach(attr => {
@@ -142,6 +162,7 @@ invalidateMaxScoreCache() {
     });
   }
 
+  // dependencies
   applyDependencies(allCategories) {
     this.dependencies.forEach(dep => {
         const targetCategory = allCategories[dep.target];
@@ -154,5 +175,27 @@ invalidateMaxScoreCache() {
             this.adjustValue(attribute, this[attribute] * (modifier - 1), 'increase');
         }
     });
+  }
+
+  evaluateCondition(condition, targetCategory) {
+    const { attribute, operator, value } = condition;
+    const targetValue = targetCategory[attribute];
+
+    switch (operator) {
+        case 'gt':
+            return targetValue > value;
+        case 'lt':
+            return targetValue < value;
+        case 'eq':
+            return targetValue === value;
+        default:
+            console.warn(`Invalid operator "${operator}" provided.`);
+            return false;
+    }
+  }
+
+  // utility functions
+  calculateMax(level, bonus, maxPerLevel) {
+    return (level * maxPerLevel) + bonus;
   }
 }
