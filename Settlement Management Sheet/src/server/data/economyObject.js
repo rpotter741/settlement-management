@@ -3,20 +3,11 @@ import CustomCategory from '../classes/customCategoryClass';
 const attributes = [
   {
     name: 'Trade',
+    internalName: 'trade',
     startingValue: 5,
     startingBonus: 0,
     maxPerLevel: 5,
     costPerLevel: 83,
-    attrition: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
-    retention: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
     settlementPointCost: {
       default: 2,
       'Mercantile': 1,
@@ -26,20 +17,11 @@ const attributes = [
   },
   {
     name: 'Craftsmanship',
+    internalName: 'craftsmanship',
     startingValue: 2,
     startingBonus: 0,
     maxPerLevel: 3,
     costPerLevel: 115,
-    attrition: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
-    retention: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
     settlementPointCost: {
       default: 2,
       'Mercantile': 3,
@@ -49,20 +31,11 @@ const attributes = [
   },
   {
     name: 'Labor Pool',
+    internalName: 'laborPool',
     startingValue: 1,
     startingBonus: 0,
     maxPerLevel: 2,
     costPerLevel: 150,
-    attrition: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
-    retention: {
-      enabled: false,
-      interval: null,
-      rate: null,
-    },
     settlementPointCost: {
       default: 2,
       'Mercantile': 2,
