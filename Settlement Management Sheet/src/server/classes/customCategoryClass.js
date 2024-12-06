@@ -1,13 +1,13 @@
 export default class CustomCategory {
   constructor(name, level, attributes, thresholds, dependencies, type = 'custom') {
     this.name = name;
-    this.type = type;
+    this.attributes = {};
     this.thresholds = thresholds;
     this.rating = undefined;
-    this.bonus = 0;
-    this._maxScoreCache = null;
     this.dependencies = dependencies || [];
-    this.attributes = {};
+    this.bonus = 0;
+    this._type = type;
+    this._maxScoreCache = null;
     this.initializeAttributes(attributes, level);
     this.initializeHandlers();
   }
@@ -134,7 +134,7 @@ export default class CustomCategory {
       }
 
       if (daysPassed % interval === 0) {
-        attr.current = Math.max(0, attr.current - attrition.attritionRate);
+        attr.current = Math.max(0, attr.current - attrition.rate);
       }
     });
   }
@@ -157,7 +157,7 @@ export default class CustomCategory {
       }
 
       if (daysPassed % interval === 0) {
-        attr.current = Math.min(attr.max, attr.current + retention.retentionRate);
+        attr.current = Math.min(attr.max, attr.current + retention.rate);
       }
     });
   }
@@ -165,17 +165,20 @@ export default class CustomCategory {
   // dependencies
   applyDependencies(allCategories) {
     this.dependencies.forEach(dep => {
-        const targetCategory = allCategories[dep.target];
-        if (!targetCategory) return;
+      const targetCategory = allCategories[dep.target];
+      if (!targetCategory) return;
 
-        const conditionMet = this.evaluateCondition(dep.condition, targetCategory);
-
-        if (conditionMet) {
-            const { attribute, modifier } = dep.effect;
-            this.adjustValue(attribute, this[attribute] * (modifier - 1), 'increase');
+      dep.conditions.forEach(({ rating, modifier }) => {
+        if (targetCategory.rating === rating) {
+          // Apply the modifier
+          Object.keys(this.attributes).forEach(attrKey => {
+            this.adjustValue(attrKey, this.attributes[attrKey].current * (modifier - 1), 'increase');
+          });
         }
+      });
     });
   }
+
 
   evaluateCondition(condition, targetCategory) {
     const { attribute, operator, value } = condition;
