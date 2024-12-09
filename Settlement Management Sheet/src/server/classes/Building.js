@@ -4,8 +4,6 @@ class Building {
     description = '',
     level = 0,
     status = 'Not Built',
-    costs = {},
-    rewards = {},
     branches = [], // Array of initial branches
     official = false,
   }) {
@@ -13,8 +11,6 @@ class Building {
     this.description = description;
     this.level = level;
     this.status = status;
-    this.costs = costs;
-    this.rewards = rewards; // Effects of the building
     this.branches = branches; // Starting branches
     this.official = official; // Whether this is a default/predefined building
   }
@@ -47,3 +43,15 @@ class Building {
 }
 
 export default Building;
+
+/*
+  const Walls = new Building({
+    name: 'Walls',
+    description: 'Basic walls to protect the settlement.',
+    level: 1,
+    costs: { stone: 100, gold: 50 },
+    rewards: { defensiveInfrastructure: 5 },
+    branches: [reinforcedWalls],
+    official: true,
+  });
+*/

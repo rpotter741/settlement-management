@@ -7,7 +7,12 @@ const userSchema = new mongoose.Schema({
   settlements: [
     {
       settlementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Settlement' },
-      role: { type: String, enum: ['dm', 'player', 'resident'], required: true },
+      role: {
+        type: String,
+        enum: ['dm', 'player', 'resident'],
+        required: true,
+      },
+      characterName: { type: String, default: '' },
     },
   ],
 });
