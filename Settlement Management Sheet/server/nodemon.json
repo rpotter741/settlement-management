@@ -1,0 +1,11 @@
+{
+  "watch": ["src/server", "src/shared"],
+  "ext": "js,json",
+  "exec": "node --experimental-modules src/server.js",
+  "ignore": ["node_modules", "dist"],
+  "env": {
+    "NODE_ENV": "development",
+    "PORT": "3000"
+  },
+  "delay": "1000"
+}
