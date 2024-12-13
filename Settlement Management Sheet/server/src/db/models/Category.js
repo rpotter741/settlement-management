@@ -14,6 +14,7 @@ const ValuesSchema = new Schema({
 const RateSchema = new Schema({
   enabled: { type: Boolean, default: false },
   rate: { type: Number, default: null },
+  perLevel: { type: Boolean, default: false },
   interval: {
     type: String,
     enum: ['daily', 'weekly', 'monthly', 'yearly'],

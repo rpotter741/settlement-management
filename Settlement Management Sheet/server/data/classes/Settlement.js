@@ -2,6 +2,7 @@ import EventLog from './eventLogClass';
 import Vault from './vaultClass';
 import Health from './healthClass';
 import Infrastructure from './infrastructureClass';
+import UpgradeManager from './UpgradeManager';
 class Settlement {
   constructor(
     name,
@@ -23,7 +24,7 @@ class Settlement {
     this.infrastructure = new Infrastructure(buildings); // Tracks building status (from the Buildings class)
     this.taxRate = 'Medium'; // Current tax rate
     this.taxImpacts = taxImpacts || {}; // Dynamic modifiers for tax calculations
-    this.upgrades = upgrades || []; // Array of completed upgrades
+    this.upgrades = upgrades || new UpgradeManager(); // Array of completed upgrades
     this.statuses = statuses || []; // Array of active statuses
     this.tradeGoods = []; // Trade goods available in the settlement
     this.notes = {

@@ -1,0 +1,118 @@
+.create-category-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-category-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.create-category-section {
+  margin-bottom: 20px;
+}
+
+.create-category-section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+.create-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.create-category-item label {
+  flex: 1;
+}
+
+.create-category-item input {
+  flex: 2;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.create-category-button {
+  display: inline-block;
+  padding: 10px 15px;
+  margin: 5px 0;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.create-category-button:hover {
+  background-color: #0056b3;
+}
+
+.create-category-button.add-button {
+  background-color: #28a745;
+}
+
+.create-category-button.add-button:hover {
+  background-color: #218838;
+}
+
+.create-category-button.remove-button {
+  background-color: #dc3545;
+}
+
+.create-category-button.remove-button:hover {
+  background-color: #c82333;
+}
+
+.create-category-button.export-button {
+  background-color: #17a2b8;
+  display: block;
+  margin: 20px auto 0;
+}
+
+.create-category-button.export-button:hover {
+  background-color: #138496;
+}
+
+.thresholds-container {
+  margin: 1rem 0;
+  font-family: Arial, sans-serif;
+}
+
+.thresholds-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Split the list into two columns */
+  gap: 0.5rem;
+}
+
+.thresholds-list li {
+  display: flex;
+  align-items: baseline;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd; /* Optional: subtle divider for clarity */
+}
+
+.threshold-score {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.threshold-label {
+  font-style: italic;
+  color: whitesmoke; /* Optional: different color for emphasis */
+}
+
+.thresholds-container p {
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
