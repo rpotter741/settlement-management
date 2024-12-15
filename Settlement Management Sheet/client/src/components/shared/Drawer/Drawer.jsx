@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Drawer.css';
 
+import Button from '../Button/Button';
+
 const Drawer = ({
   children,
   header,
@@ -23,10 +25,14 @@ const Drawer = ({
     <div className={`drawer ${isOpen ? 'open' : 'closed'}`}>
       <div className="drawer-header" style={headerStyle}>
         {onRemove && (
-          <button onClick={() => onRemove(type, index)}>Remove</button>
+          <Button variant="warning" onClick={() => onRemove(type, index)}>
+            Remove
+          </Button>
         )}
         <h2>{header}</h2>
-        <button onClick={toggleDrawer}>{isOpen ? 'Close' : 'Open'}</button>
+        <Button variant="primary" onClick={toggleDrawer}>
+          {isOpen ? 'Close' : 'Open'}
+        </Button>
       </div>
       <div className="drawer-content">{children}</div>
     </div>

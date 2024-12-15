@@ -10,20 +10,8 @@ const emptyCategory = {
         bonus: 0,
       },
       costPerLevel: 0,
-      attrition: {
-        enabled: false,
-        rate: 0,
-        perLevel: false,
-        interval: ' ',
-      },
-      retention: {
-        enabled: false,
-        rate: 0,
-        perLevel: false,
-        interval: ' ',
-      },
       settlementPointCost: {
-        default: 0,
+        default: 1,
       },
     },
   ],
@@ -35,21 +23,21 @@ const emptyCategory = {
 
 const emptyThreshold = {
   max: 0,
-  rating: ' ',
+  rating: '',
 };
 
 const emptyDependency = {
-  target: ' ',
+  target: '',
   conditions: [{ rating: ' ', modifier: 0 }],
 };
 
 const emptyCondition = {
-  rating: ' ',
+  rating: '',
   modifier: 0,
 };
 
 const emptyAttribute = {
-  name: ' ',
+  name: '',
   values: {
     current: 0,
     maxPerLevel: 0,
@@ -57,20 +45,8 @@ const emptyAttribute = {
     bonus: 0,
   },
   costPerLevel: 0,
-  attrition: {
-    enabled: false,
-    rate: 0,
-    perLevel: false,
-    interval: ' ',
-  },
-  retention: {
-    enabled: false,
-    rate: 0,
-    perLevel: false,
-    interval: ' ',
-  },
   settlementPointCost: {
-    default: 0,
+    default: 1,
   },
 };
 

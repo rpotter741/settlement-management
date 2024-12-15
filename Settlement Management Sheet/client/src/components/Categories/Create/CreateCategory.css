@@ -1,3 +1,9 @@
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 .create-category-container {
   max-width: 800px;
   margin: 0 auto;
@@ -25,8 +31,8 @@
 .create-category-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 0.7rem;
+  /* margin-bottom: 10px; */
 }
 
 .create-category-item label {

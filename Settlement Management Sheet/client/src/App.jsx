@@ -12,8 +12,7 @@ import Register from './components/pages/Register';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
-import CustomCategory from './components/Categories/Create/CreateCategory';
-
+import CustomCreation from './components/pages/CustomCreation';
 /*!!localStorage.getItem('token') */
 const App = () => {
   const isAuthenticated = true;
@@ -32,7 +31,7 @@ const App = () => {
             />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/customCategory" element={<CustomCategory />} />
+            <Route path="/customCreation" element={<CustomCreation />} />
 
             {/* Protected Route */}
             <Route

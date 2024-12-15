@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import InputWithLabel from '../../../../shared/InputWithLabel/InputWithLabel';
 import FloatingSelect from '../../../../shared/FloatingSelect/FloatingSelect';
-import Switch from '../../../../shared/Switch/Switch';
+import Button from '../../../../shared/Button/Button';
 import './AttributeForm.css';
 
 const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
@@ -24,6 +24,13 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
     onChange(updatedAttr, index);
   };
 
+  const handleRemoveSettlementType = (type) => {
+    const updatedSPCosts = { ...attr.settlementPointCost };
+    delete updatedSPCosts[type];
+    setTypeSelect('Select an option');
+    handleInputChange('settlementPointCost', updatedSPCosts);
+  };
+
   const getSettlementTypeOptions = () => {
     const options = [
       { value: 'Survivalist', label: 'Survivalist' },
@@ -37,7 +44,13 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
   };
 
   const addSettlementPointCost = (type) => {
-    if (!type || type === '') return;
+    if (!type || type.trim() === '') return; // Ensure valid type
+
+    // Check if the type already exists in settlementPointCost
+    if (attr.settlementPointCost.hasOwnProperty(type)) {
+      alert(`Settlement Point Cost for "${type}" already exists.`);
+      return;
+    }
 
     // const existingType = settlementTypes.find((t) => t.name === type);
     // if (existingType) {
@@ -45,8 +58,10 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
     //   return;
     // }
 
-    // Add new type if not found
+    // Add the new type with a default value of 0
     const updatedSPCosts = { ...attr.settlementPointCost, [type]: 0 };
+
+    // Update the state with the new settlementPointCost
     handleInputChange('settlementPointCost', updatedSPCosts);
 
     // Optionally, add type to the database
@@ -61,6 +76,7 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
     if (customSPType.trim()) {
       addSettlementPointCost(customSPType, customSPValue);
     }
+    setTypeSelect('Select an option');
     setShowCustomModal(false);
     setCustomSPType('');
     setCustomSPValue(0);
@@ -68,13 +84,13 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
 
   return (
     <div>
-      <h3>Attribute {index + 1}</h3>
       <InputWithLabel
         id={`attribute-type${index}`}
         label="Name"
         value={attr.name}
         onChange={(e) => handleInputChange('name', e.target.value)}
         type="text"
+        required={true}
       />
       <div>
         <InputWithLabel
@@ -85,9 +101,10 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
             handleInputChange('currencyCostPerLevel', Number(e.target.value))
           }
           type="number"
+          required={true}
         />
       </div>
-      <h4>Values</h4>
+      <h4 className="my-4 text-xl font-bold ml-4">Values</h4>
       {['current', 'maxPerLevel', 'max', 'bonus'].map((key) => (
         <div key={key}>
           <InputWithLabel
@@ -109,104 +126,11 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
             }
             type="number"
             disabled={key === 'max'}
+            required={key !== 'max'}
           />
         </div>
       ))}
-      <h4>Attrition</h4>
-      {['enabled', 'rate', 'perLevel', 'interval'].map((key) => (
-        <div key={key}>
-          {key === 'enabled' || key === 'perLevel' ? (
-            <div>
-              <Switch
-                label={
-                  key === 'perLevel'
-                    ? 'Per Level'
-                    : key.charAt(0).toUpperCase() + key.slice(1)
-                }
-                checked={attr.attrition[key]}
-                onChange={(checked) => {
-                  handleInputChange(`attrition.${key}`, checked);
-                  if (attr.retention.enabled) {
-                    handleInputChange(`retention.${key}`, !checked);
-                  }
-                }}
-              />
-            </div>
-          ) : key === 'interval' ? (
-            <FloatingSelect
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
-              options={[
-                { value: 'daily', label: 'Daily' },
-                { value: 'weekly', label: 'Weekly' },
-                { value: 'monthly', label: 'Monthly' },
-                { value: 'yearly', label: 'Yearly' },
-              ]}
-              value={attr.attrition[key] || ''}
-              onChange={(e) =>
-                handleInputChange(`attrition.${key}`, e.target.value)
-              }
-            />
-          ) : (
-            <InputWithLabel
-              id={`attribute-${key}${index}`}
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
-              value={attr.attrition[key]}
-              onChange={(e) =>
-                handleInputChange(`attrition.${key}`, Number(e.target.value))
-              }
-              type="number"
-            />
-          )}
-        </div>
-      ))}
-      <h4>Retention</h4>
-      {['enabled', 'rate', 'perLevel', 'interval'].map((key) => (
-        <div key={key}>
-          {key === 'enabled' || key === 'perLevel' ? (
-            <div>
-              <Switch
-                label={
-                  key === 'perLevel'
-                    ? 'Per Level'
-                    : key.charAt(0).toUpperCase() + key.slice(1)
-                }
-                checked={attr.retention[key]}
-                onChange={(checked) => {
-                  handleInputChange(`retention.${key}`, checked);
-                  if (attr.attrition.enabled) {
-                    handleInputChange(`attrition.${key}`, !checked);
-                  }
-                }}
-              />
-            </div>
-          ) : key === 'interval' ? (
-            <FloatingSelect
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
-              options={[
-                { value: 'daily', label: 'Daily' },
-                { value: 'weekly', label: 'Weekly' },
-                { value: 'monthly', label: 'Monthly' },
-                { value: 'yearly', label: 'Yearly' },
-              ]}
-              value={attr.retention[key] || ' '}
-              onChange={(e) =>
-                handleInputChange(`retention.${key}`, e.target.value)
-              }
-            />
-          ) : (
-            <InputWithLabel
-              id={`attribute-${key}${index}`}
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
-              value={attr.retention[key]}
-              onChange={(e) =>
-                handleInputChange(`retention.${key}`, Number(e.target.value))
-              }
-              type="number"
-            />
-          )}
-        </div>
-      ))}
-      <h4>Settlement Point Costs</h4>
+      <h4 className="my-4 text-xl font-bold ml-4">Settlement Point Costs</h4>
       {Object.keys(attr.settlementPointCost).map((type) => (
         <div key={type}>
           <InputWithLabel
@@ -219,18 +143,14 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
                 Number(e.target.value)
               )
             }
+            onRemove={() => handleRemoveSettlementType(type)}
             type="number"
+            min={1}
           />
         </div>
       ))}
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+      <div>
         <FloatingSelect
           label="Settlement Types"
           options={getSettlementTypeOptions()}
@@ -239,6 +159,8 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
             setTypeSelect(e.target.value);
             if (e.target.value === 'Custom') {
               setShowCustomModal(true); // Show modal when "Custom" is selected
+            } else {
+              addSettlementPointCost(e.target.value);
             }
           }}
           hideDefault={true}
@@ -256,6 +178,7 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
               value={customSPType}
               onChange={(e) => setCustomSPType(e.target.value)}
               type="text"
+              min={1}
             />
             <InputWithLabel
               id="custom-sp-value"
@@ -263,6 +186,7 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
               value={customSPValue}
               onChange={(e) => setCustomSPValue(Number(e.target.value))}
               type="number"
+              min={1}
             />
             <button onClick={handleCustomModalSubmit}>Add</button>
             <button onClick={() => setShowCustomModal(false)}>Cancel</button>

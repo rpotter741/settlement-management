@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './FloatingSelect.css';
 
+import Button from '../Button/Button';
 const FloatingSelect = ({
   label,
   options,
   value,
   onChange,
+  onRemove,
   maxWidth,
   hideDefault,
 }) => {
@@ -40,6 +42,11 @@ const FloatingSelect = ({
           </option>
         ))}
       </select>
+      {onRemove && (
+        <Button variant="warning" onClick={onRemove}>
+          Remove
+        </Button>
+      )}
     </div>
   );
 };

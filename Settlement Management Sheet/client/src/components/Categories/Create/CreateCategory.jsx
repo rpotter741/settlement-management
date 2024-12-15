@@ -6,10 +6,11 @@ import {
   emptyAttribute,
 } from '../../../helpers/categories/emptyCategoryObjects.js';
 import AttributeForm from './components/Attributes/AttributeForm';
-import Dependencies from './components/Dependency/Dependencies';
+import DependencyForm from './components/DependencyForm/DependencyForm';
 import './CreateCategory.css'; // Import the CSS file
 import InputWithLabel from '../../shared/InputWithLabel/InputWithLabel';
 import Drawer from '../../shared/Drawer/Drawer';
+import Button from '../../shared/Button/Button';
 
 const categories = [
   {
@@ -54,8 +55,7 @@ const categories = [
   },
 ];
 
-const CreateCategory = () => {
-  const [category, setCategory] = useState(emptyCategory);
+const CreateCategory = ({ category, setCategory }) => {
   const [level, setLevel] = useState(1);
 
   const handleLevelChange = (e) => {
@@ -166,15 +166,14 @@ const CreateCategory = () => {
         <p>
           Attributes define key characteristics of the category. Each attribute
           contains
-          <strong> base values</strong>,{' '}
-          <strong>attrition/retention rates</strong>, and
+          <strong> base values</strong> and
           <strong> settlement point costs</strong>. These are used to calculate
           the overall category score and its impacts on the settlement.
         </p>
         {category.attributes.map((attr, index) => (
           <Drawer
             key={index}
-            header={`Attribute ${index + 1}`}
+            header={attr.name || `Attribute ${index + 1}`}
             onRemove={() => handleRemoveItem('attributes', index)}
             index={index}
             type="attribute"
@@ -189,16 +188,16 @@ const CreateCategory = () => {
             />
           </Drawer>
         ))}
-        <button
-          className="create-category-button add-button"
+        <Button
+          variant="primary"
           onClick={() => handleAddItem('attributes', { ...emptyAttribute })}
         >
           Add Attribute
-        </button>
+        </Button>
       </div>
 
       <div className="create-category-section">
-        <h2>Thresholds</h2>
+        <h2 className="mb-2">Thresholds</h2>
         <p>
           Thresholds specify the score, based on a 10-point scale, for the
           category rating. For example, with <strong>Survival</strong>, the
@@ -210,7 +209,7 @@ const CreateCategory = () => {
             <span className="threshold-label">Dying</span>
           </li>
           <li>
-            <span className="threshold-score">3.9:</span>{' '}
+            <span className="threshold-score">2.9:</span>{' '}
             <span className="threshold-label">Endangered</span>
           </li>
           <li>
@@ -222,11 +221,11 @@ const CreateCategory = () => {
             <span className="threshold-label">Stable</span>
           </li>
           <li>
-            <span className="threshold-score">7.9:</span>{' '}
+            <span className="threshold-score">8.4:</span>{' '}
             <span className="threshold-label">Developing</span>
           </li>
           <li>
-            <span className="threshold-score">9:</span>{' '}
+            <span className="threshold-score">9.2:</span>{' '}
             <span className="threshold-label">Blossoming</span>
           </li>
           <li>
@@ -235,7 +234,7 @@ const CreateCategory = () => {
           </li>
         </ul>
         <p>
-          In this case, if the score is at or below <strong>3.9</strong>, the
+          In this case, if the score is at or below <strong>2.9</strong>, the
           category is
           <strong> Endangered</strong>. These ratings are used for player
           feedback about the status of the category and may be tied to other
@@ -263,20 +262,20 @@ const CreateCategory = () => {
               }
               type="text"
             />
-            <button
-              className="create-category-button remove-button"
+            <Button
+              variant="warning"
               onClick={() => handleRemoveItem('thresholds', index)}
             >
-              Remove Threshold
-            </button>
+              Remove
+            </Button>
           </div>
         ))}
-        <button
-          className="create-category-button add-button"
+        <Button
+          variant="primary"
           onClick={() => handleAddItem('thresholds', { ...emptyThreshold })}
         >
           Add Threshold
-        </button>
+        </Button>
       </div>
 
       <div className="create-category-section">
@@ -293,37 +292,39 @@ const CreateCategory = () => {
         {category.dependencies.map((dep, index) => (
           <Drawer
             key={index}
-            header={`Dependency ${index + 1}`}
+            header={
+              category.dependencies[index].target || `Dependency ${index + 1}`
+            }
             onRemove={() => handleRemoveItem('dependencies', index)}
             index={index}
             type="dependency"
           >
-            <Dependencies
-              key={index}
-              dependencies={category.dependencies}
-              dep={dep}
-              index={index}
-              categories={categories}
-              onChange={handleChange}
-              onAddItem={handleAddItem}
-              onRemoveItem={handleRemoveItem}
+            <DependencyForm
+              dependency={category.dependencies[index]} // Pass the single dependency
+              dependencies={category.dependencies} // Pass all dependencies
+              categories={categories} // Pass all categories for dropdown
+              categoryName={category.name} // Current category's name
+              onChange={(key, value) =>
+                handleChange(`dependencies.${index}.${key}`, value)
+              } // Update a specific dependency
+              onRemove={() => handleRemoveItem('dependencies', index)} // Remove this dependency
             />
           </Drawer>
         ))}
-        <button
-          className="create-category-button add-button"
-          onClick={() => handleAddItem('dependencies', emptyDependency)}
+        <Button
+          variant="primary"
+          onClick={() => handleAddItem('dependencies', { ...emptyDependency })}
         >
           Add Dependency
-        </button>
+        </Button>
       </div>
-
-      <button
-        className="create-category-button export-button"
+      <Button
+        variant="primary"
         onClick={exportToJson}
+        className="create-category-button export-button"
       >
         Export to JSON
-      </button>
+      </Button>
     </div>
   );
 };

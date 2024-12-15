@@ -1,11 +1,15 @@
 import React from 'react';
 import './InputWithLabel.css'; // Import the custom CSS
 
+import Button from '../Button/Button'; // Import the Button component
+
 const InputWithLabel = ({
   id,
   label,
   value,
   onChange,
+  onRemove,
+  removeText,
   type = 'text',
   ...props
 }) => {
@@ -20,6 +24,11 @@ const InputWithLabel = ({
         {...props} // Spread additional props like `required`, `disabled`, etc.
       />
       <label htmlFor={id}>{label}</label>
+      {onRemove && label !== 'Default' && (
+        <Button variant="warning" onClick={onRemove}>
+          {removeText || 'Remove'}
+        </Button>
+      )}
     </div>
   );
 };
