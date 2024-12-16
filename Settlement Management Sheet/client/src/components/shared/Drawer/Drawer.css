@@ -9,8 +9,6 @@
     max-height: 30rem; /* Adjust this based on the content or set a practical maximum */
     opacity: 1;
     transform: translateY(0);
-    overflow-y: auto;
-    margin-bottom: 1rem;
   }
 }
 
@@ -26,39 +24,4 @@
     opacity: 0;
     transform: translateY(-20px);
   }
-}
-
-.drawer {
-  overflow: auto; /* Keep overflow hidden to manage collapsing content */
-  position: relative;
-  margin-bottom: 1rem;
-}
-
-.drawer.open {
-  overflow: visible;
-}
-
-.drawer-header {
-  position: sticky; /* Makes the header sticky */
-  top: 0; /* Sticks the header at the top of its container */
-  z-index: 5; /* Keeps it above the drawer content */
-  padding: 1rem;
-  border-bottom: 1px solid #ddd; /* Optional: add a visual separator */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.drawer-content {
-  max-height: 0; /* Start with collapsed content */
-  overflow: hidden; /* Prevent overflow when content is collapsed */
-  transform-origin: top;
-  transition:
-    max-height 0.3s ease-out,
-    transform 0.3s ease-out;
-}
-
-.drawer.open .drawer-content {
-  max-height: 2000px; /* Large enough to fit the content */
-  transform: scaleY(1);
 }

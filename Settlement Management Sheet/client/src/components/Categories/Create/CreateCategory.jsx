@@ -138,7 +138,7 @@ const CreateCategory = ({ category, setCategory }) => {
   };
 
   return (
-    <div className="create-category-container">
+    <div className="max-w-3xl mx-auto p-16 rounded-2xl shadow-md shadow-black">
       <h1 className="create-category-title">Create Custom Category</h1>
 
       <div className="create-category-section">

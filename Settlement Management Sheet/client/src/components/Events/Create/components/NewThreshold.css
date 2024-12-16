@@ -1,0 +1,35 @@
+/* Table */
+.table {
+  width: 100%;
+  table-layout: fixed; /* Ensures consistent column widths */
+  border-collapse: collapse; /* Combines borders for a cleaner look */
+}
+
+.table th,
+.table td {
+  min-width: 100px;
+  max-width: 200px;
+  padding: 8px;
+  text-align: center; /* Centers text for a clean look */
+  border: 1px solid var(--color-minor-two);
+  vertical-align: middle; /* Ensures content is centered vertically */
+}
+
+/* Ensure rows stretch to match their content */
+.table tr {
+  height: auto; /* Allows rows to expand with content */
+}
+
+/* Button Cell */
+.button-cell {
+  height: 100%;
+}
+
+/* Add hover styles for buttons */
+.button-cell .btn {
+  transition: background-color 0.3s;
+}
+
+.button-cell .btn:hover {
+  background-color: var(--color-primary); /* Example hover color */
+}

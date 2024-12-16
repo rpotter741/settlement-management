@@ -1,37 +1,54 @@
 import React, { useState } from 'react';
-import InputWithLabel from '../../../shared/InputWithLabel/InputWithLabel';
-import TextAreaWithLabel from '../../../shared/TextAreaWithLabel/TextAreaWithLabel';
+import FloatingSelect from '../../../shared/FloatingSelect/FloatingSelect';
+import Drawer from '../../../shared/Drawer/Drawer';
 import Button from '../../../shared/Button/Button';
 
+import { emptyThreshold } from '../../../../helpers/events/emptyEventObjects';
+
 import NewThreshold from './NewThreshold';
+import ThresholdsDetails from '../../../../helpers/events/ThresholdsDetails';
 
 const NewCondition = ({ condition, setCondition }) => {
   return (
-    <div className="flex flex-col items-center w-full border-b p-4 mb-4">
-      <TextAreaWithLabel
-        label="Tags"
-        value={condition.tags}
-        onChange={(e) => setCondition({ ...condition, tags: e.target.value })}
+    <div>
+      <FloatingSelect
+        label="Recommendation Frequency"
+        options={[
+          { value: 'veryRare', label: 'Very Rarely (1% - 5 %)' },
+          { value: 'rare', label: 'Rarely (6% - 15%' },
+          { value: 'occasional', label: 'Occasionally (16% - 30%)' },
+          { value: 'frequent', label: 'Frequently (31% - 60%)' },
+          { value: 'veryFrequent', label: 'Very Frequently (61% - 90%)' },
+        ]}
+        value={condition.frequency}
+        onChange={(e) =>
+          setCondition({ ...condition, frequency: e.target.value })
+        }
       />
-      <InputWithLabel
-        label="Base Chance"
-        type="number"
-        value={condition.chance}
-        onChange={(e) => setCondition({ ...condition, chance: e.target.value })}
+      <NewThreshold
+        key={Math.random()}
+        thresholds={condition.thresholds}
+        setThreshold={(newThreshold, index) => {
+          const newThresholds = [...condition.thresholds];
+          newThresholds[index] = newThreshold;
+          setCondition({ ...condition, thresholds: newThresholds });
+        }}
+        removeThreshold={(index) => {
+          const newThresholds = [...condition.thresholds];
+          newThresholds.splice(index, 1);
+          setCondition({ ...condition, thresholds: newThresholds });
+        }}
       />
-      <h4 className="text-xl font-bold">Thresholds</h4>
-      {condition.thresholds.map((threshold, index) => (
-        <NewThreshold
-          key={index}
-          threshold={threshold}
-          setThreshold={(newThreshold) => {
-            const newThresholds = [...condition.thresholds];
-            newThresholds[index] = newThreshold;
-            setCondition({ ...condition, thresholds: newThresholds });
-          }}
-          index={index}
-        />
-      ))}
+      <Button
+        onClick={() =>
+          setCondition({
+            ...condition,
+            thresholds: [...condition.thresholds, { ...emptyThreshold }],
+          })
+        }
+      >
+        Add Threshold
+      </Button>
     </div>
   );
 };

@@ -21,7 +21,9 @@ const TextAreaWithLabel = ({
         placeholder=" " // Required for floating label effect
         {...props} // Spread additional props like `required`, `disabled`, etc.
       />
-      <label htmlFor={id}>{label}</label>
+      <label className="talabel" htmlFor={id}>
+        {label}
+      </label>
       {onRemove && label !== 'Default' && (
         <Button variant="warning" onClick={onRemove}>
           {removeText || 'Remove'}

@@ -6,7 +6,17 @@ export default {
   ],
 
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
+        accentTwo: 'var(--color-accent-two)',
+        minor: 'var(--color-minor)',
+        minorTwo: 'var(--color-minor-two)',
+        background: 'var(--color-background)',
+      },
+    },
   },
   plugins: [],
 };

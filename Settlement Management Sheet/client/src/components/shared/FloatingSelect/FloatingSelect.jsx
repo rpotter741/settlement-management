@@ -7,9 +7,11 @@ const FloatingSelect = ({
   options,
   value,
   onChange,
+  hideLabel = false,
   onRemove,
   maxWidth,
   hideDefault,
+  selectStyle,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -21,13 +23,14 @@ const FloatingSelect = ({
       className={`floating-select ${isFocused || value ? 'active' : ''}`}
       style={maxWidth && { maxWidth }}
     >
-      <label className="floating-label">{label}</label>
+      {!hideLabel && <label className="floating-label">{label}</label>}
       <select
         className="floating-dropdown"
         value={value}
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        style={selectStyle}
       >
         {!hideDefault ? (
           <option value="" disabled hidden>
@@ -36,7 +39,7 @@ const FloatingSelect = ({
         ) : (
           <option value="">Select an option</option>
         )}
-        {options.map((option, index) => (
+        {options?.map((option, index) => (
           <option key={index} value={option.value}>
             {option.label}
           </option>

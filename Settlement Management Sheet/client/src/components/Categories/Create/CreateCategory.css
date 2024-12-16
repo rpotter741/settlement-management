@@ -105,7 +105,7 @@ h2 {
   display: flex;
   align-items: baseline;
   padding: 0.5rem;
-  border-bottom: 1px solid #ddd; /* Optional: subtle divider for clarity */
+  border-bottom: 1px solid var(--color-accent); /* Optional: subtle divider for clarity */
 }
 
 .threshold-score {
@@ -115,7 +115,7 @@ h2 {
 
 .threshold-label {
   font-style: italic;
-  color: whitesmoke; /* Optional: different color for emphasis */
+  color: var(--color-secondary); /* Optional: different color for emphasis */
 }
 
 .thresholds-container p {

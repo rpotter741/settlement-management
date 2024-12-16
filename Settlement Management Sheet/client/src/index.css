@@ -1,11 +1,13 @@
+@import './themes/themes.css';
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* color-scheme: light dark; */
+  /* color: var(--color-primary); */
+  background-color: var(--color-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -54,15 +56,47 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+p,
+span,
+li {
+  color: var(--color-primary);
+}
+
+@keyframes slideIn {
+  from {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  a:hover {
-    color: #747bff;
+  to {
+    max-height: 500px; /* Adjust based on expected content height */
+    opacity: 1;
+    transform: translateY(0);
   }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover {
+  color: var(--color-secondary);
+}
+
+details[open] > * {
+  animation: slideIn 0.3s ease-in-out;
+  overflow: hidden; /* Prevent content from spilling during animation */
+}
+
+.custom-event-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 300px;
+  max-width: 700px;
+  width: 100%;
+  background: var(--color-background);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
 }

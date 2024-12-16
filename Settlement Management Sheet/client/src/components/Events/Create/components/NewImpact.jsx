@@ -14,10 +14,64 @@ import {
 import NewCondition from './NewCondition';
 
 const NewImpact = ({ impact, setImpact, index }) => {
-  const handleImpactRemove = (index) => {
-    const newImpacts = [...impact.impacts];
-    newImpacts.filter((_, i) => i !== index);
-    setImpact({ ...impact, impacts: newImpacts });
+  const getCategoryOptions = () => {
+    switch (impact.type) {
+      case 'category':
+        return impactCategoryOptions;
+      case 'settlement':
+        return [
+          { value: 'vault', label: 'Currency' },
+          { value: 'health', label: 'Health' },
+        ];
+      case 'status':
+        return [
+          { value: 'fear', label: 'Fear' },
+          { value: 'inspired', label: 'Inspired' },
+          { value: 'riotous', label: 'Riotous' },
+          { value: 'discontent', label: 'Discontent' },
+          { value: 'big spenders', label: 'Big Spenders' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getAttributeOptions = () => {
+    switch (impact.type) {
+      case 'category':
+        const key =
+          impact.category.charAt(0).toUpperCase() + impact.category.slice(1);
+        return impactAttributeOptions[0][key];
+      case 'settlement':
+        return [{ value: null, label: 'None' }];
+      case 'status':
+        return [{ value: null, label: 'None' }];
+      default:
+        return [];
+    }
+  };
+
+  const getKeyOptions = () => {
+    switch (impact.type) {
+      case 'category':
+        return [
+          { value: 'current', label: 'Current' },
+          { value: 'bonus', label: 'Bonus' },
+        ];
+      case 'settlement':
+        return [
+          { value: 'current', label: 'Current' },
+          { value: 'bonus', label: 'Bonus' },
+        ];
+      case 'status':
+        return [{ value: null, label: 'None' }];
+      default:
+        return [];
+    }
+  };
+
+  const handleSwitch = () => {
+    setImpact({ ...impact, immutable: !impact.immutable });
   };
 
   return (
@@ -30,19 +84,19 @@ const NewImpact = ({ impact, setImpact, index }) => {
       />
       <FloatingSelect
         label="Category"
-        options={impactCategoryOptions}
+        options={getCategoryOptions()}
         value={impact.category}
         onChange={(e) => setImpact({ ...impact, category: e.target.value })}
       />
       <FloatingSelect
         label="Attribute"
-        options={impactAttributeOptions}
+        options={getAttributeOptions()}
         value={impact.attribute}
         onChange={(e) => setImpact({ ...impact, attribute: e.target.value })}
       />
       <FloatingSelect
         label="Key"
-        options={impactKeyOptions}
+        options={getKeyOptions()}
         value={impact.key}
         onChange={(e) => setImpact({ ...impact, key: e.target.value })}
       />
@@ -55,30 +109,8 @@ const NewImpact = ({ impact, setImpact, index }) => {
       <Switch
         label="Immutable"
         checked={impact.immutable}
-        onChange={(e) => setImpact({ ...impact, immutable: e.target.checked })}
+        onChange={handleSwitch}
       />
-      <h5 className="text-lg font-bold">Conditions</h5>
-      {impact.conditions &&
-        impact.conditions.map((condition, index) => (
-          <Drawer
-            key={index}
-            header={`Condition ${index + 1}`}
-            onRemove={() => {
-              handleImpactRemove(index);
-            }}
-            type="condition"
-          >
-            <NewCondition
-              key={index}
-              condition={condition}
-              setCondition={(newCondition) => {
-                const newConditions = [...impact.conditions];
-                newConditions[index] = newCondition;
-                setImpact({ ...impact, conditions: newConditions });
-              }}
-            />
-          </Drawer>
-        ))}
     </div>
   );
 };

@@ -6,17 +6,17 @@ const emptyThreshold = {
 };
 
 const thresholdOperatorOptions = [
-  { value: 'lt', label: 'Less than' },
-  { value: 'lte', label: 'Less than or equal to' },
-  { value: 'gt', label: 'Greater than' },
-  { value: 'gte', label: 'Greater than or equal to' },
-  { value: 'eq', label: 'Equal to' },
+  { value: 'lt', label: '<' },
+  { value: 'lte', label: '<=' },
+  { value: 'gt', label: '>' },
+  { value: 'gte', label: '>=' },
+  { value: 'eq', label: '=' },
 ];
 
 const emptyCondition = {
   tags: [],
   thresholds: [{ ...emptyThreshold }],
-  chance: 0,
+  frequency: '',
 };
 
 const emptyImpact = {
@@ -26,7 +26,6 @@ const emptyImpact = {
   key: '',
   baseAmount: 1,
   immutable: false,
-  conditions: [{ ...emptyCondition }],
 };
 
 const impactTypeOptions = [
@@ -47,16 +46,19 @@ const impactAttributeOptions = [
       { value: 'food', label: 'Food' },
       { value: 'supplies', label: 'Supplies' },
       { value: 'medicalCapacity', label: 'Medical Capacity' },
+      { value: 'score', label: 'Score' },
     ],
     Safety: [
       { value: 'defensiveInfrastructure', label: 'Defensive Infrastructure' },
       { value: 'intel', label: 'Intelligence' },
       { value: 'garrison', label: 'Garrison' },
+      { value: 'score', label: 'Score' },
     ],
     Economy: [
       { value: 'trade', label: 'Trade' },
       { value: 'laborPool', label: 'Labor Pool' },
       { value: 'craftsmanship', label: 'Craftsmanship' },
+      { value: 'score', label: 'Score' },
     ],
   },
 ];
@@ -80,7 +82,6 @@ const emptyPhase = {
 };
 
 const phaseTypeOptions = [
-  { value: 'null', label: 'Select a type' },
   { value: 'Immediate', label: 'Immediate' },
   { value: 'Active', label: 'Active' },
   { value: 'Passive', label: 'Passive' },
@@ -126,11 +127,13 @@ const emptyEvent = {
   details: '',
   link: null,
   tags: [],
+  conditions: { ...emptyCondition },
   flavorText: {
-    Low: '',
-    Moderate: '',
-    High: '',
-    Extreme: '',
+    trivial: '',
+    low: '',
+    moderate: '',
+    high: '',
+    catastrophic: '',
   },
 };
 

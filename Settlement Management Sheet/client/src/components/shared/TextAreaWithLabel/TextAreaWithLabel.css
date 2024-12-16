@@ -2,46 +2,58 @@
   position: relative;
   width: 100%;
   margin-bottom: 20px;
+  margin-top: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1rem;
 }
 
 .input-wrapper textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-minor-two); /* Themed border color */
   border-radius: 4px;
   outline: none;
   font-size: 1rem;
   box-sizing: border-box;
-  background: transparent;
-  color: #fff;
-  resize: none;
-}
-
-.input-wrapper label {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  background-color: #242424; /* Matches background */
-  padding: 2px 5px;
-  font-size: 1rem;
-  color: #fff;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  border-radius: 1rem;
+  background: var(--color-background); /* Themed background color */
+  color: var(--color-primary); /* Themed text color */
+  resize: none; /* Prevent resizing */
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth focus transitions */
 }
 
 .input-wrapper textarea:focus {
-  border-color: #007bff;
+  border-color: var(--color-accent); /* Highlight border on focus */
+  box-shadow: 0 0 0 2px var(--color-accent); /* Focus ring */
 }
 
-.input-wrapper textarea:focus + label,
-.input-wrapper textarea:not(:placeholder-shown) + label {
-  top: -0px;
-  font-size: 0.85rem;
-  color: #fff;
+.input-wrapper .talabel {
+  position: absolute;
+  top: 50%; /* Start centered */
+  left: 12px;
+  transform: translateY(-50%);
+  background-color: var(
+    --color-background
+  ); /* Matches the textarea background */
+  padding: 2px 5px;
+  font-size: 1rem;
+  color: var(--color-primary); /* Subtle label color */
+  border-radius: 0.5rem;
+  pointer-events: none;
+  transition: all 0.2s ease; /* Smooth label movement */
+}
+
+.input-wrapper textarea:focus + .talabel,
+.input-wrapper textarea:not(:placeholder-shown) + .talabel {
+  top: -0rem; /* Float above the textarea */
+  font-size: 0.85rem; /* Shrink label */
+  font-weight: bold;
+  color: var(--color-secondary); /* Accent color on focus or when filled */
+}
+
+.input-wrapper textarea:not(:placeholder-shown) {
+  color: var(--color-secondary);
+  border: var(--color-secondary) 1px solid;
 }

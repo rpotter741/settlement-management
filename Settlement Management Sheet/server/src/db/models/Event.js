@@ -27,7 +27,6 @@ const ImpactSchema = new mongoose.Schema({
   key: { type: String, enum: [null, 'current', 'bonus'], default: null }, // Attribute key
   baseAmount: { type: Number, required: true }, // Base value of the impact
   immutable: { type: Boolean, default: false }, // Scaling flag
-  conditions: [ConditionSchema], // Array of condition objects
 });
 
 export const PhaseSchema = new mongoose.Schema({
@@ -90,6 +89,7 @@ const EventSchema = new mongoose.Schema({
     randomWeights: [Number], // Optional: Weights for 'auto' random selection
   },
   tags: { type: [String], default: [] }, // Optional tags for filtering
+  conditions: [ConditionSchema], // Array of condition objects
   votes: {
     options: [
       {

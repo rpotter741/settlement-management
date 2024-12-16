@@ -10,6 +10,7 @@ const InputWithLabel = ({
   onChange,
   onRemove,
   removeText,
+  hideLabel = false,
   type = 'text',
   ...props
 }) => {
@@ -23,7 +24,11 @@ const InputWithLabel = ({
         placeholder=" " // Required for floating label effect
         {...props} // Spread additional props like `required`, `disabled`, etc.
       />
-      <label htmlFor={id}>{label}</label>
+      {!hideLabel && (
+        <label className="label" htmlFor={id}>
+          {label}
+        </label>
+      )}
       {onRemove && label !== 'Default' && (
         <Button variant="warning" onClick={onRemove}>
           {removeText || 'Remove'}
