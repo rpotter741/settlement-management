@@ -41,7 +41,7 @@
 .drawer-header {
   position: sticky; /* Makes the header sticky */
   top: 0; /* Sticks the header at the top of its container */
-  z-index: 10; /* Keeps it above the drawer content */
+  z-index: 5; /* Keeps it above the drawer content */
   padding: 1rem;
   border-bottom: 1px solid #ddd; /* Optional: add a visual separator */
   display: flex;

@@ -56,7 +56,7 @@ const DependencyForm = ({
       {/* Dependency Conditions */}
       {dependency.target && (
         <div className="dependency-conditions">
-          <h4>Modifiers for {dependency.target}</h4>
+          <h4>Modifiers for {dependency.target} State:</h4>
           {categories
             .find((cat) => cat.name === dependency.target)
             ?.thresholds.map((threshold, condIndex) => (

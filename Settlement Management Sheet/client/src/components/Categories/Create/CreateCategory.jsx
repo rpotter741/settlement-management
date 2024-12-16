@@ -252,6 +252,9 @@ const CreateCategory = ({ category, setCategory }) => {
                 handleChange(`thresholds.${index}.max`, Number(e.target.value))
               }
               type="number"
+              step="0.1"
+              min="0"
+              max="10"
             />
             <InputWithLabel
               id={`threshold-rating-${index}`}
