@@ -1,5 +1,21 @@
 import mongoose from 'mongoose';
 
+const ThresholdSchema = new mongoose.Schema({
+  category: { type: String, required: true }, // Category to match
+  attribute: { type: String, required: true }, // Attribute to compare
+  operator: {
+    type: String,
+    enum: ['lt', 'lte', 'gt', 'gte', 'eq'],
+    required: true,
+  }, // Comparison operator
+  value: { type: Number, required: true }, // Threshold value
+});
+
+const ConditionSchema = new mongoose.Schema({
+  thresholds: [ThresholdSchema], // Array of threshold objects
+  chance: { type: Number, default: 0 }, // Chance of the event occurring
+});
+
 const ImpactSchema = new mongoose.Schema({
   type: {
     type: String,
@@ -11,6 +27,7 @@ const ImpactSchema = new mongoose.Schema({
   key: { type: String, enum: [null, 'current', 'bonus'], default: null }, // Attribute key
   baseAmount: { type: Number, required: true }, // Base value of the impact
   immutable: { type: Boolean, default: false }, // Scaling flag
+  conditions: [ConditionSchema], // Array of condition objects
 });
 
 export const PhaseSchema = new mongoose.Schema({
@@ -54,11 +71,24 @@ const EventSchema = new mongoose.Schema({
     default: 'Moderate',
   }, // Event severity
   timeInDays: { type: Number, default: null }, // Duration (null for indefinite)
-  category: { type: String, required: true }, // Category tied to the event
+  categories: [{ type: String, required: true }], // Categories tied to the event
   details: { type: String, default: '' }, // Optional event description
   workers: { type: Number, default: 0 }, // Workers assigned to the event
   hide: { type: Boolean, default: false }, // Display status
-  link: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', default: null }, // Linked event
+  link: {
+    type: {
+      type: String,
+      enum: ['DM', 'player', 'auto'], // Determines how the link is resolved
+      required: true,
+    },
+    events: [
+      {
+        type: mongoose.Schema.Types.ObjectId, // References linked events
+        ref: 'Event',
+      },
+    ],
+    randomWeights: [Number], // Optional: Weights for 'auto' random selection
+  },
   tags: { type: [String], default: [] }, // Optional tags for filtering
   votes: {
     options: [
