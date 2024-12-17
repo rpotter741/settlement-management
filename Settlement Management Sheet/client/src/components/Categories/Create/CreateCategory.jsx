@@ -1,62 +1,29 @@
-import React, { useState } from 'react';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Button from '@mui/material/Button';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid2';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
 import {
   emptyCategory,
   emptyThreshold,
   emptyDependency,
   emptyAttribute,
+  exampleThresholds,
 } from '../../../helpers/categories/emptyCategoryObjects.js';
-import AttributeForm from './components/Attributes/AttributeForm';
-import DependencyForm from './components/DependencyForm/DependencyForm';
-import './CreateCategory.css'; // Import the CSS file
-import InputWithLabel from '../../shared/InputWithLabel/InputWithLabel';
-import Drawer from '../../shared/Drawer/Drawer';
-import Button from '../../shared/Button/Button';
 
-const categories = [
-  {
-    name: 'Select A Category',
-    thresholds: [],
-  },
-  {
-    name: 'Economy',
-    thresholds: [
-      { max: 2, rating: 'Struggling' },
-      { max: 3, rating: 'Fragile' },
-      { max: 4, rating: 'Stagnant' },
-      { max: 5, rating: 'Growing' },
-      { max: 7, rating: 'Prosperous' },
-      { max: 8, rating: 'Thriving' },
-      { max: Infinity, rating: 'Golden Era' },
-    ],
-  },
-  {
-    name: 'Safety',
-    thresholds: [
-      { max: 1, rating: 'Dangerous' },
-      { max: 2, rating: 'Lawless' },
-      { max: 4, rating: 'Unsafe' },
-      { max: 6, rating: 'Safe' },
-      { max: 8, rating: 'Guarded' },
-      { max: 9, rating: 'Protected' },
-      { max: Infinity, rating: 'Impregnable' },
-    ],
-  },
-  {
-    name: 'Survival',
-    thresholds: [
-      { max: 0.9, rating: 'Dying' },
-      { max: 3.9, rating: 'Endangered' },
-      { max: 4.9, rating: 'Unstable' },
-      { max: 6.9, rating: 'Stable' },
-      { max: 7.9, rating: 'Developing' },
-      { max: 9, rating: 'Blossoming' },
-      { max: Infinity, rating: 'Flourishing' },
-    ],
-  },
-];
+import React, { useState } from 'react';
 
 const CreateCategory = ({ category, setCategory }) => {
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(1); // Default level is 1
 
   const handleLevelChange = (e) => {
     const value = Math.max(1, Math.min(20, Number(e.target.value)));
@@ -138,197 +105,126 @@ const CreateCategory = ({ category, setCategory }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-16 rounded-2xl shadow-md shadow-black">
-      <h1 className="create-category-title">Create Custom Category</h1>
-
-      <div className="create-category-section">
-        <InputWithLabel
-          id="settlement-level"
-          label="Settlement Level"
-          value={level}
-          onChange={handleLevelChange}
-          type="number"
-        />
-      </div>
-
-      <div className="create-category-section">
-        <InputWithLabel
-          id="category-name"
-          label="Category Name"
-          value={category.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-          type="text"
-        />
-      </div>
-
-      <div className="create-category-section">
-        <h2>Attributes</h2>
-        <p>
-          Attributes define key characteristics of the category. Each attribute
-          contains
-          <strong> base values</strong> and
-          <strong> settlement point costs</strong>. These are used to calculate
-          the overall category score and its impacts on the settlement.
-        </p>
-        {category.attributes.map((attr, index) => (
-          <Drawer
-            key={index}
-            header={attr.name || `Attribute ${index + 1}`}
-            onRemove={() => handleRemoveItem('attributes', index)}
-            index={index}
-            type="attribute"
-          >
-            <AttributeForm
-              key={index}
-              attr={attr}
-              index={index}
-              onChange={handleAttributeChange}
-              onRemove={() => handleRemoveItem('attributes', index)}
-              level={parseInt(level)}
-            />
-          </Drawer>
-        ))}
-        <Button
-          variant="primary"
-          onClick={() => handleAddItem('attributes', { ...emptyAttribute })}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        margin: '0 auto',
+        width: { xs: '100%', sm: '75%', md: '50%' },
+        maxHeight: '85vh',
+        overflow: 'scroll',
+        pt: 2,
+      }}
+    >
+      <Typography variant="h4" sx={{ my: 2 }}>
+        Create Category
+      </Typography>
+      <TextField
+        label="Settlement Level"
+        value={level}
+        onChange={handleLevelChange}
+        type="number"
+        sx={{ my: 1 }}
+      />
+      <TextField
+        label="Category Name"
+        value={category.name}
+        onChange={(e) => handleChange('name', e.target.value)}
+        sx={{ my: 1 }}
+      />
+      <Accordion sx={{ width: 'auto', my: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
         >
-          Add Attribute
-        </Button>
-      </div>
-
-      <div className="create-category-section">
-        <h2 className="mb-2">Thresholds</h2>
-        <p>
-          Thresholds specify the score, based on a 10-point scale, for the
-          category rating. For example, with <strong>Survival</strong>, the
-          thresholds might look like this:
-        </p>
-        <ul className="thresholds-list">
-          <li>
-            <span className="threshold-score">0.9:</span>{' '}
-            <span className="threshold-label">Dying</span>
-          </li>
-          <li>
-            <span className="threshold-score">2.9:</span>{' '}
-            <span className="threshold-label">Endangered</span>
-          </li>
-          <li>
-            <span className="threshold-score">4.9:</span>{' '}
-            <span className="threshold-label">Unstable</span>
-          </li>
-          <li>
-            <span className="threshold-score">6.9:</span>{' '}
-            <span className="threshold-label">Stable</span>
-          </li>
-          <li>
-            <span className="threshold-score">8.4:</span>{' '}
-            <span className="threshold-label">Developing</span>
-          </li>
-          <li>
-            <span className="threshold-score">9.2:</span>{' '}
-            <span className="threshold-label">Blossoming</span>
-          </li>
-          <li>
-            <span className="threshold-score">10:</span>{' '}
-            <span className="threshold-label">Flourishing</span>
-          </li>
-        </ul>
-        <p>
-          In this case, if the score is at or below <strong>2.9</strong>, the
-          category is
-          <strong> Endangered</strong>. These ratings are used for player
-          feedback about the status of the category and may be tied to other
-          categories to adjust their scores (see <strong>Dependencies</strong>{' '}
-          below). Scores are automatically calculated based on current values,
-          bonuses, and max values.
-        </p>
-        {category.thresholds.map((thr, index) => (
-          <div key={index} className="create-category-item">
-            <InputWithLabel
-              id={`threshold-max-${index}`}
-              label="Max Value"
-              value={thr.max}
-              onChange={(e) =>
-                handleChange(`thresholds.${index}.max`, Number(e.target.value))
-              }
-              type="number"
-              step="0.1"
-              min="0"
-              max="10"
-            />
-            <InputWithLabel
-              id={`threshold-rating-${index}`}
-              label="Rating"
-              value={thr.rating}
-              onChange={(e) =>
-                handleChange(`thresholds.${index}.rating`, e.target.value)
-              }
-              type="text"
-            />
-            <Button
-              variant="warning"
-              onClick={() => handleRemoveItem('thresholds', index)}
+          <Typography variant="h5">Attributes</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Typography variant="body1">
+            Attributes define key characteristics of the category. Each
+            attribute contains <strong>base values</strong> and{' '}
+            <strong>settlement point costs</strong>. These are used to calculate
+            overall category score and its impacts on the settlement.
+          </Typography>
+          {category.attributes.map((attr, index) => (
+            <Typography key={index} variant="body1">
+              I'm an attribute!
+            </Typography>
+          ))}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={() => handleAddItem('attributes', { ...emptyAttribute })}
+          >
+            {' '}
+            Add Attribute{' '}
+          </Button>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion sx={{ width: 'auto', my: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h5">Thresholds</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Typography variant="body1">
+            Thresholds specify the score, based on a 10-point scale, for the
+            category rating. See below for details on <strong>Survival</strong>
+            's thresholds.
+          </Typography>
+          <Accordion sx={{ width: 'auto', my: 2 }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
             >
-              Remove
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="primary"
-          onClick={() => handleAddItem('thresholds', { ...emptyThreshold })}
-        >
-          Add Threshold
-        </Button>
-      </div>
-
-      <div className="create-category-section">
-        <h2>Dependencies</h2>
-        <p>
-          Dependencies adjust the category score based on other categories. When
-          selecting another category, you'll see input fields for each of that
-          category's thresholds. Dependency modifiers have a range of 0 - 5 in
-          0.1 increments. If you want to double the score at a given rating,
-          you'd put 2. If you want to half the score, you'd put 0.5. Putting a
-          modifier of 0 will make this category's score 0 at that rating.
-          Dependencies are multiplied together to calculate the final score.
-        </p>
-        {category.dependencies.map((dep, index) => (
-          <Drawer
-            key={index}
-            header={
-              category.dependencies[index].target || `Dependency ${index + 1}`
-            }
-            onRemove={() => handleRemoveItem('dependencies', index)}
-            index={index}
-            type="dependency"
-          >
-            <DependencyForm
-              dependency={category.dependencies[index]} // Pass the single dependency
-              dependencies={category.dependencies} // Pass all dependencies
-              categories={categories} // Pass all categories for dropdown
-              categoryName={category.name} // Current category's name
-              onChange={(key, value) =>
-                handleChange(`dependencies.${index}.${key}`, value)
-              } // Update a specific dependency
-              onRemove={() => handleRemoveItem('dependencies', index)} // Remove this dependency
-            />
-          </Drawer>
-        ))}
-        <Button
-          variant="primary"
-          onClick={() => handleAddItem('dependencies', { ...emptyDependency })}
-        >
-          Add Dependency
-        </Button>
-      </div>
-      <Button
-        variant="primary"
-        onClick={exportToJson}
-        className="create-category-button export-button"
-      >
-        Export to JSON
-      </Button>
-    </div>
+              <Typography variant="h6">Survival Thresholds</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gridTemplateColumns: {
+                    xs: 'repeat(1, 1fr)',
+                  },
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
+                  {exampleThresholds.map(({ max, rating }) => (
+                    <Grid key={max} item xs={6}>
+                      <Typography variant="body1">
+                        <strong>{max}</strong>: {rating}
+                      </Typography>
+                    </Grid>
+                  ))}
+                  <Grid item xs={12}>
+                    <Typography variant="body1" sx={{ px: 2 }}>
+                      In this case, if the score is at or below{' '}
+                      <strong>2.9</strong>, the category is
+                      <strong> Endangered</strong>. These ratings are used for
+                      player feedback about the status of the category and may
+                      be tied to other categories to adjust their scores (see{' '}
+                      <strong>Dependencies</strong> below). Scores are
+                      automatically calculated based on current values, bonuses,
+                      and max values.
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+          //thresholds here
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };
 
