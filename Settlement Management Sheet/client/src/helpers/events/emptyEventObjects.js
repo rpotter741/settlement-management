@@ -44,7 +44,7 @@ const impactAttributeOptions = [
   {
     Survival: [
       { value: 'food', label: 'Food' },
-      { value: 'supplies', label: 'Supplies' },
+      { value: 'shelter', label: 'Shelter' },
       { value: 'medicalCapacity', label: 'Medical Capacity' },
       { value: 'score', label: 'Score' },
     ],
@@ -56,7 +56,7 @@ const impactAttributeOptions = [
     ],
     Economy: [
       { value: 'trade', label: 'Trade' },
-      { value: 'laborPool', label: 'Labor Pool' },
+      { value: 'culture', label: 'Culture' },
       { value: 'craftsmanship', label: 'Craftsmanship' },
       { value: 'score', label: 'Score' },
     ],

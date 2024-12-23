@@ -10,24 +10,24 @@ const attributes = [
     costPerLevel: 30,
     settlementPointCost: {
       default: 1,
-      'Mercantile': 1,
-      'Survivalist': 1,
-      'Fortified': 2,
-    }
+      Mercantile: 1,
+      Survivalist: 1,
+      Fortified: 2,
+    },
   },
   {
-    name: 'Supplies',
-    internalName: 'supplies',
+    name: 'Shelter',
+    internalName: 'shelter',
     startingValue: 3,
     startingBonus: 0,
     maxPerLevel: 3,
-    costPerLevel: 50,
+    costPerLevel: 60,
     settlementPointCost: {
       default: 2,
-      'Mercantile': 2,
-      'Survivalist': 1,
-      'Fortified': 3,
-    }
+      Mercantile: 2,
+      Survivalist: 1,
+      Fortified: 3,
+    },
   },
   {
     name: 'Medical Capacity',
@@ -38,22 +38,22 @@ const attributes = [
     costPerLevel: 75,
     settlementPointCost: {
       default: 3,
-      'Mercantile': 3,
-      'Survivalist': 2,
-      'Fortified': 3,
-    }
+      Mercantile: 3,
+      Survivalist: 2,
+      Fortified: 3,
+    },
   },
-]
+];
 
 const thresholds = [
-  { max: .9, rating: "Dying" },
-  { max: 3.9, rating: "Endangered" },
-  { max: 4.9, rating: "Unstable" },
-  { max: 6.9, rating: "Stable" },
-  { max: 7.9, rating: "Developing" },
-  { max: 9, rating: "Blossoming" },
-  { max: Infinity, rating: "Flourishing" },
-]
+  { max: 0.9, rating: 'Dying' },
+  { max: 3.9, rating: 'Endangered' },
+  { max: 4.9, rating: 'Unstable' },
+  { max: 6.9, rating: 'Stable' },
+  { max: 7.9, rating: 'Developing' },
+  { max: 9, rating: 'Blossoming' },
+  { max: 10, rating: 'Flourishing' },
+];
 
 const dependencies = []; // no dependencies
 
@@ -62,7 +62,7 @@ const Survival = new CustomCategory(
   1,
   attributes,
   thresholds,
-  dependencies,
-)
+  dependencies
+);
 
 export default Survival;

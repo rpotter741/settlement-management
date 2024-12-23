@@ -1,16 +1,24 @@
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Button from '@mui/material/Button';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Box from '@mui/material/Box';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Collapse,
+  Divider,
+  Typography,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import ValidatedInput from '../../utils/ValidatedInput';
+
+import AttributeForm from './components/Attributes/AttributeForm';
+import DependencyForm from './components/DependencyForm/DependencyForm';
+import TitledCollapse from '../../utils/TitledCollapse/TitledCollapse';
+import useNestedObject from '../../../hooks/useNestedObject';
+
+import categories from '../../../helpers/categories/categories';
+import categorySidebar from '../../../helpers/categories/createCategorySidebar.js';
+import { useDynamicSidebar } from '../../../context/SidebarContext';
 
 import {
   emptyCategory,
@@ -20,18 +28,19 @@ import {
   exampleThresholds,
 } from '../../../helpers/categories/emptyCategoryObjects.js';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 const CreateCategory = ({ category, setCategory }) => {
   const [level, setLevel] = useState(1); // Default level is 1
+  const { updateHandlers, updateContent } = useDynamicSidebar();
 
-  const handleLevelChange = (e) => {
-    const value = Math.max(1, Math.min(20, Number(e.target.value)));
+  const handleLevelChange = (val) => {
+    const value = Math.max(1, Math.min(20, Number(val)));
     setLevel(value);
-    handleChange('settlementLevel', value);
   };
 
   const handleChange = (keyPath, value) => {
+    console.log(keyPath, value);
     const updateNestedObject = (obj, keys, val) => {
       if (keys.length === 1) {
         obj[keys[0]] = val;
@@ -44,7 +53,9 @@ const CreateCategory = ({ category, setCategory }) => {
     };
     setCategory((prev) => {
       const updatedCategory = { ...prev };
+      console.log(updatedCategory, 'before change');
       updateNestedObject(updatedCategory, keyPath.split('.'), value);
+      console.log(updatedCategory, 'after change');
       return updatedCategory;
     });
   };
@@ -64,6 +75,23 @@ const CreateCategory = ({ category, setCategory }) => {
       return updatedCategory;
     });
   };
+
+  useEffect(() => {
+    const handlers = [
+      () => {
+        console.log('adding attribute');
+        handleAddItem('attributes', { ...emptyAttribute });
+      },
+      () => {
+        handleAddItem('thresholds', { ...emptyThreshold });
+      },
+      () => {
+        handleAddItem('dependencies', { ...emptyDependency });
+      },
+    ];
+    updateHandlers(handlers);
+    updateContent(categorySidebar);
+  }, []);
 
   const handleRemoveItem = (keyPath, index) => {
     setCategory((prev) => {
@@ -109,121 +137,164 @@ const CreateCategory = ({ category, setCategory }) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        margin: '0 auto',
-        width: { xs: '100%', sm: '75%', md: '50%' },
-        maxHeight: '85vh',
-        overflow: 'scroll',
-        pt: 2,
+        flexGrow: 2,
+        width: '100%',
+        height: '100%',
+        overflowY: 'scroll',
+        boxShadow: 3,
+        borderRadius: 4,
+        p: 2,
+        mr: 1,
+        backgroundColor: 'background.default',
       }}
     >
-      <Typography variant="h4" sx={{ my: 2 }}>
+      <Typography
+        variant="h3"
+        sx={{
+          mb: 3,
+          mt: 2,
+        }}
+      >
         Create Category
       </Typography>
-      <TextField
+      {/* <ValidatedInput
         label="Settlement Level"
         value={level}
         onChange={handleLevelChange}
+        validated={level >= 1 && level <= 20}
+        validation={(value) => value >= 1 && value <= 20}
+        errorText="Level must be between 1 and 20"
         type="number"
         sx={{ my: 1 }}
-      />
-      <TextField
+      /> */}
+      <ValidatedInput
         label="Category Name"
         value={category.name}
-        onChange={(e) => handleChange('name', e.target.value)}
-        sx={{ my: 1 }}
+        onChange={(value) => handleChange('name', value)}
+        validation={(value) => value.length >= 3}
+        validated={category.name.length >= 3}
+        errorText="Category name must be at least 3 characters"
       />
-      <Accordion sx={{ width: 'auto', my: 2 }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
+      {/* Attributes Section */}
+      <TitledCollapse
+        title="Attributes"
+        titleType="h5"
+        styles={{ width: '100%', mt: 2 }}
+      >
+        {category.attributes.map((attr, index) => (
+          <TitledCollapse
+            key={index}
+            title={attr.name ? attr.name : `Attribute ${index + 1}`}
+            onRemove={() => handleRemoveItem('attributes', index)}
+            titleType="h6"
+            styles={{ width: '100%', mt: 2 }}
+          >
+            <AttributeForm
+              attr={attr}
+              index={index}
+              onChange={handleAttributeChange}
+              level={level}
+            />
+          </TitledCollapse>
+        ))}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '12px 16px',
+            width: '100%',
+          }}
         >
-          <Typography variant="h5">Attributes</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body1">
-            Attributes define key characteristics of the category. Each
-            attribute contains <strong>base values</strong> and{' '}
-            <strong>settlement point costs</strong>. These are used to calculate
-            overall category score and its impacts on the settlement.
-          </Typography>
-          {category.attributes.map((attr, index) => (
-            <Typography key={index} variant="body1">
-              I'm an attribute!
-            </Typography>
-          ))}
           <Button
             variant="contained"
             color="primary"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, mr: 4 }}
             onClick={() => handleAddItem('attributes', { ...emptyAttribute })}
           >
             {' '}
             Add Attribute{' '}
           </Button>
-        </AccordionDetails>
-      </Accordion>
-      <Accordion sx={{ width: 'auto', my: 2 }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
+        </Box>
+      </TitledCollapse>
+
+      {/* Thresholds Section */}
+      <TitledCollapse
+        title="Thresholds"
+        titleType="h5"
+        styles={{ width: '100%', mt: 2 }}
+      >
+        {category.thresholds.map((threshold, index) => (
+          <Box
+            key={index}
+            sx={{
+              mt: 2,
+              display: 'flex',
+              alignItems: 'start',
+              justifyContent: 'space-between',
+            }}
+          >
+            <ValidatedInput
+              label="Max Value"
+              value={threshold.max}
+              type="number"
+              step={0.1}
+              onChange={handleChange}
+              keyPath={`thresholds.${index}.max`}
+              validation={(value) => value >= 0.1 && value <= 10}
+              validated={threshold.max >= 0.1 && threshold.max <= 10}
+              errorText="Max value must be between 0.1 and 10"
+            />
+            <ValidatedInput
+              label="Rating"
+              value={threshold.rating}
+              onChange={handleChange}
+              keyPath={`thresholds.${index}.rating`}
+              validation={(value) => value.length >= 3}
+              validated={threshold.rating.length >= 3}
+              onRemove={() => handleRemoveItem('thresholds', index)}
+              errorText="Rating must be at least 3 characters"
+            />
+          </Box>
+        ))}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2, mr: 4 }}
+          onClick={() => handleAddItem('thresholds', { ...emptyThreshold })}
         >
-          <Typography variant="h5">Thresholds</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body1">
-            Thresholds specify the score, based on a 10-point scale, for the
-            category rating. See below for details on <strong>Survival</strong>
-            's thresholds.
-          </Typography>
-          <Accordion sx={{ width: 'auto', my: 2 }}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-            >
-              <Typography variant="h6">Survival Thresholds</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Box
-                sx={{
-                  display: 'flex',
-                  gridTemplateColumns: {
-                    xs: 'repeat(1, 1fr)',
-                  },
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
-                  {exampleThresholds.map(({ max, rating }) => (
-                    <Grid key={max} item xs={6}>
-                      <Typography variant="body1">
-                        <strong>{max}</strong>: {rating}
-                      </Typography>
-                    </Grid>
-                  ))}
-                  <Grid item xs={12}>
-                    <Typography variant="body1" sx={{ px: 2 }}>
-                      In this case, if the score is at or below{' '}
-                      <strong>2.9</strong>, the category is
-                      <strong> Endangered</strong>. These ratings are used for
-                      player feedback about the status of the category and may
-                      be tied to other categories to adjust their scores (see{' '}
-                      <strong>Dependencies</strong> below). Scores are
-                      automatically calculated based on current values, bonuses,
-                      and max values.
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-          //thresholds here
-        </AccordionDetails>
-      </Accordion>
+          {' '}
+          Add Threshold{' '}
+        </Button>
+      </TitledCollapse>
+
+      {/* Dependencies Section */}
+      <TitledCollapse
+        title="Dependencies"
+        titleType="h5"
+        styles={{ width: '100%', mt: 2 }}
+      >
+        {category.dependencies.map((dep, index) => (
+          <DependencyForm
+            key={index}
+            index={index}
+            dependencies={category.dependencies}
+            categories={categories}
+            categoryName={category.name}
+            dependency={dep}
+            onChange={handleChange}
+            onRemove={handleRemoveItem}
+          />
+        ))}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2, mr: 4 }}
+          onClick={() => handleAddItem('dependencies', { ...emptyDependency })}
+        >
+          {' '}
+          Add Dependency{' '}
+        </Button>
+      </TitledCollapse>
     </Box>
   );
 };

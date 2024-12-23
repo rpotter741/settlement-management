@@ -1,6 +1,17 @@
 import React from 'react';
 import InputWithLabel from '../../../../shared/InputWithLabel/InputWithLabel';
-import FloatingSelect from '../../../../shared/FloatingSelect/FloatingSelect';
+
+import ValidatedInput from '../../../../utils/ValidatedInput';
+import {
+  Box,
+  Select,
+  MenuItem,
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import TitledCollapse from '../../../../utils/TitledCollapse/TitledCollapse';
 
 const DependencyForm = ({
   dependency,
@@ -8,8 +19,12 @@ const DependencyForm = ({
   categories,
   categoryName,
   onChange,
+  index,
   onRemove,
 }) => {
+  const handleInputChange = (keyPath, value) => {
+    onChange(keyPath, value);
+  };
   const handleConditionChange = (threshold, value) => {
     const updatedCondition = {
       rating: threshold.rating,
@@ -25,7 +40,7 @@ const DependencyForm = ({
         )
       : [...existingConditions, updatedCondition];
 
-    onChange('conditions', updatedConditions);
+    onChange(`dependencies.${index}.`, updatedConditions);
   };
 
   const getOptions = (currentTarget) => {
@@ -41,46 +56,69 @@ const DependencyForm = ({
   };
 
   return (
-    <div className="dependency-item">
+    <TitledCollapse
+      title={dependency.target || `Untargeted Dependency ${index + 1}`}
+      onRemove={() => onRemove(`dependencies`, index)}
+    >
       {/* Dependency Target */}
-      <div className="dependency-header">
-        <FloatingSelect
-          label="Category"
-          options={getOptions(dependency.target)}
-          value={dependency.target}
-          onChange={(e) => onChange('target', e.target.value)}
-          onRemove={onRemove}
-        />
-      </div>
+      <FormControl fullWidth sx={{ my: 2 }}>
+        <InputLabel
+          id="category-dependency-label"
+          sx={{ backgroundColor: 'background.paper' }}
+        >
+          Category Dependency
+        </InputLabel>
+        <Select
+          labelId="category-dependency-label"
+          id="category-dependency"
+          value={dependency.target || 'Choose an option'}
+          onChange={(e) =>
+            onChange(`dependencies.${index}.target`, e.target.value)
+          }
+        >
+          <MenuItem value="Choose an option">Choose an option</MenuItem>
+          {getOptions(dependency.target).map((option) => (
+            <MenuItem key={option.value} value={option.label}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       {/* Dependency Conditions */}
       {dependency.target && (
-        <div className="dependency-conditions">
-          <h4>Modifiers for {dependency.target} State:</h4>
+        <Box>
+          <Typography variant="h4">
+            Modifiers for {dependency.target}:
+          </Typography>
           {categories
             .find((cat) => cat.name === dependency.target)
             ?.thresholds.map((threshold, condIndex) => (
-              <div key={condIndex} className="condition-item">
-                <InputWithLabel
+              <Box key={condIndex}>
+                <ValidatedInput
                   label={`${threshold.rating}`}
                   type="number"
                   value={
+                    dependencies[index].conditions[condIndex]?.modifier || 0
+                  }
+                  onChange={handleInputChange}
+                  validated={
                     dependency.conditions?.find(
                       (cond) => cond.rating === threshold.rating
-                    )?.modifier || 0
+                    )?.modifier >= 0 &&
+                    dependency.conditions?.find(
+                      (cond) => cond.rating === threshold.rating
+                    )?.modifier <= 5
                   }
-                  onChange={(e) =>
-                    handleConditionChange(threshold, e.target.value)
-                  }
-                  step={0.1}
-                  min={0}
-                  max={5}
+                  validation={(value) => value >= 0 && value <= 5}
+                  keyPath={`dependencies.${index}.conditions.${condIndex}.modifier`}
+                  errorText="Modifier must be between 0 and 5"
                 />
-              </div>
+              </Box>
             ))}
-        </div>
+        </Box>
       )}
-    </div>
+    </TitledCollapse>
   );
 };
 

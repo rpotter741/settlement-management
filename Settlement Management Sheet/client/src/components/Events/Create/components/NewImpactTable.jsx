@@ -1,22 +1,33 @@
 import React from 'react';
-import FloatingSelect from '../../../shared/FloatingSelect/FloatingSelect';
-import InputWithLabel from '../../../shared/InputWithLabel/InputWithLabel';
-import Switch from '../../../shared/Switch/Switch';
-import Button from '../../../shared/Button/Button';
+
+import {
+  Box,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Select,
+  MenuItem,
+  Switch,
+  Button,
+  Input,
+} from '@mui/material';
 
 import {
   impactKeyOptions,
   impactAttributeOptions,
   impactCategoryOptions,
   impactTypeOptions,
-} from '../../../../helpers/events/emptyEventObjects';
+} from '../../../../utility/impactOptions.js';
 
 const NewImpactTable = ({ impacts, setImpacts }) => {
   const handleImpactChange = (index, field, value) => {
     const updatedImpacts = impacts.map((impact, i) =>
       i === index ? { ...impact, [field]: value } : impact
     );
-    setImpacts(updatedImpacts);
+    setImpacts(updatedImpacts, index + 1);
   };
 
   const handleSwitchChange = (index) => {
@@ -32,116 +43,168 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
   };
 
   return (
-    <div className="overflow-x-auto w-full min-w-[800px]">
-      <table className="table-auto w-full border-collapse border border-minor-two min-w-full">
-        <thead>
-          <tr className="bg-background text-primary">
-            <th className="border border-minor-two px-4 py-2">Type</th>
-            <th className="border border-minor-two px-4 py-2">Category</th>
-            <th className="border border-minor-two px-4 py-2">Attribute</th>
-            <th className="border border-minor-two px-4 py-2">Key</th>
-            <th className="border border-minor-two px-4 py-2">Base Amount</th>
-            <th className="border border-minor-two px-4 py-2">Immutable</th>
-            <th className="border border-minor-two px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+    <TableContainer
+      component={Box}
+      sx={{
+        overflowX: 'auto',
+        display: 'flex',
+        width: '100%',
+        flexGrow: 2,
+        minWidth: '800px',
+        boxShadow: 3,
+        borderRadius: 2,
+      }}
+    >
+      <Table sx={{ borderCollapse: 'collapse', width: '100%' }}>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: 'background.default' }}>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Type
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Category
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Attribute
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Key
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Base Amount
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Immutable
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              Actions
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {impacts.map((impact, index) => (
-            <tr key={index} className="bg-secondary text-primary">
-              <td className="border border-minor-two px-2">
-                <FloatingSelect
-                  options={impactTypeOptions}
+            <TableRow
+              key={index}
+              sx={{
+                backgroundColor:
+                  index % 2 ? 'background.paper' : 'background.default',
+              }}
+            >
+              {/* Type */}
+              <TableCell>
+                <Select
                   value={impact.type}
-                  onChange={(e) =>
-                    handleImpactChange(index, 'type', e.target.value)
-                  }
-                  hideLabel={true}
-                />
-              </td>
-              <td className="border border-minor-two px-2">
-                <FloatingSelect
-                  options={
-                    impact.type === 'category'
-                      ? impactCategoryOptions
-                      : impact.type === 'settlement'
-                        ? [
-                            { value: 'vault', label: 'Currency' },
-                            { value: 'health', label: 'Health' },
-                          ]
-                        : [
-                            { value: 'fear', label: 'Fear' },
-                            { value: 'inspired', label: 'Inspired' },
-                          ]
-                  }
+                  onChange={(e) => {
+                    handleImpactChange(index, 'type', e.target.value);
+                  }}
+                  fullWidth
+                  sx={{ minWidth: '150px' }}
+                >
+                  {/* Replace this with `impactTypeOptions.map` */}
+                  {impactTypeOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </TableCell>
+
+              {/* Category */}
+              <TableCell>
+                <Select
                   value={impact.category}
                   onChange={(e) =>
                     handleImpactChange(index, 'category', e.target.value)
                   }
-                  hideLabel={true}
-                />
-              </td>
-              <td className="border border-minor-two px-2">
-                <FloatingSelect
-                  options={
-                    impact.type === 'category'
-                      ? impactAttributeOptions[0][
-                          impact.category.charAt(0).toUpperCase() +
-                            impact.category.slice(1)
-                        ]
-                      : [{ value: null, label: 'None' }]
-                  }
+                  fullWidth
+                  sx={{ minWidth: '150px' }}
+                >
+                  {/* Replace this with dynamic category options */}
+                  {impact.type &&
+                    impactCategoryOptions[impact.type].map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </TableCell>
+
+              {/* Attribute */}
+              <TableCell>
+                <Select
                   value={impact.attribute}
                   onChange={(e) =>
                     handleImpactChange(index, 'attribute', e.target.value)
                   }
-                  hideLabel={true}
-                />
-              </td>
-              <td className="border border-minor-two px-2">
-                <FloatingSelect
-                  options={
-                    impact.category !== 'currency'
-                      ? impactKeyOptions
-                      : impactKeyOptions.filter(
-                          (option) => option.value !== 'bonus'
-                        )
-                  }
+                  fullWidth
+                  sx={{ minWidth: '150px' }}
+                >
+                  {/* Replace this with dynamic attribute options */}
+                  {impact.category &&
+                    impactAttributeOptions[impact.category].map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </TableCell>
+
+              {/* Key */}
+              <TableCell>
+                <Select
                   value={impact.key}
                   onChange={(e) =>
                     handleImpactChange(index, 'key', e.target.value)
                   }
-                  hideLabel={true}
-                />
-              </td>
-              <td className="border border-minor-two px-2">
-                <InputWithLabel
+                  fullWidth
+                  sx={{ minWidth: '150px' }}
+                >
+                  {/* Replace this with dynamic key options */}
+                  {impact.category &&
+                    impactKeyOptions[impact.category].map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </TableCell>
+
+              {/* Base Amount */}
+              <TableCell>
+                <Input
                   value={impact.baseAmount}
                   type="number"
                   onChange={(e) =>
                     handleImpactChange(index, 'baseAmount', e.target.value)
                   }
-                  hideLabel={true}
+                  sx={{ width: '100%' }}
                 />
-              </td>
-              <td className="border border-minor-two px-2 text-center">
+              </TableCell>
+
+              {/* Immutable */}
+              <TableCell align="center">
                 <Switch
                   checked={impact.immutable}
                   onChange={() => handleSwitchChange(index)}
                 />
-              </td>
-              <td className="border border-minor-two px-2 text-center">
+              </TableCell>
+
+              {/* Actions */}
+              <TableCell align="center">
                 <Button
-                  variant="danger"
+                  variant="contained"
+                  color="error"
                   onClick={() => handleRemoveImpact(index)}
+                  size="small"
                 >
                   Remove
                 </Button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

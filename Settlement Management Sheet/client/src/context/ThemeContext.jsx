@@ -35,8 +35,8 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const backgroundColor =
       muiTheme.palette.mode === 'dark'
-        ? muiTheme.palette.background.default
-        : muiTheme.palette.background.paper;
+        ? muiTheme.palette.background.paper
+        : muiTheme.palette.background.default;
 
     document.documentElement.style.backgroundColor = backgroundColor;
     document.body.style.backgroundColor = backgroundColor;

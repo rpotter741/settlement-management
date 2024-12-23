@@ -52,6 +52,7 @@ const themeOptions = {
       },
 
       divider: '#c3c3c3', // Line dividers
+      dividerDark: '#9e9e9e',
 
       // Custom keys
       honey: {

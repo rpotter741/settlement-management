@@ -71,7 +71,7 @@ const NewImpact = ({ impact, setImpact, index }) => {
   };
 
   const handleSwitch = () => {
-    setImpact({ ...impact, immutable: !impact.immutable });
+    setImpact({ ...impact, immutable: !impact.immutable }, index);
   };
 
   return (
@@ -80,31 +80,37 @@ const NewImpact = ({ impact, setImpact, index }) => {
         label="Type"
         options={impactTypeOptions}
         value={impact.type}
-        onChange={(e) => setImpact({ ...impact, type: e.target.value })}
+        onChange={(e) => setImpact({ ...impact, type: e.target.value }, index)}
       />
       <FloatingSelect
         label="Category"
         options={getCategoryOptions()}
         value={impact.category}
-        onChange={(e) => setImpact({ ...impact, category: e.target.value })}
+        onChange={(e) =>
+          setImpact({ ...impact, category: e.target.value }, index)
+        }
       />
       <FloatingSelect
         label="Attribute"
         options={getAttributeOptions()}
         value={impact.attribute}
-        onChange={(e) => setImpact({ ...impact, attribute: e.target.value })}
+        onChange={(e) =>
+          setImpact({ ...impact, attribute: e.target.value }, index)
+        }
       />
       <FloatingSelect
         label="Key"
         options={getKeyOptions()}
         value={impact.key}
-        onChange={(e) => setImpact({ ...impact, key: e.target.value })}
+        onChange={(e) => setImpact({ ...impact, key: e.target.value }, index)}
       />
       <InputWithLabel
         label="Base Amount"
         type="number"
         value={impact.baseAmount}
-        onChange={(e) => setImpact({ ...impact, baseAmount: e.target.value })}
+        onChange={(e) =>
+          setImpact({ ...impact, baseAmount: e.target.value }, index)
+        }
       />
       <Switch
         label="Immutable"

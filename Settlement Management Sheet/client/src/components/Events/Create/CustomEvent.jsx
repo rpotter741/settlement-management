@@ -8,6 +8,7 @@ import Drawer from '../../shared/Drawer/Drawer';
 
 import { emptyPhase } from '../../../helpers/events/emptyEventObjects';
 import PhasesDetails from '../../../helpers/events/PhasesDetails';
+import eventSidebar from '../../../helpers/events/createEventsSidebar';
 
 const CustomEvent = ({ event, setEvent }) => {
   const [phases, setPhases] = useState(event.phases || []);

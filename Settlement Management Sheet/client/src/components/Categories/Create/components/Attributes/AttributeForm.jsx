@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import InputWithLabel from '../../../../shared/InputWithLabel/InputWithLabel';
+import {
+  Box,
+  Button,
+  MenuItem,
+  Select,
+  TextField,
+  FormControl,
+  InputLabel,
+  Typography,
+} from '@mui/material';
+import ValidatedInput from '../../../../utils/ValidatedInput';
 import FloatingSelect from '../../../../shared/FloatingSelect/FloatingSelect';
-import Button from '../../../../shared/Button/Button';
-import './AttributeForm.css';
 
 const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
-  const [typeSelect, setTypeSelect] = useState('');
+  const [typeSelect, setTypeSelect] = useState('Select an option');
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customSPType, setCustomSPType] = useState('');
   const [customSPValue, setCustomSPValue] = useState(0);
@@ -83,117 +91,110 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
   };
 
   return (
-    <div>
-      <InputWithLabel
-        id={`attribute-type${index}`}
-        label="Name"
+    <Box>
+      <ValidatedInput
+        label="Attribute Name"
         value={attr.name}
-        onChange={(e) => handleInputChange('name', e.target.value)}
-        type="text"
-        required={true}
+        keyPath="name"
+        onChange={handleInputChange}
+        validated={attr.name.trim() !== ''}
+        validation={(value) => value.trim() !== ''}
+        errorText="Attribute name cannot be empty"
       />
-      <div>
-        <InputWithLabel
-          id={`attribute-currency-cost${index}`}
-          label="Currency Cost Per Level"
-          value={attr.currencyCostPerLevel}
-          onChange={(e) =>
-            handleInputChange('currencyCostPerLevel', Number(e.target.value))
+      <ValidatedInput
+        label="Currency Cost Per Level"
+        value={attr.costPerLevel}
+        keyPath="costPerLevel"
+        onChange={handleInputChange}
+        type="number"
+        validated={attr.costPerLevel >= 0}
+        validation={(value) => value >= 0}
+        errorText="Cost per level must be a positive number"
+      />
+      {/* <Typography variant="h6">Values</Typography> */}
+      {/*
+        Commented out because this is a template creation tool. Starting values
+        aren't set until the user creates a settlement. But, we'll keep it here
+        in case we decide templates should include a starting value. It's the same
+        reason that bonus isn't here; it should only be set when the user creates
+        a settlement. At least, that's my thinking.
+      */}
+      {/* <ValidatedInput
+        label="Starting Value"
+        value={attr.values.current}
+        keyPath="values.current"
+        onChange={handleInputChange}
+        type="number"
+        validated={attr.values.current >= 0}
+        validation={(value) => value >= 0}
+        errorText="Starting value must be a positive number"
+      /> */}
+      <ValidatedInput
+        label="Max Per Level"
+        value={attr.values.maxPerLevel}
+        keyPath="values.maxPerLevel"
+        onChange={handleInputChange}
+        type="number"
+        validated={attr.maxPerLevel > 0}
+        validation={(value) => value > 0}
+        errorText="Max per level must be greater than zero"
+      />
+      {/* <ValidatedInput
+        label="Max"
+        value={attr.values.maxPerLevel * level + attr.values.bonus}
+        keyPath="max"
+        type="number"
+        validated={true}
+        validation={() => 0 === 0}
+        disabled
+      /> */}
+      <Typography variant="h6">Settlement Point Costs</Typography>
+      {Object.keys(attr.settlementPointCost).map((type, idx) => (
+        <ValidatedInput
+          key={idx}
+          onRemove={
+            type !== 'default' ? () => handleRemoveSettlementType(type) : null
           }
+          label={type.charAt(0).toUpperCase() + type.slice(1)}
+          value={attr.settlementPointCost[type]}
+          keyPath={`settlementPointCost.${type}`}
+          onChange={handleInputChange}
           type="number"
-          required={true}
+          validated={attr.settlementPointCost[type] >= 0}
+          validation={(value) => value >= 0}
+          errorText="Settlement point cost must be a positive number"
         />
-      </div>
-      <h4 className="my-4 text-xl font-bold ml-4">Values</h4>
-      {['current', 'maxPerLevel', 'max', 'bonus'].map((key) => (
-        <div key={key}>
-          <InputWithLabel
-            id={`attribute-${key}${index}`}
-            label={
-              key === 'current'
-                ? 'Starting Value'
-                : key === 'maxPerLevel'
-                  ? 'Max Per Level'
-                  : key.charAt(0).toUpperCase() + key.slice(1)
-            }
-            value={
-              key === 'max'
-                ? attr.values.maxPerLevel * level + attr.values.bonus
-                : attr.values[key]
-            }
-            onChange={(e) =>
-              handleInputChange(`values.${key}`, Number(e.target.value))
-            }
-            type="number"
-            disabled={key === 'max'}
-            required={key !== 'max'}
-          />
-        </div>
       ))}
-      <h4 className="my-4 text-xl font-bold ml-4">Settlement Point Costs</h4>
-      {Object.keys(attr.settlementPointCost).map((type) => (
-        <div key={type}>
-          <InputWithLabel
-            id={`attribute-${type}${index}`}
-            label={type.charAt(0).toUpperCase() + type.slice(1)}
-            value={attr.settlementPointCost[type]}
-            onChange={(e) =>
-              handleInputChange(
-                `settlementPointCost.${type}`,
-                Number(e.target.value)
-              )
-            }
-            onRemove={() => handleRemoveSettlementType(type)}
-            type="number"
-            min={1}
-          />
-        </div>
-      ))}
-
-      <div>
-        <FloatingSelect
-          label="Settlement Types"
-          options={getSettlementTypeOptions()}
-          value={typeSelect}
-          onChange={(e) => {
-            setTypeSelect(e.target.value);
-            if (e.target.value === 'Custom') {
-              setShowCustomModal(true); // Show modal when "Custom" is selected
-            } else {
-              addSettlementPointCost(e.target.value);
-            }
-          }}
-          hideDefault={true}
-        />
-      </div>
-
-      {/* Modal for Custom Settlement Type */}
-      {showCustomModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h4>Add Custom Settlement Type</h4>
-            <InputWithLabel
-              id="custom-sp-type"
-              label="Custom Type Name"
-              value={customSPType}
-              onChange={(e) => setCustomSPType(e.target.value)}
-              type="text"
-              min={1}
-            />
-            <InputWithLabel
-              id="custom-sp-value"
-              label="Default Value"
-              value={customSPValue}
-              onChange={(e) => setCustomSPValue(Number(e.target.value))}
-              type="number"
-              min={1}
-            />
-            <button onClick={handleCustomModalSubmit}>Add</button>
-            <button onClick={() => setShowCustomModal(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-    </div>
+      <>
+        <FormControl>
+          <InputLabel id="demo-simple-select-label">
+            Settlement Types
+          </InputLabel>
+          <Select
+            label="Settlement Types"
+            value={typeSelect}
+            onChange={(e) => {
+              setTypeSelect(e.target.value);
+              if (e.target.value === 'Custom') {
+                setShowCustomModal(true); // Show modal when "Custom" is selected
+              } else {
+                addSettlementPointCost(e.target.value);
+                setTypeSelect('Select an option');
+              }
+            }}
+          >
+            <MenuItem value="Select an option" disabled>
+              Select an option
+            </MenuItem>
+            {getSettlementTypeOptions().map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </>
+    </Box>
   );
 };
 

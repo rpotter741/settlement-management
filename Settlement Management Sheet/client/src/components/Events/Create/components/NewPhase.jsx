@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import InputWithLabel from '../../../shared/InputWithLabel/InputWithLabel';
-import TextAreaWithLabel from '../../../shared/TextAreaWithLabel/TextAreaWithLabel';
-import FloatingSelect from '../../../shared/FloatingSelect/FloatingSelect';
 import Button from '../../../shared/Button/Button';
-import Drawer from '../../../shared/Drawer/Drawer';
+import {
+  Box,
+  Typography,
+  FormControl,
+  InputAdornment,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Divider,
+} from '@mui/material';
+import ValidatedInput from '../../../utils/ValidatedInput';
+import ValidatedTextArea from '../../../utils/ValidatedTextArea/ValidatedTextArea';
 
 import NewImpact from './NewImpact';
 import NewImpactTable from './NewImpactTable';
@@ -54,41 +64,90 @@ const NewPhase = ({ phase, setPhase, index }) => {
     });
   };
 
+  const showLabor = phase.type === 'Active';
+  const showDuration = phase.type === 'Active' || phase.type === 'Passive';
+
   return (
-    <div className="flex flex-col items-center w-full">
-      <InputWithLabel
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 2,
+        width: '100%',
+        height: '100%',
+        overflowY: 'scroll',
+        boxShadow: 3,
+        p: 2,
+        mr: 1,
+        backgroundColor: 'background.default',
+        gap: 2,
+      }}
+    >
+      <ValidatedInput
         label="Phase Name"
         value={phase.name}
-        onChange={(e) => setPhase({ ...phase, name: e.target.value })}
+        onChange={(value) => setPhase(index, { ...phase, name: value })}
+        required
+        validated={phase.name.length >= 3}
+        validation={(value) => value.length >= 3}
+        errorText="Phase name must be at least 3 characters long"
       />
-      <FloatingSelect
-        label="Phase Type"
-        options={phaseTypeOptions}
-        value={phase.type}
-        onChange={(e) => setPhase({ ...phase, type: e.target.value })}
-      />
-      <TextAreaWithLabel
+      <FormControl>
+        <InputLabel id={`phase-${index + 1}-type`}>Phase Type</InputLabel>
+        <Select
+          label="Phase Type"
+          value={phase.type}
+          onChange={(e) => {
+            setPhase(index, { ...phase, type: e.target.value });
+          }}
+          sx={{ textAlign: 'left', mb: 1.5 }}
+        >
+          <MenuItem value="Select an option" disabled>
+            Select an option
+          </MenuItem>
+          {phaseTypeOptions.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {showDuration && (
+        <ValidatedInput
+          label="Duration (in days)"
+          value={phase.timeInDays}
+          onChange={(value) => setPhase(index, { ...phase, timeInDays: value })}
+          required
+          validated={phase.timeInDays >= 1}
+          validation={(value) => value >= 1}
+          errorText="Duration must be at least 1 day"
+        />
+      )}
+      {showLabor && (
+        <ValidatedInput
+          label="Labor Needed"
+          value={phase.laborNeeded}
+          onChange={(value) =>
+            setPhase(index, { ...phase, laborNeeded: value })
+          }
+          required
+          validated={phase.timeInDays >= 0}
+          validation={(value) => value >= 0}
+          errorText="Duration must be a positive number"
+        />
+      )}
+      <ValidatedTextArea
         label="Description"
-        value={phase.details}
-        onChange={(e) => setPhase({ ...phase, details: e.target.value })}
-        className="h-32"
+        value={phase.description}
+        onChange={(value) => setPhase(index, { ...phase, description: value })}
+        required
+        validated={phase.description?.length >= 0}
+        validation={(value) => value?.length >= 0}
+        errorText="Description cannot be blank"
       />
-      <InputWithLabel
-        label="Duration (in days)"
-        value={phase.timeInDays}
-        onChange={(e) => setPhase({ ...phase, timeInDays: e.target.value })}
-        type="number"
-      />
-      <InputWithLabel
-        label="Labor Needed"
-        value={phase.laborNeeded}
-        onChange={(e) => setPhase({ ...phase, laborNeeded: e.target.value })}
-        type="number"
-      />
-      <h4 className="text-xl font-bold mb-4 border-b w-full text-center pb-4">
-        Impacts
-      </h4>
-      {index === 0 && (
+
+      <Typography variant="h4">Impacts</Typography>
+      {/* {index === 0 && (
         <div>
           <p className="mb-4">
             Impacts allow events to affect the settlement in meaningful ways:
@@ -180,7 +239,7 @@ const NewPhase = ({ phase, setPhase, index }) => {
             </table>
           </details>
         </div>
-      )}
+      )} */}
       <h5 className="text-xl font-bold mb-4">Costs</h5>
       <Button onClick={() => handleAddImpact('costs')}>Add Cost</Button>
       <NewImpactTable
@@ -210,8 +269,12 @@ const NewPhase = ({ phase, setPhase, index }) => {
           })
         }
       />
-    </div>
+    </Box>
   );
 };
 
 export default NewPhase;
+
+/*
+
+*/

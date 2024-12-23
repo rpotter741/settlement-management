@@ -11,6 +11,7 @@ import './tailwind.css';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
+import { DynamicSidebarProvider } from './context/SidebarContext';
 
 import LoginPage from './components/pages/Login';
 import Register from './components/pages/Register';
@@ -24,33 +25,35 @@ const App = () => {
     <React.StrictMode>
       <AuthProvider>
         <ThemeProvider>
-          <Router>
-            <Routes>
-              {/* Public Route */}
-              <Route
-                path="/"
-                element={
-                  <Navigate to={isAuthenticated ? '/dashboard' : '/login'} />
-                }
-              />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/customCreation" element={<CustomCreation />} />
+          <DynamicSidebarProvider>
+            <Router>
+              <Routes>
+                {/* Public Route */}
+                <Route
+                  path="/"
+                  element={
+                    <Navigate to={isAuthenticated ? '/dashboard' : '/login'} />
+                  }
+                />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/customCreation" element={<CustomCreation />} />
 
-              {/* Protected Route */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected Route */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Fallback Route */}
-              <Route path="*" element={<p>404: Page not found</p>} />
-            </Routes>
-          </Router>
+                {/* Fallback Route */}
+                <Route path="*" element={<p>404: Page not found</p>} />
+              </Routes>
+            </Router>
+          </DynamicSidebarProvider>
         </ThemeProvider>
       </AuthProvider>
     </React.StrictMode>

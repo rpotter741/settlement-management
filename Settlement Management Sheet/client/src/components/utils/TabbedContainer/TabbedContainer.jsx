@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Button from '@mui/material/Button';
+import React, { useEffect, useState } from 'react';
+import Sidebar from '../Sidebar/Sidebar';
+import { Box, Tabs, Tab, Drawer } from '@mui/material';
 
 const TabPanel = ({ children, value, index }) => (
   <div
@@ -10,15 +8,16 @@ const TabPanel = ({ children, value, index }) => (
     hidden={value !== index}
     id={`tabpanel-${index}`}
     aria-labelledby={`tab-${index}`}
+    style={{ height: '100%', width: '100%' }}
   >
     {value === index && (
       <Box
         sx={{
-          p: 3,
+          p: 2,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1,
+          flexDirection: 'row',
+          height: '100%',
+          gap: 2,
         }}
       >
         {children}
@@ -32,32 +31,43 @@ const a11yProps = (index) => ({
   'aria-controls': `tabpanel-${index}`,
 });
 
-const TabbedContainer = ({ tabs, onAdd, onRemove, removeLimit = 1 }) => {
+const TabbedContainer = ({
+  tabs,
+  onAdd,
+  layout = 'row', // "row" for side-by-side, "column" for stacked
+  headerSx,
+  tabSx,
+}) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    tabs.map((tab) => {
+      tab.props = { ...tab.props, toggleDrawer };
+    });
+  });
+
+  const toggleDrawer = (bool) => {
+    setOpen(bool);
+  };
 
   const handleChange = (event, newValue) => {
     if (newValue === 'add-tab') {
-      onAdd();
+      onAdd?.();
     } else {
       setActiveTab(newValue);
-    }
-  };
-
-  const handleRemove = (index) => {
-    onRemove(index);
-    if (activeTab >= tabs.length - 1) {
-      setActiveTab(Math.max(0, tabs.length - 2)); // Adjust active tab focus if needed
     }
   };
 
   return (
     <Box
       sx={{
-        width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'start',
+        height: '100%',
+        width: '100%',
+        overflowY: 'scroll',
+        overflowX: 'hidden',
       }}
     >
       {/* Tabs Header */}
@@ -68,13 +78,16 @@ const TabbedContainer = ({ tabs, onAdd, onRemove, removeLimit = 1 }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: 2,
+          width: '100%',
+          ...headerSx,
         }}
       >
         <Tabs
           value={activeTab}
           onChange={handleChange}
           aria-label="dynamic tabs"
+          variant="scrollable"
+          scrollButtons="auto"
         >
           {tabs.map((tab, index) => (
             <Tab
@@ -91,24 +104,12 @@ const TabbedContainer = ({ tabs, onAdd, onRemove, removeLimit = 1 }) => {
       {/* Tabs Content */}
       {tabs.map((tab, index) => (
         <TabPanel key={index} value={activeTab} index={index}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Render Component */}
-            {React.isValidElement(tab.component) ? (
-              React.cloneElement(tab.component, tab.props)
+          <Box sx={tab.contentSx ? tab.contentSx : {}}>
+            {tab.sidebarSx && <Sidebar sidebarSx={tab.sidebarSx} />}
+            {tab.component ? (
+              React.createElement(tab.component, tab.props, toggleDrawer)
             ) : (
-              <tab.component {...tab.props} />
-            )}
-
-            {/* Remove Button */}
-            {tabs.length > removeLimit && (
-              <Button
-                onClick={() => handleRemove(index)}
-                variant="contained"
-                color="error"
-                size="small"
-              >
-                ✕
-              </Button>
+              <Box>Error: Component not found</Box>
             )}
           </Box>
         </TabPanel>

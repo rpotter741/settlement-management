@@ -52,7 +52,7 @@ const thresholds = [
   { max: 5, rating: 'Growing' },
   { max: 7, rating: 'Prosperous' },
   { max: 8, rating: 'Thriving' },
-  { max: Infinity, rating: 'Golden Era' },
+  { max: 10, rating: 'Golden Era' },
 ];
 
 const dependencies = [

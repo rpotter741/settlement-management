@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import InputWithLabel from '../../shared/InputWithLabel/InputWithLabel';
-import Button from '../../shared/Button/Button';
-import TextAreaWithLabel from '../../shared/TextAreaWithLabel/TextAreaWithLabel';
+import React, { useEffect, useState } from 'react';
+import { useDynamicSidebar } from '../../../context/SidebarContext';
+import eventSidebar from '../../../helpers/events/createEventsSidebar';
 import NewPhase from './components/NewPhase';
 import NewCondition from './components/NewCondition';
-import Drawer from '../../shared/Drawer/Drawer';
+import Box from '@mui/material/Box';
 
 import { emptyPhase } from '../../../helpers/events/emptyEventObjects';
 import ConditionsDetails from '../../../helpers/events/ConditionsDetails';
@@ -12,10 +11,13 @@ import DescriptionDetails from '../../../helpers/events/DescriptionDetails';
 import EventTagsTable from './components/EventsTagTable';
 import EventTagDetails from '../../../helpers/events/EventTagDetails';
 
-import TabbedContainer from '../../utils/TabbedContainer';
+import InnerTabbedContainer from '../../utils/TabbedContainer/InnerTabbedContainer';
+import sidebarSx from '../../utils/Sidebar/styles';
+import contentSx from '../../utils/TabbedContainer/contentStyles';
 
 const CustomEvent = ({ event, setEvent }) => {
   const [phases, setPhases] = useState(event.phases || []);
+  const { updateHandlers, updateContent } = useDynamicSidebar();
 
   const handleSetPhase = (index, newPhase) => {
     setPhases((prev) =>
@@ -32,91 +34,56 @@ const CustomEvent = ({ event, setEvent }) => {
   };
 
   const getTabs = () => {
-    let tabs = [];
-    phases.forEach((phase, index) => {
-      tabs.push(phase.name || `Phase ${index + 1}`);
+    const renderedPhases = phases.map((phase, index) => {
+      const name = phase.name ? phase.name : `Phase ${index + 1}`;
+      const component = NewPhase;
+      const props = { phase, setPhase: handleSetPhase, index };
+      return {
+        name,
+        component,
+        props,
+        sidebarSx,
+        // contentSx,
+      };
     });
-    tabs.push('+');
-    return tabs;
+    const tempPhase = () => <div>Test</div>;
+    // return [tempPhase];
+    return renderedPhases;
   };
 
-  return (
-    <div className="relative grid grid-cols-2 gap-4">
-      <div className="custom-event-sidebar">
-        <div className="sticky top-0 bg-background z-10">
-          <h3 className="text-3xl font-bold p-4">Event Overview</h3>
-          <InputWithLabel
-            label="Event Name"
-            value={event.name}
-            onChange={(e) => setEvent({ ...event, name: e.target.value })}
-          />
-          <DescriptionDetails />
-          <TextAreaWithLabel
-            label="Event Description"
-            value={event.details}
-            onChange={(e) => setEvent({ ...event, details: e.target.value })}
-          />
-        </div>
-        <details>
-          <summary className="text-2xl font-bold m-4">Event Conditions</summary>
-          <ConditionsDetails />
-          <NewCondition
-            key={Math.random()}
-            condition={event.conditions}
-            setCondition={(newCondition) => {
-              setEvent({ ...event, conditions: newCondition });
-            }}
-          />
-        </details>
-        <details className="p-4 bg-background mb-4">
-          <summary className="text-2xl font-bold m-4"> Event Tags</summary>
-          <EventTagDetails />
-          <EventTagsTable />
-        </details>
-        <details>
-          <summary className="text-2xl font-bold m-4">
-            Flavor Text (Optional)
-          </summary>
-          <p>
-            You can specify flavor text for each severity here. If empty, that
-            severity will default to the event description.
-          </p>
-          {Object.entries(event.flavorText).map(([key, value], index) => (
-            <TextAreaWithLabel
-              key={index}
-              label={`${key[0].toUpperCase()}${key.slice(1)}`}
-              value={value}
-              onChange={(e) => {
-                setEvent({
-                  ...event,
-                  flavorText: {
-                    ...event.flavorText,
-                    [key]: e.target.value,
-                  },
-                });
-              }}
-            />
-          ))}
-        </details>
-      </div>
-      <div className="custom-event-content text-primary">
-        <TabbedContainer
-          tabs={getTabs()}
-          onAdd={handleAddPhase}
-          onRemove={handleRemovePhase}
-        >
-          {phases.map((phase, index) => (
-            <NewPhase
-              key={index}
-              phase={phase}
-              setPhase={(newPhase) => handleSetPhase(index, newPhase)}
-              onRemovePhase={handleRemovePhase}
-            />
-          ))}
-        </TabbedContainer>
-      </div>
-    </div>
+  useEffect(() => {
+    const handlers = [];
+    updateHandlers(handlers);
+    updateContent(eventSidebar);
+  }, []);
+
+  const headerSx = {
+    width: '90%',
+    justifyContent: 'flex-start',
+    mb: -0,
+  };
+
+  const tabSx = {
+    m: 0,
+    p: 0,
+    justifyContent: 'start',
+    backgroundColor: 'background.dark',
+  };
+
+  return phases ? (
+    <InnerTabbedContainer
+      tabs={getTabs() || []}
+      onRemove={handleRemovePhase}
+      onAdd={handleAddPhase}
+      headerSx={headerSx}
+      tabSx={tabSx}
+    />
+  ) : (
+    <Box>Nothing to show!</Box>
   );
 };
+{
+  /* </Box> */
+}
 
 export default CustomEvent;
