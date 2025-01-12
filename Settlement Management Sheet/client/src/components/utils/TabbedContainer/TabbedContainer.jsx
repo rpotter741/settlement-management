@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../Sidebar/Sidebar';
-import { Box, Tabs, Tab, Drawer } from '@mui/material';
+import { Box, Tabs, Tab, Drawer, IconButton, Tooltip } from '@mui/material';
+import GlossaryIcon from '@mui/icons-material/Book';
 
 const TabPanel = ({ children, value, index }) => (
-  <div
+  <Box
     role="tabpanel"
     hidden={value !== index}
     id={`tabpanel-${index}`}
@@ -13,8 +14,11 @@ const TabPanel = ({ children, value, index }) => (
     {value === index && (
       <Box
         sx={{
-          p: 2,
           display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexGrow: 1,
+          flexShrink: 1,
           flexDirection: 'row',
           height: '100%',
           gap: 2,
@@ -23,7 +27,7 @@ const TabPanel = ({ children, value, index }) => (
         {children}
       </Box>
     )}
-  </div>
+  </Box>
 );
 
 const a11yProps = (index) => ({
@@ -66,7 +70,7 @@ const TabbedContainer = ({
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-        overflowY: 'scroll',
+        overflowY: 'hidden',
         overflowX: 'hidden',
       }}
     >
@@ -104,8 +108,21 @@ const TabbedContainer = ({
       {/* Tabs Content */}
       {tabs.map((tab, index) => (
         <TabPanel key={index} value={activeTab} index={index}>
+          <Tooltip title="Open Glossary">
+            <IconButton
+              sx={{
+                position: 'absolute',
+                left: 24,
+                top: '12%',
+                boxShadow: 2,
+                zIndex: 1000,
+              }}
+            >
+              <GlossaryIcon />
+            </IconButton>
+          </Tooltip>
           <Box sx={tab.contentSx ? tab.contentSx : {}}>
-            {tab.sidebarSx && <Sidebar sidebarSx={tab.sidebarSx} />}
+            {/* {tab.sidebarSx && <Sidebar sidebarSx={tab.sidebarSx} />} */}
             {tab.component ? (
               React.createElement(tab.component, tab.props, toggleDrawer)
             ) : (

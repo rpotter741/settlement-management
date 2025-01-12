@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { TextField, Box, Typography } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { TextField, Box, Tooltip } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import TrashIcon from '@mui/icons-material/Delete';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
@@ -16,6 +16,7 @@ const ValidatedTextField = ({
   validated = false, // Boolean to apply success styling
   errorText = 'Invalid input', // Text to display when error
   validatedText = '', // Text to display when validated
+  tooltipText,
   ...props
 }) => {
   const [error, setError] = useState(false);
@@ -44,10 +45,21 @@ const ValidatedTextField = ({
       }}
     >
       <TextField
-        label={label}
+        label={
+          <>
+            {tooltipText && (
+              <Tooltip title={tooltipText}>
+                {label}
+                <InfoIcon />
+              </Tooltip>
+            )}
+            {!tooltipText && label}
+          </>
+        }
         value={propValue}
         onChange={handleChange}
         error={error}
+        variant={tooltipText ? 'standard' : 'outlined'}
         slotProps={{
           input: {
             step: 0.1,
@@ -59,6 +71,12 @@ const ValidatedTextField = ({
               </InputAdornment>
             ),
           },
+          inputLabel: {
+            shrink: tooltipText && true,
+            sx: {
+              fontSize: tooltipText && '1.2rem',
+            },
+          },
           formHelperText: {
             sx: {
               position: 'relative',
@@ -68,7 +86,6 @@ const ValidatedTextField = ({
           },
         }}
         helperText={error ? errorText : ' '}
-        fullWidth
         {...props}
         sx={{
           '& .MuiInputLabel-root': {

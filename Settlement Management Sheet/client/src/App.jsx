@@ -12,7 +12,6 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
 import { DynamicSidebarProvider } from './context/SidebarContext';
-
 import LoginPage from './components/pages/Login';
 import Register from './components/pages/Register';
 import Dashboard from './components/Dashboard';

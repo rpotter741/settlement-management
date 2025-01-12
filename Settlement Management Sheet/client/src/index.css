@@ -15,7 +15,7 @@ body {
   align-items: center;
   justify-content: start;
   width: 100vw;
-  padding: auto;
+  /* padding: auto; */
   max-height: 100vh;
   overflow: hidden;
 }
@@ -27,8 +27,8 @@ body {
   justify-content: start;
   width: 100vw;
   min-height: 100vh; /* Ensures it fills the viewport */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left); */
   box-sizing: border-box;
   overflow: hidden;
 }

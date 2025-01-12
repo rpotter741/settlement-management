@@ -12,11 +12,13 @@ import {
   IconButton,
   Divider,
 } from '@mui/material';
-import ValidatedInput from '../../../utils/ValidatedInput';
+import ValidatedInput from '../../../utils/ValidatedTextArea/ValidatedInput';
 import ValidatedTextArea from '../../../utils/ValidatedTextArea/ValidatedTextArea';
 
 import NewImpact from './NewImpact';
 import NewImpactTable from './NewImpactTable';
+
+import EventsTagTable from './EventsTagTable';
 
 import {
   emptyPhase,
@@ -254,6 +256,7 @@ const NewPhase = ({ phase, setPhase, index }) => {
           })
         }
       />
+      <EventsTagTable />
 
       <h5 className="text-xl font-bold mt-8 mb-4">Rewards</h5>
       <Button onClick={() => handleAddImpact('rewards')}>Add Reward</Button>

@@ -10,7 +10,7 @@ const ValuesSchema = new Schema({
   bonus: { type: Number, default: 0 },
 });
 
-// Subdocument for attrition and retention
+// Subdocument for attrition and retention ==> move to gameLogic(?) or maybe campaignSettings(?)
 const RateSchema = new Schema({
   enabled: { type: Boolean, default: false },
   rate: { type: Number, default: null },
@@ -25,9 +25,12 @@ const RateSchema = new Schema({
 // Subdocument for settlement point costs
 const SettlementPointCostSchema = new Schema({
   default: { type: Number, required: true },
-  Survivalist: { type: Number, default: 1 },
-  Fortified: { type: Number, default: 1 },
-  Mercantile: { type: Number, default: 1 },
+  unique: [
+    {
+      name: { type: String, required: true },
+      cost: { type: Number, required: true },
+    },
+  ],
 });
 
 // Subdocument for attributes
@@ -35,8 +38,6 @@ const AttributeSchema = new Schema({
   name: { type: String, required: true },
   values: { type: ValuesSchema, required: true },
   costPerLevel: { type: Number, required: true },
-  attrition: { type: RateSchema, default: () => ({}) },
-  retention: { type: RateSchema, default: () => ({}) },
   settlementPointCost: { type: SettlementPointCostSchema, required: true },
 });
 

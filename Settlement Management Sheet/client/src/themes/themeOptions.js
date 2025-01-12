@@ -42,8 +42,8 @@ const themeOptions = {
       },
 
       background: {
-        default: '#fbf7ef', // General background color
-        paper: '#f5f0e6', // Used for cards, modals, etc.
+        default: '#f5f0e6', // General background color
+        paper: '#fbf7ef', // Used for cards, modals, etc.
       },
       text: {
         primary: '#242424', // Main text color

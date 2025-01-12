@@ -3,28 +3,44 @@ import TabbedContainer from '../utils/TabbedContainer/TabbedContainer';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+
+import CreateAttribute from '../Attributes/Create/CreateAttribute';
+
 import CreateCategory from '../Categories/Create/CreateCategory';
-import { emptyCategory } from '../../helpers/categories/emptyCategoryObjects';
+import {
+  emptyCategory,
+  emptyAttribute,
+} from '../../helpers/categories/emptyCategoryObjects';
 
 import CustomEvent from '../Events/Create/CustomEventTwo';
 import { emptyEvent } from '../../helpers/events/emptyEventObjects';
 
-import CreateWeather from '../Weather/CreateWeather';
+import CustomListeners from '../Listeners/Create/CustomListeners';
+
+import CreateWeather from '../Weather/Create/CreateWeather';
 import { emptyWeather } from '../../helpers/weather/emptyWeatherObject.js';
 
 import CreateStatus from '../Status/CreateStatus';
+
 import CreateBuilding from '../Building/CreateBuilding';
+
 import CreateUpgrade from '../Upgrade/CreateUpgrade';
+
 import CreateTradeHub from '../TradeHub/Create/TradeHub';
+
 import CreateSettlementType from '../SettlementType/CreateSettlementType';
+
 import CreateSettlement from '../Settlement/CreateSettlement';
+
 import CreateAPT from '../APT/CreateAPT';
 
-import Sidebar from '../utils/Sidebar/Sidebar';
-import sidebarSx from '../utils/Sidebar/styles';
+import sidebarSx from '../utils/Sidebar/styles.js';
 import contentSx from '../utils/TabbedContainer/contentStyles';
 
+import CategoryModal from '../Categories/Create/CategoryModal';
+
 const CustomCreation = () => {
+  const [attribute, setAttribute] = useState({ ...emptyAttribute });
   const [category, setCategory] = useState({ ...emptyCategory });
   const [event, setEvent] = useState({ ...emptyEvent });
   const [weather, setWeather] = useState({ ...emptyWeather });
@@ -38,6 +54,12 @@ const CustomCreation = () => {
   const [tab, setTab] = useState('category');
 
   const createToolTabs = [
+    {
+      name: 'Attribute',
+      component: CreateAttribute,
+      sidebarSx,
+      contentSx: { ...contentSx, flexGrow: 4 },
+    },
     {
       name: 'Category',
       component: CreateCategory,
@@ -53,14 +75,24 @@ const CustomCreation = () => {
       contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
+      name: 'Listeners',
+      component: CustomListeners,
+      props: { event, setEvent },
+      sidebarSx,
+      contentSx: { ...contentSx, flexGrow: 4 },
+    },
+    {
       name: 'Weather',
       component: CreateWeather,
       props: { weather, setWeather },
+      sidebarSx,
+      contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
       name: 'Status',
-      component: CreateStatus,
+      component: CategoryModal,
       props: { category, setCategory },
+      contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
       name: 'Building',

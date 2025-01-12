@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   Box,
+  Button,
   Typography,
   FormControl,
   InputLabel,
@@ -14,17 +15,22 @@ import {
 
 import InfoIcon from '@mui/icons-material/Info';
 
-import ValidatedInput from '../utils/ValidatedInput';
-import TitledCollapse from '../utils/TitledCollapse/TitledCollapse';
-import NewImpactTable from '../Events/Create/components/NewImpactTable';
+import ValidatedInput from '../../utils/ValidatedTextArea/ValidatedInput';
+import TitledCollapse from '../../utils/TitledCollapse/TitledCollapse';
+import NewImpactTable from '../../Events/Create/components/NewImpactTable';
 
 import {
   emptyWeather,
   emptyEffect,
   emptyEvent,
-} from '../../helpers/weather/emptyWeatherObject.js';
+} from '../../../helpers/weather/emptyWeatherObject.js';
+
+import { useDynamicSidebar } from '../../../context/SidebarContext';
+import weatherSidebar from '../../../helpers/weather/weatherSidebar.js';
 
 const CreateWeather = ({ weather, setWeather }) => {
+  const { updateHandlers, updateContent } = useDynamicSidebar();
+
   const [severity, setSeverity] = useState(1.0);
   const handleImpactUpdate = (impacts, step) => {
     console.log(step, weather);
@@ -37,31 +43,48 @@ const CreateWeather = ({ weather, setWeather }) => {
     });
   };
 
+  const handleAddImpact = (step) => {
+    const newImpacts = [...(weather.effects[step] || []), { ...emptyEffect }];
+    setWeather({
+      ...weather,
+      effects: {
+        ...weather.effects,
+        [step]: newImpacts,
+      },
+    });
+  };
+
+  useEffect(() => {
+    updateContent(weatherSidebar);
+    updateHandlers([handleAddImpact]);
+  }, []);
+
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'start',
         alignItems: 'center',
         gap: 2,
         p: 2,
         width: '100%',
+        backgroundColor: 'background.default',
+        borderRadius: 4,
+        boxShadow: 4,
       }}
     >
       <Typography variant="h4">Create Weather Object</Typography>
-      <Tooltip title="Name must be at least 3 characters long">
-        <ValidatedInput
-          label="Name"
-          value={weather.name}
-          onChange={(name) => setWeather({ ...weather, name })}
-          type="text"
-          required
-          validated={weather.name?.length > 3}
-          validation={(name) => name?.length > 3}
-          errorText="Name must be at least 3 characters long"
-        />
-      </Tooltip>
+      <ValidatedInput
+        label="Name"
+        value={weather.name}
+        onChange={(name) => setWeather({ ...weather, name })}
+        type="text"
+        required
+        validated={weather.name?.length > 3}
+        validation={(name) => name?.length > 3}
+        errorText="Name must be at least 3 characters long"
+      />
       Some Biome tags!
       {/* Biomes tags, baby! */}
       <ValidatedInput
@@ -93,6 +116,7 @@ const CreateWeather = ({ weather, setWeather }) => {
           <NewImpactTable
             impacts={weather.effects['1']}
             setImpacts={handleImpactUpdate}
+            position={1}
           />
           <Box
             sx={{
@@ -127,6 +151,9 @@ const CreateWeather = ({ weather, setWeather }) => {
             ]}
             onChange={(e, newValue) => setSeverity(newValue)}
           />
+          <Button onClick={() => handleAddImpact('1')} variant="contained">
+            <Typography variant="h6">Add Impact</Typography>
+          </Button>
         </Box>
       ) : (
         <Box>I'm complex!</Box>

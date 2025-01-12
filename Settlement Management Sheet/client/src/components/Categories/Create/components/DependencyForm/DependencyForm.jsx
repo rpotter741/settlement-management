@@ -1,7 +1,7 @@
 import React from 'react';
 import InputWithLabel from '../../../../shared/InputWithLabel/InputWithLabel';
 
-import ValidatedInput from '../../../../utils/ValidatedInput';
+import ValidatedInput from '../../../../utils/ValidatedTextArea/ValidatedInput';
 import {
   Box,
   Select,

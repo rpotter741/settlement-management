@@ -22,24 +22,50 @@ import {
   impactTypeOptions,
 } from '../../../../utility/impactOptions.js';
 
-const NewImpactTable = ({ impacts, setImpacts }) => {
+const NewImpactTable = ({ impacts, setImpacts, position }) => {
   const handleImpactChange = (index, field, value) => {
     const updatedImpacts = impacts.map((impact, i) =>
       i === index ? { ...impact, [field]: value } : impact
     );
-    setImpacts(updatedImpacts, index + 1);
+    setImpacts(updatedImpacts, position);
   };
 
-  const handleSwitchChange = (index) => {
+  const handleImmutableChange = (index) => {
     const updatedImpacts = impacts.map((impact, i) =>
       i === index ? { ...impact, immutable: !impact.immutable } : impact
     );
-    setImpacts(updatedImpacts);
+    setImpacts(updatedImpacts, index + 1);
   };
 
   const handleRemoveImpact = (index) => {
     const updatedImpacts = impacts.filter((_, i) => i !== index);
-    setImpacts(updatedImpacts);
+    setImpacts(updatedImpacts, index + 1);
+  };
+
+  const getOptions = (type, key) => {
+    let options;
+    switch (type) {
+      case 'type':
+        options = impactTypeOptions;
+        break;
+      case 'category':
+        options = impactCategoryOptions[key];
+        break;
+      case 'attribute':
+        options = impactAttributeOptions[key];
+        break;
+      case 'key':
+        options = impactKeyOptions[key];
+        break;
+      default:
+        break;
+    }
+
+    if (!options) {
+      return [{ value: '', label: 'None' }];
+    } else {
+      return options;
+    }
   };
 
   return (
@@ -101,7 +127,7 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
                   sx={{ minWidth: '150px' }}
                 >
                   {/* Replace this with `impactTypeOptions.map` */}
-                  {impactTypeOptions.map((option) => (
+                  {getOptions('type').map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
@@ -121,7 +147,7 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
                 >
                   {/* Replace this with dynamic category options */}
                   {impact.type &&
-                    impactCategoryOptions[impact.type].map((option) => (
+                    getOptions('category', impact.type).map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
                       </MenuItem>
@@ -141,7 +167,7 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
                 >
                   {/* Replace this with dynamic attribute options */}
                   {impact.category &&
-                    impactAttributeOptions[impact.category].map((option) => (
+                    getOptions('attribute', impact.category).map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
                       </MenuItem>
@@ -161,7 +187,7 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
                 >
                   {/* Replace this with dynamic key options */}
                   {impact.category &&
-                    impactKeyOptions[impact.category].map((option) => (
+                    getOptions('key', impact.category).map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
                       </MenuItem>
@@ -185,7 +211,7 @@ const NewImpactTable = ({ impacts, setImpacts }) => {
               <TableCell align="center">
                 <Switch
                   checked={impact.immutable}
-                  onChange={() => handleSwitchChange(index)}
+                  onChange={() => handleImmutableChange(index)}
                 />
               </TableCell>
 

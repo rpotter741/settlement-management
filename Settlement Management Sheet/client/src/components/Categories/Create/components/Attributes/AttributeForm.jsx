@@ -8,11 +8,21 @@ import {
   FormControl,
   InputLabel,
   Typography,
+  Divider,
 } from '@mui/material';
-import ValidatedInput from '../../../../utils/ValidatedInput';
-import FloatingSelect from '../../../../shared/FloatingSelect/FloatingSelect';
+import ValidatedInput from '../../../../utils/ValidatedTextArea/ValidatedInput';
+import AttributePreview from './AttributePreview';
 
-const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
+import { useDynamicSidebar } from '../../../../../context/SidebarContext';
+import GlossarySidebar from '../../../../shared/GlossarySidebar/GlossarySidebar';
+
+const AttributeForm = ({
+  attr,
+  index,
+  onChange = () => {},
+  onRemove = () => {},
+  level,
+}) => {
   const [typeSelect, setTypeSelect] = useState('Select an option');
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customSPType, setCustomSPType] = useState('');
@@ -46,9 +56,12 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
       { value: 'Fortified', label: 'Fortified' },
       { value: 'Custom', label: 'Custom' }, // Add custom as an option
     ];
-    return options.filter(
-      (option) => !Object.keys(attr.settlementPointCost).includes(option.value)
-    );
+    if (attr?.settlementPointCost) {
+      return options.filter(
+        (option) =>
+          !Object.keys(attr.settlementPointCost).includes(option.value)
+      );
+    }
   };
 
   const addSettlementPointCost = (type) => {
@@ -92,24 +105,39 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
 
   return (
     <Box>
+      {/* <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          my: 2,
+          justifyContent: 'space-between',
+          width: '100%',
+          gap: 2,
+          flexDirection: { xs: 'column', sm: 'row' },
+        }}
+      > */}
       <ValidatedInput
         label="Attribute Name"
-        value={attr.name}
+        value={attr?.name}
         keyPath="name"
         onChange={handleInputChange}
-        validated={attr.name.trim() !== ''}
+        validated={attr?.name.trim() !== ''}
         validation={(value) => value.trim() !== ''}
         errorText="Attribute name cannot be empty"
+        style={{ width: '100%' }}
+        tooltipText="Attribute names are unique and can not be changed once created. If an attribute with the same name already exists in your custom assets, it will be overwritten."
       />
       <ValidatedInput
         label="Currency Cost Per Level"
-        value={attr.costPerLevel}
+        value={attr?.costPerLevel}
         keyPath="costPerLevel"
         onChange={handleInputChange}
         type="number"
-        validated={attr.costPerLevel >= 0}
+        validated={attr?.costPerLevel >= 0}
         validation={(value) => value >= 0}
         errorText="Cost per level must be a positive number"
+        style={{ width: '100%' }}
+        tooltipText="Currency Cost Per Level translates to the amount of currency an attribute typically costs to purchase from a Trade Hub. This value scales by settlement level."
       />
       {/* <Typography variant="h6">Values</Typography> */}
       {/*
@@ -131,13 +159,15 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
       /> */}
       <ValidatedInput
         label="Max Per Level"
-        value={attr.values.maxPerLevel}
+        value={attr?.values.maxPerLevel}
         keyPath="values.maxPerLevel"
         onChange={handleInputChange}
         type="number"
-        validated={attr.maxPerLevel > 0}
+        validated={attr?.maxPerLevel > 0}
         validation={(value) => value > 0}
         errorText="Max per level must be greater than zero"
+        style={{ width: '100%' }}
+        tooltipText="Max Per Level represents the highest value, per level, the settlement can benefit from this attribute. While a settlement can store more than the max of a resource, scores and ratings are capped at the max per level plus any existing category or attribute bonuses."
       />
       {/* <ValidatedInput
         label="Max"
@@ -148,28 +178,52 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
         validation={() => 0 === 0}
         disabled
       /> */}
-      <Typography variant="h6">Settlement Point Costs</Typography>
-      {Object.keys(attr.settlementPointCost).map((type, idx) => (
-        <ValidatedInput
-          key={idx}
-          onRemove={
-            type !== 'default' ? () => handleRemoveSettlementType(type) : null
-          }
-          label={type.charAt(0).toUpperCase() + type.slice(1)}
-          value={attr.settlementPointCost[type]}
-          keyPath={`settlementPointCost.${type}`}
-          onChange={handleInputChange}
-          type="number"
-          validated={attr.settlementPointCost[type] >= 0}
-          validation={(value) => value >= 0}
-          errorText="Settlement point cost must be a positive number"
-        />
-      ))}
+      {/* </Box> */}
+      <ValidatedInput
+        label="Description"
+        value={attr?.description}
+        keyPath="description"
+        onChange={handleInputChange}
+        validated={attr?.description.trim() !== ''}
+        validation={(value) => value.trim() !== ''}
+        errorText="Description cannot be empty"
+        multiline
+        fullWidth
+      />
+      <Divider variant="h6" textAlign="center">
+        <Typography variant="h6"> Settlement Point Costs</Typography>
+      </Divider>
+      <Box
+        sx={{
+          display: 'grid',
+          width: '100%',
+          gap: 2,
+        }}
+      >
+        {attr?.settlementPointCost &&
+          Object.keys(attr?.settlementPointCost).map((type, idx) => (
+            <ValidatedInput
+              key={idx}
+              onRemove={
+                type !== 'default'
+                  ? () => handleRemoveSettlementType(type)
+                  : null
+              }
+              label={type.charAt(0).toUpperCase() + type.slice(1)}
+              value={attr?.settlementPointCost[type]}
+              keyPath={`settlementPointCost.${type}`}
+              onChange={handleInputChange}
+              type="number"
+              validated={attr?.settlementPointCost[type] >= 0}
+              validation={(value) => value >= 0}
+              errorText="Settlement point cost must be a positive number"
+              style={{ width: '100%' }}
+            />
+          ))}
+      </Box>
       <>
         <FormControl>
-          <InputLabel id="demo-simple-select-label">
-            Settlement Types
-          </InputLabel>
+          <InputLabel id="settlement-types">Settlement Types</InputLabel>
           <Select
             label="Settlement Types"
             value={typeSelect}
@@ -186,11 +240,11 @@ const AttributeForm = ({ attr, index, onChange, onRemove, level }) => {
             <MenuItem value="Select an option" disabled>
               Select an option
             </MenuItem>
-            {getSettlementTypeOptions().map((option) => (
+            {/* {getSettlementTypeOptions().map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
-            ))}
+            ))} */}
           </Select>
         </FormControl>
       </>

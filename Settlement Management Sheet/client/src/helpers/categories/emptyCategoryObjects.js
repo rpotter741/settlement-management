@@ -10,9 +10,11 @@ const exampleThresholds = [
 
 const emptyCategory = {
   name: '',
+  description: '',
   attributes: [
     {
       name: '',
+      description: '',
       values: {
         current: 0,
         maxPerLevel: 0,
@@ -48,13 +50,14 @@ const emptyCondition = {
 
 const emptyAttribute = {
   name: '',
+  description: '',
   values: {
-    current: 0,
     maxPerLevel: 0,
-    max: 0,
     bonus: 0,
   },
   costPerLevel: 0,
+  healthPerLevel: 0,
+  thresholds: [{ max: 0, rating: '' }],
   settlementPointCost: {
     default: 1,
   },

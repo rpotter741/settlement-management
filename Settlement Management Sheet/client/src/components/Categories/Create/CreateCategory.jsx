@@ -1,20 +1,10 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Collapse,
-  Divider,
-  Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import ValidatedInput from '../../utils/ValidatedInput';
+import { Box, Button, Typography } from '@mui/material';
+import ValidatedInput from '../../utils/ValidatedTextArea/ValidatedInput';
 
 import AttributeForm from './components/Attributes/AttributeForm';
+import AttributePreview from './components/Attributes/AttributePreview';
 import DependencyForm from './components/DependencyForm/DependencyForm';
 import TitledCollapse from '../../utils/TitledCollapse/TitledCollapse';
-import useNestedObject from '../../../hooks/useNestedObject';
 
 import categories from '../../../helpers/categories/categories';
 import categorySidebar from '../../../helpers/categories/createCategorySidebar.js';
@@ -25,14 +15,56 @@ import {
   emptyThreshold,
   emptyDependency,
   emptyAttribute,
-  exampleThresholds,
 } from '../../../helpers/categories/emptyCategoryObjects.js';
 
 import React, { useEffect, useState, useContext } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  addCategory,
+  updateCategory,
+  selectCategoryById,
+  selectAllCategories,
+} from '../../../features/category/categoriesSlice.js';
 
 const CreateCategory = ({ category, setCategory }) => {
   const [level, setLevel] = useState(1); // Default level is 1
   const { updateHandlers, updateContent } = useDynamicSidebar();
+  const [attributes, setAttributes] = useState(false);
+  const [thresholds, setThresholds] = useState(false);
+  const [dependencies, setDependencies] = useState(false);
+  const [attributeOpen, setAttributeOpen] = useState(
+    new Array(category.attributes.length || 1).fill(false)
+  );
+
+  const dispatch = useDispatch();
+
+  const selectedCategoryId = useSelector((state) => state.selection.category);
+  const selectedCategory = useSelector((state) =>
+    selectedCategoryId ? selectCategoryById(state, selectedCategoryId) : null
+  );
+
+  useEffect(() => {
+    if (!selectedCategoryId) {
+      const newCategoryId = `temp-${Date.now()}`;
+      dispatch(
+        addCategory({
+          id: newCategoryId,
+          name: '',
+          description: '',
+          attributes: [],
+          thresholds: [],
+          dependencies: [],
+        })
+      );
+      dispatch(updateCategory(newCategoryId));
+    }
+  }, [selectedCategoryId, dispatch]);
+
+  const handleCategoryUpdate = (updates) => {
+    if (selectedCategoryId) {
+      dispatch(updateCategory({ id: selectedCategoryId, ...updates }));
+    }
+  };
 
   const handleLevelChange = (val) => {
     const value = Math.max(1, Math.min(20, Number(val)));
@@ -40,7 +72,6 @@ const CreateCategory = ({ category, setCategory }) => {
   };
 
   const handleChange = (keyPath, value) => {
-    console.log(keyPath, value);
     const updateNestedObject = (obj, keys, val) => {
       if (keys.length === 1) {
         obj[keys[0]] = val;
@@ -53,9 +84,7 @@ const CreateCategory = ({ category, setCategory }) => {
     };
     setCategory((prev) => {
       const updatedCategory = { ...prev };
-      console.log(updatedCategory, 'before change');
       updateNestedObject(updatedCategory, keyPath.split('.'), value);
-      console.log(updatedCategory, 'after change');
       return updatedCategory;
     });
   };
@@ -112,6 +141,10 @@ const CreateCategory = ({ category, setCategory }) => {
 
       return updatedCategory;
     });
+
+    let attrs = [...attributeOpen].map(() => false);
+    attrs.splice(index, 1);
+    setAttributeOpen(attrs);
   };
 
   const handleAttributeChange = (updatedAttr, index) => {
@@ -132,13 +165,18 @@ const CreateCategory = ({ category, setCategory }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleFocus = (index) => {
+    setAttributeOpen(
+      (prev) => prev.map((open, i) => (i === index ? !open : false)) // Close all others
+    );
+  };
+
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 2,
-        width: '100%',
         height: '100%',
         overflowY: 'scroll',
         boxShadow: 3,
@@ -146,6 +184,7 @@ const CreateCategory = ({ category, setCategory }) => {
         p: 2,
         mr: 1,
         backgroundColor: 'background.default',
+        maxWidth: ['100%', '80%', '60%', '49%'],
       }}
     >
       <Typography
@@ -157,22 +196,13 @@ const CreateCategory = ({ category, setCategory }) => {
       >
         Create Category
       </Typography>
-      {/* <ValidatedInput
-        label="Settlement Level"
-        value={level}
-        onChange={handleLevelChange}
-        validated={level >= 1 && level <= 20}
-        validation={(value) => value >= 1 && value <= 20}
-        errorText="Level must be between 1 and 20"
-        type="number"
-        sx={{ my: 1 }}
-      /> */}
       <ValidatedInput
+        fullWidth
         label="Category Name"
-        value={category.name}
-        onChange={(value) => handleChange('name', value)}
+        value={selectedCategory?.name}
+        onChange={(value) => handleCategoryUpdate({ name: value })}
         validation={(value) => value.length >= 3}
-        validated={category.name.length >= 3}
+        validated={(value) => value.length >= 3}
         errorText="Category name must be at least 3 characters"
       />
       {/* Attributes Section */}
@@ -180,23 +210,55 @@ const CreateCategory = ({ category, setCategory }) => {
         title="Attributes"
         titleType="h5"
         styles={{ width: '100%', mt: 2 }}
+        defaultState={attributes}
+        noDefaultHandler={() => setAttributes(!attributes)}
       >
-        {category.attributes.map((attr, index) => (
-          <TitledCollapse
-            key={index}
-            title={attr.name ? attr.name : `Attribute ${index + 1}`}
-            onRemove={() => handleRemoveItem('attributes', index)}
-            titleType="h6"
-            styles={{ width: '100%', mt: 2 }}
-          >
-            <AttributeForm
-              attr={attr}
-              index={index}
-              onChange={handleAttributeChange}
-              level={level}
-            />
-          </TitledCollapse>
-        ))}
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 2,
+            gridTemplateColumns: [
+              '1fr',
+              '1fr',
+              '1fr 1fr',
+              '1fr 1fr',
+              '1fr 1fr 1fr',
+            ],
+            gridAutoFlow: 'row dense',
+          }}
+        >
+          {category.attributes.map((attr, index) => (
+            <Box
+              sx={{
+                gridArea: attributeOpen[index] ? '1 / 1 / 2 / 4' : 'auto',
+                transition: 'all 0.3s ease-in-out', // Smooth transitions
+              }}
+            >
+              <TitledCollapse
+                id={`attribute-${index}`}
+                key={index}
+                title={attr.name ? attr.name : `Attribute ${index + 1}`}
+                onRemove={() => handleRemoveItem('attributes', index)}
+                titleType="h6"
+                styles={{
+                  width: '100%',
+                  mt: 2,
+                }}
+                PreviewComponent={AttributePreview}
+                previewProps={{ attribute: attr }}
+                noDefaultHandler={() => handleFocus(index)}
+                defaultState={attributeOpen[index]}
+              >
+                <AttributeForm
+                  attr={attr}
+                  index={index}
+                  onChange={handleAttributeChange}
+                  level={level}
+                />
+              </TitledCollapse>
+            </Box>
+          ))}
+        </Box>
         <Box
           sx={{
             display: 'flex',
@@ -209,7 +271,10 @@ const CreateCategory = ({ category, setCategory }) => {
             variant="contained"
             color="primary"
             sx={{ mt: 2, mr: 4 }}
-            onClick={() => handleAddItem('attributes', { ...emptyAttribute })}
+            onClick={() => {
+              handleAddItem('attributes', { ...emptyAttribute });
+              setAttributeOpen([...attributeOpen, false]);
+            }}
           >
             {' '}
             Add Attribute{' '}
@@ -222,40 +287,53 @@ const CreateCategory = ({ category, setCategory }) => {
         title="Thresholds"
         titleType="h5"
         styles={{ width: '100%', mt: 2 }}
+        defaultState={thresholds}
+        noDefaultHandler={() => setThresholds(!thresholds)}
       >
-        {category.thresholds.map((threshold, index) => (
-          <Box
-            key={index}
-            sx={{
-              mt: 2,
-              display: 'flex',
-              alignItems: 'start',
-              justifyContent: 'space-between',
-            }}
-          >
-            <ValidatedInput
-              label="Max Value"
-              value={threshold.max}
-              type="number"
-              step={0.1}
-              onChange={handleChange}
-              keyPath={`thresholds.${index}.max`}
-              validation={(value) => value >= 0.1 && value <= 10}
-              validated={threshold.max >= 0.1 && threshold.max <= 10}
-              errorText="Max value must be between 0.1 and 10"
-            />
-            <ValidatedInput
-              label="Rating"
-              value={threshold.rating}
-              onChange={handleChange}
-              keyPath={`thresholds.${index}.rating`}
-              validation={(value) => value.length >= 3}
-              validated={threshold.rating.length >= 3}
-              onRemove={() => handleRemoveItem('thresholds', index)}
-              errorText="Rating must be at least 3 characters"
-            />
-          </Box>
-        ))}
+        <Box
+          sx={{
+            mt: 2,
+            // display: 'flex',
+            // alignItems: 'center',
+            // justifyContent: 'start',
+          }}
+        >
+          {category.thresholds.map((threshold, index) => (
+            <Box
+              key={index}
+              sx={{
+                mt: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'start',
+              }}
+            >
+              <ValidatedInput
+                label="Max Value"
+                value={threshold.max}
+                type="number"
+                step={0.1}
+                onChange={handleChange}
+                keyPath={`thresholds.${index}.max`}
+                validation={(value) => value >= 0.1 && value <= 10}
+                validated={threshold.max >= 0.1 && threshold.max <= 10}
+                errorText="Max value must be between 0.1 and 10"
+                fullWidth
+              />
+              <ValidatedInput
+                label="Rating"
+                value={threshold.rating}
+                onChange={handleChange}
+                keyPath={`thresholds.${index}.rating`}
+                validation={(value) => value.length >= 3}
+                validated={threshold.rating.length >= 3}
+                onRemove={() => handleRemoveItem('thresholds', index)}
+                errorText="Rating must be at least 3 characters"
+                fullWidth
+              />
+            </Box>
+          ))}
+        </Box>
         <Button
           variant="contained"
           color="primary"
@@ -272,6 +350,8 @@ const CreateCategory = ({ category, setCategory }) => {
         title="Dependencies"
         titleType="h5"
         styles={{ width: '100%', mt: 2 }}
+        defaultState={dependencies}
+        noDefaultHandler={() => setDependencies(!dependencies)}
       >
         {category.dependencies.map((dep, index) => (
           <DependencyForm
