@@ -22,6 +22,7 @@ const TabPanel = ({ children, value, index }) => (
           flexDirection: 'row',
           height: '100%',
           gap: 2,
+          width: '100%',
         }}
       >
         {children}

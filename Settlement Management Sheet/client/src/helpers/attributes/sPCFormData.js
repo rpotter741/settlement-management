@@ -3,7 +3,6 @@ const sPCFormData = {
   tooltip: '',
   type: 'number',
   validate: (value) => {
-    if (!value) return 'Value is required';
     if (value <= 0) return 'Value must be greater than 0';
     return null;
   },

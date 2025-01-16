@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { set, cloneDeep } from 'lodash';
 import {
   initializeAttribute,
+  initializeEdit,
+  updateEditAttribute,
   selectAttribute,
-  updateAttribute,
+  saveAttribute,
 } from '../../../features/attribute/attributeSlice.js';
 import { useSnackbar } from '../../../context/SnackbarContext.jsx';
 
 import {
   selectKey,
-  clearKey,
+  selectTool,
 } from '../../../features/selection/selectionSlice.js';
 
 import {
-  Box,
-  Button,
-  Typography,
-  Modal,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import CheckIcon from '@mui/icons-material/Check';
+  initializeValidation,
+  initializeObject,
+  getErrorCount,
+  setValidationObject,
+  validateTool,
+} from '../../../features/validation/validationSlice.js';
+
+import { Box, Button, Typography, Modal } from '@mui/material';
 
 import IconSelector from '../../utils/IconSelector/IconSelector.jsx';
 import EditAttribute from './EditAttribute.jsx';
@@ -33,119 +35,35 @@ const CreateAttribute = () => {
   const [editMode, setEditMode] = useState(false);
   const [localAttr, setLocalAttr] = useState(null);
   const [showModal, setShowModal] = useState(null);
-  const [validationObj, setValidationObj] = useState({});
-  const [errors, setErrors] = useState({});
   const [expanded, setExpanded] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
-  const dispatch = useDispatch();
+  const [firstRender, setFirstRender] = useState(true);
 
+  const dispatch = useDispatch();
   const attr = useSelector(selectAttribute);
+  const editAttr = useSelector((state) => state.attributes.edit);
   const allIds = useSelector((state) => state.attributes.allIds);
 
-  const initializeValidationObj = (attr) => {
-    const validationObj = { ...attr };
+  const errors = useSelector((state) => state.validation.attribute);
 
-    // Set all errors to null
-    Object.keys(validationObj).forEach((key) => {
-      if (Array.isArray(validationObj[key])) {
-        validationObj[key] = validationObj[key].map((item) =>
-          typeof item === 'object' ? initializeValidationObj(item) : null
-        );
-      } else if (typeof validationObj[key] === 'object') {
-        validationObj[key] = initializeValidationObj(validationObj[key]);
-      } else {
-        validationObj[key] = null;
-      }
-    });
-    delete validationObj.icon;
-    delete validationObj.iconColor;
-    delete validationObj.tags;
-    return validationObj;
-  };
-
-  const validateAttribute = (attr) => {
-    const newErrors = { ...errors };
-
-    // Validate top-level fields
-    if (!attr.name || attr.name.trim().length < 3) {
-      newErrors.name = 'Name must be at least 3 characters.';
-    }
-    if (attr.values.maxPerLevel <= 0) {
-      newErrors.values.maxPerLevel = 'Max per level must be greater than 0.';
-    }
-    if (attr.values.maxPerLevel > 10) {
-      newErrors.values.maxPerLevel = 'Max per level cannot be greater than 10.';
-    }
-    if (attr.costPerLevel <= 0) {
-      newErrors.costPerLevel = 'Cost per level must be greater than 0.';
-    }
-    if (attr.healthPerLevel < 0) {
-      newErrors.healthPerLevel = 'Health per level cannot be negative.';
-    }
-    if (!attr.description || attr.description.trim().length < 30) {
-      newErrors.description = 'Description must be at least 30 characters.';
-    }
-
-    // Validate thresholds
-    newErrors.thresholds = attr.thresholds.map((threshold) => {
-      const thresholdErrors = {};
-      if (!threshold.name || threshold.name.trim().length === 0) {
-        thresholdErrors.name = 'Threshold name is required.';
-      }
-      if (threshold.max <= 0 || threshold.max > 100) {
-        thresholdErrors.max = 'Threshold max must be between 1 and 100.';
-      }
-      thresholdErrors.id = threshold.id;
-      return Object.keys(thresholdErrors).length > 0 ? thresholdErrors : null;
-    });
-
-    // Remove empty arrays/nulls
-    if (newErrors.thresholds.every((item) => item === null)) {
-      delete newErrors.thresholds;
-    }
-    console.log(newErrors);
-    return newErrors;
-  };
-
-  const getErrorCount = (errors) => {
-    let count = 0;
-
-    const countErrors = (errorObj) => {
-      if (Array.isArray(errorObj)) {
-        // If it's an array, count non-null/undefined values
-        errorObj.forEach((item) => {
-          if (item && typeof item === 'object') {
-            countErrors(item); // Recursively check nested objects/arrays
-          } else if (item !== null && item !== undefined) {
-            count++;
-          }
-        });
-      } else if (errorObj && typeof errorObj === 'object') {
-        // If it's an object, traverse its keys
-        Object.entries(errorObj).forEach(([key, value]) => {
-          if (key !== 'id') {
-            countErrors(value); // Recursively check nested objects/arrays
-          }
-        });
-      } else if (errorObj !== null && errorObj !== undefined) {
-        // Count primitive values that are not null or undefined
-        count++;
-      }
-    };
-
-    countErrors(errors); // Start recursion
-    return count;
-  };
-
-  // if no active, create a new one
   useEffect(() => {
+    dispatch(selectTool('attribute'));
+  }, [dispatch]);
+
+  useEffect(() => {
+    setErrorCount(getErrorCount(errors));
+  }, [errors]);
+
+  // if no active attr, create a new one
+  useEffect(() => {
+    console.log(attr);
     if (!attr) {
       setEditMode(true);
       dispatch(initializeAttribute());
     }
   }, [attr, dispatch]);
 
-  // if no active, select the newly created one
+  // if no active attr, select the newly created one
   useEffect(() => {
     if (!attr && allIds.length > 0) {
       const lastId = allIds[allIds.length - 1];
@@ -156,39 +74,52 @@ const CreateAttribute = () => {
   useEffect(() => {
     if (attr) {
       setLocalAttr(attr);
-      setErrors(initializeValidationObj(attr));
-      getErrorCount(errors);
+      dispatch(initializeEdit({ id: attr.id }));
+      dispatch(initializeValidation({ tool: 'attribute', obj: attr }));
     }
   }, [attr]);
 
+  useEffect(() => {
+    if (Object.keys(editAttr).length > 0 && firstRender) {
+      console.log('initial validation');
+      dispatch(
+        validateTool({
+          tool: 'attribute',
+          fields: [
+            'name',
+            'description',
+            'values',
+            'healthPerLevel',
+            'costPerLevel',
+            'thresholds',
+            'settlementPointCost',
+          ],
+          refObj: editAttr,
+        })
+      );
+      setFirstRender(false);
+    }
+  }, [editAttr]);
+
   const handleIconUpdate = (icon, color) => {
-    dispatch(
-      updateAttribute({
-        id: attr.id,
-        updates: { icon, iconColor: color },
-      })
-    );
+    dispatch(updateEditIcon({ color, icon }));
     setShowModal(null);
   };
 
   const handleIconColorChange = (color) => {
     dispatch(
-      updateAttribute({
-        id: attr.id,
+      updateEditAttribute({
+        keypath: 'iconColor',
         updates: { iconColor: color },
       })
     );
   };
 
-  useEffect(() => {
-    setErrorCount(getErrorCount(errors));
-  }, [errors]);
-
   const handleCancelLoad = () => {
     if (editMode) {
       setEditMode(false);
       setLocalAttr(attr);
-      setErrors(initializeValidationObj(attr));
+      dispatch(initializeValidation({ tool: 'attribute', obj: attr }));
     } else {
       console.log('Load attribute');
     }
@@ -196,19 +127,15 @@ const CreateAttribute = () => {
 
   const handleSaveEdit = () => {
     if (editMode) {
-      const errors = validateAttribute(localAttr);
-      const count = getErrorCount(errors);
-      if (count > 0) {
-        setErrors(errors);
+      if (errorCount > 0) {
         showSnackbar('Please correct the errors on the form.', 'error');
         setExpanded(true);
         //enable validation errors to be pulled out on button press again
         setTimeout(() => setExpanded(false), 1000);
         return;
       } else {
-        setErrors(null);
         setEditMode(false);
-        dispatch(updateAttribute({ id: attr.id, updates: localAttr }));
+        dispatch(saveAttribute({ id: attr.id }));
       }
     } else {
       setEditMode(true);
@@ -233,7 +160,7 @@ const CreateAttribute = () => {
         }}
       >
         {/* form preview */}
-        {editMode && (
+        {editMode && attr && (
           <Box
             sx={{
               position: 'absolute',
@@ -251,6 +178,7 @@ const CreateAttribute = () => {
               errors={errors}
               errorCount={errorCount}
               defaultExpand={expanded}
+              attr={localAttr}
             />
           </Box>
         )}
@@ -267,7 +195,8 @@ const CreateAttribute = () => {
             boxShadow: 4,
             borderRadius: 4,
             backgroundColor: 'background.paper',
-            width: ['100%', '80%', '60%', '50%', '40%'],
+            width: ['100%'],
+            maxWidth: ['100%', '100%', 1200],
             position: 'relative',
             height: '100%',
           }}
@@ -327,9 +256,6 @@ const CreateAttribute = () => {
                 borderRadius: 4,
               }}
             >
-              {showModal === 'Custom Settlement Type' && (
-                <Box>Choose a settlement type</Box>
-              )}
               {showModal === 'Change Icon' && (
                 <IconSelector
                   initialIcon={localAttr.icon}
@@ -354,7 +280,7 @@ const CreateAttribute = () => {
                 setAttr={setLocalAttr}
                 setShowModal={setShowModal}
                 errors={errors}
-                setErrors={setErrors}
+                setErrors={() => {}}
               />
             ) : (
               <PreviewAttribute attr={localAttr} />

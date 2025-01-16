@@ -109,7 +109,7 @@ const PreviewAttribute = ({ attr }) => {
       >
         Settlement Point Costs
       </Typography>
-      {Object.keys(attr?.settlementPointCost || {}).map((key) => (
+      {Object.entries(attr?.settlementPointCost || {}).map(([id, spc]) => (
         <Box
           sx={{
             display: 'flex',
@@ -118,12 +118,12 @@ const PreviewAttribute = ({ attr }) => {
             justifyContent: 'start',
             gridColumn: 'span 3',
           }}
-          key={key}
+          key={id}
         >
           <Typography variant="h6">
-            {key[0].toUpperCase() + key.slice(1)}:
+            {spc.name.charAt(0).toUpperCase() + spc.name.slice(1)}:
           </Typography>
-          <Typography>{attr?.settlementPointCost?.[key]}</Typography>
+          <Typography>{spc.value}</Typography>
         </Box>
       ))}
     </Box>

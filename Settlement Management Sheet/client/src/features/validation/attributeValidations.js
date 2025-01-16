@@ -1,38 +1,75 @@
-export const validateMPL = (value) => {
-  if (value <= 0) return 'Max Per Level must be greater than 0';
-  return null;
-};
-
-export const validateHPL = (value) => {
-  if (value < 0) return 'Health Per Level must be greater than or equal to 0';
-  return null;
-};
-
-export const validateCPL = (value) => {
-  if (value < 0) return 'Currency Per Level must be greater than or equal to 0';
-  return null;
-};
-
-export const validateSPC = (value) => {
-  if (value <= 0) return 'Value must be greater than 0';
-  return null;
-};
-
-export const validateSettlementPointCosts = (settlementPointCosts) => {
-  if (!settlementPointCosts) return 'Settlement Point Costs are required';
-  return Object.keys(settlementPointCosts).map((key) => {
-    return {
-      [key]: validateSPC(settlementPointCosts[key]),
-    };
-  });
-};
-
 const attributeValidations = {
-  validateMPL,
-  validateHPL,
-  validateCPL,
-  validateSPC,
-  validateSettlementPointCosts,
+  name: (value) => {
+    if (!value || value.trim().length < 3)
+      return 'Name must be at least 3 characters.';
+    return null;
+  },
+  description: (value) => {
+    if (!value || value.trim().length < 30)
+      return 'Description must be at least 30 characters.';
+    return null;
+  },
+  healthPerLevel: (value) => {
+    if (value < 0) return 'Health per level cannot be negative.';
+    return null;
+  },
+  costPerLevel: (value) => {
+    if (value <= 0) return 'Cost per level must be greater than 0.';
+    return null;
+  },
+  values: (values) => {
+    const errors = {};
+    if (!values.maxPerLevel) {
+      errors.maxPerLevel = 'Max per level is required.';
+    }
+    if (values.maxPerLevel <= 0) {
+      errors.maxPerLevel = 'Max per level must be greater than 0.';
+    }
+    if (values.maxPerLevel > 10) {
+      errors.maxPerLevel = 'Max per level cannot be greater than 10.';
+    }
+    if (errors.maxPerLevel === undefined) {
+      errors.maxPerLevel = null;
+    }
+    return errors;
+  },
+  thresholds: (thresholds) => {
+    return Object.entries(thresholds).reduce((errors, [id, threshold]) => {
+      const thresholdErrors = {};
+
+      if (!threshold.name || threshold.name.trim().length < 3) {
+        thresholdErrors.name = 'Threshold name must be at least 3 characters.';
+      } else {
+        thresholdErrors.name = null;
+      }
+
+      if (threshold.max <= 0 || threshold.max > 100) {
+        thresholdErrors.max = 'Threshold max must be between 1 and 100.';
+      } else {
+        thresholdErrors.max = null;
+      }
+
+      // Assign errors keyed by the threshold ID
+      errors[id] = { ...thresholdErrors, id };
+      return errors;
+    }, {}); // Start with an empty object
+  },
+
+  settlementPointCost: (SPCS) => {
+    return Object.entries(SPCS).reduce((errors, [id, spc]) => {
+      const spcErrors = {};
+
+      if (spc.value <= 0) {
+        spcErrors.value = 'Value must be greater than 0.';
+      } else {
+        spcErrors.value = null;
+      }
+
+      // Assign errors keyed by the SPC ID
+      errors[id] = { ...spcErrors, id, name: null }; // Keep `name` as `null` if necessary
+      return errors;
+    }, {}); // Start with an empty object
+  },
 };
 
 export default attributeValidations;

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Formik, Form } from 'formik';
+import { debounce } from 'lodash';
 import {
   Box,
   TextField,
@@ -17,6 +18,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 
 const DynamicForm = ({
   initialValues,
+  index,
   field,
   onSubmit,
   boxSx,
@@ -34,6 +36,14 @@ const DynamicForm = ({
   const wrappedValidate = (value) => field.validate(value);
   const [isError, setIsError] = useState(parentError);
   const [firstCheck, setFirstCheck] = useState(true);
+
+  const handleExternalUpdate = useCallback(
+    debounce((value, { keypath, id, index, name }) => {
+      if (externalUpdate) {
+        externalUpdate(value, { keypath, id, index, name });
+      }
+    }, 500)
+  );
 
   return (
     <Formik
@@ -91,12 +101,22 @@ const DynamicForm = ({
               setIsError(true);
               touched[name] = true;
               if (onError) {
-                onError(errors[name], keypath || id);
+                onError(errors[name], {
+                  keypath,
+                  id,
+                  index,
+                  name,
+                });
               }
             } else {
               setIsError(false);
               if (onError) {
-                onError(null, keypath || id);
+                onError(null, {
+                  keypath,
+                  id,
+                  index,
+                  name,
+                });
               }
             }
           }
@@ -114,9 +134,19 @@ const DynamicForm = ({
                   handleChange(e);
                   if (externalUpdate && !blur) {
                     if (type === 'number') {
-                      externalUpdate(Number(e.target.value), keypath || id);
+                      handleExternalUpdate(Number(e.target.value), {
+                        keypath,
+                        id,
+                        index,
+                        name,
+                      });
                     } else {
-                      externalUpdate(e.target.value, keypath || id);
+                      handleExternalUpdate(e.target.value, {
+                        id,
+                        keypath,
+                        index,
+                        name,
+                      });
                     }
                   }
                 }}
@@ -125,14 +155,24 @@ const DynamicForm = ({
                   handleBlur(e);
                   if (externalUpdate && blur) {
                     if (type === 'number') {
-                      externalUpdate(Number(e.target.value), keypath || id);
+                      handleExternalUpdate(Number(e.target.value), {
+                        keypath,
+                        id,
+                        index,
+                        name,
+                      });
                     } else {
-                      externalUpdate(e.target.value, keypath || id);
+                      handleExternalUpdate(e.target.value, {
+                        keypath,
+                        id,
+                        index,
+                        name,
+                      });
                     }
                   }
                 }}
-                error={Boolean(isInvalid || parentError)} // Set error state
-                helperText={errors[name] || parentError} // Display error text
+                error={Boolean(isInvalid) || Boolean(parentError)} // Set error state
+                helperText={errors[name]} // Display error text
                 fullWidth
                 min={min}
                 margin="normal"
@@ -180,10 +220,30 @@ const DynamicForm = ({
                     endAdornment: (
                       <InputAdornment position="end">
                         {isError && parentError && (
-                          <WarningIcon
-                            fontSize="small"
-                            sx={{ color: 'error.main' }}
-                          />
+                          <Tooltip
+                            title={
+                              <>
+                                {parentError ? (
+                                  <Typography variant="body2">
+                                    {parentError ||
+                                      'This field needs correction'}
+                                  </Typography>
+                                ) : (
+                                  <Typography variant="body2">
+                                    {'This field needs correction'}
+                                  </Typography>
+                                )}
+                              </>
+                            }
+                            arrow
+                          >
+                            <IconButton>
+                              <WarningIcon
+                                fontSize="small"
+                                sx={{ color: 'error.main' }}
+                              />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {tooltip && (
                           <Tooltip

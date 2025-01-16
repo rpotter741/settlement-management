@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const selectionSlice = createSlice({
   name: 'selection',
   initialState: {
+    activeTool: null,
     category: null,
     attribute: null,
     event: null,
@@ -34,10 +35,13 @@ const selectionSlice = createSlice({
         console.error(`Invalid key: ${key}`);
       }
     },
+    selectTool(state, action) {
+      state.activeTool = action.payload;
+    },
   },
 });
 
-export const { selectKey, clearKey } = selectionSlice.actions;
+export const { selectKey, clearKey, selectTool } = selectionSlice.actions;
 
 export const getSelectedId = (key) => (state) => state.selection[key];
 

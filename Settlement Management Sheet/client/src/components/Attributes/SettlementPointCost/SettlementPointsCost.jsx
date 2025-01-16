@@ -1,6 +1,20 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  selectAttrSPC,
+  selectAttrSPCErrors,
+} from '../../../features/validation/selectors/attributeSelectors';
+
+import { updateEditAttribute } from '../../../features/attribute/attributeSlice';
+import {
+  validateField,
+  setErrorField,
+} from '../../../features/validation/validationSlice';
+import { v4 as newId } from 'uuid';
+
 import { Box, Typography, Divider, Tooltip, IconButton } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
+
 import DraggableList from '../../utils/DnD/DraggableList';
 import DropZone from '../../utils/DnD/DropZone';
 import DynamicForm from '../../utils/DynamicForm/DynamicForm';
@@ -11,113 +25,147 @@ const settlementTypes = [
     name: 'Fortified',
     description:
       'Fortified Settlements put their trust in theirs walls, preemptive reconnaissance, and well-trained troops.',
-    id: 789,
+    id: '789',
   },
   {
     name: 'Mercantile',
     description:
       'Mercantile Settlements focus on establishing and expanding trade, developing vibrant culture, and welcoming artisans.',
-    id: 456,
+    id: '456',
   },
   {
     name: 'Survivalist',
     description:
       'Survivalists focus on gathering food, supplies, medical items, and constructing durable shelters.',
-    id: 123,
+    id: '123',
   },
 ];
 
-const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
+const SettlementPointsCost = () => {
+  const dispatch = useDispatch();
+  const settlementPointCost = useSelector(selectAttrSPC);
+  const errors = useSelector(selectAttrSPCErrors);
+
   const [selectedTypes, setSelectedTypes] = useState([]);
-  // Filter available types
+
+  React.useEffect(() => {
+    console.log('settlementPointCost', settlementPointCost);
+  }, [settlementPointCost]);
+
   const available = useMemo(() => {
-    const assignedTypes = Object.keys(attr.settlementPointCost || {});
-    return settlementTypes.filter(
-      (type) => !assignedTypes.includes(type.name.toLowerCase())
+    const assignedTypes = Object.keys(settlementPointCost || {}).reduce(
+      (types, id) => {
+        types.push(id);
+        return types;
+      },
+      []
     );
-  }, [attr, selectedTypes]);
+    const types = settlementTypes.filter(
+      (type) => !assignedTypes.includes(type.id)
+    );
+    return types;
+  }, [settlementPointCost, selectedTypes]);
 
   const fields = useMemo(() => {
-    return Object.entries(attr.settlementPointCost || {}).map(
-      ([key, value]) => ({
-        ...sPCFormData,
-        name: key,
-        label: key[0].toUpperCase() + key.slice(1),
-        tooltip: null,
-        keypath: `settlementPointCost.${key}`,
+    return Object.entries(settlementPointCost || {}).map(([id, spc]) => ({
+      ...sPCFormData,
+      name: spc.name,
+      label: spc.name.charAt(0).toUpperCase() + spc.name.slice(1),
+      tooltip: null,
+      id,
+    }));
+  }, [settlementPointCost]);
+
+  const handleValidationUpdate = (error, id) => {
+    dispatch(
+      validateField({
+        tool: 'attribute',
+        error,
+        id,
+        keypath: 'settlementPointCost',
+        field: 'value',
       })
     );
-  }, [attr]);
-
-  const handleValidationUpdate = (value, keypath) => {
-    const keys = keypath.split('.');
-    const updatedErrors = { ...errors };
-
-    keys.reduce((acc, key, idx) => {
-      if (idx === keys.length - 1) {
-        acc[key] = value;
-      } else {
-        acc[key] = { ...acc[key] }; // Ensure nested objects are copied
-      }
-      return acc[key];
-    }, updatedErrors);
-
-    setErrors(updatedErrors);
   };
 
   // Handle drop
   const handleDrop = useCallback(
     (item) => {
-      if (selectedTypes.includes(item.name)) {
-        const newTypes = [...selectedTypes];
-        selectedTypes.filter((type) => type !== item.name);
-        setSelectedTypes(newTypes);
-      }
-      const formattedName = item.name.toLowerCase();
-      setAttr((prev) => ({
-        ...prev,
-        settlementPointCost: {
-          ...prev.settlementPointCost,
-          [formattedName]: 1,
-        },
-      }));
-      setErrors((prev) => ({
-        ...prev,
-        settlementPointCost: {
-          ...prev.settlementPointCost,
-          [formattedName]: null,
-        },
-      }));
-    },
+      setSelectedTypes((prevSelected) =>
+        prevSelected.includes(item.id)
+          ? prevSelected.filter((id) => id !== item.id)
+          : prevSelected
+      );
 
-    [attr, setAttr]
+      dispatch((dispatch, getState) => {
+        const currentSPC = selectAttrSPC(getState());
+        const formattedName = item.name.toLowerCase();
+        const newSPC = {
+          ...currentSPC,
+          [item.id]: { name: formattedName, value: 1 },
+        };
+
+        dispatch(
+          updateEditAttribute({
+            keypath: 'settlementPointCost',
+            updates: newSPC,
+          })
+        );
+
+        const currentErrors = selectAttrSPCErrors(getState());
+        const newErrors = {
+          ...currentErrors,
+          [item.id]: { name: null, value: null },
+        };
+
+        dispatch(
+          setErrorField({
+            tool: 'attribute',
+            value: newErrors,
+            keypath: 'settlementPointCost',
+          })
+        );
+      });
+    },
+    [dispatch]
   );
 
   // Handle value change
   const handleValueChange = useCallback(
-    (name, value) => {
-      setAttr((prev) => ({
-        ...prev,
-        settlementPointCost: {
-          ...prev.settlementPointCost,
-          [name]: value,
-        },
-      }));
+    (value, { id }) => {
+      dispatch(
+        updateEditAttribute({
+          keypath: 'settlementPointCost',
+          updates: value,
+          id,
+        })
+      );
     },
-    [attr, setAttr]
+    [settlementPointCost]
   );
 
   const handleRemoveSettlementType = useCallback(
-    (name) => {
-      const newAttr = { ...attr };
-      delete newAttr.settlementPointCost[name];
-      setAttr(newAttr);
+    (id) => {
+      const newSPC = { ...settlementPointCost };
+      delete newSPC[id];
+      dispatch(
+        updateEditAttribute({
+          keypath: 'settlementPointCost',
+          updates: newSPC,
+        })
+      );
 
       const newErrors = { ...errors };
-      delete newErrors.settlementPointCost[name];
-      setErrors(newErrors);
+      delete newErrors[id];
+      dispatch(
+        setErrorField({
+          tool: 'attribute',
+          keypath: 'settlementPointCost',
+          value: newErrors,
+        })
+      );
     },
-    [attr, setAttr]
+    [settlementPointCost]
   );
 
   const handleCheck = (checked, value) => {
@@ -128,22 +176,40 @@ const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
     }
   };
 
-  const handleTransfer = () => {
-    const newAttr = { ...attr };
-    const newErrors = { ...errors };
-    const attrTypes = { ...attr.settlementPointCost };
-    const validateTypes = { ...newErrors.settlementPointCost };
-    selectedTypes.forEach((type) => {
-      const formattedName = type.toLowerCase();
-      attrTypes[formattedName] = 1;
-      validateTypes[formattedName] = null;
-    });
-    setErrors({ ...newErrors, settlementPointCost: validateTypes });
-    setAttr({ ...newAttr, settlementPointCost: attrTypes });
-    setSelectedTypes([]);
-  };
+  const handleTransfer = useCallback(() => {
+    dispatch((dispatch, getState) => {
+      const currentSPC = selectAttrSPC(getState());
+      const currentErrors = selectAttrSPCErrors(getState());
 
-  if (!attr) return <Box>Loading...</Box>;
+      const newSPC = { ...currentSPC };
+      const newErrors = { ...currentErrors };
+
+      selectedTypes.forEach((type) => {
+        const id = newId();
+        newSPC[id] = { name: type.toLowerCase(), value: 1 };
+        newErrors[id] = { name: null, value: null };
+      });
+
+      dispatch(
+        updateEditAttribute({
+          keypath: 'settlementPointCost',
+          updates: newSPC,
+        })
+      );
+
+      dispatch(
+        setErrorField({
+          tool: 'attribute',
+          keypath: 'settlementPointCost',
+          value: newErrors,
+        })
+      );
+
+      setSelectedTypes([]); // Clear after transfer
+    });
+  }, [selectedTypes, dispatch]);
+
+  if (!settlementPointCost) return <Box>Loading...</Box>;
 
   return (
     <Box
@@ -204,6 +270,9 @@ const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
                 position: 'absolute',
                 left: '50%', // Center the button
                 transform: 'translate(-50%, 0)', // Center the button
+                '&:hover': {
+                  backgroundColor: 'success.main',
+                },
               }}
             >
               <ArrowForward />
@@ -229,29 +298,27 @@ const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
         <DropZone
           type="type"
           handleAdd={handleDrop}
-          defaultItems={Object.entries(attr.settlementPointCost).map(
-            ([key, value]) => ({
-              name: key,
-              value,
+          defaultItems={Object.entries(settlementPointCost).map(
+            ([id, spc]) => ({
+              id,
+              name: spc.name,
+              value: spc.value,
             })
           )}
         >
           {({ droppedItems }) =>
             droppedItems.map((type, index) => {
-              const field = fields.find((f) => f.name === type.name);
+              const field = fields.find((f) => f.id === type.id);
               if (!field) return null;
               return (
                 <DynamicForm
-                  keypath={`settlementPointCost.${type.name}`}
                   key={type.name}
                   initialValues={{
-                    [type.name]: attr.settlementPointCost[type.name] || 1,
+                    [type.name]: type.value || 1,
                   }}
                   field={field}
                   validate={field.validate}
-                  externalUpdate={(value) =>
-                    handleValueChange(type.name, value)
-                  }
+                  externalUpdate={handleValueChange}
                   boxSx={{
                     width: '100%',
                     m: 0,
@@ -259,7 +326,7 @@ const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
                   }}
                   onRemove={
                     type.name !== 'default'
-                      ? () => handleRemoveSettlementType(type.name)
+                      ? () => handleRemoveSettlementType(type.id)
                       : null
                   }
                   onMoreDetails={
@@ -268,7 +335,7 @@ const SettlementPointsCost = ({ attr, setAttr, errors, setErrors }) => {
                       : null
                   }
                   shrink
-                  parentError={errors?.settlementPointCost?.[type.name]}
+                  parentError={errors[type.id] ? errors[type.id].value : null}
                   onError={handleValidationUpdate}
                 />
               );

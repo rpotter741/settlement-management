@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectAttribute } from '../../../features/attribute/attributeSlice';
+
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 
@@ -23,27 +25,24 @@ const countValidEntries = (items) => {
   const total = items.length;
   const valid = items.filter((item) =>
     Object.entries(item).every(([key, value]) => {
-      if (key === 'id') return true;
-      return value !== null;
+      if (key === 'id') return true; // Skip the 'id' field in validation
+      return value === null; // Consider fields valid if they're not null
     })
   ).length;
 
-  return { valid: total - valid, total };
-};
-
-const countValidKeys = (obj) => {
-  const values = Object.values(obj);
-  const total = values.length;
-  const valid = values.filter((value) => value !== null).length;
-
-  return { valid: total - valid, total };
+  return { valid, total }; // Return correct valid and total counts
 };
 
 const renderValidationList = (errors) => {
   // Filter out fields that need granular handling
   const filteredKeys = Object.keys(errors).filter(
     (key) =>
-      key !== 'thresholds' && key !== 'settlementPointCost' && key !== 'id'
+      key !== 'thresholds' &&
+      key !== 'settlementPointCost' &&
+      key !== 'id' &&
+      key !== 'icon' &&
+      key !== 'tags' &&
+      key !== 'iconColor'
   );
 
   // Render regular fields
@@ -90,10 +89,21 @@ const renderValidationList = (errors) => {
   return [...regularFields];
 };
 
-const ChecklistContent = ({ errors, errorCount, defaultExpand }) => {
-  const thresholdErrors = countValidEntries(errors.thresholds);
-  const settlementPointErrors = countValidKeys(errors.settlementPointCost);
+const ChecklistContent = ({ errorCount, defaultExpand }) => {
+  const errors = useSelector((state) => state.validation.attribute);
+  const [thresholdErrors, setThresholdErrors] = useState({});
+  const [settlementPointErrors, setSettlementPointErrors] = useState({});
   const [expanded, setExpanded] = useState(defaultExpand);
+
+  useEffect(() => {
+    if (!errors) return;
+    const newThresholdErrors = countValidEntries(errors?.thresholds);
+    setThresholdErrors(newThresholdErrors);
+    const newSettlementPointErrors = countValidEntries(
+      errors?.settlementPointCost
+    );
+    setSettlementPointErrors(newSettlementPointErrors);
+  }, [errors?.thresholds, errors?.settlementPointCost, errors]);
 
   useEffect(() => {
     defaultExpand === true && setExpanded(true);
@@ -175,7 +185,7 @@ const ChecklistContent = ({ errors, errorCount, defaultExpand }) => {
         <Typography variant="body2">
           Fix the following fields to proceed:
         </Typography>
-        {renderValidationList(errors)}
+        {errors && renderValidationList(errors)}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           {settlementPointErrors.valid < settlementPointErrors.total ? (
             <WarningIcon color="error" />

@@ -1,15 +1,30 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 import iconList from '../../components/utils/IconSelector/iconList.jsx';
+import { cloneDeep } from 'lodash';
+import { setKeypathValue as set } from '../../utility/setKeypathValue.js';
+import { v4 as newId } from 'uuid';
 
 const attributesSlice = createSlice({
   name: 'attributes',
   initialState: {
     byId: {},
     allIds: [],
+    edit: {},
   },
   reducers: {
     initializeAttribute(state) {
-      const tempId = `temp-${Date.now()}`; // Temporary unique ID for the category
+      const tempId = newId(); // Temporary unique ID for the category
+      const thresholds = {};
+      const thresholdOrder = [];
+      const maxThresholds = [9, 29, 49, 69, 84, 99, 100];
+      for (let i = 0; i < 7; i++) {
+        const id = newId();
+        thresholds[id] = {
+          name: '',
+          max: maxThresholds[i],
+        };
+        thresholdOrder.push(id);
+      }
       state.byId[tempId] = {
         id: tempId,
         name: '',
@@ -22,17 +37,41 @@ const attributesSlice = createSlice({
         },
         healthPerLevel: 0,
         costPerLevel: 0,
-        thresholds: [
-          { name: '', max: 9, id: 'temp-1' },
-          { name: '', max: 29, id: 'temp-2' },
-          { name: '', max: 49, id: 'temp-3' },
-          { name: '', max: 69, id: 'temp-4' },
-          { name: '', max: 84, id: 'temp-5' },
-          { name: '', max: 99, id: 'temp-6' },
-          { name: '', max: 100, id: 'temp-7' },
-        ],
+        thresholds: {
+          [newId()]: {
+            name: '',
+            max: 9,
+          },
+          [newId()]: {
+            name: '',
+            max: 29,
+          },
+          [newId()]: {
+            name: '',
+            max: 49,
+          },
+          [newId()]: {
+            name: '',
+            max: 69,
+          },
+          [newId()]: {
+            name: '',
+            max: 84,
+          },
+          [newId()]: {
+            name: '',
+            max: 99,
+          },
+          [newId()]: {
+            name: '',
+            max: 100,
+          },
+        },
         settlementPointCost: {
-          default: 1,
+          [newId()]: {
+            name: 'default',
+            value: 1,
+          },
         },
         icon: { ...iconList[0] },
         iconColor: '#000000',
@@ -61,54 +100,61 @@ const attributesSlice = createSlice({
       };
       state.allIds.push(id);
     },
-    updateAttribute(state, action) {
-      const { id, updates } = action.payload;
+    initializeEdit(state, action) {
+      const { id } = action.payload;
+      state.edit = cloneDeep(state.byId[id]);
+    },
+    saveAttribute(state, action) {
+      const { id } = action.payload;
+      const editClone = cloneDeep(state.edit);
+      state.byId[id] = editClone;
+    },
+    updateAttributeById(state, action) {
+      const { id, keypath, updates } = action.payload;
       if (state.byId[id]) {
-        state.byId[id] = { ...state.byId[id], ...updates };
+        set(state.byId[id], keypath, updates);
       }
     },
-
-    addSettlementPointCost(state, action) {
-      const { id, name } = action.payload;
-      if (state.byId[id]) {
-        state.byId[id].settlementPointCost[name] = 0;
-      }
+    updateEditAttribute(state, action) {
+      const { keypath, updates } = action.payload;
+      set(state.edit, keypath, updates);
+      console.log({ ...state.edit }, 'state.edit');
     },
-
-    updateSettlementPointCost(state, action) {
-      const { id, name, value } = action.payload;
-      if (state.byId[id]) {
-        state.byId[id].settlementPointCost[name] = value;
-      }
+    deleteEditIndex(state, action) {
+      const { keypath, index } = action.payload;
+      state.edit[keypath].splice(index, 1);
     },
-
-    removeSettlementPointCost(state, action) {
-      const { id, name } = action.payload;
-      if (state.byId[id]) {
-        delete state.byId[id].settlementPointCost[name];
-      }
+    deleteEditKey(state, action) {
+      const { keypath, key } = action.payload;
+      delete state.edit[keypath][key];
     },
-
+    updateEditIcon(state, action) {
+      const { icon, color } = action.payload;
+      state.edit.icon = icon;
+      state.edit.iconColor = color;
+    },
     deleteAttribute(state, action) {
       const { id } = action.payload;
       delete state.byId[id];
       state.allIds = state.allIds.filter((attributeId) => attributeId !== id);
     },
-  },
-
-  refreshAttribute(state, action) {
-    const { id } = action.payload;
-    state.byId[id] = { ...state.byId[id] };
+    refreshAttribute(state, action) {
+      const { id } = action.payload;
+      state.byId[id] = { ...state.byId[id] };
+    },
   },
 });
 
 export const {
   initializeAttribute,
+  initializeEdit,
+  saveAttribute,
   addAttribute,
-  updateAttribute,
-  addSettlementPointCost,
-  updateSettlementPointCost,
-  removeSettlementPointCost,
+  updateAttributeById,
+  updateEditAttribute,
+  deleteEditIndex,
+  deleteEditKey,
+  updateEditIcon,
   deleteAttribute,
 } = attributesSlice.actions;
 
