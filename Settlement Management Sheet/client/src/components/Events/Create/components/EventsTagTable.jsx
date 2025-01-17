@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Switch from '../../../shared/Switch/Switch';
 
 const categories = {
   Climate: ['Arid', 'Temperate', 'Cold', 'Humid', 'Rainy', 'Snowy'],

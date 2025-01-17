@@ -6,7 +6,6 @@ import {
   Navigate,
 } from 'react-router-dom';
 import './App.css';
-import './tailwind.css';
 
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';

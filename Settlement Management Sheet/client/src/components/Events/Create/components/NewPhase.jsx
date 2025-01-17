@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import InputWithLabel from '../../../shared/InputWithLabel/InputWithLabel';
-import Button from '../../../shared/Button/Button';
 import {
-  Box,
   Typography,
+  Box,
   FormControl,
   InputAdornment,
   InputLabel,
@@ -12,8 +10,6 @@ import {
   IconButton,
   Divider,
 } from '@mui/material';
-import ValidatedInput from '../../../utils/ValidatedTextArea/ValidatedInput';
-import ValidatedTextArea from '../../../utils/ValidatedTextArea/ValidatedTextArea';
 
 import NewImpact from './NewImpact';
 import NewImpactTable from './NewImpactTable';

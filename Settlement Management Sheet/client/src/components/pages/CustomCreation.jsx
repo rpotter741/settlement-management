@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import TabbedContainer from '../utils/TabbedContainer/TabbedContainer';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
+import TabbedContainer from '../shared/TabbedContainer/TabbedContainer';
+
 import Typography from '@mui/material/Typography';
 
-import CreateAttribute from '../Attributes/Create/CreateAttribute';
+import CreateAttribute from '../../features/Attributes/components/wrappers/CreateAttribute';
 
-import CreateCategory from '../Categories/Create/CreateCategory';
 import {
   emptyCategory,
   emptyAttribute,
@@ -34,10 +32,8 @@ import CreateSettlement from '../Settlement/CreateSettlement';
 
 import CreateAPT from '../APT/CreateAPT';
 
-import sidebarSx from '../utils/Sidebar/styles.js';
-import contentSx from '../utils/TabbedContainer/contentStyles';
-
-import CategoryModal from '../Categories/Create/CategoryModal';
+import sidebarSx from '../shared/Sidebar/styles.js';
+import contentSx from '../shared/TabbedContainer/contentStyles';
 
 const CustomCreation = () => {
   const [attribute, setAttribute] = useState({ ...emptyAttribute });
@@ -60,20 +56,20 @@ const CustomCreation = () => {
       sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
-    {
-      name: 'Category',
-      component: CreateCategory,
-      sidebarSx,
-      contentSx,
-      props: { category, setCategory },
-    },
-    {
-      name: 'Event',
-      component: CustomEvent,
-      props: { event, setEvent },
-      sidebarSx,
-      contentSx: { ...contentSx, flexGrow: 4 },
-    },
+    // {
+    //   name: 'Category',
+    //   component: CreateCategory,
+    //   sidebarSx,
+    //   contentSx,
+    //   props: { category, setCategory },
+    // },
+    // {
+    //   name: 'Event',
+    //   component: CustomEvent,
+    //   props: { event, setEvent },
+    //   sidebarSx,
+    //   contentSx: { ...contentSx, flexGrow: 4 },
+    // },
     {
       name: 'Listeners',
       component: CustomListeners,
@@ -81,19 +77,19 @@ const CustomCreation = () => {
       sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
-    {
-      name: 'Weather',
-      component: CreateWeather,
-      props: { weather, setWeather },
-      sidebarSx,
-      contentSx: { ...contentSx, flexGrow: 4 },
-    },
-    {
-      name: 'Status',
-      component: CategoryModal,
-      props: { category, setCategory },
-      contentSx: { ...contentSx, flexGrow: 4 },
-    },
+    // {
+    //   name: 'Weather',
+    //   component: CreateWeather,
+    //   props: { weather, setWeather },
+    //   sidebarSx,
+    //   contentSx: { ...contentSx, flexGrow: 4 },
+    // },
+    // {
+    //   name: 'Status',
+    //   component: CategoryModal,
+    //   props: { category, setCategory },
+    //   contentSx: { ...contentSx, flexGrow: 4 },
+    // },
     {
       name: 'Building',
       component: CreateBuilding,

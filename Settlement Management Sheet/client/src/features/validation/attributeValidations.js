@@ -9,17 +9,9 @@ const attributeValidations = {
       return 'Description must be at least 30 characters.';
     return null;
   },
-  healthPerLevel: (value) => {
-    if (value < 0) return 'Health per level cannot be negative.';
-    return null;
-  },
-  costPerLevel: (value) => {
-    if (value <= 0) return 'Cost per level must be greater than 0.';
-    return null;
-  },
-  values: (values) => {
+  balance: (values) => {
     const errors = {};
-    if (!values.maxPerLevel) {
+    if (!values.maxPerLevel && values.maxPerLevel !== 0) {
       errors.maxPerLevel = 'Max per level is required.';
     }
     if (values.maxPerLevel <= 0) {
@@ -30,6 +22,21 @@ const attributeValidations = {
     }
     if (errors.maxPerLevel === undefined) {
       errors.maxPerLevel = null;
+    }
+    if (!values.healthPerLevel && values.healthPerLevel !== 0) {
+      errors.healthPerLevel = 'Health per level is required.';
+    }
+    if (values.healthPerLevel < 0) {
+      errors.healthPerLevel = 'Health per level cannot be negative.';
+    }
+    if (values.costPerLevel <= 0) {
+      errors.costPerLevel = 'Cost per level must be greater than 0.';
+    }
+    if (errors.healthPerLevel === undefined) {
+      errors.healthPerLevel = null;
+    }
+    if (errors.costPerLevel === undefined) {
+      errors.costPerLevel = null;
     }
     return errors;
   },

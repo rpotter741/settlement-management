@@ -2,18 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useDynamicSidebar } from '../../../context/SidebarContext';
 import eventSidebar from '../../../helpers/events/createEventsSidebar';
 import NewPhase from './components/NewPhase';
-import NewCondition from './components/NewCondition';
 import Box from '@mui/material/Box';
 
 import { emptyPhase } from '../../../helpers/events/emptyEventObjects';
-import ConditionsDetails from '../../../helpers/events/ConditionsDetails';
-import DescriptionDetails from '../../../helpers/events/DescriptionDetails';
-import EventTagsTable from './components/EventsTagTable';
-import EventTagDetails from '../../../helpers/events/EventTagDetails';
 
-import InnerTabbedContainer from '../../utils/TabbedContainer/InnerTabbedContainer';
-import sidebarSx from '../../utils/Sidebar/styles';
-import contentSx from '../../utils/TabbedContainer/contentStyles';
+import InnerTabbedContainer from '../../shared/TabbedContainer/InnerTabbedContainer';
+import sidebarSx from '../../shared/Sidebar/styles.js';
 
 const CustomEvent = ({ event, setEvent }) => {
   const [phases, setPhases] = useState(event.phases || []);

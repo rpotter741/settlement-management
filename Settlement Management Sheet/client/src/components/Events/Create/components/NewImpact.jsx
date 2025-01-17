@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import InputWithLabel from '../../../shared/InputWithLabel/InputWithLabel';
-import FloatingSelect from '../../../shared/FloatingSelect/FloatingSelect';
-import Switch from '../../../shared/Switch/Switch';
-import Button from '../../../shared/Button/Button';
-import Drawer from '../../../shared/Drawer/Drawer';
 import {
-  impactKeyOptions,
   impactAttributeOptions,
   impactCategoryOptions,
   impactTypeOptions,
 } from '../../../../helpers/events/emptyEventObjects';
-
-import NewCondition from './NewCondition';
 
 const NewImpact = ({ impact, setImpact, index }) => {
   const getCategoryOptions = () => {

@@ -15,8 +15,6 @@ import {
 
 import InfoIcon from '@mui/icons-material/Info';
 
-import ValidatedInput from '../../utils/ValidatedTextArea/ValidatedInput';
-import TitledCollapse from '../../utils/TitledCollapse/TitledCollapse';
 import NewImpactTable from '../../Events/Create/components/NewImpactTable';
 
 import {
