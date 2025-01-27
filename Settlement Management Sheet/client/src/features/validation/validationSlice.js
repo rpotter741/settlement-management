@@ -43,7 +43,6 @@ const validationSlice = createSlice({
       }
     },
     setErrorField: (state, action) => {
-      let done = false;
       const { tool, keypath, value } = action.payload;
       if (typeof value === 'object' && !Array.isArray(value)) {
         set(state[tool], keypath, { ...value });
@@ -52,8 +51,6 @@ const validationSlice = createSlice({
       } else {
         set(state[tool], keypath, value);
       }
-      const test = cloneDeep(state[tool]);
-      console.log(test);
       state[tool] = cloneDeep(state[tool]);
     },
     validateTool: (state, action) => {

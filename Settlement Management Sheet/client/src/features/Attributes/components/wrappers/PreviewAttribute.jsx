@@ -4,7 +4,10 @@ import { Box, Button, Typography, Divider } from '@mui/material';
 
 import { Icon as CustomIcon } from '../../../../components/index.js';
 
-const PreviewAttribute = ({ attr }) => {
+import { useAttribute } from '../../hooks/useEditAttribute.jsx';
+
+const PreviewAttribute = () => {
+  const { attribute: attr } = useAttribute();
   return (
     <Box
       sx={{
@@ -77,7 +80,7 @@ const PreviewAttribute = ({ attr }) => {
         }}
       >
         <Typography variant="h6">Max Per Level:</Typography>
-        <Typography>{attr?.values?.maxPerLevel}</Typography>
+        <Typography>{attr?.balance?.maxPerLevel}</Typography>
       </Box>
       <Box
         sx={{
@@ -88,7 +91,7 @@ const PreviewAttribute = ({ attr }) => {
         }}
       >
         <Typography variant="h6">Health Per Level:</Typography>
-        <Typography>{attr?.healthPerLevel}</Typography>
+        <Typography>{attr?.balance?.healthPerLevel}</Typography>
       </Box>
       <Box
         sx={{
@@ -99,7 +102,7 @@ const PreviewAttribute = ({ attr }) => {
         }}
       >
         <Typography variant="h6">Cost Per Level:</Typography>
-        <Typography>{attr?.costPerLevel}</Typography>
+        <Typography>{attr?.balance?.costPerLevel}</Typography>
       </Box>
       <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }} />
 
@@ -109,23 +112,71 @@ const PreviewAttribute = ({ attr }) => {
       >
         Settlement Point Costs
       </Typography>
-      {Object.entries(attr?.settlementPointCost || {}).map(([id, spc]) => (
+      {attr.settlementPointCostOrder.map((id) => (
         <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center',
-            justifyContent: 'start',
-            gridColumn: 'span 3',
-          }}
+          // sx={{
+          //   display: 'flex',
+          //   gap: 2,
+          //   alignItems: 'center',
+          //   justifyContent: 'start',
+          //   gridColumn: 'span 3',
+          // }}
+          variant="checkListItem"
           key={id}
         >
           <Typography variant="h6">
-            {spc.name.charAt(0).toUpperCase() + spc.name.slice(1)}:
+            {attr.settlementPointCost[id].name.charAt(0).toUpperCase() +
+              attr.settlementPointCost[id].name.slice(1)}
+            :
           </Typography>
-          <Typography>{spc.value}</Typography>
+          <Typography>
+            <strong>{attr.settlementPointCost[id].value}</strong>
+          </Typography>
         </Box>
       ))}
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }} />
+      <Typography
+        variant="h5"
+        sx={{
+          gridColumn: 'span 3',
+          textAlign: 'center',
+          my: 2,
+          width: '100%',
+        }}
+      >
+        Thresholds
+      </Typography>
+      <Box
+        sx={{
+          gridColumn: 'span 3',
+          gap: 2,
+          display: 'grid',
+          gridTemplateRows: 'repeat(7, 1fr)',
+          gridAutoFlow: 'column',
+        }}
+      >
+        {attr.thresholdsOrder.map((id) => (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              alignItems: 'center',
+              justifyContent: 'start',
+              maxWidth: '15rem',
+            }}
+            key={id}
+          >
+            <Typography variant="h6" sx={{ width: '75%', textAlign: 'start' }}>
+              {attr.thresholds[id].name.charAt(0).toUpperCase() +
+                attr.thresholds[id].name.slice(1)}
+              :
+            </Typography>
+            <Typography sx={{ width: '25%' }}>
+              <strong>{attr.thresholds[id].max}</strong>
+            </Typography>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };

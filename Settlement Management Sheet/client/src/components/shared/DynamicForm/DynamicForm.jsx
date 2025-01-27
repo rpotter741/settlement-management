@@ -326,6 +326,7 @@ const DynamicForm = ({
                       bottom: '-20px',
                       fontSize: '12px', // Optional: Adjust font size
                       color: isInvalid ? 'error.main' : 'transparent',
+                      display: ['none', 'none', 'block'], // Optional: Hide on mobile
                     },
                   },
                 }}

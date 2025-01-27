@@ -28,6 +28,8 @@ const attributesSlice = createSlice({
     saveAttribute(state, action) {
       const { id } = action.payload;
       const editClone = cloneDeep(state.edit);
+      console.log('editClone', editClone);
+      console.log('state.byId[id]', state.byId[id]);
       state.byId[id] = editClone;
     },
     updateAttributeById(state, action) {

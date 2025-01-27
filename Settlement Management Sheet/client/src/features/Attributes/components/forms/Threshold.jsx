@@ -43,7 +43,7 @@ const Threshold = ({
           keypath: `thresholds.${id}.name`,
         }}
         shrink={true}
-        boxSx={{ width: '80%' }}
+        boxSx={{ width: '100%' }}
         externalUpdate={handleNameChange}
         parentError={errors?.name}
         onError={handleNameValidation}

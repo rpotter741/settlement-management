@@ -77,17 +77,19 @@ export const useAttributeActions = () => {
     [dispatch]
   );
 
-  const saveAttribute = useCallback(() => {
+  const saveEditAttribute = useCallback(
     (attribute) => {
+      console.log(attribute);
       dispatch(saveAttribute({ id: attribute.id }));
-    };
-  });
+    },
+    [dispatch]
+  );
 
   return {
     updateAttribute,
     validateAttributeField,
     validateEntireAttribute,
-    saveAttribute,
+    saveEditAttribute,
   };
 };
 

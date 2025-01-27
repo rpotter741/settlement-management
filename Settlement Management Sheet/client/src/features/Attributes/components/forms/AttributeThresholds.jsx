@@ -89,7 +89,9 @@ const AttributeThresholds = () => {
     }
 
     // Sort thresholds by max value
-    const sortedThresholds = [...thresholds].sort((a, b) => a.max - b.max);
+    const sortedThresholds = thresholds.order
+      .map((id) => thresholds.data[id])
+      .sort((a, b) => a.max - b.max);
 
     // Find the largest gap between consecutive thresholds
     let largestGap = 0;
@@ -153,7 +155,7 @@ const AttributeThresholds = () => {
 
   const handleRemove = useCallback(
     (id) => {
-      let updatedThresholds = { ...thresholds };
+      let updatedThresholds = { ...thresholds.data };
       delete updatedThresholds[id];
       updateAttribute('thresholds', updatedThresholds);
 
@@ -187,7 +189,7 @@ const AttributeThresholds = () => {
       setShowTooltip(true);
       return;
     }
-    let updatedThresholds = { ...thresholds };
+    let updatedThresholds = { ...thresholds.data };
     const id = newId();
     updatedThresholds[id] = {
       id,
@@ -197,7 +199,12 @@ const AttributeThresholds = () => {
     // const updatedPlaceholders = redistributePlaceholders(updatedThresholds);
     // setPlaceholders(updatedPlaceholders);
     // updatedThresholds = updateThresholdsWithPlaceholders(updatedThresholds);
-
+    console.log(updatedThresholds);
+    const newOrder = [...thresholds.order, id];
+    newOrder.sort(
+      (a, b) => updatedThresholds[a].max - updatedThresholds[b].max
+    );
+    updateAttribute('thresholdsOrder', newOrder);
     updateAttribute('thresholds', updatedThresholds);
 
     validateAttributeField(`thresholds.${id}`, {

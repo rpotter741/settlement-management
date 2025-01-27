@@ -20,7 +20,9 @@ import { Box, Button, Typography, Modal } from '@mui/material';
 import IconSelector from 'components/shared/IconSelector/IconSelector.jsx';
 import EditAttribute from './EditAttribute.jsx';
 import PreviewAttribute from './PreviewAttribute.jsx';
-import ChecklistContent from '../ui/ChecklistContent.jsx';
+import checklistContent from '../../helpers/attributeChecklist.js';
+
+import ValidationChecklist from 'components/shared/ValidationChecklist/ValidationChecklist.jsx';
 
 const CreateAttribute = () => {
   const {
@@ -28,7 +30,7 @@ const CreateAttribute = () => {
     allIds,
     editAttribute,
     updateAttribute,
-    saveAttribute,
+    saveEditAttribute,
     errors,
   } = useAttribute();
   const { showSnackbar } = useSnackbar();
@@ -40,6 +42,10 @@ const CreateAttribute = () => {
   const [firstRender, setFirstRender] = useState(true);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    console.log(attribute);
+  }, [attribute]);
 
   useEffect(() => {
     dispatch(selectTool('attribute'));
@@ -122,8 +128,9 @@ const CreateAttribute = () => {
         setTimeout(() => setExpanded(false), 1000);
         return;
       } else {
+        console.log('teeest');
         setEditMode(false);
-        saveAttribute({ id: attribute.id });
+        saveEditAttribute(attribute);
       }
     } else {
       setEditMode(true);
@@ -162,11 +169,10 @@ const CreateAttribute = () => {
               zIndex: 1000,
             }}
           >
-            <ChecklistContent
-              errors={errors}
+            <ValidationChecklist
               errorCount={errorCount}
               defaultExpand={expanded}
-              attr={localAttr}
+              checklistContent={checklistContent}
             />
           </Box>
         )}

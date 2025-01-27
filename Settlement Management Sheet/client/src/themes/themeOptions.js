@@ -1,3 +1,5 @@
+import commonStyles from './commonStyles';
+
 const themeOptions = {
   default: {
     palette: {
@@ -84,6 +86,7 @@ const themeOptions = {
         dark: 'rgba(36,36,36,0.3)',
       },
     },
+    components: commonStyles,
   },
 };
 

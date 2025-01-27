@@ -10,6 +10,8 @@ import {
   createTheme,
 } from '@mui/material/styles';
 
+import commonStyles from '../themes/commonStyles.js';
+
 import themeOptions from '../themes/themeOptions.js';
 
 // ThemeContext
@@ -23,13 +25,17 @@ export const ThemeProvider = ({ children }) => {
       setThemeKey(newThemeKey); // Change to the provided theme key
     } else {
       console.warn(`Theme "${newThemeKey}" is not defined in themeOptions.`);
+      setThemeKey('default');
     }
   };
 
   // Dynamically generate the theme based on the themeKey state
   const muiTheme = useMemo(() => {
     const selectedTheme = themeOptions[themeKey] || themeOptions.default;
-    return createTheme(selectedTheme);
+    return createTheme({
+      ...selectedTheme,
+      components: { ...commonStyles },
+    });
   }, [themeKey]);
 
   useEffect(() => {
@@ -41,6 +47,8 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.style.backgroundColor = backgroundColor;
     document.body.style.backgroundColor = backgroundColor;
     document.body.style.color = muiTheme.palette.text.primary;
+
+    console.log('current theme:', muiTheme);
   }, [muiTheme]);
 
   return (
