@@ -112,25 +112,24 @@ const PreviewAttribute = () => {
       >
         Settlement Point Costs
       </Typography>
-      {attr.settlementPointCostOrder.map((id) => (
+      {attr.settlementPointCost.order.map((id) => (
         <Box
-          // sx={{
-          //   display: 'flex',
-          //   gap: 2,
-          //   alignItems: 'center',
-          //   justifyContent: 'start',
-          //   gridColumn: 'span 3',
-          // }}
-          variant="checkListItem"
+          sx={{
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'start',
+            gridColumn: 'span 3',
+          }}
           key={id}
         >
           <Typography variant="h6">
-            {attr.settlementPointCost[id].name.charAt(0).toUpperCase() +
-              attr.settlementPointCost[id].name.slice(1)}
+            {attr.settlementPointCost.data[id].name.charAt(0).toUpperCase() +
+              attr.settlementPointCost.data[id].name.slice(1)}
             :
           </Typography>
           <Typography>
-            <strong>{attr.settlementPointCost[id].value}</strong>
+            <strong>{attr.settlementPointCost.data[id].value}</strong>
           </Typography>
         </Box>
       ))}
@@ -155,7 +154,7 @@ const PreviewAttribute = () => {
           gridAutoFlow: 'column',
         }}
       >
-        {attr.thresholdsOrder.map((id) => (
+        {attr.thresholds.order.map((id) => (
           <Box
             sx={{
               display: 'flex',
@@ -166,14 +165,21 @@ const PreviewAttribute = () => {
             }}
             key={id}
           >
-            <Typography variant="h6" sx={{ width: '75%', textAlign: 'start' }}>
-              {attr.thresholds[id].name.charAt(0).toUpperCase() +
-                attr.thresholds[id].name.slice(1)}
-              :
-            </Typography>
-            <Typography sx={{ width: '25%' }}>
-              <strong>{attr.thresholds[id].max}</strong>
-            </Typography>
+            {attr.thresholds.data[id].name && (
+              <>
+                <Typography
+                  variant="h6"
+                  sx={{ width: '75%', textAlign: 'start' }}
+                >
+                  {attr.thresholds.data[id].name.charAt(0).toUpperCase() +
+                    attr.thresholds.data[id].name.slice(1)}
+                  :
+                </Typography>
+                <Typography sx={{ width: '25%' }}>
+                  <strong>{attr.thresholds.data[id].max}</strong>
+                </Typography>
+              </>
+            )}
           </Box>
         ))}
       </Box>

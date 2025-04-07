@@ -4,11 +4,12 @@ import {
   validateField,
   validateTool,
 } from 'features/validation/validationSlice';
+import { updateEdit } from '../state/categoriesSlice.js';
 import { categorySelectors as select } from 'features/Categories/state/categoriesSelectors.js';
 
 export const useCategorySelectors = () => {
   const allCategories = useSelector(select.base.allCategories);
-  const category = useSelector(select.base.currentCategory);
+  const category = useSelector(select.base.current);
   const editCategory = useSelector(select.base.edit);
   const allIds = useSelector(select.base.allIds);
   const errors = useSelector(select.base.errors);
@@ -48,7 +49,7 @@ export const useCategoryActions = () => {
 
   const updateCategory = useCallback(
     (keypath, updates) => {
-      dispatch(updateEditCategory({ keypath, updates }));
+      dispatch(updateEdit({ keypath, updates }));
     },
     [dispatch]
   );

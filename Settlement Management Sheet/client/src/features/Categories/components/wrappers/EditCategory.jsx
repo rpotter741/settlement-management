@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
-import AttrMetaData from '../forms/AttrMetaData.jsx';
-import AttrValues from '../forms/AttrValues.jsx';
-import SettlementPointsCost from '../forms/SettlementPointsCost.jsx';
-import AttributeThresholds from '../forms/AttributeThresholds.jsx';
-import TagTable from '../forms/TagTable';
+import CategoryMetadata from '../forms/CategoryMetadata.jsx';
 
-const EditAttribute = ({ setShowModal }) => {
-  const attr = useSelector((state) => state.attributes.edit);
-  const [values, setValues] = useState(false);
+const EditCategory = () => {
+  const category = useSelector((state) => state.categories.edit);
+  const [attributes, setAttributes] = useState(false);
   const [thresholds, setThresholds] = useState(false);
+  const [dependencies, setDependencies] = useState(false);
   const [tags, setTags] = useState(false);
-  const [spCosts, setSpCosts] = useState(false);
+
+  useEffect(() => {
+    console.log(category, 'category in edit');
+  }, [category]);
 
   return (
     <Box
@@ -33,29 +33,17 @@ const EditAttribute = ({ setShowModal }) => {
         pb: 2,
       }}
     >
-      <AttrMetaData setShowModal={setShowModal} />
+      <CategoryMetadata />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
-        title="Values"
+        title="Attributes"
         titleType="h6"
-        defaultState={values}
-        styles={{ width: '100%', mb: 2 }}
-        boxSx={{
-          gridColumn: 'span 3',
-        }}
-        noDefaultHandler={() => setValues(!values)}
-      >
-        <AttrValues values={values} />
-      </TitledCollapse>
-      <TitledCollapse
-        title="Settlement Point Costs"
-        titleType="h6"
-        defaultState={spCosts}
+        defaultState={attributes}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setSpCosts(!spCosts)}
+        noDefaultHandler={() => setAttributes(!attributes)}
       >
-        <SettlementPointsCost />
+        metadata
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
@@ -65,20 +53,30 @@ const EditAttribute = ({ setShowModal }) => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setThresholds(!thresholds)}
       >
-        <AttributeThresholds />
+        thresholds
       </TitledCollapse>
       <TitledCollapse
-        title={`Tags (${attr.tags?.length} / 5)`}
+        title="Dependencies"
+        titleType="h6"
+        defaultState={dependencies}
+        styles={{ width: '100%', mb: 2 }}
+        boxSx={{ gridColumn: 'span 3' }}
+        noDefaultHandler={() => setDependencies(!dependencies)}
+      >
+        dependencies
+      </TitledCollapse>
+      <TitledCollapse
+        title="Tags"
         titleType="h6"
         defaultState={tags}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setTags(!tags)}
       >
-        <TagTable attr={attr} />
+        tags
       </TitledCollapse>
     </Box>
   );
 };
 
-export default EditAttribute;
+export default EditCategory;

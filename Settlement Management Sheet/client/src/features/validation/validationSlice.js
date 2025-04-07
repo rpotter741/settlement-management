@@ -56,7 +56,6 @@ const validationSlice = createSlice({
     validateTool: (state, action) => {
       const { tool, fields, refObj } = action.payload;
       const validateFns = validationsMap[tool];
-      console.log(refObj);
       fields.forEach((field) => {
         const error = validateFns[field](refObj[field]);
         state[tool][field] = error;

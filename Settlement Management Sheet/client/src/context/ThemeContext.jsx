@@ -47,8 +47,6 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.style.backgroundColor = backgroundColor;
     document.body.style.backgroundColor = backgroundColor;
     document.body.style.color = muiTheme.palette.text.primary;
-
-    console.log('current theme:', muiTheme);
   }, [muiTheme]);
 
   return (

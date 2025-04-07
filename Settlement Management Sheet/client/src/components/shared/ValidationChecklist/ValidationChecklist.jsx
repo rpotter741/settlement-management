@@ -93,11 +93,7 @@ const ValidationChecklist = ({ defaultExpand, checklistContent, ...props }) => {
     >
       {/* Tab / Button */}
       <Tooltip
-        title={
-          expanded
-            ? 'Collapse Validation Checklist'
-            : `${errorCount} Errors Remaining`
-        }
+        title={expanded ? null : `${errorCount} Errors Remaining`}
         placement="left"
         arrow
       >

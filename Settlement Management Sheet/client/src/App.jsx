@@ -5,6 +5,8 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import queryClient from './context/QueryClient';
 import './App.css';
 
 import { AuthProvider } from './context/AuthContext';
@@ -21,39 +23,43 @@ const App = () => {
 
   return (
     <React.StrictMode>
-      <AuthProvider>
-        <ThemeProvider>
-          <DynamicSidebarProvider>
-            <Router>
-              <Routes>
-                {/* Public Route */}
-                <Route
-                  path="/"
-                  element={
-                    <Navigate to={isAuthenticated ? '/dashboard' : '/login'} />
-                  }
-                />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/customCreation" element={<CustomCreation />} />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider>
+            <DynamicSidebarProvider>
+              <Router>
+                <Routes>
+                  {/* Public Route */}
+                  <Route
+                    path="/"
+                    element={
+                      <Navigate
+                        to={isAuthenticated ? '/dashboard' : '/login'}
+                      />
+                    }
+                  />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/customCreation" element={<CustomCreation />} />
 
-                {/* Protected Route */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected Route */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Fallback Route */}
-                <Route path="*" element={<p>404: Page not found</p>} />
-              </Routes>
-            </Router>
-          </DynamicSidebarProvider>
-        </ThemeProvider>
-      </AuthProvider>
+                  {/* Fallback Route */}
+                  <Route path="*" element={<p>404: Page not found</p>} />
+                </Routes>
+              </Router>
+            </DynamicSidebarProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </React.StrictMode>
   );
 };

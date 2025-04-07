@@ -54,21 +54,14 @@ const SettlementPointsCost = () => {
 
   const [selectedTypes, setSelectedTypes] = useState([]);
 
-  React.useEffect(() => {
-    console.log('errors', errors);
-  }, [errors]);
-
   const available = useMemo(() => {
-    console.log('recalculating available');
     const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {
       types.push(id);
       return types;
     }, []);
-    console.log(assignedTypes, 'assigned types');
     const types = settlementTypes.filter(
       (type) => !assignedTypes.includes(type.id)
     );
-    console.log(types, 'types');
     return types;
   }, [costs, selectedTypes, dispatch]);
 
@@ -96,7 +89,6 @@ const SettlementPointsCost = () => {
   // Handle drop
   const handleDrop = useCallback(
     (item) => {
-      console.log(item.id, 'item id');
       setSelectedTypes((prevSelected) =>
         prevSelected.includes(item.id)
           ? prevSelected.filter((id) => id !== item.id)
@@ -110,7 +102,7 @@ const SettlementPointsCost = () => {
           ...currentSPC,
           [item.id]: { name: formattedName, value: 1 },
         };
-        updateAttribute('settlementPointCost', newSPC);
+        updateAttribute('settlementPointCost.data', newSPC);
 
         const currentErrors = selectAttrSPCErrors(getState());
         const newErrors = {
@@ -118,11 +110,11 @@ const SettlementPointsCost = () => {
           [item.id]: { name: null, value: null },
         };
 
-        validateAttributeField('settlementPointCost', newErrors);
+        validateAttributeField('settlementPointCost.data', newErrors);
 
         const currentOrder = selectSettlementPointCostOrder(getState());
         const newOrder = [...currentOrder, item.id];
-        updateAttribute('settlementPointCostOrder', newOrder);
+        updateAttribute('settlementPointCost.order', newOrder);
       });
     },
     [dispatch]
@@ -131,7 +123,7 @@ const SettlementPointsCost = () => {
   // Handle value change
   const handleValueChange = useCallback(
     (value, { id }) => {
-      updateAttribute(`settlementPointCost.${id}.value`, value);
+      updateAttribute(`settlementPointCost.data.${id}.value`, value);
     },
     [costs]
   );
@@ -140,7 +132,7 @@ const SettlementPointsCost = () => {
     (id) => {
       const newSPC = { ...costs };
       delete newSPC[id];
-      updateAttribute('settlementPointCost', newSPC);
+      updateAttribute('settlementPointCost.data', newSPC);
 
       const newErrors = { ...errors };
       delete newErrors[id];
@@ -149,7 +141,7 @@ const SettlementPointsCost = () => {
       const newOrder = settlementPointCost.order.filter(
         (order) => order !== id
       );
-      updateAttribute('settlementPointCostOrder', newOrder);
+      updateAttribute('settlementPointCost.order', newOrder);
     },
     [costs, errors]
   );
@@ -178,11 +170,11 @@ const SettlementPointsCost = () => {
         newOrder.push(type.id);
       });
 
-      updateAttribute('settlementPointCost', newSPC);
+      updateAttribute('settlementPointCost.data', newSPC);
 
       validateAttributeField('settlementPointCost', newErrors);
 
-      updateAttribute('settlementPointCostOrder', newOrder);
+      updateAttribute('settlementPointCost.order', newOrder);
 
       setSelectedTypes([]); // Clear after transfer
     });

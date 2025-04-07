@@ -11,6 +11,7 @@ export default defineConfig({
       hooks: '/src/hooks',
       context: '/src/context',
       utility: '/src/utility',
+      services: '/src/services',
       // Specific aliases for features
       attribute: '/src/features/Attributes',
       category: '/src/features/Categories',

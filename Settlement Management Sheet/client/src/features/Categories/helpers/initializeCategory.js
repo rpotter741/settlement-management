@@ -1,6 +1,6 @@
 import { v4 as newId } from 'uuid';
 
-const initializeCategory = (tempId) => {
+const initializeCategory = () => {
   const maxThresholds = [9, 29, 49, 69, 84, 99, 100];
   const thresholds = {};
   const thresholdsOrder = maxThresholds.map((max) => {
@@ -9,7 +9,8 @@ const initializeCategory = (tempId) => {
     return id;
   });
   return {
-    id: tempId,
+    id: newId(),
+    refId: newId(),
     name: '',
     description: '',
     attributes: [],
@@ -21,6 +22,10 @@ const initializeCategory = (tempId) => {
       data: {},
       order: [],
     },
+    tags: [],
+    isValid: false,
+    status: 'DRAFT',
+    createdBy: '',
   };
 };
 

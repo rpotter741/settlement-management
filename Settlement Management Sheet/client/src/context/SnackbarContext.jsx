@@ -17,7 +17,6 @@ export const SnackbarProvider = ({ children }) => {
   // Add a new toast to the queue
   const showSnackbar = useCallback(
     (message, type = 'info', duration = 3000, component = null, props = {}) => {
-      console.log('showSnackbar', message, type, duration, component, props);
       setQueue((prevQueue) => [
         ...prevQueue,
         { id: Date.now(), message, type, duration, component, props },

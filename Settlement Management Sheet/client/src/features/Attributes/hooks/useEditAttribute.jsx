@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { updateEditAttribute, saveAttribute } from '../state/attributeSlice';
+import { loadSelectedAttribute } from '../state/attributeThunks';
 import { validateField, validateTool } from '../../validation/validationSlice';
 import { attributeSelectors as select } from '../state/attributeSelectors.js';
 
@@ -79,8 +80,15 @@ export const useAttributeActions = () => {
 
   const saveEditAttribute = useCallback(
     (attribute) => {
-      console.log(attribute);
-      dispatch(saveAttribute({ id: attribute.id }));
+      dispatch(saveAttribute({ refId: attribute.refId }));
+    },
+    [dispatch]
+  );
+
+  const loadAttribute = useCallback(
+    ({ refId, id }) => {
+      console.log(refId);
+      dispatch(loadSelectedAttribute({ refId, id }));
     },
     [dispatch]
   );
@@ -90,6 +98,7 @@ export const useAttributeActions = () => {
     validateAttributeField,
     validateEntireAttribute,
     saveEditAttribute,
+    loadAttribute,
   };
 };
 

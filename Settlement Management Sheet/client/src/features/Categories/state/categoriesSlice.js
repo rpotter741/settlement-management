@@ -12,10 +12,10 @@ const categoriesSlice = createSlice({
   },
   reducers: {
     initializeCategory(state) {
-      const tempId = `temp-${Date.now()}`;
-      const newCategory = createNewCategory(tempId); // Temporary unique ID for the category
-      state.byId[tempId] = newCategory;
-      state.allIds.push(tempId);
+      const newCategory = createNewCategory(); // Temporary unique ID for the category
+      const { refId } = newCategory;
+      state.byId[refId] = newCategory;
+      state.allIds.push(refId);
     },
     addCategory(state, action) {
       const { category } = action.payload;
@@ -24,8 +24,8 @@ const categoriesSlice = createSlice({
       state.allIds.push(id);
     },
     initializeEdit(state, action) {
-      const { id } = action.payload;
-      state.edit = cloneDeep(state.byId[id]);
+      const { refId } = action.payload;
+      state.edit = cloneDeep(state.byId[refId]);
     },
     saveCategory(state, action) {
       const { id } = action.payload;

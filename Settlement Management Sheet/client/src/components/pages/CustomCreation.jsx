@@ -10,6 +10,8 @@ import {
   emptyAttribute,
 } from '../../helpers/categories/emptyCategoryObjects';
 
+import CreateCategory from '../../features/Categories/components/wrappers/CreateCategory.jsx';
+
 import CustomEvent from '../Events/Create/CustomEventTwo';
 import { emptyEvent } from '../../helpers/events/emptyEventObjects';
 
@@ -56,20 +58,18 @@ const CustomCreation = () => {
       sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
-    // {
-    //   name: 'Category',
-    //   component: CreateCategory,
-    //   sidebarSx,
-    //   contentSx,
-    //   props: { category, setCategory },
-    // },
-    // {
-    //   name: 'Event',
-    //   component: CustomEvent,
-    //   props: { event, setEvent },
-    //   sidebarSx,
-    //   contentSx: { ...contentSx, flexGrow: 4 },
-    // },
+    {
+      name: 'Category',
+      component: CreateCategory,
+      sidebarSx,
+      contentSx: { ...contentSx, flexGrow: 4 },
+    },
+    {
+      name: 'Event',
+      component: CreateCategory,
+      sidebarSx,
+      contentSx: { ...contentSx, flexGrow: 4 },
+    },
     {
       name: 'Listeners',
       component: CustomListeners,
@@ -77,19 +77,11 @@ const CustomCreation = () => {
       sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
-    // {
-    //   name: 'Weather',
-    //   component: CreateWeather,
-    //   props: { weather, setWeather },
-    //   sidebarSx,
-    //   contentSx: { ...contentSx, flexGrow: 4 },
-    // },
-    // {
-    //   name: 'Status',
-    //   component: CategoryModal,
-    //   props: { category, setCategory },
-    //   contentSx: { ...contentSx, flexGrow: 4 },
-    // },
+    {
+      name: 'Status',
+      component: CreateCategory,
+      contentSx: { ...contentSx, flexGrow: 4 },
+    },
     {
       name: 'Building',
       component: CreateBuilding,
@@ -113,6 +105,11 @@ const CustomCreation = () => {
     {
       name: 'Settlement',
       component: CreateSettlement,
+      props: { category, setCategory },
+    },
+    {
+      name: 'Story Thread',
+      component: CreateCategory,
       props: { category, setCategory },
     },
     {

@@ -41,7 +41,7 @@ const attributeValidations = {
     return errors;
   },
   thresholds: (thresholds) => {
-    return Object.entries(thresholds).reduce((errors, [id, threshold]) => {
+    return Object.entries(thresholds.data).reduce((errors, [id, threshold]) => {
       const thresholdErrors = {};
 
       if (!threshold.name || threshold.name.trim().length < 3) {
@@ -63,7 +63,7 @@ const attributeValidations = {
   },
 
   settlementPointCost: (SPCS) => {
-    return Object.entries(SPCS).reduce((errors, [id, spc]) => {
+    return Object.entries(SPCS.data).reduce((errors, [id, spc]) => {
       const spcErrors = {};
 
       if (spc.value <= 0) {

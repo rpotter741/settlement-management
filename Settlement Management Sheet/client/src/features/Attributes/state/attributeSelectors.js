@@ -39,20 +39,20 @@ export const selectBalanceErrors = createErrorSelector('balance');
 // Thresholds Selectors
 export const selectThresholds = createSelector(
   [selectEditAttr],
-  (attr) => attr.thresholds
+  (attr) => attr.thresholds?.data
 );
 
 export const selectThresholdErrors = createErrorSelector('thresholds');
 
 export const selectThresholdsOrder = createSelector(
   [selectEditAttr],
-  (attr) => attr.thresholdsOrder
+  (attr) => attr.thresholds?.order
 );
 
 // Settlement Point Cost Selectors
 export const selectSettlementPointCost = createSelector(
   [selectEditAttr],
-  (attr) => attr.settlementPointCost
+  (attr) => attr.settlementPointCost?.data
 );
 
 export const selectSettlementPointCostErrors = createErrorSelector(
@@ -61,7 +61,7 @@ export const selectSettlementPointCostErrors = createErrorSelector(
 
 export const selectSettlementPointCostOrder = createSelector(
   [selectEditAttr],
-  (attr) => attr.settlementPointCostOrder
+  (attr) => attr.settlementPointCost?.order
 );
 
 // Current Attribute Selector

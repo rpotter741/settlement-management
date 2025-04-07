@@ -13,29 +13,27 @@ const attributesSlice = createSlice({
   reducers: {
     initializeAttribute(state) {
       const newAttr = createNewAttribute();
-      state.byId[newAttr.id] = newAttr;
-      state.allIds.push(newAttr.id);
+      state.byId[newAttr.refId] = newAttr;
+      state.allIds.push(newAttr.refId);
     },
     addAttribute(state, action) {
       const { attribute } = action.payload;
-      state.byId[attribute.id] = attribute;
-      state.allIds.push(attribute.id);
+      state.byId[attribute.refId] = attribute;
+      state.allIds.push(attribute.refId);
     },
     initializeEdit(state, action) {
-      const { id } = action.payload;
-      state.edit = cloneDeep(state.byId[id]);
+      const { refId } = action.payload;
+      state.edit = cloneDeep(state.byId[refId]);
     },
     saveAttribute(state, action) {
-      const { id } = action.payload;
+      const { refId } = action.payload;
       const editClone = cloneDeep(state.edit);
-      console.log('editClone', editClone);
-      console.log('state.byId[id]', state.byId[id]);
-      state.byId[id] = editClone;
+      state.byId[refId] = editClone;
     },
     updateAttributeById(state, action) {
-      const { id, keypath, updates } = action.payload;
-      if (state.byId[id]) {
-        set(state.byId[id], keypath, updates);
+      const { refId, keypath, updates } = action.payload;
+      if (state.byId[refId]) {
+        set(state.byId[refId], keypath, updates);
       }
     },
     updateEditAttribute(state, action) {
@@ -48,13 +46,15 @@ const attributesSlice = createSlice({
       state.edit.iconColor = color;
     },
     deleteAttribute(state, action) {
-      const { id } = action.payload;
-      delete state.byId[id];
-      state.allIds = state.allIds.filter((attributeId) => attributeId !== id);
+      const { refId } = action.payload;
+      delete state.byId[refId];
+      state.allIds = state.allIds.filter(
+        (attributeId) => attributeId !== refId
+      );
     },
     refreshAttribute(state, action) {
-      const { id } = action.payload;
-      state.byId[id] = { ...state.byId[id] };
+      const { refId } = action.payload;
+      state.byId[refId] = { ...state.byId[refId] };
     },
   },
 });

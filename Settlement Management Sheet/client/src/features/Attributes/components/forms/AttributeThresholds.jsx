@@ -37,22 +37,20 @@ const AttributeThresholds = () => {
       },
       300,
       { leading: true, trailing: false }
-    ), // Debounce time (300ms here)
-    [showSnackbar] // Dependency for useCallback
+    ),
+    [showSnackbar]
   );
 
   const handleThresholdMaxChange = useCallback(
-    (value, { id }) => {
-      const thresholdsClone = { ...thresholds.data };
-      if (thresholdsClone[id].max === value) {
-        return;
-      }
-      updateAttribute(`thresholds.${id}.max`, value);
+    (updates, { id }) => {
+      console.log(thresholds, updates);
+      updateAttribute(`thresholds.data.${id}.max`, updates);
       if (lastId !== id) {
         setLastId(id);
       }
+      validateAttributeField(`thresholds.data.${id}.max`, updates);
     },
-    [thresholds.data, updateAttribute, lastId, setLastId]
+    [updateAttribute, lastId, setLastId]
   );
 
   const handleBlur = useCallback(() => {
@@ -64,8 +62,8 @@ const AttributeThresholds = () => {
     const newOrder = [...thresholds.order].sort((a, b) => {
       return thresholdsClone[a].max - thresholdsClone[b].max;
     });
-    updateAttribute('thresholds', thresholdsClone);
-    updateAttribute('thresholdsOrder', newOrder);
+    updateAttribute('thresholds.data', thresholdsClone);
+    updateAttribute('thresholds.order', newOrder);
     if (changes) {
       changes.forEach((change) => {
         debouncedShowSnackbar(change, 'warning');
@@ -79,8 +77,9 @@ const AttributeThresholds = () => {
     debouncedShowSnackbar,
   ]);
 
-  const handleThresholdNameChange = (value, { id }) => {
-    updateAttribute(`thresholds.${id}.name`, value);
+  const handleThresholdNameChange = (updates, { id }) => {
+    updateAttribute(`thresholds.data.${id}.name`, updates);
+    validateAttributeField(`thresholds.data.${id}.name`, updates);
   };
 
   const recommendThresholdValue = (thresholds) => {
@@ -157,11 +156,11 @@ const AttributeThresholds = () => {
     (id) => {
       let updatedThresholds = { ...thresholds.data };
       delete updatedThresholds[id];
-      updateAttribute('thresholds', updatedThresholds);
+      updateAttribute('thresholds.data', updatedThresholds);
 
       const order = thresholds.order;
       const newOrder = order.filter((item) => item !== id);
-      updateAttribute('thresholdsOrder', newOrder);
+      updateAttribute('thresholds.order', newOrder);
 
       // const updatedPlaceholders = redistributePlaceholders(thresholds);
       // setPlaceholders(updatedPlaceholders);
@@ -170,15 +169,15 @@ const AttributeThresholds = () => {
       // Remove the error from the store
       const newErrors = { ...errors };
       delete newErrors[id];
-      validateAttributeField('thresholds', newErrors);
+      validateAttributeField('thresholds.errors', newErrors);
     },
     [thresholds.data, errors]
   );
 
   const handleAdd = () => {
-    if (thresholds.length >= 100) {
+    if (thresholds.order.length >= 15) {
       showSnackbar(
-        "Congrats on clicking at least 94 times! 100 is the limit, friend. Hope that's enough!",
+        "Congrats on clicking at least 9 times! 15 is the limit, friend. Hope that's enough!",
         'info'
       );
       confetti({
@@ -196,20 +195,16 @@ const AttributeThresholds = () => {
       name: '',
       max: recommendThresholdValue(thresholds),
     };
-    // const updatedPlaceholders = redistributePlaceholders(updatedThresholds);
-    // setPlaceholders(updatedPlaceholders);
-    // updatedThresholds = updateThresholdsWithPlaceholders(updatedThresholds);
-    console.log(updatedThresholds);
     const newOrder = [...thresholds.order, id];
     newOrder.sort(
       (a, b) => updatedThresholds[a].max - updatedThresholds[b].max
     );
-    updateAttribute('thresholdsOrder', newOrder);
-    updateAttribute('thresholds', updatedThresholds);
+    updateAttribute('thresholds.order', newOrder);
+    updateAttribute('thresholds.data', updatedThresholds);
 
     validateAttributeField(`thresholds.${id}`, {
-      name: 'Threshold name must be at least 3 characters.',
-      max: 'Threshold max must be between 1 and 100.',
+      name: null,
+      max: null,
     });
   };
 

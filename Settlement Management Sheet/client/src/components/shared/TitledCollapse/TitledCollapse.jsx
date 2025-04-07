@@ -23,6 +23,7 @@ const CustomCollapse = ({
   PreviewComponent,
   previewProps,
   boxSx,
+  ...props
 }) => {
   return (
     <Box sx={{ width: '100%', borderRadius: 4, ...boxSx }}>
@@ -51,6 +52,7 @@ const CustomCollapse = ({
             fontWeight: 'bold',
             width: '100%',
             color: color || 'inherit',
+            ...props.titleSx,
           }}
         >
           {title}

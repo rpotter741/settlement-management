@@ -1,12 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 // Base Selectors
-export const selectAllCategories = (state) =>
-  state.categories.allIds.map((id) => state.categories.byId[id]);
+const category = (state) => state.categories;
+export const selectAllCategories = createSelector([category], (state) =>
+  state.allIds.map((id) => state.byId[id])
+);
+
 export const selectCategoryIds = (state) => state.categories.allIds;
 export const selectEditCategory = (state) => state.categories.edit;
 export const selectCategoryById = (id) => (state) => state.categories.byId[id];
 export const selectCategoryErrors = (state) => state.validation.category;
+export const selectCategoryId = (state) => state.selection.category;
 
 // Dynamic Error Selector Factory
 const createErrorSelector = (errorField) =>
@@ -16,8 +20,8 @@ const createErrorSelector = (errorField) =>
 export const selectMetadata = createSelector(
   [selectEditCategory],
   (category) => ({
-    name: category.name,
-    description: category.description,
+    name: category?.name,
+    description: category?.description,
   })
 );
 
@@ -32,25 +36,32 @@ export const selectMetadataErrors = createSelector(
 //
 export const selectAttributes = createSelector(
   [selectEditCategory],
-  (category) => category.attributes
+  (category) => category?.attributes
 );
 
 export const selectThresholds = createSelector(
   [selectEditCategory],
-  (category) => category.thresholds
+  (category) => category?.thresholds
 );
 
 export const selectThresholdErrors = createErrorSelector('thresholds');
 
 export const selectDependencies = createSelector(
   [selectEditCategory],
-  (category) => category.dependencies
+  (category) => category?.dependencies
 );
 
 export const selectDependenciesErrors = createErrorSelector('dependencies');
 
+// active category
+export const selectCategory = createSelector(
+  [selectCategoryId, (state) => state.categories.byId],
+  (catId, categoriesById) => categoriesById[catId] || null
+);
+
 export const categorySelectors = {
   base: {
+    current: selectCategory,
     edit: selectEditCategory,
     errors: selectCategoryErrors,
     allIds: selectCategoryIds,
@@ -61,7 +72,7 @@ export const categorySelectors = {
     main: selectMetadata,
     errors: selectMetadataErrors,
   },
-  selectAttributes,
+  attributes: selectAttributes,
   thresholds: {
     main: selectThresholds,
     errors: selectThresholdErrors,

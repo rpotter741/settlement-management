@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
+// redux
+import { useDispatch } from 'react-redux';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import {
   initializeAttribute,
@@ -9,20 +10,32 @@ import {
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import { selectKey, selectTool } from 'features/selection/selectionSlice.js';
 
+// validation
 import {
   initializeValidation,
   getErrorCount,
   validateTool,
 } from 'features/validation/validationSlice.js';
 
-import { Box, Button, Typography, Modal } from '@mui/material';
+import queryClient from 'context/QueryClient.js';
+import api from 'services/interceptor.js';
 
+// mui components
+import { Box, Typography, Modal } from '@mui/material';
+
+// custom components
 import IconSelector from 'components/shared/IconSelector/IconSelector.jsx';
 import EditAttribute from './EditAttribute.jsx';
 import PreviewAttribute from './PreviewAttribute.jsx';
 import checklistContent from '../../helpers/attributeChecklist.js';
-
 import ValidationChecklist from 'components/shared/ValidationChecklist/ValidationChecklist.jsx';
+import DesktopMenu from 'components/shared/ToolMenu/DesktopMenu.jsx';
+import LoadAttribute from './LoadAttribute.jsx';
+import MobileMenu from 'components/shared/ToolMenu/MobileMenu.jsx';
+
+// axios imports
+import saveAttributeAPI from '../../helpers/saveAttributeAPI.js';
+import publishAttributeAPI from '../../helpers/publishAttributeAPI.js';
 
 const CreateAttribute = () => {
   const {
@@ -35,31 +48,32 @@ const CreateAttribute = () => {
   } = useAttribute();
   const { showSnackbar } = useSnackbar();
   const [editMode, setEditMode] = useState(false);
-  const [localAttr, setLocalAttr] = useState(null);
   const [showModal, setShowModal] = useState(null);
   const [expanded, setExpanded] = useState(false);
-  const [errorCount, setErrorCount] = useState(0);
+  const [errorCount, setErrorCount] = useState(undefined);
   const [firstRender, setFirstRender] = useState(true);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log(attribute);
-  }, [attribute]);
-
-  useEffect(() => {
     dispatch(selectTool('attribute'));
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    setErrorCount(getErrorCount(errors));
-  }, [errors]);
+    const count = getErrorCount(errors);
+    setErrorCount(count);
+    if (attribute) {
+      if (count === 0 && !attribute.isValid) {
+        updateAttribute('isValid', true);
+      } else if (count > 0 && attribute.isValid) {
+        updateAttribute('isValid', false);
+      }
+    }
+  }, [errors, attribute]);
 
   // if no active attr, create a new one
   useEffect(() => {
-    console.log(attribute);
     if (!attribute) {
-      setEditMode(true);
       dispatch(initializeAttribute());
     }
   }, [attribute, dispatch]);
@@ -74,15 +88,31 @@ const CreateAttribute = () => {
 
   useEffect(() => {
     if (attribute) {
-      setLocalAttr(attribute);
-      dispatch(initializeEdit({ id: attribute.id }));
+      dispatch(initializeEdit({ refId: attribute.refId }));
       dispatch(initializeValidation({ tool: 'attribute', obj: attribute }));
     }
   }, [attribute]);
 
   useEffect(() => {
+    if (attribute) {
+      dispatch(
+        validateTool({
+          tool: 'attribute',
+          fields: [
+            'name',
+            'description',
+            'balance',
+            'thresholds',
+            'settlementPointCost',
+          ],
+          refObj: attribute,
+        })
+      );
+    }
+  }, [attribute]);
+
+  useEffect(() => {
     if (Object.keys(editAttribute).length > 0 && firstRender) {
-      console.log('initial validation');
       dispatch(
         validateTool({
           tool: 'attribute',
@@ -110,31 +140,65 @@ const CreateAttribute = () => {
     updateAttribute('iconColor', iconColor);
   };
 
-  const handleCancelLoad = () => {
-    if (editMode) {
+  const handleCancel = () => {
+    setEditMode(false);
+  };
+
+  const handleLoad = () => {
+    setShowModal('Load Attribute');
+  };
+
+  const handleSave = async () => {
+    try {
+      showSnackbar('Saving...', 'info');
+      const response = await saveAttributeAPI(editAttribute);
+      saveEditAttribute(attribute);
       setEditMode(false);
-      dispatch(initializeValidation({ tool: 'attribute', obj: attr }));
-    } else {
-      console.log('Load attribute');
+      showSnackbar(response.message, 'success');
+    } catch (error) {
+      showSnackbar(error.message, 'error');
     }
   };
 
-  const handleSaveEdit = () => {
-    if (editMode) {
-      if (errorCount > 0) {
-        showSnackbar('Please correct the errors on the form.', 'error');
-        setExpanded(true);
-        //enable validation errors to be pulled out on button press again
-        setTimeout(() => setExpanded(false), 1000);
-        return;
-      } else {
-        console.log('teeest');
-        setEditMode(false);
-        saveEditAttribute(attribute);
-      }
-    } else {
-      setEditMode(true);
+  const handlePublish = async () => {
+    try {
+      showSnackbar('Publishing...', 'info');
+      const response = await publishAttributeAPI(editAttribute);
+      showSnackbar(response.message, 'success');
+    } catch (error) {
+      showSnackbar(error.message, 'error');
     }
+  };
+
+  const prefetchAttributes = () => {
+    // prefetch
+    queryClient.prefetchQuery({
+      queryKey: ['attributes', 'personal', ''],
+      queryFn: async () => {
+        const { data } = await api.get(`/attributes/personal`, {
+          params: { limit: 10, offset: pageParam, search },
+        });
+        return data;
+      },
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['attributes', 'personal', ''],
+      queryFn: async () => {
+        const { data } = await api.get(`/attributes/community`, {
+          params: { limit: 10, offset: pageParam, search },
+        });
+        return data;
+      },
+    });
+  };
+
+  const buttonActions = {
+    edit: () => setEditMode(true),
+    save: () => handleSave(),
+    load: () => handleLoad(),
+    loadHover: () => prefetchAttributes(),
+    cancel: () => handleCancel(),
+    publish: () => handlePublish(),
   };
 
   if (!attribute) {
@@ -152,10 +216,11 @@ const CreateAttribute = () => {
           width: ['100%'],
           position: 'relative',
           height: '100%',
+          mb: 4,
         }}
       >
-        {/* form preview */}
-        {editMode && attribute && (
+        {/* validation checklist baby */}
+        {errorCount !== undefined && attribute && (
           <Box
             sx={{
               position: 'absolute',
@@ -182,7 +247,7 @@ const CreateAttribute = () => {
             justifyContent: 'start',
             flexDirection: 'column',
             alignItems: 'center',
-            p: 4,
+            px: 4,
             mb: 2,
             overflowY: 'scroll',
             overflowX: 'show',
@@ -195,46 +260,42 @@ const CreateAttribute = () => {
             height: '100%',
           }}
         >
-          <Button
-            variant="contained"
+          <Box
             sx={{
-              position: 'absolute',
-              top: 24,
-              right: 32,
-              backgroundColor: editMode ? 'primary.main' : 'accent.main',
-              color: editMode ? 'common.white' : 'text.primary',
-            }}
-            onClick={() => {
-              handleCancelLoad();
-            }}
-          >
-            {editMode ? 'Cancel Edit' : 'Load Attribute'}
-          </Button>
-          <Button
-            variant="contained"
-            sx={{
-              position: 'absolute',
-              top: 24,
-              left: 32,
-              backgroundColor: editMode ? 'success.main' : 'info.main',
-            }}
-            onClick={() => handleSaveEdit()}
-          >
-            {editMode ? 'Save Attribute' : 'Edit Attribute'}
-          </Button>
-          <Typography
-            variant="h4"
-            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               width: '100%',
-              textAlign: 'center',
-              gridColumn: 'span 3',
-              color: 'primary.main',
-              mt: 4,
-              mb: 8,
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              pt: 4,
+              backgroundColor: 'background.paper',
+              borderBottom: '1px solid',
+              borderColor: 'dividerDark',
             }}
           >
-            CUSTOM ATTRIBUTE
-          </Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                width: '100%',
+                textAlign: 'center',
+                gridColumn: 'span 3',
+                color: 'primary.main',
+                mt: 4,
+                mb: 4,
+              }}
+            >
+              CUSTOM ATTRIBUTE
+            </Typography>
+            <DesktopMenu
+              mode={editMode}
+              tool="Attribute"
+              isValid={errorCount === 0}
+              actions={buttonActions}
+            />
+          </Box>
           <Modal open={showModal !== null} onClose={() => setShowModal(null)}>
             <Box
               sx={{
@@ -248,6 +309,7 @@ const CreateAttribute = () => {
                 boxShadow: 24,
                 p: 4,
                 borderRadius: 4,
+                ml: 1,
               }}
             >
               {showModal === 'Change Icon' && (
@@ -257,6 +319,9 @@ const CreateAttribute = () => {
                   setColor={handleIconColorChange}
                   onConfirm={handleIconUpdate}
                 />
+              )}
+              {showModal === 'Load Attribute' && (
+                <LoadAttribute setShowModal={setShowModal} />
               )}
             </Box>
           </Modal>
@@ -269,15 +334,9 @@ const CreateAttribute = () => {
             }}
           >
             {editMode ? (
-              <EditAttribute
-                attr={localAttr}
-                setAttr={setLocalAttr}
-                setShowModal={setShowModal}
-                errors={errors}
-                setErrors={() => {}}
-              />
+              <EditAttribute setShowModal={setShowModal} />
             ) : (
-              <PreviewAttribute attr={localAttr} />
+              <PreviewAttribute />
             )}
           </Box>
         </Box>

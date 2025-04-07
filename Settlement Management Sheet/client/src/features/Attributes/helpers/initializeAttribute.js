@@ -6,52 +6,46 @@ function initializeAttribute() {
 
   // Generate thresholds
   const maxThresholds = [9, 29, 49, 69, 84, 99, 100];
-  const thresholds = {};
-  const thresholdsOrder = maxThresholds.map((max) => {
+  const thresholds = {
+    data: {},
+    order: [],
+  };
+  thresholds.order = maxThresholds.map((max) => {
     const id = newId();
-    thresholds[id] = { name: '', max };
+    thresholds.data[id] = { name: '', max };
     return id;
   });
 
   // Generate settlementPointCost
-  const settlementPointCost = {};
-  const settlementPointCostOrder = [];
+  const settlementPointCost = {
+    data: {},
+    order: [],
+  };
   const defaultSettlementPointCostId = newId();
-  settlementPointCost[defaultSettlementPointCostId] = {
+  settlementPointCost.data[defaultSettlementPointCostId] = {
     name: 'default',
     value: 1,
   };
-  settlementPointCostOrder.push(defaultSettlementPointCostId);
+  settlementPointCost.order = [defaultSettlementPointCostId];
 
   // Return the generated object
   return {
-    id: tempId,
+    refId: tempId,
     name: '',
     description: '',
-    gameState: {
-      current: 0,
-      max: 0,
-      bonus: 0,
-    },
     balance: {
       maxPerLevel: 0,
       healthPerLevel: 0,
       costPerLevel: 0,
     },
     thresholds,
-    thresholdsOrder,
     settlementPointCost,
-    settlementPointCostOrder,
     icon: { ...iconList[0] },
     iconColor: '#000000',
     tags: [],
     isValid: false,
-    status: 'draft',
-    credits: {
-      createdBy: '',
-      updatedAt: null,
-      createdAt: new Date().toISOString(),
-    },
+    status: 'DRAFT',
+    createdBy: '',
   };
 }
 

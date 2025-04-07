@@ -45,7 +45,14 @@ const Icon = ({
 
   // Default to box mode
   return (
-    <Box sx={{ display: 'inline-block', p: 1 }}>
+    <Box
+      sx={{
+        display: 'inline-block',
+        p: 1,
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox={viewBox}

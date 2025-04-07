@@ -34,7 +34,10 @@ const AttrMetaData = ({ setShowModal }) => {
         <Typography variant="h6">Icon</Typography>
         <Button
           onClick={() => setShowModal('Change Icon')}
-          sx={{ boxShadow: 4, borderRadius: 4 }}
+          sx={{
+            boxShadow: 4,
+            borderRadius: 4,
+          }}
         >
           <CustomIcon
             viewBox={attr?.icon?.viewBox || '0 0 664 512'}
