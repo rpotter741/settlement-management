@@ -3,8 +3,6 @@ import { useRef, useState, useEffect } from 'react';
 import ActionsButton from './ActionsButton.jsx';
 import {
   TableContainer,
-  Table,
-  TableBody,
   TableRow,
   TableCell,
   Paper,
@@ -27,6 +25,7 @@ const TableList = ({
   isFetchingNextPage,
   onSearch,
   onActionClick,
+  checkbox = false,
   infiniteScroll = true,
   options = [],
 }) => {
@@ -39,6 +38,17 @@ const TableList = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
+  const [selected, setSelected] = useState([]);
+
+  const onCheckboxChange = (id) => {
+    setSelected((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
 
   useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage) return;
@@ -108,12 +118,19 @@ const TableList = ({
         )}
         {type === 'personal' && <Box sx={{ flex: 1, p: 2 }}>{row.status}</Box>}
         <Box sx={{ flex: 0.5, textAlign: 'end' }}>
-          <ActionsButton
-            options={options}
-            onActionClick={onActionClick}
-            refId={row.refId}
-            id={row.id}
-          />
+          {!checkbox ? (
+            <ActionsButton
+              options={options}
+              onActionClick={onActionClick}
+              refId={row.refId}
+              id={row.id}
+            />
+          ) : (
+            <Checkbox
+              onChange={() => onCheckboxChange(row.id)}
+              checked={selected.includes(row.id)}
+            />
+          )}
         </Box>
         {expandedRow === row.refId && (
           <Box>
