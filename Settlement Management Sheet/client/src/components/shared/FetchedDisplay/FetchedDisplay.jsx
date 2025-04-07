@@ -16,11 +16,11 @@ const FetchedDisplay = ({
   maxSelections = 6,
   selected,
   setSelected,
+  displayName = capitalize(tool),
 }) => {
   const [myTools, setMyTools] = useState(true);
   const [myData, setMyData] = useState([]);
   const [search, setSearch] = useState('');
-  const [displayName, setDisplayName] = useState(capitalize(tool));
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     usePaginatedTool({
@@ -38,6 +38,15 @@ const FetchedDisplay = ({
       setMyData(cachedData.pages.flatMap((page) => page.items));
     }
   }, [data, type, search]);
+
+  const onDelete = async (e, id) => {
+    e.stopPropagation();
+    try {
+      setMyData((prev) => prev.filter((item) => item.refId !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
+  };
 
   return (
     <TitledCollapse
@@ -58,6 +67,7 @@ const FetchedDisplay = ({
         isFetchingNextPage={isFetchingNextPage}
         onSearch={setSearch}
         onActionClick={onActionClick}
+        onDelete={onDelete}
         type={type}
         checkbox={selectionMode}
         selected={selected}

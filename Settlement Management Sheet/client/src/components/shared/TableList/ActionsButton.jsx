@@ -2,8 +2,8 @@ import React from 'react';
 
 import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@mui/material';
 
-const ActionsButton = (props) => {
-  const { onActionClick, refId, id, options } = props;
+const ActionsButton = React.memo((props) => {
+  const { onActionClick, refId, id, options, onDelete } = props;
 
   return (
     <SpeedDial
@@ -25,13 +25,23 @@ const ActionsButton = (props) => {
           key={option.name}
           icon={option.icon}
           tooltipTitle={option.name}
-          onClick={(e) => {
-            onActionClick(e, option.name, { refId, id });
+          onClick={async (e) => {
+            e.stopPropagation();
+            if (option.name === 'delete') {
+              try {
+                await onActionClick(e, option.name, { refId, id }); // do the actual delete
+                onDelete(e, refId); // only remove from local state after success
+              } catch (error) {
+                console.error('Failed to delete:', error);
+              }
+            } else {
+              onActionClick(e, option.name, { refId, id });
+            }
           }}
         />
       ))}
     </SpeedDial>
   );
-};
+});
 
 export default ActionsButton;

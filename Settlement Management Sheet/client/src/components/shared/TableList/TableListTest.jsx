@@ -25,6 +25,7 @@ const TableList = ({
   isFetchingNextPage,
   onSearch,
   onActionClick,
+  onDelete,
   checkbox = false,
   selected,
   setSelected,
@@ -51,6 +52,17 @@ const TableList = ({
       }
     });
   };
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.resetAfterIndex(0, true);
+  }, [
+    rows,
+    search,
+    contentTypeFilter,
+    statusFilter,
+    createdByFilter,
+    tagFilter,
+  ]);
 
   useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage) return;
@@ -98,7 +110,7 @@ const TableList = ({
     return (
       <Box
         ref={isLastItem ? loadMoreRef : null}
-        key={row.id}
+        key={row.refId}
         onClick={() => toggleExpand(row.refId, index)}
         sx={{
           display: 'flex',
@@ -107,7 +119,11 @@ const TableList = ({
           borderBottom: '1px solid',
           borderColor: 'secondary.main',
           cursor: 'pointer',
-          '&:hover': { backgroundColor: 'background.default' },
+          '&:hover': {
+            backgroundColor: 'background.default',
+            borderTop: '1px solid',
+            boxSizing: 'border-box',
+          },
         }}
         style={style} // Ensure virtualization works properly
       >
@@ -126,6 +142,7 @@ const TableList = ({
               onActionClick={onActionClick}
               refId={row.refId}
               id={row.id}
+              onDelete={onDelete}
             />
           ) : (
             <Checkbox
@@ -139,9 +156,12 @@ const TableList = ({
         </Box>
         {expandedRow === row.refId && (
           <Box>
-            <Box colSpan={4}>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <Box
-                sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}
+                sx={{
+                  borderRadius: 1,
+                  width: '85%',
+                }}
               >
                 <Typography variant="body2">{row.description}</Typography>
                 <Typography variant="caption">
@@ -334,6 +354,7 @@ const TableList = ({
       <Box sx={{ minWidth: 650 }} aria-label="attributes table">
         <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
           <List
+            key={filteredRows.length}
             ref={listRef}
             height={500}
             itemCount={filteredRows.length}

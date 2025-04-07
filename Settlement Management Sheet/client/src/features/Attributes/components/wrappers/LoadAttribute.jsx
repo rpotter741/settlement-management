@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
+import useServer from 'services/useServer.js';
 
 import { Box, Typography, Button } from '@mui/material';
 
@@ -22,7 +23,7 @@ const options = [
 import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
 const LoadAttribute = ({ setShowModal }) => {
-  const { addAlert } = useSnackbar();
+  const { showSnackbar } = useSnackbar();
   const { loadAttribute } = useAttribute();
 
   const ActionClick = (e, action, { refId, id }) => {
@@ -34,7 +35,19 @@ const LoadAttribute = ({ setShowModal }) => {
           setShowModal(null);
         };
       case 'Delete':
-        return () => {};
+        return async () => {
+          try {
+            showSnackbar('Deleting...', 'info');
+            await useServer({
+              tool: 'attribute',
+              type: 'delete',
+              data: { refId, id },
+            });
+            showSnackbar('Deleted successfully', 'success');
+          } catch (error) {
+            showSnackbar(error.message, 'error');
+          }
+        };
       default:
         return;
     }

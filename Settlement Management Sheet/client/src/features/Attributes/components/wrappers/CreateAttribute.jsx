@@ -37,6 +37,8 @@ import MobileMenu from 'components/shared/ToolMenu/MobileMenu.jsx';
 import saveAttributeAPI from '../../helpers/saveAttributeAPI.js';
 import publishAttributeAPI from '../../helpers/publishAttributeAPI.js';
 
+import useServer from 'services/useServer.js';
+
 const CreateAttribute = () => {
   const {
     attribute,
@@ -151,7 +153,11 @@ const CreateAttribute = () => {
   const handleSave = async () => {
     try {
       showSnackbar('Saving...', 'info');
-      const response = await saveAttributeAPI(editAttribute);
+      const response = await useServer({
+        tool: 'attribute',
+        type: 'save',
+        data: { ...editAttribute },
+      });
       saveEditAttribute(attribute);
       setEditMode(false);
       showSnackbar(response.message, 'success');

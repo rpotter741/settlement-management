@@ -5,13 +5,17 @@ const useServer = async ({ tool, type, data }) => {
 
   const actions = {
     save: () =>
-      api.post(`/${tool}/save`, {
-        ...data,
-        contentType: 'OFFICIAL',
-        createdBy: 'Admin',
+      api.post(`/tools/${tool}/save`, {
+        data: {
+          ...data,
+          contentType: 'OFFICIAL',
+          createdBy: 'Admin',
+        },
+        tool,
       }),
-    publish: () => api.post(`/${tool}/publish`, { refId, id }),
-    delete: () => api.post(`/${tool}/delete`, { refId }),
+    publish: () =>
+      api.post(`/tools/${tool}/publish`, { data: { refId, id }, tool }),
+    delete: () => api.post(`/tools/${tool}/delete`, { refId, tool }),
   };
 
   try {
