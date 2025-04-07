@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
@@ -22,6 +21,7 @@ const options = [
 
 import PersonalAttributes from '../forms/PersonalAttributes.jsx';
 import CommunityAttributes from '../forms/CommunityAttributes.jsx';
+import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
 const LoadAttribute = ({ setShowModal }) => {
   const { addAlert } = useSnackbar();
@@ -52,10 +52,17 @@ const LoadAttribute = ({ setShowModal }) => {
       <Typography variant="h4" gutterBottom textAlign="center">
         LOAD ATTRIBUTE
       </Typography>
-      <PersonalAttributes onActionClick={handleActionClick} options={options} />
-      <CommunityAttributes
+      <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
+        type="personal"
+        tool="attributes"
+      />
+      <FetchedDisplay
+        onActionClick={handleActionClick}
+        options={options}
+        type="community"
+        tool="attributes"
       />
     </Box>
   );
