@@ -19,8 +19,6 @@ const options = [
   { name: 'Favorite', icon: <HeartFill /> },
 ];
 
-import PersonalAttributes from '../forms/PersonalAttributes.jsx';
-import CommunityAttributes from '../forms/CommunityAttributes.jsx';
 import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
 const LoadAttribute = ({ setShowModal }) => {
