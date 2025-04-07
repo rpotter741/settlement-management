@@ -26,6 +26,9 @@ const TableList = ({
   onSearch,
   onActionClick,
   checkbox = false,
+  selected,
+  setSelected,
+  maxSelections,
   infiniteScroll = true,
   options = [],
 }) => {
@@ -38,7 +41,6 @@ const TableList = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
-  const [selected, setSelected] = useState([]);
 
   const onCheckboxChange = (id) => {
     setSelected((prev) => {
@@ -129,6 +131,9 @@ const TableList = ({
             <Checkbox
               onChange={() => onCheckboxChange(row.id)}
               checked={selected.includes(row.id)}
+              disabled={
+                selected.length >= maxSelections && !selected.includes(row.id)
+              }
             />
           )}
         </Box>

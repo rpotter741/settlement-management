@@ -7,7 +7,16 @@ import capitalize from 'utility/capitalize.js';
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableListTest from 'components/shared/TableList/TableListTest.jsx';
 
-const FetchedDisplay = ({ onActionClick, options, type, tool }) => {
+const FetchedDisplay = ({
+  onActionClick,
+  options,
+  type,
+  tool,
+  selectionMode = false,
+  maxSelections = 6,
+  selected,
+  setSelected,
+}) => {
   const [myTools, setMyTools] = useState(true);
   const [myData, setMyData] = useState([]);
   const [search, setSearch] = useState('');
@@ -50,6 +59,10 @@ const FetchedDisplay = ({ onActionClick, options, type, tool }) => {
         onSearch={setSearch}
         onActionClick={onActionClick}
         type={type}
+        checkbox={selectionMode}
+        selected={selected}
+        setSelected={setSelected}
+        maxSelections={maxSelections}
       />
     </TitledCollapse>
   );
