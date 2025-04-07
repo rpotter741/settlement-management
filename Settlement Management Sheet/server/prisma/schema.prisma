@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentTypes {
+  OFFICIAL
+  CUSTOM
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/////////////////// ATTRIBUTE //////////////////////
+
+model Attribute {
+  id                  String    @id @default(uuid())
+  refId               String    // ID for versioning or app-level tracking
+  name                String
+  description         String
+  balance             Json
+  thresholds          Json
+  settlementPointCost Json
+  icon                Json
+  iconColor           String
+  tags                String[]  // Array of strings for tags
+  isValid             Boolean
+  status              Status
+  contentType         ContentTypes // for separating official from custom content
+  createdBy           String    // Potential foreign key to User model in the future
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([contentType])
+  @@index([tags])
+  @@index([refId, updatedAt(sort: Desc)])
+}
+
+
+////////////////// CATEGORY //////////////////////////
+
+model Category {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  attributes   Json
+  thresholds   Json
+  dependencies Json
+  tags         String[]
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([contentType])
+  @@index([tags])
+  @@index([refId, updatedAt(sort: Desc)])
+}
+
+////////////////// EVENT //////////////////////////
+
+model Event {
+  id          String @id @default(uuid())
+  refId       String
+  name        String
+  description String
+  flavorText  Json
+  phases      Json
+  resolutions Json
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  //flavorText:
+    //trivial: string,
+    //minor: string,
+    //...
+    //significant: string
+
+  //phases:
+    //[
+    //  {
+    //    type: 'active / immediate / passive / indefinite'
+    //    impact: see-below,
+    //    length: 0+,
+    //    productivity: 0+,
+    //  },
+    //]
+
+  //resolutions:
+    //[
+      //{
+        //uuid():
+          //{
+            //name:
+            //description:
+            //impact:
+          //}
+      //}
+    //]
+}
+
+////////////////// LISTENER //////////////////////////
+
+model Listener {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  conditions   Json
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  //conditions:
+    //array of logic objects, eg:
+    //  [
+    //    {
+      //    logic: 'none',
+       //   condition: {
+       //     attribute_base_id: value
+       //   }
+       // },
+       // {
+        //  logic: 'and',
+         // condition: {
+          //  attribute_base_id: value,
+           // attribute_base_id: value,
+         // }
+       // }
+     // ]
+}
+
+////////////////// STATUS //////////////////////////
+enum StatusType {
+  Weather
+  Morale
+}
+
+model GameStatus {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  type         StatusType
+  steps        Json
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+////////////////// BUILDING //////////////////////////
+
+model Building {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  upgrades     Json
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  //upgrades:
+    //upgrade_base_id
+    //upgrade_ref_id
+}
+
+////////////////// UPGRADE //////////////////////////
+enum UpgradeType {
+  Settlement
+  Leadership
+  Building
+}
+
+model Upgrade {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  impact       Json
+  ability      String
+  upgradeType  UpgradeType
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  //impact:
+    //attribute_base_id: value
+  //ability:
+    //description of skill. eg, 'Adaptive Resources: If losing an attribute in one category, you can spend from another at a 1:1 settlement point cost ratio. E.g., if losing 3 food, you could lose 1 medical supply instead. Once per turn.'
+}
+
+////////////////// TRADE HUB //////////////////////////
+
+model TradeHub {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  region       String
+  location     String @default("None")
+  stock        Json
+  trend        Json
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // region pulls from narrative data
+  // location pulls from narrative data
+  // stock:
+    // attribute_base_id
+    // attribute name
+    // number
+  // trend: tuple (eg, -1, 1) for weekly loss/gain limit (0, 2) would be increasing, (-5, -2) would be decreasing
+}
+
+////////////////// SETTLEMENT TYPE //////////////////////////
+
+model SettlementType {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  description  String
+  upgrades     String[]
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+////////////////// SETTLEMENT //////////////////////////
+
+model Settlement {
+  id            String @id @default(uuid())
+  refId         String
+  name          String
+  stats         Json
+  pop           Json
+  categories    Json
+  eventLog      Json
+  narrativeData String // foreign key later
+  isValid       Boolean
+  contentType   ContentTypes
+  createdBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  //stats includes:
+    // level
+    // health
+    // gold (currency?)
+    // calendar id
+
+  //pop includes:
+    // DM (array)
+    // players (array)
+    // residents (array)
+    // aristocrats (array)
+
+  //categories includes:
+    //category_refId:
+      // bonus
+      // attribute refId:
+        // current
+        // bonus
+
+  //eventLog includes:
+    // eventId keys:
+      // narrative data selections (array of details in [[description tag]] order)
+      // impacts
+      // dates (irl && calendar)
+}
+
+//////////////// LOCATION //////////////
+
+enum LocationType {
+  forest
+  mountain
+  plain
+  river
+  lake
+  ocean
+  ruin
+  mine
+  cave
+  poi
+}
+
+model Location {
+  id              String @id @default(uuid())
+  refId           String
+  name            String
+  description     String
+  eventRefs       String[]
+  linkedRegion    Region @relation(fields: [linkedRegionId], references: [id])
+  linkedRegionId  String
+  type            LocationType
+}
+
+/////////////// REGION ////////////////
+
+model Region {
+  id            String @id @default(uuid())
+  refId         String
+  name          String
+  description   String
+  locations     Location[]
+  contentType   ContentTypes
+  createdBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
