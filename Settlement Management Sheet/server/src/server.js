@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import requestLogger from './middleware/requestLogger.js';
 import userRouter from './routes/userRoutes.js';
+import toolRouter from './routes/toolRoutes.js';
 import attributeRouter from './routes/attributeRoutes.js';
 import prisma from './db/db.js';
 
@@ -25,6 +26,8 @@ app.use(requestLogger); // Log requests
 app.use(express.static(path.resolve(__dirname, '../public')));
 
 app.use('/user', userRouter);
+
+app.use('/tools', toolRouter);
 
 app.use('/attributes', attributeRouter);
 

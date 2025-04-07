@@ -11,7 +11,7 @@ const getUserAttributes = async (req, res) => {
         name: { contains: search, mode: 'insensitive' },
       },
       distinct: ['refId'],
-      orderBy: [{ refId: 'asc' }, { updatedAt: 'desc' }], // Get most recent version
+      orderBy: [{ updatedAt: 'desc' }], // Get most recent version
       take: parseInt(limit),
       skip: parseInt(offset),
       select: {
