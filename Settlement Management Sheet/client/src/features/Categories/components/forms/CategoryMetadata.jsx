@@ -1,14 +1,19 @@
 import React from 'react';
 import { useCategory } from '../../hooks/useCategory.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 
 import { DynamicForm } from '../../../../components/index.js';
 
 import categoryFields from '../../helpers/categoryFormData.js';
 
 const CategoryMetadata = () => {
-  const { editCategory, errors, updateCategory, validateCategoryField } =
-    useCategory();
-  const category = editCategory;
+  const {
+    edit: category,
+    errors,
+    updateTool: updateCategory,
+    validateToolField: validateCategoryField,
+  } = useTools('category');
+
   const handleUpdate = (updates, { keypath }) => {
     updateCategory(keypath, updates);
   };

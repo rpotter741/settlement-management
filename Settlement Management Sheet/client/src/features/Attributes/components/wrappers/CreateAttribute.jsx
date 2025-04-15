@@ -1,18 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 // redux
-import { useDispatch } from 'react-redux';
 import initializeAttribute from 'features/Attributes/helpers/initializeAttribute.js';
-import { initializeTool, initializeEdit } from '../../../../app/toolSlice.js';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
-import { selectKey, selectTool } from 'features/selection/selectionSlice.js';
-
-// validation
-import {
-  initializeValidation,
-  getErrorCount,
-  validateTool,
-} from 'features/validation/validationSlice.js';
 
 // mui components
 import { Box, Typography, Modal } from '@mui/material';
@@ -37,12 +27,14 @@ import prefetchToolContent from 'services/prefetchTools.js';
 //testing toolHook baby!
 import { useTools } from 'hooks/useTool.jsx';
 
+//testing initialize tool hook baby!
+import { useInitializeTool } from 'hooks/useInitializeTool.jsx';
+
 const CreateAttribute = () => {
   const {
     current: attribute,
     edit: editAttribute,
     allIds,
-    setCurrentTool,
     updateTool: updateAttribute,
     saveToolEdit: saveEditAttribute,
     errors,
@@ -54,85 +46,20 @@ const CreateAttribute = () => {
   const [errorCount, setErrorCount] = useState(undefined);
   const [firstRender, setFirstRender] = useState(true);
 
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(selectTool('attribute'));
-  }, []);
-
-  useEffect(() => {
-    const count = getErrorCount(errors);
-    setErrorCount(count);
-    if (attribute) {
-      if (count === 0 && !attribute.isValid) {
-        updateAttribute('isValid', true);
-      } else if (count > 0 && attribute.isValid) {
-        updateAttribute('isValid', false);
-      }
-    }
-  }, [errors, attribute]);
-
-  // if no active attr, create a new one
-  useEffect(() => {
-    if (!attribute) {
-      const initialData = initializeAttribute();
-      dispatch(initializeTool({ tool: 'attribute', data: initialData }));
-
-      setCurrentTool(initialData);
-    }
-  }, [attribute, dispatch]);
-
-  // if no active attr, select the newly created one
-  useEffect(() => {
-    if (!attribute && allIds.length > 0) {
-      const lastId = allIds[allIds.length - 1];
-      dispatch(selectKey({ key: 'attribute', value: lastId }));
-    }
-  }, [attribute, allIds, dispatch]);
-
-  useEffect(() => {
-    if (attribute) {
-      dispatch(initializeEdit({ refId: attribute.refId, tool: 'attribute' }));
-      dispatch(initializeValidation({ tool: 'attribute', obj: attribute }));
-    }
-  }, [attribute]);
-
-  useEffect(() => {
-    if (attribute) {
-      dispatch(
-        validateTool({
-          tool: 'attribute',
-          fields: [
-            'name',
-            'description',
-            'balance',
-            'thresholds',
-            'settlementPointCost',
-          ],
-          refObj: attribute,
-        })
-      );
-    }
-  }, [attribute]);
-
-  useEffect(() => {
-    if (Object.keys(editAttribute).length > 0 && firstRender) {
-      dispatch(
-        validateTool({
-          tool: 'attribute',
-          fields: [
-            'name',
-            'description',
-            'balance',
-            'thresholds',
-            'settlementPointCost',
-          ],
-          refObj: editAttribute,
-        })
-      );
-      setFirstRender(false);
-    }
-  }, [editAttribute]);
+  useInitializeTool({
+    tool: 'attribute',
+    allIds,
+    current: attribute,
+    errors,
+    initializeFn: initializeAttribute,
+    validationFields: [
+      'name',
+      'description',
+      'balance',
+      'thresholds',
+      'settlementPointCost',
+    ],
+  });
 
   const handleIconUpdate = (icon, color) => {
     updateAttribute('icon', icon);

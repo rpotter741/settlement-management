@@ -3,11 +3,12 @@ import React from 'react';
 import { Box, Button, Typography, Divider } from '@mui/material';
 
 import { useCategory } from '../../hooks/useCategory.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';
 
 const PreviewCategory = () => {
-  const { category } = useCategory();
+  const { current: category } = useTools('category');
   return (
     <Box
       sx={{

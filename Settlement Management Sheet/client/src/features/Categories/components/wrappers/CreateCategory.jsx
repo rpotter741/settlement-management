@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 // redux
 import { useDispatch } from 'react-redux';
-import { useCategory } from '../../hooks/useCategory.jsx';
-import {
-  initializeCategory,
-  initializeEdit,
-} from '../../state/categoriesSlice.js';
+import initializeCategory from 'features/Categories/helpers/initializeCategory.js';
+import { initializeTool, initializeEdit } from '../../../../app/toolSlice.js';
+import { useTools } from 'hooks/useTool.jsx';
+
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import { selectKey, selectTool } from 'features/selection/selectionSlice.js';
 
@@ -16,8 +15,6 @@ import {
   getErrorCount,
   validateTool,
 } from 'features/validation/validationSlice.js';
-import queryClient from 'context/QueryClient.js';
-import api from 'services/interceptor.js';
 
 // mui components
 import { Box, Typography, Modal } from '@mui/material';
@@ -38,19 +35,25 @@ const checklistContent = [];
 
 const CreateCategory = () => {
   const {
-    category,
+    current: category,
+    edit,
     allIds,
-    editCategory,
-    updateCategory,
-    saveEditCategory,
+    edit: editCategory,
+    updateTool: updateCategory,
+    saveEditTool: saveEditCategory,
     errors,
-  } = useCategory();
+    setCurrentTool,
+  } = useTools('category');
   const { showSnackbar } = useSnackbar();
   const [editMode, setEditMode] = useState(false);
   const [showModal, setShowModal] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [errorCount, setErrorCount] = useState(undefined);
   const [firstRender, setFirstRender] = useState(true);
+
+  useEffect(() => {
+    console.log('Category:', category);
+  }, [category]);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -71,7 +74,10 @@ const CreateCategory = () => {
 
   useEffect(() => {
     if (!category) {
-      dispatch(initializeCategory());
+      const initialData = initializeCategory();
+      console.log(initialData, 'initialData');
+      dispatch(initializeTool({ tool: 'category', data: initialData }));
+      setCurrentTool(initialData);
     }
   }, [category, dispatch]);
 
@@ -84,7 +90,7 @@ const CreateCategory = () => {
 
   useEffect(() => {
     if (category) {
-      dispatch(initializeEdit({ refId: category.refId }));
+      dispatch(initializeEdit({ refId: category.refId, tool: 'category' }));
       dispatch(initializeValidation({ tool: 'category', obj: category }));
     }
   }, [category, dispatch]);
@@ -101,31 +107,16 @@ const CreateCategory = () => {
     }
   }, [category, dispatch]);
 
-  useEffect(() => {
-    console.log(category);
-  }, [category]);
-
   const handleSave = async () => {
     try {
-      useServer({
+      const response = await useServer({
         tool: 'category',
         type: 'save',
-        data: {
-          ...category,
-          contentType: 'OFFICIAL',
-          createdBy: 'Admin',
-        },
-      })
-        .then((res) => {
-          showSnackbar('Category saved successfully', 'success');
-          saveEditCategory(category.refId);
-          setEditMode(false);
-          dispatch(initializeCategory());
-        })
-        .catch((error) => {
-          console.error('Error saving category:', error);
-          showSnackbar('Error saving category', 'error');
-        });
+        data: { ...edit },
+      });
+      saveEditCategory(edit.refId, true);
+      setEditMode(false);
+      showSnackbar(response.message, 'success');
     } catch (error) {
       showSnackbar('Error saving category', 'error');
     }
