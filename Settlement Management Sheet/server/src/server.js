@@ -29,8 +29,6 @@ app.use('/user', userRouter);
 
 app.use('/tools', toolRouter);
 
-app.use('/attributes', attributeRouter);
-
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../public/index.html'));
 });

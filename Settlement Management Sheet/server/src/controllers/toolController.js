@@ -94,6 +94,7 @@ const saveContent = async (req, res) => {
 const deleteContent = async (req, res) => {
   try {
     const { tool, refId } = req.body;
+    console.log(tool, refId);
 
     if (!tool || !refId) {
       return res.status(400).json({ message: 'Tool and refId are required.' });
@@ -105,11 +106,29 @@ const deleteContent = async (req, res) => {
     }
 
     await model.deleteMany({ where: { refId } });
-    return res.json({ message: 'Content deleted successfully.' });
+    console.log('we did it!');
+    return res.status(200).json({ message: 'Content deleted successfully.' });
   } catch (error) {
     console.error('Error deleting content:', error);
     return res.status(500).json({ message: 'Error deleting content.' });
   }
 };
 
-export { getContent, saveContent, deleteContent };
+const getItem = async (req, res) => {
+  try {
+    const { tool, id, refId } = req.query;
+    console.log(tool, id, refId);
+    const model = prisma[tool];
+    if (!model) {
+      return res.status(400).json({ message: 'Invalid tool type.' });
+    }
+    const item = await model.findUnique({ where: { id, refId } });
+    console.log(item);
+    res.json(item);
+  } catch (error) {
+    console.error('Error getting item:', error);
+    return res.status(500).json({ message: 'Error getting item.' });
+  }
+};
+
+export { getContent, saveContent, deleteContent, getItem };

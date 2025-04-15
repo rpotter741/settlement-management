@@ -6,11 +6,14 @@ import {
   getContent,
   saveContent,
   deleteContent,
+  getItem,
 } from '../controllers/toolController.js';
 
 const router = express.Router();
 
-router.get('/:tool/:scope', getContent);
+router.get('/content', getContent);
+
+router.get('/getItem', getItem);
 
 router.post('/:tool/save', saveContent);
 
