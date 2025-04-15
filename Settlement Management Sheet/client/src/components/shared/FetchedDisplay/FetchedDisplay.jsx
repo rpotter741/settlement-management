@@ -25,7 +25,7 @@ const FetchedDisplay = ({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     usePaginatedTool({
       tool: tool,
-      type: type,
+      scope: type,
       search,
     });
 
@@ -42,6 +42,12 @@ const FetchedDisplay = ({
   const onDelete = async (e, id) => {
     e.stopPropagation();
     try {
+      queryClient.setQueryData([tool, type, search], (oldData) => {
+        return {
+          ...oldData,
+          items: oldData.items.filter((item) => item.refId !== id),
+        };
+      });
       setMyData((prev) => prev.filter((item) => item.refId !== id));
     } catch (error) {
       console.error('Error deleting item:', error);

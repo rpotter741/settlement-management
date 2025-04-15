@@ -29,7 +29,10 @@ const ActionsButton = React.memo((props) => {
             e.stopPropagation();
             if (option.name === 'delete') {
               try {
-                await onActionClick(e, option.name, { refId, id }); // do the actual delete
+                await onActionClick(e, option.name, {
+                  refId,
+                  id,
+                }); // do the actual delete
                 onDelete(e, refId); // only remove from local state after success
               } catch (error) {
                 console.error('Failed to delete:', error);

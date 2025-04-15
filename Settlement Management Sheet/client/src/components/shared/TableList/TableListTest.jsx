@@ -43,7 +43,8 @@ const TableList = ({
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
 
-  const onCheckboxChange = (id) => {
+  const onCheckboxChange = (e, id) => {
+    e.stopPropagation();
     setSelected((prev) => {
       if (prev.includes(id)) {
         return prev.filter((item) => item !== id);
@@ -91,7 +92,7 @@ const TableList = ({
   );
 
   const getRowHeight = (index) =>
-    expandedRow === filteredRows[index].refId ? 120 : 50;
+    expandedRow === filteredRows[index].refId ? 175 : 50;
 
   const Row = ({ index, style }) => {
     const row = filteredRows[index];
@@ -124,6 +125,8 @@ const TableList = ({
             borderTop: '1px solid',
             boxSizing: 'border-box',
           },
+          flexWrap: 'wrap',
+          overflowY: 'scroll',
         }}
         style={style} // Ensure virtualization works properly
       >
@@ -146,7 +149,7 @@ const TableList = ({
             />
           ) : (
             <Checkbox
-              onChange={() => onCheckboxChange(row.id)}
+              onChange={(e) => onCheckboxChange(e, row.id)}
               checked={selected.includes(row.id)}
               disabled={
                 selected.length >= maxSelections && !selected.includes(row.id)
@@ -155,14 +158,9 @@ const TableList = ({
           )}
         </Box>
         {expandedRow === row.refId && (
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Box
-                sx={{
-                  borderRadius: 1,
-                  width: '85%',
-                }}
-              >
+          <Box sx={{ width: '85%', p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+              <Box>
                 <Typography variant="body2">{row.description}</Typography>
                 <Typography variant="caption">
                   Tags: {row.tags.join(', ')}
@@ -255,7 +253,7 @@ const TableList = ({
               <MenuItem value="" key="all">
                 All
               </MenuItem>
-              {Array.from(new Set(rows.map((row) => row.createdBy))).map(
+              {Array.from(new Set(rows.map((row) => row?.createdBy))).map(
                 (creator) => (
                   <MenuItem key={creator} value={creator}>
                     {creator}
@@ -275,12 +273,14 @@ const TableList = ({
             onChange={(e) => setTagFilter(e.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
-            {Array.from(new Set(rows.flatMap((row) => row.tags))).map((tag) => (
-              <MenuItem key={tag} value={tag}>
-                <Checkbox checked={tagFilter.includes(tag)} />
-                <ListItemText primary={tag} />
-              </MenuItem>
-            ))}
+            {Array.from(new Set(rows.flatMap((row) => row?.tags))).map(
+              (tag) => (
+                <MenuItem key={tag} value={tag}>
+                  <Checkbox checked={tagFilter.includes(tag)} />
+                  <ListItemText primary={tag} />
+                </MenuItem>
+              )
+            )}
           </Select>
         </FormControl>
         <Box

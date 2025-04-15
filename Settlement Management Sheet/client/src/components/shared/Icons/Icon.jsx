@@ -47,7 +47,6 @@ const Icon = ({
   return (
     <Box
       sx={{
-        display: 'inline-block',
         p: 1,
         display: 'flex',
         alignItems: 'center',

@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import confetti from 'canvas-confetti';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 import { useSnackbar } from '../../../../context/SnackbarContext.jsx';
 
 import { v4 as newId } from 'uuid';
@@ -22,13 +23,19 @@ const placeholderArray = [
 ];
 
 const AttributeThresholds = () => {
-  const { thresholds, updateAttribute, validateAttributeField } =
-    useAttribute();
+  const {
+    selectValue,
+    updateTool: updateAttribute,
+    validateToolField: validateAttributeField,
+    errors: thresholdErrors,
+  } = useTools('attribute');
+  const thresholds = selectValue('thresholds');
+  console.log(thresholds);
   const [placeholders, setPlaceholders] = useState(placeholderArray);
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
   const [lastId, setLastId] = useState(null);
-  const errors = thresholds.errors;
+  const errors = thresholdErrors.thresholds;
 
   const debouncedShowSnackbar = useCallback(
     debounce(

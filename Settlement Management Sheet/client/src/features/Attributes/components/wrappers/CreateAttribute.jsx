@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 // redux
 import { useDispatch } from 'react-redux';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
-import {
-  initializeAttribute,
-  initializeEdit,
-} from '../../state/attributeSlice.js';
+import initializeAttribute from 'features/Attributes/helpers/initializeAttribute.js';
+import { initializeTool, initializeEdit } from '../../../../app/toolSlice.js';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import { selectKey, selectTool } from 'features/selection/selectionSlice.js';
 
@@ -16,9 +13,6 @@ import {
   getErrorCount,
   validateTool,
 } from 'features/validation/validationSlice.js';
-
-import queryClient from 'context/QueryClient.js';
-import api from 'services/interceptor.js';
 
 // mui components
 import { Box, Typography, Modal } from '@mui/material';
@@ -34,20 +28,25 @@ import LoadAttribute from './LoadAttribute.jsx';
 import MobileMenu from 'components/shared/ToolMenu/MobileMenu.jsx';
 
 // axios imports
-import saveAttributeAPI from '../../helpers/saveAttributeAPI.js';
 import publishAttributeAPI from '../../helpers/publishAttributeAPI.js';
 
 import useServer from 'services/useServer.js';
 
+import prefetchToolContent from 'services/prefetchTools.js';
+
+//testing toolHook baby!
+import { useTools } from 'hooks/useTool.jsx';
+
 const CreateAttribute = () => {
   const {
-    attribute,
+    current: attribute,
+    edit: editAttribute,
     allIds,
-    editAttribute,
-    updateAttribute,
-    saveEditAttribute,
+    setCurrentTool,
+    updateTool: updateAttribute,
+    saveToolEdit: saveEditAttribute,
     errors,
-  } = useAttribute();
+  } = useTools('attribute');
   const { showSnackbar } = useSnackbar();
   const [editMode, setEditMode] = useState(false);
   const [showModal, setShowModal] = useState(null);
@@ -76,7 +75,10 @@ const CreateAttribute = () => {
   // if no active attr, create a new one
   useEffect(() => {
     if (!attribute) {
-      dispatch(initializeAttribute());
+      const initialData = initializeAttribute();
+      dispatch(initializeTool({ tool: 'attribute', data: initialData }));
+
+      setCurrentTool(initialData);
     }
   }, [attribute, dispatch]);
 
@@ -90,7 +92,7 @@ const CreateAttribute = () => {
 
   useEffect(() => {
     if (attribute) {
-      dispatch(initializeEdit({ refId: attribute.refId }));
+      dispatch(initializeEdit({ refId: attribute.refId, tool: 'attribute' }));
       dispatch(initializeValidation({ tool: 'attribute', obj: attribute }));
     }
   }, [attribute]);
@@ -152,13 +154,12 @@ const CreateAttribute = () => {
 
   const handleSave = async () => {
     try {
-      showSnackbar('Saving...', 'info');
       const response = await useServer({
         tool: 'attribute',
         type: 'save',
         data: { ...editAttribute },
       });
-      saveEditAttribute(attribute);
+      saveEditAttribute(editAttribute.refId, true);
       setEditMode(false);
       showSnackbar(response.message, 'success');
     } catch (error) {
@@ -176,33 +177,11 @@ const CreateAttribute = () => {
     }
   };
 
-  const prefetchAttributes = () => {
-    // prefetch
-    queryClient.prefetchQuery({
-      queryKey: ['attributes', 'personal', ''],
-      queryFn: async () => {
-        const { data } = await api.get(`/attributes/personal`, {
-          params: { limit: 10, offset: pageParam, search },
-        });
-        return data;
-      },
-    });
-    queryClient.prefetchQuery({
-      queryKey: ['attributes', 'personal', ''],
-      queryFn: async () => {
-        const { data } = await api.get(`/attributes/community`, {
-          params: { limit: 10, offset: pageParam, search },
-        });
-        return data;
-      },
-    });
-  };
-
   const buttonActions = {
     edit: () => setEditMode(true),
     save: () => handleSave(),
     load: () => handleLoad(),
-    loadHover: () => prefetchAttributes(),
+    loadHover: () => prefetchToolContent('attribute'),
     cancel: () => handleCancel(),
     publish: () => handlePublish(),
   };
@@ -222,6 +201,8 @@ const CreateAttribute = () => {
           width: ['100%'],
           position: 'relative',
           height: '100%',
+          flexShrink: 1,
+          flexGrow: 2,
           mb: 4,
         }}
       >
@@ -254,15 +235,15 @@ const CreateAttribute = () => {
             flexDirection: 'column',
             alignItems: 'center',
             px: 4,
-            mb: 2,
+            mb: 7,
             overflowY: 'scroll',
-            overflowX: 'show',
             boxShadow: 4,
             borderRadius: 4,
             backgroundColor: 'background.paper',
             width: ['100%'],
             maxWidth: ['100%', '100%', 800],
             position: 'relative',
+            flexShrink: 1,
             height: '100%',
           }}
         >

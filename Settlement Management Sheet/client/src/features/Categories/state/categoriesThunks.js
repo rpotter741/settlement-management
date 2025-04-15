@@ -1,25 +1,32 @@
-import { updateCategory } from '../features/category/categoriesSlice';
-import { updateAttribute } from '../features/attribute/attributesSlice';
+import queryClient from 'context/QueryClient.js';
+import api from 'services/interceptor.js';
+import {
+  addCategory,
+  deleteById,
+} from 'features/Categories/state/categoriesSlice.js';
+import { selectKey } from 'features/selection/selectionSlice.js';
 
-export const updateAttributeInCategory =
-  (categoryId, attributeId, updates) => async (dispatch, getState) => {
+export const loadSelectedCategory =
+  ({ refId, id }) =>
+  async (dispatch, getState) => {
     const state = getState();
-    const category = state.categories.byId[categoryId];
+    const oldId = state.selection.category;
 
-    if (!category) throw new Error(`Category ${categoryId} not found`);
-    if (!category.attributes.includes(attributeId))
-      throw new Error(
-        `Attribute ${attributeId} is not part of Category ${categoryId}`
-      );
+    await queryClient.prefetchQuery({
+      queryKey: ['categories', id],
+      queryFn: async () => {
+        const { data } = await api.get(`/categories/${id}`);
+        return data;
+      },
+    });
 
-    // Update the attribute
-    dispatch(updateAttribute({ id: attributeId, updates }));
+    const cachedCategory = queryClient.getQueryData(['categories', id]);
 
-    // Optionally update category metadata
-    dispatch(
-      updateCategory({
-        id: categoryId,
-        updates: { lastModified: new Date().toISOString() },
-      })
-    );
+    if (!state.categories.byId[refId]) {
+      dispatch(addCategory({ category: cachedCategory }));
+    }
+
+    dispatch(selectKey({ key: 'category', value: refId }));
+
+    if (oldId) dispatch(deleteById({ refId: oldId })); // prevent removing null
   };

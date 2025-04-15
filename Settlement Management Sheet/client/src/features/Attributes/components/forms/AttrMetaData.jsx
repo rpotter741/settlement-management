@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 
 import { attributeFields } from '../../helpers/attributeFormData.js';
 import {
@@ -10,9 +11,13 @@ import {
 import { Box, Typography, Button } from '@mui/material';
 
 const AttrMetaData = ({ setShowModal }) => {
-  const { editAttribute, errors, updateAttribute, validateAttributeField } =
-    useAttribute();
-  const attr = editAttribute;
+  const {
+    edit: attr,
+    errors,
+    updateTool: updateAttribute,
+    validateToolField: validateAttributeField,
+  } = useTools('attribute');
+
   const handleUpdate = (updates, { keypath }) => {
     updateAttribute(keypath, updates);
   };

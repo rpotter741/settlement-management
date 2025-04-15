@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import useServer from 'services/useServer.js';
+import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
 
@@ -24,20 +24,19 @@ import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx'
 
 const LoadAttribute = ({ setShowModal }) => {
   const { showSnackbar } = useSnackbar();
-  const { loadAttribute } = useAttribute();
+  const { loadNewTool } = useTools('attribute');
 
   const ActionClick = (e, action, { refId, id }) => {
     e.stopPropagation();
     switch (action) {
       case 'Edit':
         return () => {
-          loadAttribute({ refId, id });
+          loadNewTool({ refId, id, setNew: true });
           setShowModal(null);
         };
       case 'Delete':
         return async () => {
           try {
-            showSnackbar('Deleting...', 'info');
             await useServer({
               tool: 'attribute',
               type: 'delete',
@@ -67,13 +66,15 @@ const LoadAttribute = ({ setShowModal }) => {
         onActionClick={handleActionClick}
         options={options}
         type="personal"
-        tool="attributes"
+        tool="attribute"
+        displayName="Attributes"
       />
       <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
         type="community"
-        tool="attributes"
+        tool="attribute"
+        displayName="Attributes"
       />
     </Box>
   );

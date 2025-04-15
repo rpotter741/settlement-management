@@ -38,17 +38,6 @@ import sidebarSx from '../shared/Sidebar/styles.js';
 import contentSx from '../shared/TabbedContainer/contentStyles';
 
 const CustomCreation = () => {
-  const [attribute, setAttribute] = useState({ ...emptyAttribute });
-  const [category, setCategory] = useState({ ...emptyCategory });
-  const [event, setEvent] = useState({ ...emptyEvent });
-  const [weather, setWeather] = useState({ ...emptyWeather });
-  const [status, setStatus] = useState('');
-  const [building, setBuilding] = useState('');
-  const [upgrade, setUpgrade] = useState('');
-  const [tradeHub, setTradeHub] = useState('');
-  const [settlement, setSettlement] = useState('');
-  const [settlementType, setSettlementType] = useState('');
-  const [apt, setAPT] = useState('');
   const [tab, setTab] = useState('category');
 
   const createToolTabs = [
@@ -73,7 +62,6 @@ const CustomCreation = () => {
     {
       name: 'Listeners',
       component: CustomListeners,
-      props: { event, setEvent },
       sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
@@ -85,44 +73,37 @@ const CustomCreation = () => {
     {
       name: 'Building',
       component: CreateBuilding,
-      props: { category, setCategory },
     },
     {
       name: 'Upgrade',
       component: CreateUpgrade,
-      props: { category, setCategory },
     },
     {
       name: 'Trade Hub',
       component: CreateTradeHub,
-      props: { category, setCategory },
     },
     {
       name: 'Settlement Type',
       component: CreateSettlementType,
-      props: { category, setCategory },
     },
     {
       name: 'Settlement',
       component: CreateSettlement,
-      props: { category, setCategory },
     },
     {
       name: 'Story Thread',
       component: CreateCategory,
-      props: { category, setCategory },
     },
     {
       name: 'APT',
       component: CreateAPT,
-      props: { category, setCategory },
     },
   ];
 
   return (
     <>
-      <Typography variant="h3" gutterBottom>
-        Eclorean Ledger Creation Tool
+      <Typography variant="h3" gutterBottom sx={{ my: 2 }}>
+        Eclorean Ledger Creation Tools
       </Typography>
       <TabbedContainer tabs={createToolTabs} />
     </>

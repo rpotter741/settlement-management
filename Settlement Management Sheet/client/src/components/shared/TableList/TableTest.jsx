@@ -116,7 +116,7 @@ const TableList = ({
               >
                 <Typography variant="body2">{row.description}</Typography>
                 <Typography variant="caption">
-                  Tags: {row.tags.join(', ')}
+                  Tags: {row?.tags.join(', ')}
                 </Typography>
               </Box>
             </TableCell>
@@ -223,19 +223,21 @@ const TableList = ({
           <InputLabel sx={{ backgroundColor: 'background.paper' }}>
             Tags
           </InputLabel>
-          <Select
+          {/* <Select
             multiple
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
-            {Array.from(new Set(rows.flatMap((row) => row.tags))).map((tag) => (
-              <MenuItem key={tag} value={tag}>
-                <Checkbox checked={tagFilter.includes(tag)} />
-                <ListItemText primary={tag} />
-              </MenuItem>
-            ))}
-          </Select>
+            {Array.from(new Set(rows.flatMap((row) => row?.tags))).map(
+              (tag) => (
+                <MenuItem key={tag} value={tag}>
+                  <Checkbox checked={tagFilter.includes(tag)} />
+                  <ListItemText primary={tag} />
+                </MenuItem>
+              )
+            )}
+          </Select> */}
         </FormControl>
         <Box
           sx={{

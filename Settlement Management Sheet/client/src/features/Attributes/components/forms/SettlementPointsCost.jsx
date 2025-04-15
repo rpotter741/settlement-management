@@ -7,12 +7,7 @@ import {
   selectSettlementPointCostOrder,
 } from '../../state/attributeSelectors.js';
 
-import { updateEditAttribute } from '../../state/attributeSlice';
-import {
-  validateField,
-  setErrorField,
-} from '../../../validation/validationSlice';
-import { v4 as newId } from 'uuid';
+import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Typography, Divider, Tooltip, IconButton } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
@@ -46,11 +41,18 @@ const settlementTypes = [
 ];
 
 const SettlementPointsCost = () => {
-  const { settlementPointCost, updateAttribute, validateAttributeField } =
-    useAttribute();
+  const {
+    selectValue,
+    updateTool: updateAttribute,
+    validateToolField: validateAttributeField,
+    errors: spcErrors,
+  } = useTools('attribute');
+
+  const settlementPointCost = selectValue('settlementPointCost');
   const dispatch = useDispatch();
   const costs = settlementPointCost.data;
-  const errors = settlementPointCost.errors;
+  const errors = spcErrors.settlementPointCost;
+  const order = settlementPointCost.order;
 
   const [selectedTypes, setSelectedTypes] = useState([]);
 
@@ -87,38 +89,30 @@ const SettlementPointsCost = () => {
   };
 
   // Handle drop
-  const handleDrop = useCallback(
-    (item) => {
-      setSelectedTypes((prevSelected) =>
-        prevSelected.includes(item.id)
-          ? prevSelected.filter((id) => id !== item.id)
-          : prevSelected
-      );
+  const handleDrop = (item) => {
+    setSelectedTypes((prevSelected) =>
+      prevSelected.includes(item.id)
+        ? prevSelected.filter((id) => id !== item.id)
+        : prevSelected
+    );
 
-      dispatch((dispatch, getState) => {
-        const currentSPC = selectAttrSPC(getState());
-        const formattedName = item.name.toLowerCase();
-        const newSPC = {
-          ...currentSPC,
-          [item.id]: { name: formattedName, value: 1 },
-        };
-        updateAttribute('settlementPointCost.data', newSPC);
+    const formattedName = item.name.toLowerCase();
+    const newSPC = {
+      ...costs,
+      [item.id]: { name: formattedName, value: 1 },
+    };
+    updateAttribute('settlementPointCost.data', newSPC);
 
-        const currentErrors = selectAttrSPCErrors(getState());
-        const newErrors = {
-          ...currentErrors,
-          [item.id]: { name: null, value: null },
-        };
+    const newErrors = {
+      ...errors,
+      [item.id]: { name: null, value: null },
+    };
 
-        validateAttributeField('settlementPointCost.data', newErrors);
+    validateAttributeField('settlementPointCost.data', newErrors);
 
-        const currentOrder = selectSettlementPointCostOrder(getState());
-        const newOrder = [...currentOrder, item.id];
-        updateAttribute('settlementPointCost.order', newOrder);
-      });
-    },
-    [dispatch]
-  );
+    const newOrder = [...order, item.id];
+    updateAttribute('settlementPointCost.order', newOrder);
+  };
 
   // Handle value change
   const handleValueChange = useCallback(
@@ -138,9 +132,7 @@ const SettlementPointsCost = () => {
       delete newErrors[id];
       validateAttributeField('settlementPointCost', newErrors);
 
-      const newOrder = settlementPointCost.order.filter(
-        (order) => order !== id
-      );
+      const newOrder = order.filter((order) => order !== id);
       updateAttribute('settlementPointCost.order', newOrder);
     },
     [costs, errors]
@@ -154,31 +146,25 @@ const SettlementPointsCost = () => {
     }
   };
 
-  const handleTransfer = useCallback(() => {
-    dispatch((dispatch, getState) => {
-      const currentSPC = selectAttrSPC(getState());
-      const currentErrors = selectAttrSPCErrors(getState());
+  const handleTransfer = () => {
+    const newSPC = { ...costs };
+    const newErrors = { ...errors };
+    const newOrder = [...order];
 
-      const newSPC = { ...currentSPC };
-      const newErrors = { ...currentErrors };
-      const order = selectSettlementPointCostOrder(getState());
-      const newOrder = [...order];
-
-      selectedTypes.forEach((type) => {
-        newSPC[type.id] = { name: type.name.toLowerCase(), value: 1 };
-        newErrors[type.id] = { name: null, value: null };
-        newOrder.push(type.id);
-      });
-
-      updateAttribute('settlementPointCost.data', newSPC);
-
-      validateAttributeField('settlementPointCost', newErrors);
-
-      updateAttribute('settlementPointCost.order', newOrder);
-
-      setSelectedTypes([]); // Clear after transfer
+    selectedTypes.forEach((type) => {
+      newSPC[type.id] = { name: type.name.toLowerCase(), value: 1 };
+      newErrors[type.id] = { name: null, value: null };
+      newOrder.push(type.id);
     });
-  }, [selectedTypes, dispatch]);
+
+    updateAttribute('settlementPointCost.data', newSPC);
+
+    validateAttributeField('settlementPointCost', newErrors);
+
+    updateAttribute('settlementPointCost.order', newOrder);
+
+    setSelectedTypes([]); // Clear after transfer
+  };
 
   if (!settlementPointCost) return <Box>Loading...</Box>;
 

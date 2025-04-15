@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useCategory } from '../../hooks/useEditCategory.jsx';
+import { useCategory } from '../../hooks/useCategory.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
@@ -20,8 +19,7 @@ const options = [
   { name: 'Favorite', icon: <HeartFill /> },
 ];
 
-// import PersonalAttributes from '../forms/PersonalAttributes.jsx';
-// import CommunityAttributes from '../forms/CommunityAttributes.jsx';
+import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
 const LoadCategory = ({ setShowModal }) => {
   const [selected, setSelected] = useState([]);
@@ -53,8 +51,22 @@ const LoadCategory = ({ setShowModal }) => {
       <Typography variant="h4" gutterBottom textAlign="center">
         LOAD CATEGORY
       </Typography>
+      <FetchedDisplay
+        onActionClick={handleActionClick}
+        options={options}
+        type="personal"
+        tool="category"
+        displayName="Categories"
+      />
+      <FetchedDisplay
+        onActionClick={handleActionClick}
+        options={options}
+        type="community"
+        tool="category"
+        displayName="Categories"
+      />
     </Box>
   );
 };
 
-export default LoadAttribute;
+export default LoadCategory;

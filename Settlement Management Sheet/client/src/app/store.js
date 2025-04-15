@@ -3,6 +3,7 @@ import selectionReducer from '../features/selection/selectionSlice';
 import attributesReducer from '../features/Attributes/state/attributeSlice';
 import categoriesReducer from '../features/Categories/state/categoriesSlice';
 import validationReducer from '../features/validation/validationSlice';
+import toolsReducer from './toolSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     validation: validationReducer,
     attributes: attributesReducer,
     categories: categoriesReducer,
+    tools: toolsReducer,
   },
 });
 

@@ -27,8 +27,12 @@ import ValidationChecklist from 'components/shared/ValidationChecklist/Validatio
 import DesktopMenu from 'components/shared/ToolMenu/DesktopMenu.jsx';
 import EditCategory from './EditCategory';
 import PreviewCategory from './PreviewCategory.jsx';
+import LoadCategory from './LoadCategory.jsx';
 
 // axios imports
+import useServer from 'services/useServer.js';
+
+import prefetchTools from 'services/prefetchTools.js';
 
 const checklistContent = [];
 
@@ -103,16 +107,41 @@ const CreateCategory = () => {
 
   const handleSave = async () => {
     try {
-      showSnackbar('Saving....', 'info');
+      useServer({
+        tool: 'category',
+        type: 'save',
+        data: {
+          ...category,
+          contentType: 'OFFICIAL',
+          createdBy: 'Admin',
+        },
+      })
+        .then((res) => {
+          showSnackbar('Category saved successfully', 'success');
+          saveEditCategory(category.refId);
+          setEditMode(false);
+          dispatch(initializeCategory());
+        })
+        .catch((error) => {
+          console.error('Error saving category:', error);
+          showSnackbar('Error saving category', 'error');
+        });
     } catch (error) {
       showSnackbar('Error saving category', 'error');
     }
+  };
+
+  const handleLoad = () => {
+    setShowModal('load');
   };
 
   const buttonActions = {
     edit: () => setEditMode(true),
     cancel: () => setEditMode(false),
     save: async () => handleSave(),
+    load: () => handleLoad(),
+    loadHover: () => prefetchTools('category'),
+    publish: async () => {},
   };
 
   if (!category) {
@@ -210,7 +239,25 @@ const CreateCategory = () => {
             />
           </Box>
           <Modal open={showModal !== null} onClose={() => setShowModal(null)}>
-            <Box></Box>
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                bgcolor: 'background.default',
+                border: '2px solid #000',
+                borderColor: 'secondary.light',
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 4,
+                ml: 1,
+              }}
+            >
+              {showModal === 'load' && (
+                <LoadCategory setShowModal={setShowModal} />
+              )}
+            </Box>
           </Modal>
           <Box
             sx={{

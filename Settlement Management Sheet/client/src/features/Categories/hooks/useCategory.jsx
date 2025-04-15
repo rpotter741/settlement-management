@@ -4,8 +4,9 @@ import {
   validateField,
   validateTool,
 } from 'features/validation/validationSlice';
-import { updateEdit } from '../state/categoriesSlice.js';
+import { updateEdit, saveCategory } from '../state/categoriesSlice.js';
 import { categorySelectors as select } from 'features/Categories/state/categoriesSelectors.js';
+import { loadSelectedCategory } from '../state/categoriesThunks.js';
 
 export const useCategorySelectors = () => {
   const allCategories = useSelector(select.base.allCategories);
@@ -74,9 +75,16 @@ export const useCategoryActions = () => {
     [dispatch]
   );
 
-  const saveCategory = useCallback(
+  const saveEditCategory = useCallback(
     (id) => {
       dispatch(saveCategory({ id }));
+    },
+    [dispatch]
+  );
+
+  const loadCategory = useCallback(
+    ({ refId, id }) => {
+      dispatch(loadSelectedCategory({ refId, id }));
     },
     [dispatch]
   );
@@ -85,7 +93,8 @@ export const useCategoryActions = () => {
     updateCategory,
     validateCategoryField,
     validateCategory,
-    saveCategory,
+    saveEditCategory,
+    loadCategory,
   };
 };
 

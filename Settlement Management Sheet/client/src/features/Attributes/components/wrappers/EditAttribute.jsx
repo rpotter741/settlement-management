@@ -10,12 +10,18 @@ import SettlementPointsCost from '../forms/SettlementPointsCost.jsx';
 import AttributeThresholds from '../forms/AttributeThresholds.jsx';
 import TagTable from '../forms/TagTable';
 
+import { useTools } from 'hooks/useTool.jsx';
+
 const EditAttribute = ({ setShowModal }) => {
-  const attr = useSelector((state) => state.attributes.edit);
+  const { edit: attr } = useTools('attribute');
   const [values, setValues] = useState(false);
   const [thresholds, setThresholds] = useState(false);
   const [tags, setTags] = useState(false);
   const [spCosts, setSpCosts] = useState(false);
+
+  React.useEffect(() => {
+    console.log(attr);
+  }, [attr]);
 
   return (
     <Box
@@ -29,8 +35,9 @@ const EditAttribute = ({ setShowModal }) => {
         gap: 2,
         backgroundColor: 'background.paper',
         width: '100%',
+        height: '100%',
         position: 'relative',
-        pb: 2,
+        pb: 4,
       }}
     >
       <AttrMetaData setShowModal={setShowModal} />

@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 import {
   selectBalance,
   selectBalanceErrors,
 } from '../../state/attributeSelectors';
 import autobalanceSteps from '../../helpers/attributeAutoBalance.js';
-
 import { attributeFields } from '../../helpers/attributeFormData';
-
-import { updateEditAttribute } from '../../state/attributeSlice.js';
-import { validateField } from '../../../validation/validationSlice.js';
 
 import {
   Box,
@@ -24,13 +21,14 @@ import { DynamicForm } from '../../../../components/index.js';
 import InfoIcon from '@mui/icons-material/Info';
 
 const AttrValues = ({ values }) => {
-  const { balance, updateAttribute, validateAttributeField } = useAttribute();
+  const {
+    edit,
+    updateTool: updateAttribute,
+    validateToolField: validateAttributeField,
+    errors,
+  } = useTools('attribute');
+
   const [autobalance, setAutobalance] = useState(false);
-
-  const attr = balance.data;
-  const errors = balance.errors;
-
-  const dispatch = useDispatch();
 
   const handleUpdate = (updates, { keypath }) => {
     updateAttribute(keypath, updates);
@@ -113,32 +111,32 @@ const AttrValues = ({ values }) => {
         }}
       >
         <DynamicForm
-          initialValues={{ maxPerLevel: attr.maxPerLevel || 0 }}
+          initialValues={{ maxPerLevel: edit.balance.maxPerLevel || 0 }}
           validate={attributeFields.maxPerLevel.validate}
           field={attributeFields.maxPerLevel}
           externalUpdate={handleUpdate}
           shrink
-          parentError={errors.maxPerLevel}
+          parentError={errors.balance.maxPerLevel}
           onError={handleValidationUpdate}
           isExpanded={values}
         />
         <DynamicForm
-          initialValues={{ healthPerLevel: attr?.healthPerLevel || 0 }}
+          initialValues={{ healthPerLevel: edit.balance.healthPerLevel || 0 }}
           validate={attributeFields.healthPerLevel.validate}
           field={attributeFields.healthPerLevel}
           externalUpdate={handleUpdate}
           shrink
-          parentError={errors.healthPerLevel}
+          parentError={errors.balance.healthPerLevel}
           onError={handleValidationUpdate}
           isExpanded={values}
         />
         <DynamicForm
-          initialValues={{ costPerLevel: attr?.costPerLevel || 0 }}
+          initialValues={{ costPerLevel: edit.balance.costPerLevel || 0 }}
           validate={attributeFields.costPerLevel.validate}
           field={attributeFields.costPerLevel}
           externalUpdate={handleUpdate}
           shrink
-          parentError={errors.costPerLevel}
+          parentError={errors.balance.costPerLevel}
           onError={handleValidationUpdate}
           isExpanded={values}
         />

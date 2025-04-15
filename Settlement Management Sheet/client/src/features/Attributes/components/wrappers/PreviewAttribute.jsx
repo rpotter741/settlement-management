@@ -6,8 +6,10 @@ import { Icon as CustomIcon } from '../../../../components/index.js';
 
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 
+import { useTools } from 'hooks/useTool.jsx';
+
 const PreviewAttribute = () => {
-  const { attribute: attr } = useAttribute();
+  const { current: attr } = useTools('attribute');
   return (
     <Box
       sx={{
@@ -16,11 +18,13 @@ const PreviewAttribute = () => {
         gridTemplateRows: 'auto',
         alignItems: 'start',
         justifyContent: 'center',
-        my: 2,
+        mt: 2,
         gap: 2,
         backgroundColor: 'background.paper',
         width: '100%',
         position: 'relative',
+        height: '100%',
+        pb: 4,
       }}
     >
       <Box

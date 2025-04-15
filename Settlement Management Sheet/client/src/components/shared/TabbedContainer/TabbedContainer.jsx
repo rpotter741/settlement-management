@@ -122,7 +122,7 @@ const TabbedContainer = ({
               <GlossaryIcon />
             </IconButton>
           </Tooltip>
-          <Box sx={tab.contentSx ? tab.contentSx : {}}>
+          <Box sx={tab.contentSx ? tab.contentSx : {}} role="tabbox">
             {/* {tab.sidebarSx && <Sidebar sidebarSx={tab.sidebarSx} />} */}
             {tab.component ? (
               React.createElement(tab.component, tab.props, toggleDrawer)
