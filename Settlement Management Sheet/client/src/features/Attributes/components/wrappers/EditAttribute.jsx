@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
@@ -18,10 +17,6 @@ const EditAttribute = ({ setShowModal }) => {
   const [thresholds, setThresholds] = useState(false);
   const [tags, setTags] = useState(false);
   const [spCosts, setSpCosts] = useState(false);
-
-  React.useEffect(() => {
-    console.log(attr);
-  }, [attr]);
 
   return (
     <Box
@@ -75,7 +70,7 @@ const EditAttribute = ({ setShowModal }) => {
         <AttributeThresholds />
       </TitledCollapse>
       <TitledCollapse
-        title={`Tags (${attr.tags?.length} / 5)`}
+        title={`Tags (${attr?.tags?.length} / 5)`}
         titleType="h6"
         defaultState={tags}
         styles={{ width: '100%', mb: 2 }}

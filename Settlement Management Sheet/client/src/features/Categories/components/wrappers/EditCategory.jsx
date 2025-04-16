@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
@@ -7,15 +8,11 @@ import { TitledCollapse } from '../../../../components/index.js';
 import CategoryMetadata from '../forms/CategoryMetadata.jsx';
 
 const EditCategory = () => {
-  const category = useSelector((state) => state.categories.edit);
+  const { edit: category } = useTools('category');
   const [attributes, setAttributes] = useState(false);
   const [thresholds, setThresholds] = useState(false);
   const [dependencies, setDependencies] = useState(false);
   const [tags, setTags] = useState(false);
-
-  useEffect(() => {
-    console.log(category, 'category in edit');
-  }, [category]);
 
   return (
     <Box

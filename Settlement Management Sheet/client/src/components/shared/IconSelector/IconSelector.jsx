@@ -3,21 +3,25 @@ import { Box, Typography, Card, Button } from '@mui/material';
 import Icon from '../Icons/Icon.jsx';
 import iconList from './iconList';
 import IconColorPicker from './IconColorPicker.jsx';
+import { useTools } from 'hooks/useTool.jsx';
 
-const IconSelector = ({
-  initialIcon,
-  onSelect,
-  color,
-  setColor,
-  onConfirm,
-}) => {
-  const [selectedIcon, setSelectedIcon] = useState(initialIcon);
+const IconSelector = ({ tool, setShowModal }) => {
+  const { edit, updateTool } = useTools(tool);
+  const [selectedIcon, setSelectedIcon] = useState(edit.icon);
 
   const handleIconChange = (event, newValue) => {
     setSelectedIcon(newValue);
-    if (onSelect) {
-      onSelect(newValue);
-    }
+    updateTool('icon', newValue);
+  };
+
+  const handleColorChange = (color) => {
+    updateTool('iconColor', color);
+  };
+
+  const onConfirm = (icon, color) => {
+    updateTool('icon', icon);
+    updateTool('iconColor', color);
+    setShowModal(null);
   };
 
   return (
@@ -53,10 +57,13 @@ const IconSelector = ({
             viewBox={selectedIcon.viewBox}
             path={selectedIcon.d}
             size={48}
-            color={color}
+            color={edit.iconColor}
           />
         </Box>
-        <IconColorPicker onChange={setColor} sourceColor={color} />
+        <IconColorPicker
+          onChange={handleColorChange}
+          sourceColor={edit.iconColor}
+        />
       </Box>
       {iconList.map(
         (icon, index) =>
@@ -78,7 +85,7 @@ const IconSelector = ({
                   viewBox={icon.viewBox}
                   path={icon.d}
                   size={48}
-                  color={color}
+                  color={edit.iconColor}
                 />
               </Button>
             </Card>
@@ -87,7 +94,7 @@ const IconSelector = ({
       <Button
         variant="contained"
         sx={{ gridColumn: 'span 6', mt: 2 }}
-        onClick={() => onConfirm(selectedIcon, color)}
+        onClick={() => onConfirm(selectedIcon, edit.iconColor)}
       >
         Confirm
       </Button>

@@ -17,19 +17,21 @@ export const useInitializeTool = ({
   tool,
   allIds,
   current,
-  errors,
+  edit,
+  errorData,
   initializeFn,
   validationFields,
 }) => {
   const dispatch = useDispatch();
   const [errorCount, setErrorCount] = useState(0);
+  const [firstRender, setFirstRender] = useState(true);
 
   useEffect(() => {
     dispatch(selectTool({ tool: tool }));
   }, []);
 
   useEffect(() => {
-    const count = getErrorCount(errors);
+    const count = getErrorCount(errorData);
     setErrorCount(count);
     if (current) {
       if (count === 0 && !tool.isValid) {
@@ -38,10 +40,10 @@ export const useInitializeTool = ({
         updateEdit({ tool, keypath: 'isValid', updates: false });
       }
     }
-  }, [errors, tool]);
+  }, [errorData, tool]);
 
   useEffect(() => {
-    if (!current) {
+    if (current === null) {
       const data = initializeFn();
       dispatch(initializeTool({ tool, data }));
       dispatch(setCurrent({ tool, data, initializeEdit: true }));
@@ -56,14 +58,18 @@ export const useInitializeTool = ({
   }, [tool, allIds, dispatch]);
 
   useEffect(() => {
-    if (current) {
-      dispatch(initializeEdit({ refId: tool.refId, tool }));
+    if (current && !edit) {
+      dispatch(initializeEdit({ refId: current.refId, tool }));
       dispatch(initializeValidation({ tool, obj: tool }));
     }
   }, [tool, dispatch]);
 
   useEffect(() => {
     if (current && validationFields.length > 0) {
+      const isReady = validationFields.every(
+        (field) => current[field] !== undefined
+      );
+      if (!isReady) return;
       dispatch(
         validateTool({
           tool,
@@ -73,14 +79,6 @@ export const useInitializeTool = ({
       );
     }
   }, [current, dispatch]);
-};
 
-//  useInitializeTool({
-//    tool: 'attribute',
-//    allIds,
-//    current,
-//    errors,
-//    validateTool,
-//    initializeFn: initializeAttribute,
-//    validationFields: ['name', 'description', 'balance', 'thresholds', 'settlementPointCost']
-//})
+  return { errorCount, setErrorCount };
+};

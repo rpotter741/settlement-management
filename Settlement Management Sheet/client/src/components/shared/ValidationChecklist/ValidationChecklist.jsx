@@ -13,12 +13,16 @@ import ChecklistItem from './ChecklistItem.jsx';
 import countValidEntries from './countValidEntries.js';
 import calculateProgressColor from './calculateProgressColor.js';
 
-const ValidationChecklist = ({ defaultExpand, checklistContent, ...props }) => {
+const ValidationChecklist = ({
+  defaultExpand,
+  checklistContent,
+  errors,
+  tool,
+  ...props
+}) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(defaultExpand || false);
   const [errorStates, setErrorStates] = useState([]);
-  const tool = useSelector((state) => state.selection.activeTool);
-  const errors = useSelector((state) => state.validation[tool]);
   const [errorCount, setErrorCount] = useState(0);
   // progress bar stuff
   const [progress, setProgress] = useState(0);
@@ -45,7 +49,7 @@ const ValidationChecklist = ({ defaultExpand, checklistContent, ...props }) => {
         const configuredItem = { ...item, type: item.type || 'single' };
         const data = get(errors, item.keypath);
 
-        if (item.type === 'group') {
+        if (item.type === 'group' && data !== undefined) {
           const { valid, total } = countValidEntries(data);
           configuredItem.valid = valid;
           configuredItem.total = total;

@@ -53,7 +53,7 @@ const PreviewCategory = () => {
         Attributes
       </Typography>
       {category?.attributes?.map((attr) => (
-        <Box sx={{ gridColumn: 'span 3', display: 'flex', gap: 2 }}>
+        <Box sx={{ gridColumn: 'span 3', display: 'flex', gap: 2 }} key={attr}>
           <Typography variant="h6">{attr?.name}</Typography>
         </Box>
       ))}
@@ -75,6 +75,7 @@ const PreviewCategory = () => {
       >
         {category?.thresholds.order.map((id, n) => (
           <Box
+            key={id}
             sx={{
               display: 'flex',
               gap: 2,

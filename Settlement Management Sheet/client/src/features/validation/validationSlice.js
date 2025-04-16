@@ -56,6 +56,8 @@ const validationSlice = createSlice({
     validateTool: (state, action) => {
       const { tool, fields, refObj } = action.payload;
       const validateFns = validationsMap[tool];
+      if (!refObj || !validateFns) return;
+      if (!state[tool]) state[tool] = {};
       fields.forEach((field) => {
         const error = validateFns[field](refObj[field]);
         state[tool][field] = error;
@@ -79,6 +81,7 @@ export const {
 } = validationSlice.actions;
 
 export const initializeObject = (obj, defaultValue = null) => {
+  if (!obj || typeof obj !== 'object') return {};
   if (Array.isArray(obj)) {
     // Convert array to an object keyed by `id`
     return obj.reduce((acc, item) => {
@@ -92,7 +95,7 @@ export const initializeObject = (obj, defaultValue = null) => {
 
   if (obj && typeof obj === 'object') {
     return Object.keys(obj).reduce((acc, key) => {
-      if (key === 'id') {
+      if (key === 'id' || key === 'refId') {
         acc[key] = obj[key]; // Keep `id` unchanged
       } else {
         acc[key] = initializeObject(obj[key], defaultValue); // Initialize other keys

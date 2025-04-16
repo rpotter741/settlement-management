@@ -4,10 +4,9 @@ import { setKeypathValue as set } from 'utility/setKeypathValue.js';
 
 const defaultToolState = {
   current: null,
-  edit: {},
+  edit: null,
   byId: {},
   allIds: [],
-  errors: {},
 };
 
 const initialState = {
@@ -60,8 +59,10 @@ const toolSlice = createSlice({
     },
     setCurrent: (state, action) => {
       const { tool, data, initializeEdit } = action.payload;
-      state[tool].current = data;
-      initializeEdit ? (state[tool].edit = data) : null;
+      state[tool].current = cloneDeep(data);
+      if (initializeEdit) {
+        state[tool].edit = cloneDeep(data);
+      }
     },
   },
 });

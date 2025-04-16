@@ -1,85 +1,94 @@
 import React, { useEffect, useState } from 'react';
-
-// redux
-import initializeCategory from 'features/Categories/helpers/initializeCategory.js';
+import { useSnackbar } from 'context/SnackbarContext.jsx';
+import { Box, Typography, Modal } from '@mui/material';
+import ValidationChecklist from 'components/shared/ValidationChecklist/ValidationChecklist.jsx';
+import DesktopMenu from 'components/shared/ToolMenu/DesktopMenu.jsx';
+import MobileMenu from 'components/shared/ToolMenu/MobileMenu.jsx';
+import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
+import useServer from 'services/useServer.js';
+import prefetchToolContent from 'services/prefetchTools.js';
 import { useTools } from 'hooks/useTool.jsx';
 import { useInitializeTool } from 'hooks/useInitializeTool.jsx';
 
-import { useSnackbar } from 'context/SnackbarContext.jsx';
+const CreateShell = ({
+  tool,
+  initializeTool,
+  validationFields,
+  editComponent,
+  previewComponent,
+  checklistContent,
+  loadDisplayName,
+  editComponentProps = {},
+  previewComponentProps = {},
+  modalComponents = {},
+  modalComponentsProps = {},
+}) => {
+  const { current, edit, allIds, saveToolEdit, errors } = useTools(tool);
 
-// mui components
-import { Box, Typography, Modal } from '@mui/material';
-
-// custom components
-import ValidationChecklist from 'components/shared/ValidationChecklist/ValidationChecklist.jsx';
-import checklistContent from '../../helpers/checklistContent.js';
-import DesktopMenu from 'components/shared/ToolMenu/DesktopMenu.jsx';
-import EditCategory from './EditCategory';
-import PreviewCategory from './PreviewCategory.jsx';
-import LoadCategory from './LoadCategory.jsx';
-
-// axios imports
-import useServer from 'services/useServer.js';
-import prefetchTools from 'services/prefetchTools.js';
-
-const CreateCategory = () => {
-  const {
-    current: category,
+  const { errorCount } = useInitializeTool({
+    tool,
     allIds,
-    edit: editCategory,
-    updateTool: updateCategory,
-    saveEditTool: saveEditCategory,
-    errors,
-    setCurrentTool,
-  } = useTools('category');
+    current,
+    errorData: errors,
+    initializeFn: initializeTool,
+    validationFields,
+  });
+
   const { showSnackbar } = useSnackbar();
+
   const [editMode, setEditMode] = useState(false);
   const [showModal, setShowModal] = useState(null);
   const [expanded, setExpanded] = useState(false);
 
-  const { errorCount } = useInitializeTool({
-    tool: 'category',
-    allIds,
-    current: category,
-    errors,
-    initializeFn: initializeCategory,
-    validationFields: ['name', 'description'],
-  });
+  const allCapsTool = tool.toUpperCase();
+
+  const handleCancel = () => {
+    setEditMode(false);
+    setShowModal(null);
+  };
 
   const handleSave = async () => {
-    console.log(editCategory);
     try {
       const response = await useServer({
-        tool: 'category',
+        tool,
         type: 'save',
-        data: { ...editCategory },
+        data: { ...edit },
       });
-      saveEditCategory(editCategory.refId, true);
+      saveToolEdit(edit.refId, true);
       setEditMode(false);
       showSnackbar(response.message, 'success');
     } catch (error) {
-      showSnackbar('Error saving category', 'error');
+      showSnackbar(error.message, 'error');
     }
   };
 
-  const handleLoad = () => {
-    setShowModal('load');
+  const handlePublish = async () => {
+    try {
+      const response = await useServer({
+        tool,
+        type: 'publish',
+        data: { ...edit },
+      });
+      showSnackbar(response.message, 'success');
+    } catch (error) {
+      showSnackbar(error.message, 'error');
+    }
   };
 
   const buttonActions = {
     edit: () => setEditMode(true),
-    cancel: () => setEditMode(false),
-    save: async () => handleSave(),
-    load: () => handleLoad(),
-    loadHover: () => prefetchTools('category'),
-    publish: async () => {},
+    save: () => handleSave(),
+    cancel: () => handleCancel(),
+    publish: () => handlePublish(),
+    loadHover: () => prefetchToolContent(tool),
+    load: () => setShowModal('Load Tool'),
   };
 
-  if (!category) {
+  if (!current) {
     return <Box>Loading...</Box>;
   }
 
-  if (category !== null) {
+  if (current !== null) {
     return (
       <Box
         sx={{
@@ -90,10 +99,12 @@ const CreateCategory = () => {
           width: ['100%'],
           position: 'relative',
           height: '100%',
+          flexShrink: 1,
+          flexGrow: 2,
           mb: 4,
         }}
       >
-        {errorCount !== undefined && category && (
+        {errorCount !== undefined && errors && current && (
           <Box
             sx={{
               position: 'absolute',
@@ -112,7 +123,7 @@ const CreateCategory = () => {
               defaultExpand={expanded}
               checklistContent={checklistContent}
               errors={errors}
-              tool="category"
+              tool={tool}
             />
           </Box>
         )}
@@ -123,15 +134,15 @@ const CreateCategory = () => {
             flexDirection: 'column',
             alignItems: 'center',
             px: 4,
-            mb: 2,
+            mb: 7,
             overflowY: 'scroll',
-            overflowX: 'show',
             boxShadow: 4,
             borderRadius: 4,
             backgroundColor: 'background.paper',
             width: ['100%'],
             maxWidth: ['100%', '100%', 800],
             position: 'relative',
+            flexShrink: 1,
             height: '100%',
           }}
         >
@@ -162,11 +173,11 @@ const CreateCategory = () => {
                 mb: 4,
               }}
             >
-              CUSTOM CATEGORY
+              CUSTOM {allCapsTool}
             </Typography>
             <DesktopMenu
               mode={editMode}
-              tool="Category"
+              tool={tool}
               isValid={errorCount === 0}
               actions={buttonActions}
             />
@@ -187,29 +198,33 @@ const CreateCategory = () => {
                 ml: 1,
               }}
             >
-              {showModal === 'load' && (
-                <LoadCategory setShowModal={setShowModal} />
+              {showModal === 'Load Tool' && (
+                <LoadTool
+                  setShowModal={setShowModal}
+                  tool={tool}
+                  displayName={loadDisplayName}
+                />
               )}
+              {modalComponents[showModal] &&
+                React.createElement(modalComponents[showModal], {
+                  ...modalComponentsProps[showModal],
+                  setShowModal,
+                })}
             </Box>
           </Modal>
-          <Box
-            sx={{
-              gridColumn: 'span 3',
-              display: 'flex',
-              gap: 2,
-              width: '100%',
-            }}
-          >
-            {editMode ? (
-              <EditCategory setShowModal={setShowModal} />
-            ) : (
-              <PreviewCategory />
-            )}
-          </Box>
+          {editMode
+            ? React.createElement(editComponent, {
+                ...editComponentProps,
+                setShowModal,
+              })
+            : React.createElement(previewComponent, {
+                ...previewComponentProps,
+                setShowModal,
+              })}
         </Box>
       </Box>
     );
   }
 };
 
-export default CreateCategory;
+export default CreateShell;

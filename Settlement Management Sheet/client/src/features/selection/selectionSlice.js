@@ -36,7 +36,8 @@ const selectionSlice = createSlice({
       }
     },
     selectTool(state, action) {
-      state.activeTool = action.payload;
+      const { tool } = action.payload;
+      state.activeTool = tool;
     },
   },
 });

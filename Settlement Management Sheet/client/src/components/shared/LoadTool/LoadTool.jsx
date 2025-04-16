@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTools } from 'hooks/useTool.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 import HeartIcon from '@mui/icons-material/Favorite';
 import PencilIcon from '@mui/icons-material/Edit';
@@ -21,10 +21,11 @@ const options = [
 
 import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
-const LoadCategory = ({ setShowModal }) => {
+const LoadTool = ({ setShowModal, tool, displayName }) => {
   const [selected, setSelected] = useState([]);
-  const { addAlert } = useSnackbar();
-  const { loadNewTool } = useTools('category');
+  const { showSnackbar } = useSnackbar();
+  const { loadNewTool } = useTools(tool);
+  const capsTool = tool.toUpperCase();
 
   const ActionClick = (e, action, { refId, id }) => {
     e.stopPropagation();
@@ -37,7 +38,12 @@ const LoadCategory = ({ setShowModal }) => {
       case 'Delete':
         return async () => {
           try {
-            await useServer({});
+            await useServer({
+              tool,
+              type: 'delete',
+              data: { refId, id },
+            });
+            showSnackbar('Deleted successfully', 'success');
           } catch (error) {
             showSnackbar(error.message, 'error');
           }
@@ -55,24 +61,24 @@ const LoadCategory = ({ setShowModal }) => {
   return (
     <Box sx={{ minWidth: ['100%', '600px', '800px', '1000px'] }}>
       <Typography variant="h4" gutterBottom textAlign="center">
-        LOAD CATEGORY
+        LOAD {capsTool}
       </Typography>
       <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
         type="personal"
-        tool="category"
-        displayName="Categories"
+        tool={tool}
+        displayName={displayName}
       />
       <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
         type="community"
-        tool="category"
-        displayName="Categories"
+        tool={tool}
+        displayName={displayName}
       />
     </Box>
   );
 };
 
-export default LoadCategory;
+export default LoadTool;
