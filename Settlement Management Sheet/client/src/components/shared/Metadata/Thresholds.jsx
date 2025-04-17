@@ -1,41 +1,25 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import confetti from 'canvas-confetti';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useTools } from 'hooks/useTool.jsx';
-import { useSnackbar } from '../../../../context/SnackbarContext.jsx';
+import { useSnackbar } from 'context/SnackbarContext.jsx';
 
 import { v4 as newId } from 'uuid';
 import resolveDuplicates from 'utility/resolveDuplicates';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
 import Threshold from './Threshold';
 
-const placeholderArray = [
-  'Starving',
-  'Malnourished',
-  'Hungry',
-  'Satiated',
-  'Nourished',
-  'Well-Fed',
-  'Feasting',
-];
-
-const AttributeThresholds = () => {
-  const {
-    selectValue,
-    updateTool: updateAttribute,
-    validateToolField: validateAttributeField,
-    errors: thresholdErrors,
-  } = useTools('attribute');
+const ObjectThresholds = ({ tool, max = 15 }) => {
+  const { selectValue, edit, updateTool, validateToolField, errors } =
+    useTools(tool);
   const thresholds = selectValue('thresholds');
-  console.log(thresholds);
-  const [placeholders, setPlaceholders] = useState(placeholderArray);
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
   const [lastId, setLastId] = useState(null);
-  const errors = thresholdErrors.thresholds;
+  // const errors = objErrors.thresholds;
+
+  console.log(errors);
 
   const debouncedShowSnackbar = useCallback(
     debounce(
@@ -50,14 +34,13 @@ const AttributeThresholds = () => {
 
   const handleThresholdMaxChange = useCallback(
     (updates, { id }) => {
-      console.log(thresholds, updates);
-      updateAttribute(`thresholds.data.${id}.max`, updates);
+      updateTool(`thresholds.data.${id}.max`, updates);
       if (lastId !== id) {
         setLastId(id);
       }
-      validateAttributeField(`thresholds.data.${id}.max`, updates);
+      validateToolField(`thresholds.data.${id}.max`, updates);
     },
-    [updateAttribute, lastId, setLastId]
+    [updateTool, validateToolField, lastId, setLastId]
   );
 
   const handleBlur = useCallback(() => {
@@ -69,8 +52,8 @@ const AttributeThresholds = () => {
     const newOrder = [...thresholds.order].sort((a, b) => {
       return thresholdsClone[a].max - thresholdsClone[b].max;
     });
-    updateAttribute('thresholds.data', thresholdsClone);
-    updateAttribute('thresholds.order', newOrder);
+    updateTool('thresholds.data', thresholdsClone);
+    updateTool('thresholds.order', newOrder);
     if (changes) {
       changes.forEach((change) => {
         debouncedShowSnackbar(change, 'warning');
@@ -79,14 +62,14 @@ const AttributeThresholds = () => {
   }, [
     thresholds.data,
     thresholds.order,
-    updateAttribute,
+    updateTool,
     lastId,
     debouncedShowSnackbar,
   ]);
 
   const handleThresholdNameChange = (updates, { id }) => {
-    updateAttribute(`thresholds.data.${id}.name`, updates);
-    validateAttributeField(`thresholds.data.${id}.name`, updates);
+    updateTool(`thresholds.data.${id}.name`, updates);
+    validateToolField(`thresholds.data.${id}.name`, updates);
   };
 
   const recommendThresholdValue = (thresholds) => {
@@ -131,56 +114,28 @@ const AttributeThresholds = () => {
     return recommendedValue;
   };
 
-  const redistributePlaceholders = (thresholds) => {
-    const totalPlaceholders = placeholders.length; // Default 7
-    const remainingCount = thresholds.length;
-
-    // Always include the first and last placeholders
-    const extremes = [placeholders[0], placeholders[totalPlaceholders - 1]];
-
-    if (remainingCount === 1) return [extremes[0]]; // Single threshold edge case
-
-    // Calculate proportional indices for placeholders
-    const step = (totalPlaceholders - 1) / (remainingCount - 1);
-    const distributedPlaceholders = thresholds.map((_, index) => {
-      const placeholderIndex = Math.round(index * step);
-      return placeholders[placeholderIndex] || extremes[1];
-    });
-
-    return distributedPlaceholders;
-  };
-
-  const updateThresholdsWithPlaceholders = (thresholds) => {
-    const distributedPlaceholders = redistributePlaceholders(thresholds);
-
-    return thresholds.map((threshold, index) => ({
-      ...threshold,
-      placeholder: distributedPlaceholders[index], // Attach placeholder to threshold
-    }));
-  };
-
   const handleRemove = useCallback(
     (id) => {
       let updatedThresholds = { ...thresholds.data };
       delete updatedThresholds[id];
-      updateAttribute('thresholds.data', updatedThresholds);
+      updateTool('thresholds.data', updatedThresholds);
 
       const order = thresholds.order;
       const newOrder = order.filter((item) => item !== id);
-      updateAttribute('thresholds.order', newOrder);
+      updateTool('thresholds.order', newOrder);
 
       // Remove the error from the store
       const newErrors = { ...errors };
       delete newErrors[id];
-      validateAttributeField('thresholds.errors', newErrors);
+      validateToolField('thresholds.errors', newErrors);
     },
     [thresholds.data, errors]
   );
 
   const handleAdd = () => {
-    if (thresholds.order.length >= 15) {
+    if (thresholds.order.length >= max) {
       showSnackbar(
-        "Congrats on clicking at least 9 times! 15 is the limit, friend. Hope that's enough!",
+        `Congrats on clicking at least ${max - 7} times! ${max} is the limit, friend. Hope that's enough!`,
         'info'
       );
       confetti({
@@ -202,39 +157,33 @@ const AttributeThresholds = () => {
     newOrder.sort(
       (a, b) => updatedThresholds[a].max - updatedThresholds[b].max
     );
-    updateAttribute('thresholds.order', newOrder);
-    updateAttribute('thresholds.data', updatedThresholds);
+    updateTool('thresholds.order', newOrder);
+    updateTool('thresholds.data', updatedThresholds);
 
-    validateAttributeField(`thresholds.${id}`, {
+    validateToolField(`thresholds.${id}`, {
       name: null,
       max: null,
     });
   };
 
   const handleMaxValidation = useCallback((value, { id }) => {
-    validateAttributeField(`thresholds.${id}.max`, value);
+    validateToolField(`thresholds.${id}.max`, value);
   });
 
   const handleNameValidation = useCallback((value, { id }) => {
-    validateAttributeField(`thresholds.${id}.name`, value);
+    validateToolField(`thresholds.${id}.name`, value);
   });
 
   return (
     <Box>
       <Typography variant="h6">
-        Attribute Thresholds
-        <Tooltip
-          title="The placeholder in each threshold you place (to a maximum of 7) will represent the Food Attribute thresholds to give you an idea of how they could scale."
-          arrow
-        >
-          <InfoIcon />
-        </Tooltip>
+        {tool.charAt(0).toUpperCase() + tool.slice(1)} Thresholds
       </Typography>
       <Typography>
-        Thresholds represent attribute state at a given percentage. They provide
+        Thresholds represent {tool} state at a given percentage. They provide
         both narrative depth and an easy way to set{' '}
         <strong>Conditions and Listeners</strong> without relying on intimate
-        knowledge of the attribute itself.{' '}
+        knowledge of the {tool} itself.{' '}
       </Typography>
       {thresholds.order.map((id, index) => {
         const threshold = thresholds.data[id];
@@ -281,4 +230,4 @@ const AttributeThresholds = () => {
   );
 };
 
-export default AttributeThresholds;
+export default ObjectThresholds;

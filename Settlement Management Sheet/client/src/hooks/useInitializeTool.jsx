@@ -24,11 +24,6 @@ export const useInitializeTool = ({
 }) => {
   const dispatch = useDispatch();
   const [errorCount, setErrorCount] = useState(0);
-  const [firstRender, setFirstRender] = useState(true);
-
-  useEffect(() => {
-    console.log(current);
-  }, [current]);
 
   useEffect(() => {
     dispatch(selectTool({ tool: tool }));

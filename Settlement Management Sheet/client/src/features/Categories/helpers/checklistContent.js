@@ -7,6 +7,16 @@ const checklistContent = [
     keypath: 'description',
     label: 'Description',
   },
+  {
+    keypath: 'thresholds',
+    label: 'Thresholds',
+    type: 'group',
+  },
+  {
+    keypath: 'dependencies',
+    label: 'Dependencies',
+    type: 'group',
+  },
 ];
 
 export default checklistContent;

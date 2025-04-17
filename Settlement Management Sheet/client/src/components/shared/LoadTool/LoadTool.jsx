@@ -22,11 +22,30 @@ const options = [
 
 import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
 
-const LoadTool = ({ setShowModal, tool, displayName }) => {
-  const [selected, setSelected] = useState([]);
+const LoadTool = ({
+  setShowModal,
+  tool,
+  keypath = '',
+  displayName,
+  selectionMode = false,
+  maxSelections = 6,
+  outerUpdate = () => {},
+  outerTool = {},
+}) => {
+  const { loadNewTool, edit } = useTools(tool);
   const { showSnackbar } = useSnackbar();
-  const { loadNewTool } = useTools(tool);
+  const [selected, setSelected] = useState(outerTool[keypath] || []);
   const capsTool = tool.toUpperCase();
+
+  useEffect(() => {
+    console.log(selected);
+    console.log(outerTool);
+  }, [selected]);
+
+  const handleSelectConfirm = () => {
+    outerUpdate(keypath, selected);
+    setShowModal(null);
+  };
 
   const ActionClick = (e, action, { refId, id }) => {
     e.stopPropagation();
@@ -70,6 +89,11 @@ const LoadTool = ({ setShowModal, tool, displayName }) => {
         type="personal"
         tool={tool}
         displayName={displayName}
+        selectionMode={selectionMode}
+        selected={selected}
+        setSelected={setSelected}
+        maxSelections={maxSelections}
+        onConfirm={handleSelectConfirm}
       />
       <FetchedDisplay
         onActionClick={handleActionClick}
@@ -77,6 +101,11 @@ const LoadTool = ({ setShowModal, tool, displayName }) => {
         type="community"
         tool={tool}
         displayName={displayName}
+        selectionMode={selectionMode}
+        selected={selected}
+        setSelected={setSelected}
+        maxSelections={maxSelections}
+        onConfirm={handleSelectConfirm}
       />
     </Box>
   );

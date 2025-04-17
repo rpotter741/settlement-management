@@ -17,6 +17,7 @@ const FetchedDisplay = ({
   selected,
   setSelected,
   displayName = capitalize(tool),
+  onConfirm = () => {},
 }) => {
   const [myTools, setMyTools] = useState(true);
   const [myData, setMyData] = useState([]);
@@ -79,6 +80,7 @@ const FetchedDisplay = ({
         selected={selected}
         setSelected={setSelected}
         maxSelections={maxSelections}
+        onConfirm={onConfirm}
       />
     </TitledCollapse>
   );

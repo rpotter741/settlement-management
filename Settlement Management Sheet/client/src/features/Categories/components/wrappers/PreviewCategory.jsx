@@ -6,9 +6,12 @@ import { useCategory } from '../../hooks/useCategory.jsx';
 import { useTools } from 'hooks/useTool.jsx';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';
+import useFetchReferences from 'hooks/useFetchReferences.jsx';
+import AttributeCard from 'components/shared/AttributeCard/AttributeCard.jsx';
 
 const PreviewCategory = () => {
   const { current: category } = useTools('category');
+  const attributes = useFetchReferences('attribute', category.attributes);
   return (
     <Box
       sx={{
@@ -52,10 +55,8 @@ const PreviewCategory = () => {
       >
         Attributes
       </Typography>
-      {category?.attributes?.map((attr) => (
-        <Box sx={{ gridColumn: 'span 3', display: 'flex', gap: 2 }} key={attr}>
-          <Typography variant="h6">{attr?.name}</Typography>
-        </Box>
+      {attributes.map((attr) => (
+        <AttributeCard key={attr.refId} attr={attr} />
       ))}
       <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
       <Typography

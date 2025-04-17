@@ -38,7 +38,6 @@ const AttrMetaData = ({ setShowModal }) => {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 1,
@@ -65,7 +64,7 @@ const AttrMetaData = ({ setShowModal }) => {
         <DynamicForm
           initialValues={{ name: attr?.name || '' }}
           field={attributeFields.name}
-          boxSx={{ flexGrow: 2, flexShrink: 1 }}
+          boxSx={{ flexGrow: 2, flexShrink: 1, px: 1 }}
           externalUpdate={handleUpdate}
           shrink
           parentError={errors?.name}
@@ -75,7 +74,7 @@ const AttrMetaData = ({ setShowModal }) => {
       <DynamicForm
         initialValues={{ description: attr?.description || '' }}
         field={attributeFields.description}
-        boxSx={{ gridColumn: 'span 3' }}
+        boxSx={{ gridColumn: 'span 3', px: 1 }}
         externalUpdate={handleUpdate}
         shrink
         parentError={errors?.description}

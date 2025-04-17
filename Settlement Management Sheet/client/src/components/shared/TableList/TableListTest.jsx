@@ -15,6 +15,7 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
+  Button,
 } from '@mui/material';
 
 const TableList = ({
@@ -32,6 +33,7 @@ const TableList = ({
   maxSelections,
   infiniteScroll = true,
   options = [],
+  onConfirm,
 }) => {
   const loadMoreRef = useRef(null);
   const listRef = useRef();
@@ -149,7 +151,8 @@ const TableList = ({
             />
           ) : (
             <Checkbox
-              onChange={(e) => onCheckboxChange(e, row.id)}
+              sx={{ zIndex: 3 }}
+              onClick={(e) => onCheckboxChange(e, row.id)}
               checked={selected.includes(row.id)}
               disabled={
                 selected.length >= maxSelections && !selected.includes(row.id)
@@ -367,6 +370,11 @@ const TableList = ({
           <Box>{isFetchingNextPage && <Box colSpan={6}>Loading...</Box>}</Box>
         </Box>
       </Box>
+      {checkbox && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <Button onClick={onConfirm}>Confirm</Button>
+        </Box>
+      )}
     </TableContainer>
   );
 };

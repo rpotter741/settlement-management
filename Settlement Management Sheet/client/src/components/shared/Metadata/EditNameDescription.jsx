@@ -1,29 +1,24 @@
 import React from 'react';
 import { useTools } from 'hooks/useTool.jsx';
 
-import DynamicForm from 'components/shared/DynamicForm/DynamicForm.jsx';
+import DynamicForm from '../DynamicForm/DynamicForm.jsx';
 
-const CategoryMetadata = () => {
-  const {
-    edit: category,
-    errors,
-    updateTool: updateCategory,
-    validateToolField: validateCategoryField,
-  } = useTools('category');
+const EditNameDescription = ({ tool, fields }) => {
+  const { edit, errors, updateTool, validateToolField } = useTools(tool);
 
   const handleUpdate = (updates, { keypath }) => {
-    updateCategory(keypath, updates);
+    updateTool(keypath, updates);
   };
 
   const handleValidationUpdate = (error, { keypath }) => {
-    validateCategoryField(keypath, error);
+    validateToolField(keypath, error);
   };
 
   return (
     <>
       <DynamicForm
-        initialValues={{ name: category?.name || '' }}
-        field={categoryFields.name}
+        initialValues={{ name: edit?.name || '' }}
+        field={fields.name}
         externalUpdate={handleUpdate}
         shrink
         parentError={errors?.name}
@@ -31,8 +26,8 @@ const CategoryMetadata = () => {
         boxSx={{ gridColumn: 'span 3', px: 1 }}
       />
       <DynamicForm
-        initialValues={{ name: category?.description || '' }}
-        field={categoryFields.description}
+        initialValues={{ name: edit?.description || '' }}
+        field={fields.description}
         externalUpdate={handleUpdate}
         shrink
         parentError={errors?.description}
@@ -43,4 +38,4 @@ const CategoryMetadata = () => {
   );
 };
 
-export default CategoryMetadata;
+export default EditNameDescription;

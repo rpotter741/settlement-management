@@ -4,11 +4,13 @@ import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
+import EditNameDescription from 'components/shared/Metadata/EditNameDescription.jsx';
+import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
 
-import CategoryMetadata from '../forms/CategoryMetadata.jsx';
+import categoryFields from '../../helpers/categoryFormData.js';
 import CategoryAttributes from '../forms/CategoryAttributes.jsx';
 
-const EditCategory = () => {
+const EditCategory = ({ setShowModal }) => {
   const { edit: category } = useTools('category');
   const [attributes, setAttributes] = useState(false);
   const [thresholds, setThresholds] = useState(false);
@@ -31,7 +33,7 @@ const EditCategory = () => {
         pb: 2,
       }}
     >
-      <CategoryMetadata />
+      <EditNameDescription tool="category" fields={categoryFields} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
         title="Attributes"
@@ -41,7 +43,7 @@ const EditCategory = () => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setAttributes(!attributes)}
       >
-        <CategoryAttributes />
+        <CategoryAttributes setShowModal={setShowModal} />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
@@ -51,7 +53,7 @@ const EditCategory = () => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setThresholds(!thresholds)}
       >
-        thresholds
+        <ObjectThresholds tool="category" />
       </TitledCollapse>
       <TitledCollapse
         title="Dependencies"

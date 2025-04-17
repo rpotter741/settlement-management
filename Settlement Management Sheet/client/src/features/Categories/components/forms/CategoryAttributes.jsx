@@ -3,20 +3,35 @@ import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
 
-const CategoryAttributes = () => {
-  const { current, edit, updateTool, validateToolField } = useTools('category');
+import AttributeCard from 'components/shared/AttributeCard/AttributeCard.jsx';
 
-  useEffect(() => {
-    console.log(edit);
-  }, [edit]);
+import useFetchReferences from 'hooks/useFetchReferences.jsx';
+
+const CategoryAttributes = ({ setShowModal }) => {
+  const { current, edit, updateTool, validateToolField } = useTools('category');
+  const attributes = useFetchReferences('attribute', edit.attributes);
+
+  const handleAddClick = () => {
+    setShowModal('Select Attribute');
+  };
 
   return (
     <Box>
       <Typography variant="h6" sx={{ textAlign: 'center', mb: 2 }}>
-        {edit.attributes.map((attr) => (
-          <Box key={attr}>{attr}</Box>
-        ))}
-        {edit.attributes.length < 6 && <Button>Add Attribute</Button>}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 2,
+          }}
+        >
+          {attributes.map((attr) => (
+            <AttributeCard key={attr.refId} attr={attr} />
+          ))}
+        </Box>
+        {edit.attributes.length < 6 && (
+          <Button onClick={handleAddClick}>Add Attribute</Button>
+        )}
       </Typography>
     </Box>
   );

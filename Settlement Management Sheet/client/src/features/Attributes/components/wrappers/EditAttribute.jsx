@@ -6,6 +6,7 @@ import { TitledCollapse } from '../../../../components/index.js';
 import AttrMetaData from '../forms/AttrMetaData.jsx';
 import AttrValues from '../forms/AttrValues.jsx';
 import SettlementPointsCost from '../forms/SettlementPointsCost.jsx';
+import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
 import AttributeThresholds from '../forms/AttributeThresholds.jsx';
 import TagTable from '../forms/TagTable';
 
@@ -67,7 +68,7 @@ const EditAttribute = ({ setShowModal }) => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setThresholds(!thresholds)}
       >
-        <AttributeThresholds />
+        <ObjectThresholds tool="attribute" />
       </TitledCollapse>
       <TitledCollapse
         title={`Tags (${attr?.tags?.length} / 5)`}
