@@ -6,6 +6,7 @@ import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
 import CategoryMetadata from '../forms/CategoryMetadata.jsx';
+import CategoryAttributes from '../forms/CategoryAttributes.jsx';
 
 const EditCategory = () => {
   const { edit: category } = useTools('category');
@@ -40,7 +41,7 @@ const EditCategory = () => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setAttributes(!attributes)}
       >
-        metadata
+        <CategoryAttributes />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"

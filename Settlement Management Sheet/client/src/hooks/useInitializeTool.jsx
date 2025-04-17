@@ -27,6 +27,10 @@ export const useInitializeTool = ({
   const [firstRender, setFirstRender] = useState(true);
 
   useEffect(() => {
+    console.log(current);
+  }, [current]);
+
+  useEffect(() => {
     dispatch(selectTool({ tool: tool }));
   }, []);
 
@@ -59,7 +63,7 @@ export const useInitializeTool = ({
 
   useEffect(() => {
     if (current && !edit) {
-      dispatch(initializeEdit({ refId: current.refId, tool }));
+      dispatch(initializeEdit({ id: current.id, tool }));
       dispatch(initializeValidation({ tool, obj: tool }));
     }
   }, [tool, dispatch]);

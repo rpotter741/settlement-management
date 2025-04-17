@@ -18,7 +18,7 @@ const useServer = async ({ tool, type, data }) => {
       api.post(`/tools/${tool}/publish`, { data: { refId, id }, tool }),
     delete: async () => {
       try {
-        await api.post(`/tools/${tool}/delete`, { refId, tool });
+        await api.post(`/tools/${tool}/delete`, { id, tool });
       } catch (error) {
         console.error('API error:', error.message);
         throw new Error(

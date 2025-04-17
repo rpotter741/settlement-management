@@ -11,6 +11,7 @@ const initializeCategory = () => {
   return {
     id: newId(),
     refId: newId(),
+    version: 1,
     name: '',
     description: '',
     attributes: [],

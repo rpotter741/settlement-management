@@ -40,7 +40,7 @@ const PreviewCategory = () => {
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h6">Description</Typography>
+        <Typography variant="h6">Description:</Typography>
         <Typography sx={{ textAlign: 'start' }} variant="body1">
           {category?.description || 'No description'}
         </Typography>

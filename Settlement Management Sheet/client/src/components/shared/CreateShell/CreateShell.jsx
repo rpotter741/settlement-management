@@ -9,6 +9,11 @@ import useServer from 'services/useServer.js';
 import prefetchToolContent from 'services/prefetchTools.js';
 import { useTools } from 'hooks/useTool.jsx';
 import { useInitializeTool } from 'hooks/useInitializeTool.jsx';
+import { useDispatch } from 'react-redux';
+import {
+  initializeTool as initialize,
+  setCurrent,
+} from '../../../app/toolSlice.js';
 
 const CreateShell = ({
   tool,
@@ -75,7 +80,16 @@ const CreateShell = ({
     }
   };
 
+  const dispatch = useDispatch();
+
+  const handleAdd = async () => {
+    const newTool = initializeTool(tool);
+    dispatch(initialize({ tool, data: newTool }));
+    dispatch(setCurrent({ tool, data: newTool, initializeEdit: true }));
+  };
+
   const buttonActions = {
+    add: () => handleAdd(),
     edit: () => setEditMode(true),
     save: () => handleSave(),
     cancel: () => handleCancel(),

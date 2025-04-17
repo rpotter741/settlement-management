@@ -20,28 +20,28 @@ const toolSlice = createSlice({
   reducers: {
     initializeTool: (state, action) => {
       const { tool, data } = action.payload;
-      state[tool].byId[data.refId] = data;
-      state[tool].allIds.push(data.refId);
+      state[tool].byId[data.id] = data;
+      state[tool].allIds.push(data.id);
     },
     addTool: (state, action) => {
       const { tool, data } = action.payload;
-      state[tool].byId[data.refId] = data;
-      state[tool].allIds.push(data.refId);
+      state[tool].byId[data.id] = data;
+      state[tool].allIds.push(data.id);
     },
     initializeEdit: (state, action) => {
-      const { tool, refId } = action.payload;
-      state[tool].edit = cloneDeep(state[tool].byId[refId]);
+      const { tool, id } = action.payload;
+      state[tool].edit = cloneDeep(state[tool].byId[id]);
     },
     saveTool: (state, action) => {
-      const { tool, refId, overwriteCurrent } = action.payload;
+      const { tool, id, overwriteCurrent } = action.payload;
       const editClone = cloneDeep(state[tool].edit);
-      state[tool].byId[refId] = editClone;
+      state[tool].byId[id] = editClone;
       overwriteCurrent ? (state[tool].current = editClone) : null;
     },
     updateById: (state, action) => {
-      const { tool, refId, keypath, updates } = action.payload;
-      if (state[tool].byId[refId]) {
-        set(state[tool].byId[refId], keypath, updates);
+      const { tool, id, keypath, updates } = action.payload;
+      if (state[tool].byId[id]) {
+        set(state[tool].byId[id], keypath, updates);
       }
     },
     updateEdit: (state, action) => {
@@ -49,13 +49,13 @@ const toolSlice = createSlice({
       set(state[tool].edit, keypath, updates);
     },
     deleteById: (state, action) => {
-      const { tool, refId } = action.payload;
-      delete state[tool].byId[refId];
-      state[tool].allIds = state[tool].allIds.filter((id) => id !== refId);
+      const { tool, id } = action.payload;
+      delete state[tool].byId[id];
+      state[tool].allIds = state[tool].allIds.filter((id_) => id_ !== id);
     },
     refreshById: (state, action) => {
-      const { tool, refId } = action.payload;
-      state[tool].byId[refId] = { ...state[tool].byId[refId] };
+      const { tool, id } = action.payload;
+      state[tool].byId[id] = { ...state[tool].byId[id] };
     },
     setCurrent: (state, action) => {
       const { tool, data, initializeEdit } = action.payload;

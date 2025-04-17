@@ -7,6 +7,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import PublicIcon from '@mui/icons-material/Public';
 import EditIcon from '@mui/icons-material/Edit';
 import LoadIcon from '@mui/icons-material/GetApp';
+import PlusIcon from '@mui/icons-material/Add';
 
 const DesktopMenu = ({ mode, tool, isValid, actions, ...props }) => {
   return (
@@ -21,6 +22,18 @@ const DesktopMenu = ({ mode, tool, isValid, actions, ...props }) => {
         ...props.sx,
       }}
     >
+      <>
+        <Tooltip
+          arrow
+          title={<Typography variant="body2">Add a new {tool}</Typography>}
+        >
+          <Box>
+            <Button onClick={actions.add} startIcon={<PlusIcon />}>
+              Create {tool}
+            </Button>
+          </Box>
+        </Tooltip>
+      </>
       {mode && (
         <>
           <Tooltip

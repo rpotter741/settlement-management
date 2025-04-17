@@ -10,7 +10,7 @@ export const loadTool =
     const oldId = state.tools[tool].current.refId;
 
     await queryClient.prefetchQuery({
-      queryKey: [tool, refId],
+      queryKey: [tool, id],
       queryFn: async () => {
         const { data } = await api.get('/tools/getItem', {
           params: {
@@ -23,16 +23,16 @@ export const loadTool =
       },
     });
 
-    const cachedItem = queryClient.getQueryData([tool, refId]);
+    const cachedItem = queryClient.getQueryData([tool, id]);
 
-    if (!state.tools[tool].byId[refId]) {
+    if (!state.tools[tool].byId[id]) {
       dispatch(addTool({ tool, data: cachedItem }));
       if (setNew) {
         dispatch(setCurrent({ tool, data: cachedItem, initializeEdit: true }));
       }
     }
 
-    dispatch(selectKey({ key: tool, value: refId }));
+    dispatch(selectKey({ key: tool, value: id }));
 
-    if (oldId) dispatch(deleteById({ tool, refId: oldId })); // prevent removing null
+    if (oldId) dispatch(deleteById({ tool, id: oldId })); // prevent removing null
   };

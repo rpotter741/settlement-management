@@ -2,8 +2,6 @@ import iconList from '../../../components/shared/IconSelector/iconList';
 import { v4 as newId } from 'uuid';
 
 function initializeAttribute() {
-  const tempId = newId(); // Temporary unique ID for the category
-
   // Generate thresholds
   const maxThresholds = [9, 29, 49, 69, 84, 99, 100];
   const thresholds = {
@@ -30,7 +28,10 @@ function initializeAttribute() {
 
   // Return the generated object
   return {
-    refId: tempId,
+    id: newId(),
+    refId: newId(),
+    version: 1,
+    positive: true,
     name: '',
     description: '',
     balance: {
