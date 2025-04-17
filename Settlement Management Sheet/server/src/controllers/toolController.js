@@ -1,4 +1,8 @@
 import prisma from '../db/db.js';
+import { v4 as newId } from 'uuid';
+
+//helpers
+import getNextVersion from '../utils/getNextVersion.js';
 
 const getContent = async (req, res) => {
   try {
@@ -63,27 +67,46 @@ const saveContent = async (req, res) => {
     }
 
     const latest = await model.findFirst({
-      where: { refId: data.refId },
+      where: { id: data.id },
       orderBy: { updatedAt: 'desc' },
     });
+
     if (latest) {
-      await model.update({
-        where: { id: latest.id },
-        data: {
-          ...data,
-          updatedAt: new Date(),
-        },
-      });
-      return res.json({ message: 'Content updated successfully.' });
+      if (latest.status === 'PUBLISHED') {
+        // Create a new draft version
+        const version = await getNextVersion(model, data.id);
+        await model.create({
+          data: {
+            ...data,
+            version,
+            status: 'DRAFT',
+            createdBy: userId,
+            contentType: 'OFFICIAL',
+          },
+        });
+        return res.json({ message: 'New draft version created.' });
+      } else {
+        // Update the existing draft version
+        await model.update({
+          where: { refId: latest.refId },
+          data: {
+            ...data,
+            updatedAt: new Date(),
+          },
+        });
+        return res.json({ message: 'Draft updated successfully.' });
+      }
     } else {
+      // Create brand new object
       await model.create({
         data: {
           ...data,
+          version: 1,
           createdBy: userId,
           contentType: 'OFFICIAL',
         },
       });
-      return res.json({ message: 'Content saved successfully.' });
+      return res.json({ message: 'Content created successfully.' });
     }
   } catch (error) {
     console.error('Error saving content:', error);
@@ -93,10 +116,9 @@ const saveContent = async (req, res) => {
 
 const deleteContent = async (req, res) => {
   try {
-    const { tool, refId } = req.body;
-    console.log(tool, refId);
+    const { tool, id } = req.body;
 
-    if (!tool || !refId) {
+    if (!tool || !id) {
       return res.status(400).json({ message: 'Tool and refId are required.' });
     }
 
@@ -105,8 +127,7 @@ const deleteContent = async (req, res) => {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }
 
-    await model.deleteMany({ where: { refId } });
-    console.log('we did it!');
+    await model.deleteMany({ where: { id } });
     return res.status(200).json({ message: 'Content deleted successfully.' });
   } catch (error) {
     console.error('Error deleting content:', error);
@@ -117,13 +138,11 @@ const deleteContent = async (req, res) => {
 const getItem = async (req, res) => {
   try {
     const { tool, id, refId } = req.query;
-    console.log(tool, id, refId);
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }
     const item = await model.findUnique({ where: { id, refId } });
-    console.log(item);
     res.json(item);
   } catch (error) {
     console.error('Error getting item:', error);
@@ -131,4 +150,19 @@ const getItem = async (req, res) => {
   }
 };
 
-export { getContent, saveContent, deleteContent, getItem };
+const fetchByIds = async (req, res) => {
+  try {
+    const { tool, ids } = req.query;
+    const model = prisma[tool];
+    if (!model) {
+      return res.status(400).json({ message: 'Invalid tool type.' });
+    }
+    const items = await model.findMany({ where: { id: { in: ids } } });
+    res.json(items);
+  } catch (error) {
+    console.error('Error getting items by ids:', error);
+    return res.status(500).json({ message: 'Error getting items by ids.' });
+  }
+};
+
+export { getContent, saveContent, deleteContent, getItem, fetchByIds };

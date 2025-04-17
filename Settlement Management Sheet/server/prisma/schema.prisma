@@ -21,8 +21,10 @@ enum Status {
 /////////////////// ATTRIBUTE //////////////////////
 
 model Attribute {
-  id                  String    @id @default(uuid())
-  refId               String    // ID for versioning or app-level tracking
+  refId               String    @id @default(uuid())
+  id                  String @unique // ID for versioning or app-level tracking
+  version             Int // per id
+  positive            Boolean
   name                String
   description         String
   balance             Json
@@ -40,15 +42,16 @@ model Attribute {
 
   @@index([contentType])
   @@index([tags])
-  @@index([refId, updatedAt(sort: Desc)])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 
 ////////////////// CATEGORY //////////////////////////
 
 model Category {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String  @unique   // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   attributes   Json
@@ -70,8 +73,9 @@ model Category {
 ////////////////// EVENT //////////////////////////
 
 model Event {
-  id          String @id @default(uuid())
-  refId       String
+  refId       String    @id @default(uuid())
+  id          String  @unique   // ID for versioning or app-level tracking
+  version     Int // per id
   name        String
   description String
   flavorText  Json
@@ -116,8 +120,9 @@ model Event {
 ////////////////// LISTENER //////////////////////////
 
 model Listener {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String   @unique  // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   conditions   Json
@@ -154,8 +159,9 @@ enum StatusType {
 }
 
 model GameStatus {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String    @unique // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   type         StatusType
@@ -171,8 +177,9 @@ model GameStatus {
 ////////////////// BUILDING //////////////////////////
 
 model Building {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String    @unique // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   upgrades     Json
@@ -196,8 +203,9 @@ enum UpgradeType {
 }
 
 model Upgrade {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String    @unique // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   impact       Json
@@ -219,8 +227,9 @@ model Upgrade {
 ////////////////// TRADE HUB //////////////////////////
 
 model TradeHub {
-  id           String @id @default(uuid())
-  refId        String
+  refId        String    @id @default(uuid())
+  id           String    @unique // ID for versioning or app-level tracking
+  version      Int // per id
   name         String
   description  String
   region       String
@@ -246,8 +255,9 @@ model TradeHub {
 ////////////////// SETTLEMENT TYPE //////////////////////////
 
 model SettlementType {
-  id           String @id @default(uuid())
-  refId        String
+  refId               String    @id @default(uuid())
+  id                  String    @unique // ID for versioning or app-level tracking
+  version             Int // per id
   name         String
   description  String
   upgrades     String[]
@@ -262,8 +272,9 @@ model SettlementType {
 ////////////////// SETTLEMENT //////////////////////////
 
 model Settlement {
-  id            String @id @default(uuid())
-  refId         String
+  refId         String    @id @default(uuid())
+  id            String     @unique// ID for versioning or app-level tracking
+  version       Int // per id
   name          String
   stats         Json
   pop           Json
@@ -318,12 +329,13 @@ enum LocationType {
 }
 
 model Location {
-  id              String @id @default(uuid())
-  refId           String
+  refId           String    @id @default(uuid())
+  id              String    @unique // ID for versioning or app-level tracking
+  version         Int // per id
   name            String
   description     String
   eventRefs       String[]
-  linkedRegion    Region @relation(fields: [linkedRegionId], references: [id])
+  linkedRegion    String
   linkedRegionId  String
   type            LocationType
 }
@@ -331,11 +343,12 @@ model Location {
 /////////////// REGION ////////////////
 
 model Region {
-  id            String @id @default(uuid())
-  refId         String
+  refId         String    @id @default(uuid())
+  id            String    @unique // ID for versioning or app-level tracking
+  version       Int // per id
   name          String
   description   String
-  locations     Location[]
+  locations     String[]
   contentType   ContentTypes
   createdBy     String
   createdAt     DateTime @default(now())
