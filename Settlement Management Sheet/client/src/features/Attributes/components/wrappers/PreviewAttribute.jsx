@@ -69,12 +69,29 @@ const PreviewAttribute = () => {
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h6">Description</Typography>
+        <Typography variant="h6">Description:</Typography>
         <Typography sx={{ textAlign: 'start' }} variant="body1">
           {attr?.description || 'No description'}
         </Typography>
+        <Box
+          sx={{
+            gridColumn: 'span 3',
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="h6">Type:</Typography>
+          <Typography variant="body1">
+            {attr?.positive ? 'Positive' : 'Negative' || 'None'}
+          </Typography>
+        </Box>
       </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
+        {' '}
+        BALANCE{' '}
+      </Divider>
       <Box
         sx={{
           display: 'flex',
@@ -108,14 +125,10 @@ const PreviewAttribute = () => {
         <Typography variant="h6">Cost Per Level:</Typography>
         <Typography>{attr?.balance?.costPerLevel}</Typography>
       </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }} />
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
+        SETTLEMENT POINT COSTS
+      </Divider>
 
-      <Typography
-        variant="h5"
-        sx={{ gridColumn: 'span 3', textAlign: 'center', my: 2 }}
-      >
-        Settlement Point Costs
-      </Typography>
       {attr.settlementPointCost.order.map((id) => (
         <Box
           sx={{
@@ -137,18 +150,9 @@ const PreviewAttribute = () => {
           </Typography>
         </Box>
       ))}
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }} />
-      <Typography
-        variant="h5"
-        sx={{
-          gridColumn: 'span 3',
-          textAlign: 'center',
-          my: 2,
-          width: '100%',
-        }}
-      >
-        Thresholds
-      </Typography>
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
+        THRESHOLDS
+      </Divider>
       <Box
         sx={{
           gridColumn: 'span 3',
