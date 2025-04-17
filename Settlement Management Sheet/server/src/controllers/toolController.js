@@ -1,5 +1,4 @@
 import prisma from '../db/db.js';
-import { v4 as newId } from 'uuid';
 
 //helpers
 import getNextVersion from '../utils/getNextVersion.js';
@@ -152,7 +151,7 @@ const getItem = async (req, res) => {
 
 const fetchByIds = async (req, res) => {
   try {
-    const { tool, ids } = req.query;
+    const { tool, ids } = req.body;
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });

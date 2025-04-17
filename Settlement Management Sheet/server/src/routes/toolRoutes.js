@@ -7,6 +7,7 @@ import {
   saveContent,
   deleteContent,
   getItem,
+  fetchByIds,
 } from '../controllers/toolController.js';
 
 const router = express.Router();
@@ -14,6 +15,8 @@ const router = express.Router();
 router.get('/content', getContent);
 
 router.get('/getItem', getItem);
+
+router.post('/fetchByIds', fetchByIds);
 
 router.post('/:tool/save', saveContent);
 
