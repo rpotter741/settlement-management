@@ -1,25 +1,34 @@
-import { Box, Typography, Card, Button, Divider } from '@mui/material';
+import { Box, Typography, Card, Button, Divider, Chip } from '@mui/material';
 import { useState } from 'react';
 import changeIconDimensions from 'utility/halveIconDimensions.js';
+import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 
 import Icon from 'components/shared/Icons/Icon.jsx';
 
 const AttributeCard = ({ attr }) => {
+  const [expanded, setExpanded] = useState(false);
   return (
-    <Card sx={{ py: 4, boxShadow: 3, backgroundColor: 'background.default' }}>
+    <Card
+      sx={{
+        pb: 4,
+        boxShadow: 3,
+        backgroundColor: 'background.default',
+      }}
+    >
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           gap: 2,
+          minHeight: 100,
         }}
       >
         <Typography variant="h6" sx={{ textAlign: 'center' }}>
           {attr.name}
         </Typography>
         <Icon
-          viewBox={changeIconDimensions(attr.icon.viewBox, 0.75)}
+          viewBox={changeIconDimensions(attr.icon.viewBox, 1)}
           path={attr.icon.d}
           size={40}
           color={attr.iconColor}
@@ -35,10 +44,22 @@ const AttributeCard = ({ attr }) => {
       <Typography variant="body2" sx={{ textAlign: 'left', pl: 2 }}>
         Health: {attr.balance.healthPerLevel}
       </Typography>
-      <Divider sx={{ fontSize: '0.75rem' }}>Description</Divider>
-      <Typography variant="body2" sx={{ textAlign: 'center', px: 2 }}>
-        {attr.description}
-      </Typography>
+      <Divider>
+        <Chip
+          sx={{
+            backgroundColor: 'background.default',
+            color: 'primary.main',
+          }}
+          label={expanded ? 'Hide Description' : 'Show Description'}
+          size="small"
+          onClick={() => setExpanded((prev) => !prev)}
+        />
+      </Divider>
+      {expanded && (
+        <Typography variant="body2" sx={{ textAlign: 'center', px: 2 }}>
+          {attr.description}
+        </Typography>
+      )}
     </Card>
   );
 };
