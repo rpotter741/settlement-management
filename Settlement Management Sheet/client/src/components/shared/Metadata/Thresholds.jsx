@@ -10,16 +10,13 @@ import resolveDuplicates from 'utility/resolveDuplicates';
 import { Box, Typography, Tooltip, Button } from '@mui/material';
 import Threshold from './Threshold';
 
-const ObjectThresholds = ({ tool, max = 15 }) => {
+const ObjectThresholds = ({ tool, max = 21 }) => {
   const { selectValue, edit, updateTool, validateToolField, errors } =
     useTools(tool);
   const thresholds = selectValue('thresholds');
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
   const [lastId, setLastId] = useState(null);
-  // const errors = objErrors.thresholds;
-
-  console.log(errors);
 
   const debouncedShowSnackbar = useCallback(
     debounce(

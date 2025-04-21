@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useDynamicSidebar } from '../../../context/SidebarContext';
 import eventSidebar from '../../../helpers/events/createEventsSidebar';
 import NewPhase from './components/NewPhase';
 import Box from '@mui/material/Box';

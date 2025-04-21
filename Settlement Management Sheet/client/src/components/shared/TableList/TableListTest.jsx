@@ -45,13 +45,23 @@ const TableList = ({
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
 
-  const onCheckboxChange = (e, id) => {
+  const onCheckboxChange = (e, { id, refId }) => {
     e.stopPropagation();
     setSelected((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
+      const alreadySelected = prev.ids.includes(id);
+
+      if (alreadySelected) {
+        // Remove both id and corresponding refId
+        return {
+          ids: prev.ids.filter((item) => item !== id),
+          refIds: prev.refIds.filter((item) => item !== refId),
+        };
       } else {
-        return [...prev, id];
+        // Add both id and refId
+        return {
+          ids: [...prev.ids, id],
+          refIds: [...prev.refIds, refId],
+        };
       }
     });
   };
@@ -68,6 +78,10 @@ const TableList = ({
   ]);
 
   useEffect(() => {
+    console.log(selected, 'selected');
+  }, [selected]);
+
+  useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -81,8 +95,8 @@ const TableList = ({
 
   const [expandedRow, setExpandedRow] = useState(null);
 
-  const toggleExpand = (rowId) => {
-    setExpandedRow(expandedRow === rowId ? null : rowId);
+  const toggleExpand = (rowRefId) => {
+    setExpandedRow(expandedRow === rowRefId ? null : rowRefId);
     if (listRef.current) listRef.current.resetAfterIndex(0);
   };
 
@@ -128,7 +142,7 @@ const TableList = ({
             boxSizing: 'border-box',
           },
           flexWrap: 'wrap',
-          overflowY: 'scroll',
+          overflowY: expandedRow === row.refId ? 'scroll' : 'hidden',
         }}
         style={style} // Ensure virtualization works properly
       >
@@ -152,8 +166,10 @@ const TableList = ({
           ) : (
             <Checkbox
               sx={{ zIndex: 3 }}
-              onClick={(e) => onCheckboxChange(e, row.id)}
-              checked={selected.includes(row.id)}
+              onClick={(e) =>
+                onCheckboxChange(e, { id: row.id, refId: row.refId })
+              }
+              checked={selected.ids.includes(row.id)}
               disabled={
                 selected.length >= maxSelections && !selected.includes(row.id)
               }

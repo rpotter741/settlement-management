@@ -18,8 +18,6 @@ const useFetchReferences = (tool, refIds = []) => {
         })
         .then(({ data }) => {
           data.forEach((item) => {
-            console.log(refIds);
-            console.log(item);
             queryClient.setQueryData([tool, item.id], item);
           });
           setResolved(refIds.map((id) => queryClient.getQueryData([tool, id])));

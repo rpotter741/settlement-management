@@ -6,6 +6,7 @@ import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 import EditNameDescription from 'components/shared/Metadata/EditNameDescription.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
+import ObjectDependencies from 'components/shared/Metadata/Dependencies.jsx';
 
 import categoryFields from '../../helpers/categoryFormData.js';
 import CategoryAttributes from '../forms/CategoryAttributes.jsx';
@@ -63,7 +64,7 @@ const EditCategory = ({ setShowModal }) => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setDependencies(!dependencies)}
       >
-        dependencies
+        <ObjectDependencies tool="category" setShowModal={setShowModal} />
       </TitledCollapse>
       <TitledCollapse
         title="Tags"

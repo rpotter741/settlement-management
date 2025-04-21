@@ -8,6 +8,8 @@ import { useTools } from 'hooks/useTool.jsx';
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';
 import useFetchReferences from 'hooks/useFetchReferences.jsx';
 import AttributeCard from 'components/shared/AttributeCard/AttributeCard.jsx';
+import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
+import PreviewDependencies from 'components/shared/Metadata/PreviewDependencies.jsx';
 
 const PreviewCategory = () => {
   const { current: category } = useTools('category');
@@ -31,8 +33,8 @@ const PreviewCategory = () => {
         data={category?.name}
         label="Name"
         edit={{ gridColumn: 'span 3' }}
+        type="body1"
       />
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
       <Box
         sx={{
           gridColumn: 'span 3',
@@ -48,61 +50,39 @@ const PreviewCategory = () => {
           {category?.description || 'No description'}
         </Typography>
       </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
-      <Typography
-        variant="h5"
-        sx={{ gridColumn: 'span 3', textAlign: 'center', my: 2 }}
-      >
-        Attributes
-      </Typography>
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }}>
+        ATTRIBUTES
+      </Divider>
       {attributes.map((attr) => (
         <AttributeCard key={attr.refId} attr={attr} />
       ))}
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
-      <Typography
-        variant="h5"
-        sx={{ gridColumn: 'span 3', textAlign: 'center', my: 2 }}
-      >
-        Thresholds
-      </Typography>
-      <Box
-        sx={{
-          gridColumn: 'span 3',
-          gap: 2,
-          display: 'grid',
-          gridTemplateRows: 'repeat(7, 1fr)',
-          gridAutoFlow: 'column',
-        }}
-      >
-        {category?.thresholds.order.map((id, n) => (
-          <Box
-            key={id}
-            sx={{
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              justifyContent: 'start',
-              maxWidth: '15rem',
-            }}
-          >
-            <Typography variant="h6">
-              {category.thresholds.data[id].name || n}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }} />
-      <Typography
-        variant="h5"
-        sx={{ gridColumn: 'span 3', textAlign: 'center', my: 2 }}
-      >
-        Dependencies
-      </Typography>
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }}>
+        THRESHOLDS
+      </Divider>
+      <PreviewThresholds
+        data={category?.thresholds?.data}
+        order={category?.thresholds?.order}
+        innerSx={{ gridColumn: 'span 3' }}
+      />
+      <Divider sx={{ gridColumn: 'span 3', borderColor: '#000' }}>
+        DEPENDENCIES
+      </Divider>
       {category?.dependencies?.order.map((id) => (
-        <Box sx={{ gridColumn: 'span 3', display: 'flex', gap: 2 }}>
-          <Typography variant="h6">
-            {category.dependencies.data[id].name}
-          </Typography>
+        <Box
+          key={id}
+          sx={{
+            gridColumn: 'span 1',
+            display: 'flex',
+            flexDirection: 'column',
+            display: 'grid',
+            gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
+            gap: 2,
+          }}
+        >
+          <PreviewDependencies
+            data={category.dependencies.data[id].thresholds}
+            name={category.dependencies.data[id].name}
+          />
         </Box>
       ))}
     </Box>

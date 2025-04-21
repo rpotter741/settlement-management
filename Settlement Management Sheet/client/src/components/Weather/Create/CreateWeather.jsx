@@ -23,7 +23,6 @@ import {
   emptyEvent,
 } from '../../../helpers/weather/emptyWeatherObject.js';
 
-import { useDynamicSidebar } from '../../../context/SidebarContext';
 import weatherSidebar from '../../../helpers/weather/weatherSidebar.js';
 
 const CreateWeather = ({ weather, setWeather }) => {

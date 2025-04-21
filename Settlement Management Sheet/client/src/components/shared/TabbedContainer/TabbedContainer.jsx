@@ -114,7 +114,7 @@ const TabbedContainer = ({
               sx={{
                 position: 'absolute',
                 left: 24,
-                top: '12%',
+                top: '12.5%',
                 boxShadow: 2,
                 zIndex: 1000,
               }}
@@ -123,7 +123,6 @@ const TabbedContainer = ({
             </IconButton>
           </Tooltip>
           <Box sx={tab.contentSx ? tab.contentSx : {}} role="tabbox">
-            {/* {tab.sidebarSx && <Sidebar sidebarSx={tab.sidebarSx} />} */}
             {tab.component ? (
               React.createElement(tab.component, tab.props, toggleDrawer)
             ) : (

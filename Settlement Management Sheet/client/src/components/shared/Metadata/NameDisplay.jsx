@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Typography } from '@mui/material';
 
-const DataDisplay = ({ label, data, isLoading, edit }) => {
+const DataDisplay = ({ label, data, isLoading, edit, type = 'h6' }) => {
   return (
     <Box
       sx={{
@@ -14,7 +14,7 @@ const DataDisplay = ({ label, data, isLoading, edit }) => {
       }}
     >
       <Typography variant="h6">{label}:</Typography>
-      <Typography>{data || 'None'}</Typography>
+      <Typography variant={type}>{data || 'None'}</Typography>
     </Box>
   );
 };

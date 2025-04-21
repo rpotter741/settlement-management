@@ -1,7 +1,5 @@
 import React, { useContext, useState } from 'react';
 
-import { useDynamicSidebar } from '../../../context/SidebarContext';
-
 import TitledCollapse from '../TitledCollapse/TitledCollapse';
 import { Button, Typography, Box } from '@mui/material';
 

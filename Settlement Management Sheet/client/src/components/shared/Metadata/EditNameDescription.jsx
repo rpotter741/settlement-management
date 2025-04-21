@@ -26,7 +26,7 @@ const EditNameDescription = ({ tool, fields }) => {
         boxSx={{ gridColumn: 'span 3', px: 1 }}
       />
       <DynamicForm
-        initialValues={{ name: edit?.description || '' }}
+        initialValues={{ description: edit?.description || '' }}
         field={fields.description}
         externalUpdate={handleUpdate}
         shrink

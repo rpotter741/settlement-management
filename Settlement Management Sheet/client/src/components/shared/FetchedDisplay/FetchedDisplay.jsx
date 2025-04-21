@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import queryClient from 'context/QueryClient.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
+import { useTools } from 'hooks/useTool.jsx';
 
 import capitalize from 'utility/capitalize.js';
 
@@ -18,7 +19,10 @@ const FetchedDisplay = ({
   setSelected,
   displayName = capitalize(tool),
   onConfirm = () => {},
+  dependency = false,
 }) => {
+  const { selectValue } = useTools(tool);
+  const depId = selectValue('refId');
   const [myTools, setMyTools] = useState(true);
   const [myData, setMyData] = useState([]);
   const [search, setSearch] = useState('');
@@ -28,6 +32,8 @@ const FetchedDisplay = ({
       tool: tool,
       scope: type,
       search,
+      dependency,
+      depId,
     });
 
   useEffect(() => {

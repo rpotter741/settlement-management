@@ -38,31 +38,25 @@ import sidebarSx from '../shared/Sidebar/styles.js';
 import contentSx from '../shared/TabbedContainer/contentStyles';
 
 const CustomCreation = () => {
-  const [tab, setTab] = useState('category');
-
   const createToolTabs = [
     {
       name: 'Attribute',
       component: CreateAttribute,
-      sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
       name: 'Category',
       component: CreateCategory,
-      sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
       name: 'Event',
       component: CreateCategory,
-      sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
     {
       name: 'Listeners',
       component: CustomListeners,
-      sidebarSx,
       contentSx: { ...contentSx, flexGrow: 4 },
     },
     {

@@ -83,6 +83,7 @@ const DynamicForm = ({
           id,
           objType,
           placeholder,
+          index,
           ...rest
         } = field;
         // Determine styles based on validity

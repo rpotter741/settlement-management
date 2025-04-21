@@ -4,7 +4,7 @@ import { Box, Button, Typography, Divider } from '@mui/material';
 
 import { Icon as CustomIcon } from '../../../../components/index.js';
 
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
+import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 
 import { useTools } from 'hooks/useTool.jsx';
 
@@ -33,9 +33,15 @@ const PreviewAttribute = () => {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 2,
+          height: '100%',
         }}
       >
-        <Typography variant="h6">Icon</Typography>
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}
+        >
+          Icon
+        </Typography>
         <Button sx={{ boxShadow: 4, borderRadius: 4 }} disabled>
           <CustomIcon
             viewBox={attr?.icon?.viewBox || '0 0 664 512'}
@@ -53,12 +59,16 @@ const PreviewAttribute = () => {
           alignItems: 'center',
           justifyContent: 'start',
           height: '100%',
-          borderBottom: '1px solid #000',
         }}
       >
         <Typography variant="h6">Name:</Typography>
         <Typography>{attr?.name || 'None'}</Typography>
       </Box>
+      <Divider
+        sx={{ gridColumn: 'span 3', borderColor: '#ccc', fontWeight: 'bold' }}
+      >
+        DESCRIPTION
+      </Divider>
       <Box
         sx={{
           gridColumn: 'span 3',
@@ -69,7 +79,6 @@ const PreviewAttribute = () => {
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h6">Description:</Typography>
         <Typography sx={{ textAlign: 'start' }} variant="body1">
           {attr?.description || 'No description'}
         </Typography>
@@ -82,50 +91,85 @@ const PreviewAttribute = () => {
             justifyContent: 'center',
           }}
         >
-          <Typography variant="h6">Type:</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+            Type:
+          </Typography>
           <Typography variant="body1">
             {attr?.positive ? 'Positive' : 'Negative' || 'None'}
           </Typography>
         </Box>
       </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
+      <Divider
+        sx={{
+          gridColumn: 'span 3',
+          borderColor: '#ccc',
+          fontWeight: 'bold',
+        }}
+      >
         {' '}
-        BALANCE{' '}
+        SCALING PER LEVEL{' '}
       </Divider>
       <Box
         sx={{
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          justifyContent: 'start',
+          display: 'grid',
+          gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
+          gridColumn: 'span 3',
         }}
       >
-        <Typography variant="h6">Max Per Level:</Typography>
-        <Typography>{attr?.balance?.maxPerLevel}</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'start',
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
+          >
+            Max:
+          </Typography>
+          <Typography>{attr?.balance?.maxPerLevel}</Typography>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'start',
+            backgroundColor: 'background.default',
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
+          >
+            Health:
+          </Typography>
+          <Typography>{attr?.balance?.healthPerLevel}</Typography>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'start',
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
+          >
+            Cost:
+          </Typography>
+          <Typography>{attr?.balance?.costPerLevel}</Typography>
+        </Box>
       </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          justifyContent: 'start',
-        }}
+
+      <Divider
+        sx={{ gridColumn: 'span 3', borderColor: '#ccc', fontWeight: 'bold' }}
       >
-        <Typography variant="h6">Health Per Level:</Typography>
-        <Typography>{attr?.balance?.healthPerLevel}</Typography>
-      </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          justifyContent: 'start',
-        }}
-      >
-        <Typography variant="h6">Cost Per Level:</Typography>
-        <Typography>{attr?.balance?.costPerLevel}</Typography>
-      </Box>
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
         SETTLEMENT POINT COSTS
       </Divider>
 
@@ -140,7 +184,10 @@ const PreviewAttribute = () => {
           }}
           key={id}
         >
-          <Typography variant="h6">
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: 'bold', width: '20%', textAlign: 'start' }}
+          >
             {attr.settlementPointCost.data[id].name.charAt(0).toUpperCase() +
               attr.settlementPointCost.data[id].name.slice(1)}
             :
@@ -150,47 +197,15 @@ const PreviewAttribute = () => {
           </Typography>
         </Box>
       ))}
-      <Divider sx={{ gridColumn: 'span 3', borderColor: '#ccc' }}>
+      <Divider
+        sx={{ gridColumn: 'span 3', borderColor: '#ccc', fontWeight: 'bold' }}
+      >
         THRESHOLDS
       </Divider>
-      <Box
-        sx={{
-          gridColumn: 'span 3',
-          gap: 2,
-          display: 'grid',
-          gridTemplateRows: 'repeat(7, 1fr)',
-          gridAutoFlow: 'column',
-        }}
-      >
-        {attr.thresholds.order.map((id) => (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              justifyContent: 'start',
-              maxWidth: '15rem',
-            }}
-            key={id}
-          >
-            {attr.thresholds.data[id].name && (
-              <>
-                <Typography
-                  variant="h6"
-                  sx={{ width: '75%', textAlign: 'start' }}
-                >
-                  {attr.thresholds.data[id].name.charAt(0).toUpperCase() +
-                    attr.thresholds.data[id].name.slice(1)}
-                  :
-                </Typography>
-                <Typography sx={{ width: '25%' }}>
-                  <strong>{attr.thresholds.data[id].max}</strong>
-                </Typography>
-              </>
-            )}
-          </Box>
-        ))}
-      </Box>
+      <PreviewThresholds
+        data={attr.thresholds.data}
+        order={attr.thresholds.order}
+      />
     </Box>
   );
 };

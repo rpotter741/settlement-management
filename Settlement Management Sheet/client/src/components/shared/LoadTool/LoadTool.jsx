@@ -3,6 +3,8 @@ import { useTools } from 'hooks/useTool.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import useServer from '../../../services/useServer.js';
 
+import get from 'lodash/get';
+
 import { Box, Typography } from '@mui/material';
 
 import HeartIcon from '@mui/icons-material/Favorite';
@@ -26,21 +28,21 @@ const LoadTool = ({
   setShowModal,
   tool,
   keypath = '',
+  refKeypath = '',
   displayName,
   selectionMode = false,
   maxSelections = 6,
   outerUpdate = () => {},
   outerTool = {},
+  dependency = false,
 }) => {
   const { loadNewTool, edit } = useTools(tool);
   const { showSnackbar } = useSnackbar();
-  const [selected, setSelected] = useState(outerTool[keypath] || []);
+  const [selected, setSelected] = useState({
+    ids: get(outerTool, keypath) || [],
+    refIds: get(outerTool, refKeypath) || [],
+  });
   const capsTool = tool.toUpperCase();
-
-  useEffect(() => {
-    console.log(selected);
-    console.log(outerTool);
-  }, [selected]);
 
   const handleSelectConfirm = () => {
     outerUpdate(keypath, selected);
@@ -94,6 +96,7 @@ const LoadTool = ({
         setSelected={setSelected}
         maxSelections={maxSelections}
         onConfirm={handleSelectConfirm}
+        dependency={dependency}
       />
       <FetchedDisplay
         onActionClick={handleActionClick}
@@ -106,6 +109,7 @@ const LoadTool = ({
         setSelected={setSelected}
         maxSelections={maxSelections}
         onConfirm={handleSelectConfirm}
+        dependency={dependency}
       />
     </Box>
   );
