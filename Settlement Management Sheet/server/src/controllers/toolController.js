@@ -2,6 +2,7 @@ import prisma from '../db/db.js';
 
 //helpers
 import getNextVersion from '../utils/getNextVersion.js';
+import getValidDependencies from '../utils/getValidDependencies.js';
 
 const getContent = async (req, res) => {
   try {
@@ -12,7 +13,11 @@ const getContent = async (req, res) => {
       offset = 0,
       search = '',
       scope = 'personal',
+      dependency,
+      depId,
     } = req.query;
+
+    console.log(scope, 'scope');
 
     if (!tool) return res.status(400).json({ message: 'Tool type required.' });
 
@@ -26,27 +31,49 @@ const getContent = async (req, res) => {
         : { NOT: { createdBy: userId } }),
     };
 
+    const normalSelect = {
+      id: true,
+      refId: true,
+      name: true,
+      description: true,
+      tags: true,
+      status: true,
+      createdBy: true,
+      contentType: true,
+    };
+
+    const dependencySelect = {
+      id: true,
+      refId: true,
+      name: true,
+      description: true,
+      tags: true,
+      status: true,
+      createdBy: true,
+      contentType: true,
+      dependencies: dependency === 'true' ? true : false,
+    };
+
     const items = await model.findMany({
       where: whereClause,
       distinct: ['refId'],
       orderBy: [{ updatedAt: 'desc' }],
       take: parseInt(limit),
       skip: parseInt(offset),
-      select: {
-        id: true,
-        refId: true,
-        name: true,
-        description: true,
-        tags: true,
-        status: true,
-        createdBy: true,
-        contentType: true,
-      },
+      select: dependency === 'true' ? dependencySelect : normalSelect,
     });
-
-    res.json({ items, nextOffset: offset + items.length });
+    if (dependency === 'true') {
+      console.log("shit's true!");
+      const validDependencies = await getValidDependencies(items, depId);
+      return res.json({
+        items: validDependencies,
+        nextOffset: offset + validDependencies.length,
+      });
+    } else {
+      res.json({ items, nextOffset: offset + items.length });
+    }
   } catch (error) {
-    console.error(`Error getting ${scope} ${tool}:`, error);
+    console.error(`Error getting :`, error);
     return res.status(500).json({ message: `Error getting ${scope} ${tool}.` });
   }
 };
@@ -152,6 +179,7 @@ const getItem = async (req, res) => {
 const fetchByIds = async (req, res) => {
   try {
     const { tool, ids } = req.body;
+    console.log(ids, 'ids');
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
