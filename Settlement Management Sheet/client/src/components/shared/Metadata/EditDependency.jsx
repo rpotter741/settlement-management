@@ -1,15 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { useTools } from 'hooks/useTool.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
-import useServer from '../../../services/useServer.js';
-import useFetchReferences from 'hooks/useFetchReferences.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import Dependency from 'components/shared/Metadata/Dependency.jsx';
 
-const EditDependency = ({ tool }) => {
-  const { selectValue, updateTool, validateToolField } = useTools(tool);
+const EditDependency = ({ tool, id }) => {
+  const { selectValue, updateTool, validateToolField } = useTools(tool, id);
   const data = selectValue('dependencies.data');
   const order = selectValue('dependencies.order');
   const { showSnackbar } = useSnackbar();

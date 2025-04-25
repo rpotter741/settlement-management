@@ -96,9 +96,6 @@ const CustomCreation = () => {
 
   return (
     <>
-      <Typography variant="h3" gutterBottom sx={{ my: 2 }}>
-        Eclorean Ledger Creation Tools
-      </Typography>
       <TabbedContainer tabs={createToolTabs} />
     </>
   );

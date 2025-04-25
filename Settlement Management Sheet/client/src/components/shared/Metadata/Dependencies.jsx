@@ -8,9 +8,11 @@ import { Box, Typography, Tooltip, Button } from '@mui/material';
 import EditDependency from 'components/shared/Metadata/EditDependency.jsx';
 import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
 
-const ObjectDependencies = ({ tool, setShowModal }) => {
-  const { selectValue, edit, updateTool, validateToolField, errors } =
-    useTools(tool);
+const ObjectDependencies = ({ tool, setShowModal, id }) => {
+  const { selectValue, edit, updateTool, validateToolField, errors } = useTools(
+    tool,
+    id
+  );
   const dependencies = selectValue('dependencies');
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
@@ -28,7 +30,7 @@ const ObjectDependencies = ({ tool, setShowModal }) => {
         modifier of 0.75 means this {tool} will be 25% less at the other {tool}
         's threshold.
       </Typography>
-      <EditDependency tool={tool} />
+      <EditDependency tool={tool} id={id} />
       <Button
         variant="contained"
         color="success"

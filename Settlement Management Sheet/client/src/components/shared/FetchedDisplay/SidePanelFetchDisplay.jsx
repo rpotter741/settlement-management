@@ -6,7 +6,7 @@ import { useTools } from 'hooks/useTool.jsx';
 import capitalize from 'utility/capitalize.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
-import TableList from 'components/shared/TableList/TableList.jsx';
+import TableList from 'components/shared/TableList/SmallTableList.jsx';
 
 const FetchedDisplay = ({
   onActionClick,
@@ -20,10 +20,11 @@ const FetchedDisplay = ({
   displayName = capitalize(tool),
   onConfirm = () => {},
   dependency = false,
+  isOpen = true,
 }) => {
   const { selectValue } = useTools(tool);
   const depId = selectValue('refId');
-  const [myTools, setMyTools] = useState(true);
+  const [myTools, setMyTools] = useState(isOpen);
   const [myData, setMyData] = useState([]);
   const [search, setSearch] = useState('');
 
@@ -66,10 +67,14 @@ const FetchedDisplay = ({
       title={
         type === 'personal' ? `My ${displayName}` : `Community ${displayName}`
       }
-      titleType="h5"
+      titleType="body2"
       defaultState={myTools}
-      styles={{ width: '100%', mb: 2 }}
-      titleSx={{ color: 'secondary.light', textAlign: 'center' }}
+      styles={{ width: '100%', mb: 2, px: 2 }}
+      titleSx={{
+        color: 'secondary.light',
+        textAlign: 'center',
+        fontSize: '1rem',
+      }}
       noDefaultHandler={() => setMyTools(!myTools)}
     >
       <TableList

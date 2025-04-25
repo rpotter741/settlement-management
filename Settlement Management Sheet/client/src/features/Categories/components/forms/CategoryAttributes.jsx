@@ -7,8 +7,11 @@ import AttributeCard from 'components/shared/AttributeCard/AttributeCard.jsx';
 
 import useFetchReferences from 'hooks/useFetchReferences.jsx';
 
-const CategoryAttributes = ({ setShowModal }) => {
-  const { current, edit, updateTool, validateToolField } = useTools('category');
+const CategoryAttributes = ({ setShowModal, id }) => {
+  const { current, edit, updateTool, validateToolField } = useTools(
+    'category',
+    id
+  );
   const attributes = useFetchReferences('attribute', edit.attributes);
 
   const handleAddClick = () => {

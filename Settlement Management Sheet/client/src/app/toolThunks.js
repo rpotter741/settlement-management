@@ -1,38 +1,45 @@
 import queryClient from 'context/QueryClient.js';
 import api from 'services/interceptor.js';
-import { selectKey } from 'features/selection/selectionSlice.js';
-import { addTool, deleteById, setCurrent } from './toolSlice.js';
+import { addTool } from './toolSlice.js';
+import { addTab } from 'features/sidePanel/sidePanelSlice.js';
+import { v4 as newId } from 'uuid';
 
 export const loadTool =
-  ({ tool, refId, id, setNew = false }) =>
+  ({ tool, refId, id, currentTool }) =>
   async (dispatch, getState) => {
     const state = getState();
-    const oldId = state.tools[tool].current.refId;
-
+    const usedTool = currentTool || tool;
+    console.log('usedTool', tool, refId, id, currentTool);
     await queryClient.prefetchQuery({
-      queryKey: [tool, id],
+      queryKey: [usedTool, id],
       queryFn: async () => {
         const { data } = await api.get('/tools/getItem', {
           params: {
-            tool,
+            tool: usedTool,
             refId,
             id,
           },
         });
+        console.log(data, 'dataaaaa');
         return data;
       },
     });
 
-    const cachedItem = queryClient.getQueryData([tool, id]);
+    const cachedItem = queryClient.getQueryData([usedTool, id]);
+    console.log('cachedItem', cachedItem);
 
-    if (!state.tools[tool].byId[id]) {
-      dispatch(addTool({ tool, data: cachedItem }));
-      if (setNew) {
-        dispatch(setCurrent({ tool, data: cachedItem, initializeEdit: true }));
-      }
+    if (!state.tools[usedTool].static.byId[id]) {
+      dispatch(addTool({ tool: usedTool, data: cachedItem }));
     }
-
-    dispatch(selectKey({ key: tool, value: id }));
-
-    if (oldId) dispatch(deleteById({ tool, id: oldId })); // prevent removing null
+    dispatch(
+      addTab({
+        name: cachedItem.name,
+        id: cachedItem.id,
+        mode: 'preview',
+        type: usedTool,
+        tabId: newId(),
+        scroll: 0,
+        activate: true,
+      })
+    );
   };

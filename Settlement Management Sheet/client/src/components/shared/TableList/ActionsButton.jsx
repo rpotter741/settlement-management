@@ -21,7 +21,7 @@ const ActionsButton = React.memo((props) => {
     >
       {options.map((option) => (
         <SpeedDialAction
-          sx={{ zIndex: 1000 }}
+          sx={{ zIndex: 1000, mx: 1 }}
           key={option.name}
           icon={option.icon}
           tooltipTitle={option.name}

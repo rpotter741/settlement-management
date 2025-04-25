@@ -20,13 +20,13 @@ import {
 import { DynamicForm } from '../../../../components/index.js';
 import InfoIcon from '@mui/icons-material/Info';
 
-const AttrValues = ({ values }) => {
+const AttrValues = ({ values, id }) => {
   const {
     edit,
     updateTool: updateAttribute,
     validateToolField: validateAttributeField,
     errors,
-  } = useTools('attribute');
+  } = useTools('attribute', id);
 
   const [autobalance, setAutobalance] = useState(false);
 

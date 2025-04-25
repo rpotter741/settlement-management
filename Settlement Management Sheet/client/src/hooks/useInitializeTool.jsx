@@ -3,19 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   initializeTool,
   initializeEdit,
-  updateEdit,
-  setCurrent,
+  updateById,
 } from '../app/toolSlice.js';
 import {
   validateTool,
   initializeValidation,
   getErrorCount,
 } from 'features/validation/validationSlice.js';
-import { selectKey, selectTool } from 'features/selection/selectionSlice.js';
 
 export const useInitializeTool = ({
   tool,
-  allIds,
+  id,
   current,
   edit,
   errorData,
@@ -26,39 +24,28 @@ export const useInitializeTool = ({
   const [errorCount, setErrorCount] = useState(0);
 
   useEffect(() => {
-    dispatch(selectTool({ tool: tool }));
-  }, []);
-
-  useEffect(() => {
     const count = getErrorCount(errorData);
     setErrorCount(count);
     if (current) {
       if (count === 0 && !tool.isValid) {
-        updateEdit({ tool, keypath: 'isValid', updates: true });
+        updateById({ tool, keypath: 'isValid', updates: true, id });
       } else if (count > 0 && tool.isValid) {
-        updateEdit({ tool, keypath: 'isValid', updates: false });
+        updateById({ tool, keypath: 'isValid', updates: false, id });
       }
     }
   }, [errorData, tool]);
 
   useEffect(() => {
-    if (current === null) {
-      const data = initializeFn();
+    if (current === undefined) {
+      const newTool = initializeFn();
+      const data = { ...newTool, id };
       dispatch(initializeTool({ tool, data }));
-      dispatch(setCurrent({ tool, data, initializeEdit: true }));
     }
   }, [current, dispatch]);
 
   useEffect(() => {
-    if (!current && allIds.length > 0) {
-      const lastId = allIds[allIds.length - 1];
-      dispatch(selectKey({ key: tool, value: lastId }));
-    }
-  }, [tool, allIds, dispatch]);
-
-  useEffect(() => {
-    if (current && !edit) {
-      dispatch(initializeEdit({ id: current.id, tool }));
+    if (edit === undefined) {
+      dispatch(initializeEdit({ id, tool }));
       dispatch(initializeValidation({ tool, obj: tool }));
     }
   }, [tool, dispatch]);

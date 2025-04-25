@@ -5,8 +5,8 @@ import iconList from './iconList';
 import IconColorPicker from './IconColorPicker.jsx';
 import { useTools } from 'hooks/useTool.jsx';
 
-const IconSelector = ({ tool, setShowModal }) => {
-  const { edit, updateTool } = useTools(tool);
+const IconSelector = ({ tool, setShowModal, id }) => {
+  const { edit, updateTool } = useTools(tool, id);
   const [selectedIcon, setSelectedIcon] = useState(edit.icon);
 
   const handleIconChange = (event, newValue) => {

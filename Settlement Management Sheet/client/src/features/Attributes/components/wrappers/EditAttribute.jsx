@@ -7,13 +7,16 @@ import AttrMetaData from '../forms/AttrMetaData.jsx';
 import AttrValues from '../forms/AttrValues.jsx';
 import SettlementPointsCost from '../forms/SettlementPointsCost.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
-import AttributeThresholds from '../forms/AttributeThresholds.jsx';
 import TagTable from '../forms/TagTable';
 
 import { useTools } from 'hooks/useTool.jsx';
+import { useToolContext } from 'context/ToolContext.jsx';
 
 const EditAttribute = ({ setShowModal }) => {
-  const { edit: attr } = useTools('attribute');
+  const { id } = useToolContext();
+  console.log(id);
+  const { edit: attr } = useTools('attribute', id);
+  console.log(attr, 'attr');
   const [values, setValues] = useState(false);
   const [thresholds, setThresholds] = useState(false);
   const [tags, setTags] = useState(false);
@@ -26,17 +29,16 @@ const EditAttribute = ({ setShowModal }) => {
         gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
         gridTemplateRows: 'auto',
         alignItems: 'start',
-        justifyContent: 'center',
+        justifyContent: 'start',
         my: 2,
         gap: 2,
         backgroundColor: 'background.paper',
         width: '100%',
-        height: '100%',
         position: 'relative',
-        pb: 4,
+        // pb: 4,
       }}
     >
-      <AttrMetaData setShowModal={setShowModal} />
+      <AttrMetaData setShowModal={setShowModal} id={id} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
         title="Values"
@@ -48,7 +50,7 @@ const EditAttribute = ({ setShowModal }) => {
         }}
         noDefaultHandler={() => setValues(!values)}
       >
-        <AttrValues values={values} />
+        <AttrValues values={values} id={id} />
       </TitledCollapse>
       <TitledCollapse
         title="Settlement Point Costs"
@@ -58,7 +60,7 @@ const EditAttribute = ({ setShowModal }) => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setSpCosts(!spCosts)}
       >
-        <SettlementPointsCost />
+        <SettlementPointsCost id={id} />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
@@ -68,7 +70,7 @@ const EditAttribute = ({ setShowModal }) => {
         boxSx={{ gridColumn: 'span 3' }}
         noDefaultHandler={() => setThresholds(!thresholds)}
       >
-        <ObjectThresholds tool="attribute" />
+        <ObjectThresholds tool="attribute" id={id} />
       </TitledCollapse>
       <TitledCollapse
         title={`Tags (${attr?.tags?.length} / 5)`}

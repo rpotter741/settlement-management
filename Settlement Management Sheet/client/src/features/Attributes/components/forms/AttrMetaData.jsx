@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useTools } from 'hooks/useTool.jsx';
+import { useToolContext } from 'context/ToolContext.jsx';
 
 import { attributeFields } from '../../helpers/attributeFormData.js';
 import {
@@ -11,12 +12,15 @@ import {
 import { Box, Typography, Button, Tooltip, Switch } from '@mui/material';
 
 const AttrMetaData = ({ setShowModal }) => {
+  const { tool, id } = useToolContext();
   const {
     edit: attr,
     errors,
     updateTool: updateAttribute,
     validateToolField: validateAttributeField,
-  } = useTools('attribute');
+  } = useTools(tool, id);
+
+  console.log(attr, 'attr');
 
   const handleUpdate = (updates, { keypath }) => {
     updateAttribute(keypath, updates);
@@ -104,10 +108,10 @@ const AttrMetaData = ({ setShowModal }) => {
           </Tooltip>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body1">
-              {attr.positive ? 'Positive' : 'Negative'}
+              {attr?.positive ? 'Positive' : 'Negative'}
             </Typography>
             <Switch
-              checked={attr.positive}
+              checked={attr?.positive}
               onChange={(e) => {
                 updateAttribute('positive', e.target.checked);
               }}

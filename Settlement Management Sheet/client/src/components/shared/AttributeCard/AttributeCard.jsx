@@ -1,4 +1,4 @@
-import { Box, Typography, Card, Button, Divider, Chip } from '@mui/material';
+import { Box, Typography, Card, Collapse, Divider, Chip } from '@mui/material';
 import { useState } from 'react';
 import changeIconDimensions from 'utility/halveIconDimensions.js';
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
@@ -55,11 +55,11 @@ const AttributeCard = ({ attr }) => {
           onClick={() => setExpanded((prev) => !prev)}
         />
       </Divider>
-      {expanded && (
+      <Collapse in={expanded}>
         <Typography variant="body2" sx={{ textAlign: 'center', px: 2 }}>
           {attr.description}
         </Typography>
-      )}
+      </Collapse>
     </Card>
   );
 };

@@ -3,8 +3,8 @@ import { useTools } from 'hooks/useTool.jsx';
 
 import DynamicForm from '../DynamicForm/DynamicForm.jsx';
 
-const EditNameDescription = ({ tool, fields }) => {
-  const { edit, errors, updateTool, validateToolField } = useTools(tool);
+const EditNameDescription = ({ tool, fields, id }) => {
+  const { edit, errors, updateTool, validateToolField } = useTools(tool, id);
 
   const handleUpdate = (updates, { keypath }) => {
     updateTool(keypath, updates);

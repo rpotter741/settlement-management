@@ -9,10 +9,11 @@ import checklistContent from '../../helpers/attributeChecklist.js';
 
 import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
 
-const CreateAttribute = () => {
+const CreateAttribute = ({ id }) => {
   return (
     <CreateShell
       tool="attribute"
+      id={id}
       initializeTool={initializeAttribute}
       validationFields={[
         'name',
@@ -31,6 +32,7 @@ const CreateAttribute = () => {
       modalComponentsProps={{
         'Change Icon': {
           tool: 'attribute',
+          id,
         },
       }}
     />

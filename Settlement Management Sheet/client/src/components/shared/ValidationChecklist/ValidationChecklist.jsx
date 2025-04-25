@@ -88,7 +88,7 @@ const ValidationChecklist = ({
         right: expanded ? 0 : '-318px', // Move out of view when collapsed
         width: '300px',
         height: '100%',
-        backgroundColor: 'background.paper',
+        backgroundColor: 'background.default',
         boxShadow: 4,
         borderRadius: '8px 0 0 8px', // Rounded edge only on the left
         transition: 'right 0.4s ease-in-out',

@@ -40,13 +40,13 @@ const settlementTypes = [
   },
 ];
 
-const SettlementPointsCost = () => {
+const SettlementPointsCost = ({ id }) => {
   const {
     selectValue,
     updateTool: updateAttribute,
     validateToolField: validateAttributeField,
     errors: spcErrors,
-  } = useTools('attribute');
+  } = useTools('attribute', id);
 
   const settlementPointCost = selectValue('settlementPointCost');
   const dispatch = useDispatch();

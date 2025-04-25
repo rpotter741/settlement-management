@@ -31,15 +31,16 @@ const CustomCollapse = ({
       <Box
         onClick={noDefaultHandler}
         sx={{
-          borderRadius: 4,
-          width: width || '100%',
+          width: '100%',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
-          padding: '12px 16px',
           cursor: 'pointer',
-          backgroundColor: defaultState ? '#f0f0f0' : '#f5f5f5',
-          '&:hover': { backgroundColor: '#f0f0f0' },
+          py: 1,
+          backgroundColor: defaultState
+            ? 'background.default'
+            : 'background.paper',
+          '&:hover': { backgroundColor: 'action.hover' },
           mt: 2,
           gridColumn: 'span 3',
           ...styles,
@@ -50,43 +51,22 @@ const CustomCollapse = ({
           variant={titleType}
           sx={{
             fontWeight: 'bold',
-            width: '100%',
             color: color || 'inherit',
             ...props.titleSx,
           }}
         >
           {title}
         </Typography>
-
-        {/* Expand/Collapse Arrow */}
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}
+        <IconButton
+          onClick={noDefaultHandler}
+          size="small"
+          sx={{
+            transform: defaultState ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s ease',
+          }}
         >
-          {/* <IconButton
-            onClick={onRemove}
-            size="small"
-            sx={{
-              display: onRemove ? 'block' : 'none',
-              position: 'absolute',
-              right: '2rem',
-              color: 'secondary.light',
-            }}
-          >
-            <TrashIcon />
-          </IconButton> */}
-          <IconButton
-            onClick={noDefaultHandler}
-            size="small"
-            sx={{
-              position: 'absolute',
-              right: '0.5rem',
-              transform: defaultState ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease',
-            }}
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-        </Box>
+          <ExpandMoreIcon />
+        </IconButton>
       </Box>
       <Divider sx={{ gridColumn: 'span 3' }} />
       {/* Collapsible Content */}
@@ -96,7 +76,7 @@ const CustomCollapse = ({
             Delete
           </Button>
         )}
-        <Box sx={{ padding: '12px 16px', height: '100%' }}>{children}</Box>
+        <Box sx={{ height: '100%' }}>{children}</Box>
       </Collapse>
       {PreviewComponent && (
         <Collapse in={!defaultState} timeout="auto" unmountOnExit>

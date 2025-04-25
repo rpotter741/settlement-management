@@ -3,7 +3,7 @@ import queryClient from 'context/QueryClient.js';
 import getAttributes from '../../helpers/getAttributesAPI.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
-import TableListTest from 'components/shared/TableList/TableListTest.jsx';
+import TableList from 'components/shared/TableList/TableList.jsx';
 
 const PersonalAttributes = ({ onActionClick, options }) => {
   const [myTools, setMyTools] = useState(true);
@@ -40,7 +40,7 @@ const PersonalAttributes = ({ onActionClick, options }) => {
       titleSx={{ color: 'secondary.light', textAlign: 'center' }}
       noDefaultHandler={() => setMyTools(!myTools)}
     >
-      <TableListTest
+      <TableList
         options={options}
         rows={myData}
         fetchNextPage={fetchNextPage}

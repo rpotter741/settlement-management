@@ -1,29 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-
-import TablePaginationActions from './TablePaginationActions.jsx';
-
+import { VariableSizeList as List } from 'react-window';
+import { useRef, useState, useEffect } from 'react';
 import ActionsButton from './ActionsButton.jsx';
-
-import InfiniteScrollActions from './InfiniteScrollActions.jsx';
-
 import {
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
   TableRow,
+  TableCell,
   Paper,
-  TablePagination,
+  Box,
+  Typography,
   TextField,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
-  InputLabel,
-  FormControl,
   Checkbox,
   ListItemText,
-  Box,
-  TableFooter,
-  Typography,
+  Button,
 } from '@mui/material';
 
 const TableList = ({
@@ -34,27 +26,17 @@ const TableList = ({
   isFetchingNextPage,
   onSearch,
   onActionClick,
+  onDelete,
+  checkbox = false,
+  selected,
+  setSelected,
+  maxSelections,
   infiniteScroll = true,
+  options = [],
+  onConfirm,
 }) => {
-  console.log(rows, 'rows baby');
-  // infinite scroll and react query
   const loadMoreRef = useRef(null);
-
-  useEffect(() => {
-    if (!loadMoreRef.current || !hasNextPage) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          fetchNextPage();
-        }
-      },
-      { root: null, rootMargin: '5px', threshold: 0.1 } // Root is viewport, margin triggers early
-    );
-
-    observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, loadMoreRef]);
+  const listRef = useRef();
 
   // search and filter
   const [search, setSearch] = useState('');
@@ -62,51 +44,156 @@ const TableList = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
-  // sort and pagination
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(infiniteScroll ? -1 : 10);
-  // detail view, baby!
+
+  const onCheckboxChange = (e, { id, refId }) => {
+    e.stopPropagation();
+    setSelected((prev) => {
+      const alreadySelected = prev.ids.includes(id);
+
+      if (alreadySelected) {
+        // Remove both id and corresponding refId
+        return {
+          ids: prev.ids.filter((item) => item !== id),
+          refIds: prev.refIds.filter((item) => item !== refId),
+        };
+      } else {
+        // Add both id and refId
+        return {
+          ids: [...prev.ids, id],
+          refIds: [...prev.refIds, refId],
+        };
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.resetAfterIndex(0, true);
+  }, [
+    rows,
+    search,
+    contentTypeFilter,
+    statusFilter,
+    createdByFilter,
+    tagFilter,
+  ]);
+
+  useEffect(() => {
+    console.log(selected, 'selected');
+  }, [selected]);
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) fetchNextPage();
+      },
+      { root: null, rootMargin: '200px', threshold: 0.1 }
+    );
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage]);
+
   const [expandedRow, setExpandedRow] = useState(null);
 
-  const toggleExpand = (rowId) => {
-    setExpandedRow(expandedRow === rowId ? null : rowId);
+  const toggleExpand = (rowRefId) => {
+    setExpandedRow(expandedRow === rowRefId ? null : rowRefId);
+    if (listRef.current) listRef.current.resetAfterIndex(0);
   };
 
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const filteredRows = rows.filter(
+    (row) =>
+      row?.name?.toLowerCase().includes(search.toLowerCase()) &&
+      (!contentTypeFilter || row.contentType === contentTypeFilter) &&
+      (!statusFilter || row.status === statusFilter)
+  );
 
-  const filteredRows = (rows || [])
-    .flat()
-    .filter(
-      (row) =>
-        row?.name?.toLowerCase().includes(search.toLowerCase()) &&
-        (contentTypeFilter ? row.contentType === contentTypeFilter : true) &&
-        (statusFilter ? row.status === statusFilter : true) &&
-        (createdByFilter ? row.createdBy === createdByFilter : true) &&
-        (tagFilter.length > 0
-          ? tagFilter.every((tag) => row.tags.includes(tag))
-          : true)
+  const getRowHeight = (index) =>
+    expandedRow === filteredRows[index].refId ? 175 : 50;
+
+  const Row = ({ index, style }) => {
+    const row = filteredRows[index];
+    const isLastItem = index === filteredRows.length - 1;
+
+    if (!row) {
+      return (
+        <TableRow style={style}>
+          <TableCell colSpan={6}>
+            <Skeleton animation="wave" height={40} />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return (
+      <Box
+        ref={isLastItem ? loadMoreRef : null}
+        key={row.refId}
+        onClick={() => toggleExpand(row.refId, index)}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          borderBottom: '1px solid',
+          borderColor: 'secondary.main',
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: 'background.default',
+            borderTop: '1px solid',
+            boxSizing: 'border-box',
+          },
+          flexWrap: 'wrap',
+          overflowY: expandedRow === row.refId ? 'scroll' : 'hidden',
+        }}
+        style={style} // Ensure virtualization works properly
+      >
+        <Box sx={{ flex: 1, p: 2 }}>{row.name || '(Unnamed)'}</Box>
+        {type === 'community' && (
+          <Box sx={{ flex: 1, p: 2 }}>{row.contentType}</Box>
+        )}
+        {type === 'community' && (
+          <Box sx={{ flex: 1, p: 2 }}>{row.createdBy}</Box>
+        )}
+        {type === 'personal' && <Box sx={{ flex: 1, p: 2 }}>{row.status}</Box>}
+        <Box sx={{ flex: 0.5, textAlign: 'end' }}>
+          {!checkbox ? (
+            <ActionsButton
+              options={options}
+              onActionClick={onActionClick}
+              refId={row.refId}
+              id={row.id}
+              onDelete={onDelete}
+            />
+          ) : (
+            <Checkbox
+              sx={{ zIndex: 3 }}
+              onClick={(e) =>
+                onCheckboxChange(e, { id: row.id, refId: row.refId })
+              }
+              checked={selected.ids.includes(row.id)}
+              disabled={
+                selected.length >= maxSelections && !selected.includes(row.id)
+              }
+            />
+          )}
+        </Box>
+        {expandedRow === row.refId && (
+          <Box sx={{ width: '85%', p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+              <Box>
+                <Typography variant="body2">{row.description}</Typography>
+                <Typography variant="caption">
+                  Tags: {row.tags.join(', ')}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        )}
+      </Box>
     );
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
   };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        maxHeight: infiniteScroll ? '500px' : 'auto',
-        overflowY: 'auto',
-        minHeight: '350px',
-        position: 'relative',
-      }}
-    >
+    <TableContainer component={Paper}>
       <Box
         sx={{
           display: 'flex',
@@ -185,7 +272,7 @@ const TableList = ({
               <MenuItem value="" key="all">
                 All
               </MenuItem>
-              {Array.from(new Set(rows.map((row) => row.createdBy))).map(
+              {Array.from(new Set(rows.map((row) => row?.createdBy))).map(
                 (creator) => (
                   <MenuItem key={creator} value={creator}>
                     {creator}
@@ -205,12 +292,14 @@ const TableList = ({
             onChange={(e) => setTagFilter(e.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
-            {Array.from(new Set(rows.flatMap((row) => row.tags))).map((tag) => (
-              <MenuItem key={tag} value={tag}>
-                <Checkbox checked={tagFilter.includes(tag)} />
-                <ListItemText primary={tag} />
-              </MenuItem>
-            ))}
+            {Array.from(new Set(rows.flatMap((row) => row?.tags))).map(
+              (tag) => (
+                <MenuItem key={tag} value={tag}>
+                  <Checkbox checked={tagFilter.includes(tag)} />
+                  <ListItemText primary={tag} />
+                </MenuItem>
+              )
+            )}
           </Select>
         </FormControl>
         <Box
@@ -221,6 +310,7 @@ const TableList = ({
             backgroundColor: 'honey.light',
             width: '100%',
             zIndex: '5',
+            mb: 1,
           }}
         >
           <Box
@@ -280,135 +370,27 @@ const TableList = ({
           </Box>
         </Box>
       </Box>
-      <Table sx={{ minWidth: 650 }} aria-label="attributes table">
-        <TableBody sx={{ '&:last-child': { borderBottom: 'none' } }}>
-          {filteredRows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} align="center">
-                No results found. Try adjusting your filters.
-              </TableCell>
-            </TableRow>
-          ) : (
-            (rowsPerPage > 0
-              ? filteredRows.slice(
-                  page * rowsPerPage,
-                  page * rowsPerPage + rowsPerPage
-                )
-              : filteredRows
-            ).map((row) => (
-              <>
-                <TableRow
-                  key={row.id}
-                  onClick={() => toggleExpand(row.refId)}
-                  sx={{
-                    borderBottom: '1px solid',
-                    cursor: 'pointer',
-                    borderColor: 'secondary.main',
-                    '&:hover': { backgroundColor: 'background.default' },
-                    zIndex: 1,
-                    position: 'relative',
-                    py: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <TableCell
-                    sx={{ width: type === 'community' ? '26.667%' : '40%' }}
-                  >
-                    {row.name || '(Unnamed)'}
-                  </TableCell>
-                  {type === 'community' && (
-                    <TableCell align="left" sx={{ width: '26.667%' }}>
-                      {row.createdBy}
-                    </TableCell>
-                  )}
-                  {type === 'community' && (
-                    <TableCell align="left" sx={{ width: '26.667%' }}>
-                      {row.contentType}
-                    </TableCell>
-                  )}
-                  {type === 'personal' && (
-                    <TableCell align="left" sx={{ width: '40%' }}>
-                      {row.status}
-                    </TableCell>
-                  )}
-                  <TableCell
-                    align="left"
-                    sx={{
-                      width: '20%',
-                      display: 'flex',
-                    }}
-                  >
-                    <ActionsButton
-                      onActionClick={onActionClick}
-                      refId={row.refId}
-                      id={row.id}
-                    />
-                  </TableCell>
-                </TableRow>
-                {expandedRow === row.refId && (
-                  <TableRow>
-                    <TableCell colSpan={4}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          bgcolor: 'background.default',
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {row.description}
-                        </Typography>
-                        <Typography variant="caption">
-                          Tags: {row.tags.join(', ')}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
-            ))
-          )}
-          <TableRow ref={loadMoreRef}>
-            {isFetchingNextPage && (
-              <TableCell colSpan={6}>Loading...</TableCell>
-            )}
-            <TableCell colSpan={6} align="center">
-              {' '}
-              End of the List!{' '}
-            </TableCell>
-          </TableRow>
-          {emptyRows > 0 && (
-            <TableRow
-              style={{
-                height: 53 * emptyRows,
-              }}
-            >
-              <TableCell colSpan={6} />
-            </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          {infiniteScroll ? null : (
-            <TablePagination
-              rowsPerPageOptions={[5]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={5}
-              page={page}
-              slotProps={{
-                inputProps: {
-                  'aria-label': 'rows per page',
-                },
-                native: true,
-              }}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          )}
-        </TableFooter>
-      </Table>
+      <Box sx={{ minWidth: 650 }} aria-label="attributes table">
+        <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+          <List
+            key={filteredRows.length}
+            ref={listRef}
+            height={500}
+            itemCount={filteredRows.length}
+            itemSize={getRowHeight}
+            width="100%"
+            overscanCount={5}
+          >
+            {Row}
+          </List>
+          <Box>{isFetchingNextPage && <Box colSpan={6}>Loading...</Box>}</Box>
+        </Box>
+      </Box>
+      {checkbox && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <Button onClick={onConfirm}>Confirm</Button>
+        </Box>
+      )}
     </TableContainer>
   );
 };

@@ -5,23 +5,23 @@ import {
   validateTool,
 } from 'features/validation/validationSlice';
 import api from 'services/interceptor.js';
-import { updateEdit, saveTool, setCurrent } from '../app/toolSlice.js';
+import { updateById, saveTool } from '../app/toolSlice.js';
 import { toolSelectors as select } from '../app/toolSelectors.js';
 import { loadTool } from '../app/toolThunks.js';
 
-export const useToolActions = (tool) => {
+export const useToolActions = (tool, id) => {
   const dispatch = useDispatch();
 
   const updateTool = useCallback(
     (keypath, updates) => {
-      dispatch(updateEdit({ tool, keypath, updates }));
+      dispatch(updateById({ id, tool, keypath, updates }));
     },
     [dispatch]
   );
 
   const validateToolField = useCallback(
     (keypath, error) => {
-      dispatch(validateField({ tool, keypath, error }));
+      dispatch(validateField({ id, tool, keypath, error }));
     },
     [dispatch]
   );
@@ -40,22 +40,15 @@ export const useToolActions = (tool) => {
   );
 
   const saveToolEdit = useCallback(
-    (refId, overwriteCurrent = false) => {
-      dispatch(saveTool({ tool, refId, overwriteCurrent }));
-    },
-    [dispatch]
-  );
-
-  const setCurrentTool = useCallback(
-    (data, overwriteEdit = false) => {
-      dispatch(setCurrent({ tool, data, overwriteEdit }));
+    (overwriteCurrent = false) => {
+      dispatch(saveTool({ tool, id, overwriteCurrent }));
     },
     [dispatch]
   );
 
   const loadNewTool = useCallback(
-    ({ refId, id, setNew }) => {
-      dispatch(loadTool({ tool, refId, id, setNew }));
+    ({ refId, id, currentTool }) => {
+      dispatch(loadTool({ tool, refId, id, currentTool }));
     },
     [dispatch]
   );
@@ -65,30 +58,37 @@ export const useToolActions = (tool) => {
     validateToolField,
     validateAll,
     saveToolEdit,
-    setCurrentTool,
     loadNewTool,
   };
 };
 
-export const useToolSelectors = (tool) => {
-  const current = useSelector(select.current(tool));
-  const edit = useSelector(select.edit(tool));
+export const useToolSelectors = (tool, id) => {
+  const current = useSelector(select.byId(tool, id));
+  const edit = useSelector(select.byEditId(tool, id));
   const allIds = useSelector(select.allIds(tool));
-  const byId = useSelector(select.byId(tool));
+  const allEditIds = useSelector(select.allEditIds(tool));
   const allTools = useSelector(select.allTools(tool));
+  const allEditTools = useSelector(select.allEditTools(tool));
   const errors = useSelector(select.errors(tool));
+  const dirty = useSelector(select.changes(tool, id));
 
   const selectValue = (keypath) =>
-    useSelector(select.selectValue(tool, keypath));
+    useSelector(select.selectValue(tool, id, keypath));
+
+  const selectEditValue = (keypath) =>
+    useSelector(select.selectEditValue(tool, id, keypath));
 
   return {
     current,
     edit,
     allIds,
-    byId,
+    allEditIds,
     allTools,
+    allEditTools,
     errors,
     selectValue,
+    selectEditValue,
+    dirty,
   };
 };
 
@@ -106,9 +106,7 @@ export const useServer = (tool) => {
         });
       } catch (error) {
         console.error('API error:', error.message);
-        throw new Error(
-          error.response?.data?.message || `Failed to ${type} data`
-        );
+        throw new Error(error.response?.data?.message || `Failed to save data`);
       }
     },
     publish: async (data) => {
@@ -121,7 +119,7 @@ export const useServer = (tool) => {
       } catch (error) {
         console.error('API error:', error.message);
         throw new Error(
-          error.response?.data?.message || `Failed to ${type} data`
+          error.response?.data?.message || `Failed to publish data`
         );
       }
     },
@@ -132,7 +130,7 @@ export const useServer = (tool) => {
       } catch (error) {
         console.error('API error:', error.message);
         throw new Error(
-          error.response?.data?.message || `Failed to ${type} data`
+          error.response?.data?.message || `Failed to delete data`
         );
       }
     },
@@ -160,9 +158,9 @@ export const useServer = (tool) => {
   };
 };
 
-export const useTools = (tool) => {
-  const selectors = useToolSelectors(tool);
-  const actions = useToolActions(tool);
-  const server = useServer(tool);
+export const useTools = (tool, id) => {
+  const selectors = useToolSelectors(tool, id);
+  const actions = useToolActions(tool, id);
+  const server = useServer(tool, id);
   return { ...selectors, ...actions, ...server };
 };

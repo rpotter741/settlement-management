@@ -7,9 +7,12 @@ import { Icon as CustomIcon } from '../../../../components/index.js';
 import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 
 import { useTools } from 'hooks/useTool.jsx';
+import { useToolContext } from 'context/ToolContext.jsx';
 
 const PreviewAttribute = () => {
-  const { current: attr } = useTools('attribute');
+  const { tool, id } = useToolContext();
+  const { current: attr } = useTools('attribute', id);
+
   return (
     <Box
       sx={{
@@ -23,7 +26,7 @@ const PreviewAttribute = () => {
         backgroundColor: 'background.paper',
         width: '100%',
         position: 'relative',
-        height: '100%',
+        // height: '100%',
         pb: 4,
       }}
     >

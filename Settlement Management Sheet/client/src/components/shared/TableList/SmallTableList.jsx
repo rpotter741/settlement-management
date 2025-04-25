@@ -1,10 +1,8 @@
 import { VariableSizeList as List } from 'react-window';
 import { useRef, useState, useEffect } from 'react';
-import ActionsButton from './ActionsButton.jsx';
+import SmallActions from './SmallActions.jsx';
 import {
   TableContainer,
-  Table,
-  TableBody,
   TableRow,
   TableCell,
   Paper,
@@ -17,6 +15,8 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
+  Button,
+  Divider,
 } from '@mui/material';
 
 const TableList = ({
@@ -27,8 +27,14 @@ const TableList = ({
   isFetchingNextPage,
   onSearch,
   onActionClick,
-  options,
+  onDelete,
+  checkbox = false,
+  selected,
+  setSelected,
+  maxSelections,
   infiniteScroll = true,
+  options = [],
+  onConfirm,
 }) => {
   const loadMoreRef = useRef(null);
   const listRef = useRef();
@@ -39,9 +45,38 @@ const TableList = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [createdByFilter, setCreatedByFilter] = useState('');
   const [tagFilter, setTagFilter] = useState([]);
-  // sort and pagination
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(infiniteScroll ? -1 : 10);
+
+  const onCheckboxChange = (e, { id, refId }) => {
+    e.stopPropagation();
+    setSelected((prev) => {
+      const alreadySelected = prev.ids.includes(id);
+
+      if (alreadySelected) {
+        // Remove both id and corresponding refId
+        return {
+          ids: prev.ids.filter((item) => item !== id),
+          refIds: prev.refIds.filter((item) => item !== refId),
+        };
+      } else {
+        // Add both id and refId
+        return {
+          ids: [...prev.ids, id],
+          refIds: [...prev.refIds, refId],
+        };
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.resetAfterIndex(0, true);
+  }, [
+    rows,
+    search,
+    contentTypeFilter,
+    statusFilter,
+    createdByFilter,
+    tagFilter,
+  ]);
 
   useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage) return;
@@ -49,7 +84,7 @@ const TableList = ({
       ([entry]) => {
         if (entry.isIntersecting) fetchNextPage();
       },
-      { root: null, rootMargin: '150px', threshold: 0.1 }
+      { root: null, rootMargin: '200px', threshold: 0.1 }
     );
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
@@ -57,8 +92,8 @@ const TableList = ({
 
   const [expandedRow, setExpandedRow] = useState(null);
 
-  const toggleExpand = (rowId) => {
-    setExpandedRow(expandedRow === rowId ? null : rowId);
+  const toggleExpand = (rowRefId) => {
+    setExpandedRow(expandedRow === rowRefId ? null : rowRefId);
     if (listRef.current) listRef.current.resetAfterIndex(0);
   };
 
@@ -70,14 +105,26 @@ const TableList = ({
   );
 
   const getRowHeight = (index) =>
-    expandedRow === filteredRows[index].refId ? 120 : 50;
+    expandedRow === filteredRows[index].refId ? 175 : 55;
 
   const Row = ({ index, style }) => {
     const row = filteredRows[index];
+    const isLastItem = index === filteredRows.length - 1;
+
+    if (!row) {
+      return (
+        <TableRow style={style}>
+          <TableCell colSpan={6}>
+            <Skeleton animation="wave" height={40} />
+          </TableCell>
+        </TableRow>
+      );
+    }
 
     return (
-      <TableRow
-        key={row.id}
+      <Box
+        ref={isLastItem ? loadMoreRef : null}
+        key={row.refId}
         onClick={() => toggleExpand(row.refId, index)}
         sx={{
           display: 'flex',
@@ -86,57 +133,103 @@ const TableList = ({
           borderBottom: '1px solid',
           borderColor: 'secondary.main',
           cursor: 'pointer',
-          '&:hover': { backgroundColor: 'background.default' },
+          '&:hover': {
+            backgroundColor: 'background.default',
+          },
+          boxSizing: 'border-box',
+          flexWrap: 'wrap',
+          overflowY: expandedRow === row.refId ? 'scroll' : 'hidden',
         }}
         style={style} // Ensure virtualization works properly
       >
-        <TableCell sx={{ flex: 1 }}>{row.name || '(Unnamed)'}</TableCell>
-        {type === 'community' && (
-          <TableCell sx={{ flex: 1 }}>{row.contentType}</TableCell>
-        )}
-        {type === 'community' && (
-          <TableCell sx={{ flex: 1 }}>{row.createdBy}</TableCell>
-        )}
-        {type === 'personal' && (
-          <TableCell sx={{ flex: 1 }}>{row.status}</TableCell>
-        )}
-        <TableCell sx={{ flex: 0.5, textAlign: 'end' }}>
-          <ActionsButton
-            options={options}
-            onActionClick={onActionClick}
-            refId={row.refId}
-            id={row.id}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            maxHeight: 55,
+            height: 55,
+            width: '100%',
+            pr: 1,
+          }}
+        >
+          <Box sx={{ flex: 1, p: 0.5, alignItems: 'center' }}>
+            <Typography variant="body2" textAlign="left" sx={{ pl: 1 }}>
+              {row.name || '(Unnamed)'}
+            </Typography>
+          </Box>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'secondary.main',
+              height: '60%',
+              mx: 1,
+              mt: 1.5,
+            }}
           />
-        </TableCell>
+          <Box sx={{ flex: 0.5, textAlign: 'end', maxHeight: 55 }}>
+            {!checkbox ? (
+              <SmallActions
+                options={options}
+                onActionClick={onActionClick}
+                refId={row.refId}
+                id={row.id}
+                onDelete={onDelete}
+              />
+            ) : (
+              <Checkbox
+                sx={{ zIndex: 3 }}
+                onClick={(e) =>
+                  onCheckboxChange(e, { id: row.id, refId: row.refId })
+                }
+                checked={selected.ids.includes(row.id)}
+                disabled={
+                  selected.length >= maxSelections && !selected.includes(row.id)
+                }
+              />
+            )}
+          </Box>
+        </Box>
         {expandedRow === row.refId && (
-          <TableRow>
-            <TableCell colSpan={4}>
+          <Box>
+            <Divider
+              flexItem
+              sx={{
+                fontSize: '1rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Description
+            </Divider>
+            <Box sx={{ width: '85%', p: 2 }}>
               <Box
-                sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'start',
+                  alignItems: 'start',
+                }}
               >
-                <Typography variant="body2">{row.description}</Typography>
-                <Typography variant="caption">
-                  Tags: {row?.tags.join(', ')}
-                </Typography>
+                <Box>
+                  <Typography variant="body2">{row.description}</Typography>
+                  <Typography variant="caption">
+                    Tags: {row.tags.join(', ')}
+                  </Typography>
+                </Box>
               </Box>
-            </TableCell>
-          </TableRow>
+            </Box>
+          </Box>
         )}
-      </TableRow>
+      </Box>
     );
   };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{ maxHeight: '500px', overflowY: 'auto' }}
-    >
+    <TableContainer component={Paper}>
       <Box
         sx={{
           display: 'flex',
           position: 'sticky',
           top: 0,
-          pt: 2,
           flexWrap: 'wrap',
           backgroundColor: 'background.paper',
           zIndex: 5,
@@ -151,10 +244,10 @@ const TableList = ({
             setSearch(e.target.value);
             onSearch(e.target.value);
           }}
-          sx={{ width: type === 'community' ? '26.667%' : '40%' }}
+          sx={{ width: type === 'community' ? '50%' : '100%' }}
         />
         {type === 'community' && (
-          <FormControl size="small" sx={{ minWidth: 150, width: '26.666%' }}>
+          <FormControl size="small" sx={{ width: '50%' }}>
             <InputLabel sx={{ backgroundColor: 'background.paper' }}>
               Content Type
             </InputLabel>
@@ -176,7 +269,7 @@ const TableList = ({
         )}
 
         {type === 'personal' && (
-          <FormControl size="small" sx={{ minWidth: 150, width: '40%' }}>
+          <FormControl size="small" sx={{ width: '50%' }}>
             <InputLabel sx={{ backgroundColor: 'background.paper' }}>
               Status
             </InputLabel>
@@ -198,7 +291,7 @@ const TableList = ({
         )}
 
         {type === 'community' && (
-          <FormControl size="small" sx={{ minWidth: 150, width: '26.667%' }}>
+          <FormControl size="small" sx={{ width: '50%' }}>
             <InputLabel sx={{ backgroundColor: 'background.paper' }}>
               Created By
             </InputLabel>
@@ -209,7 +302,7 @@ const TableList = ({
               <MenuItem value="" key="all">
                 All
               </MenuItem>
-              {Array.from(new Set(rows.map((row) => row.createdBy))).map(
+              {Array.from(new Set(rows.map((row) => row?.createdBy))).map(
                 (creator) => (
                   <MenuItem key={creator} value={creator}>
                     {creator}
@@ -219,11 +312,11 @@ const TableList = ({
             </Select>
           </FormControl>
         )}
-        <FormControl size="small" sx={{ minWidth: 150, width: '20%' }}>
+        <FormControl size="small" sx={{ width: '50%' }}>
           <InputLabel sx={{ backgroundColor: 'background.paper' }}>
             Tags
           </InputLabel>
-          {/* <Select
+          <Select
             multiple
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
@@ -237,65 +330,33 @@ const TableList = ({
                 </MenuItem>
               )
             )}
-          </Select> */}
+          </Select>
         </FormControl>
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'space-between',
             py: 2,
-            backgroundColor: 'honey.light',
+            backgroundColor: 'primary.main',
             width: '100%',
             zIndex: '5',
+            mb: 1,
+            color: 'black',
           }}
         >
           <Box
             sx={{
-              width: type === 'community' ? '26.667%' : '40%',
+              width: '60%',
               fontWeight: 'bold',
               px: 1,
+              textAlign: 'start',
             }}
           >
             Name
           </Box>
-          {type === 'community' && (
-            <Box
-              sx={{
-                width: type === 'community' ? '26.667%' : '40%',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                px: 1,
-              }}
-            >
-              Content Type
-            </Box>
-          )}
-          {type === 'community' && (
-            <Box
-              sx={{
-                width: type === 'community' ? '26.667%' : '40%',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                px: 1,
-              }}
-            >
-              Created By
-            </Box>
-          )}
-          {type === 'personal' && (
-            <Box
-              sx={{
-                width: '40%',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-              }}
-            >
-              Status
-            </Box>
-          )}
           <Box
             sx={{
-              width: '20%',
+              width: '40%',
               fontSize: '1rem',
               fontWeight: 'bold',
               textAlign: 'end',
@@ -306,28 +367,27 @@ const TableList = ({
           </Box>
         </Box>
       </Box>
-      <Table sx={{ minWidth: 650 }} aria-label="attributes table">
-        <TableBody>
+      <Box sx={{ scrollbarWidth: 'none' }} aria-label="attributes table">
+        <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
           <List
+            key={filteredRows.length}
             ref={listRef}
             height={500}
             itemCount={filteredRows.length}
             itemSize={getRowHeight}
             width="100%"
+            overscanCount={5}
           >
             {Row}
           </List>
-          <TableRow ref={loadMoreRef}>
-            {isFetchingNextPage ? (
-              <TableCell colSpan={6}>Loading...</TableCell>
-            ) : filteredRows.length > 0 ? (
-              <TableCell colSpan={6} align="center">
-                End of the List!
-              </TableCell>
-            ) : null}
-          </TableRow>
-        </TableBody>
-      </Table>
+          <Box>{isFetchingNextPage && <Box colSpan={6}>Loading...</Box>}</Box>
+        </Box>
+      </Box>
+      {checkbox && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <Button onClick={onConfirm}>Confirm</Button>
+        </Box>
+      )}
     </TableContainer>
   );
 };

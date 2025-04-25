@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTools } from 'hooks/useTool.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import useServer from '../../../services/useServer.js';
+import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import get from 'lodash/get';
 
@@ -22,10 +23,9 @@ const options = [
   { name: 'Favorite', icon: <HeartFill /> },
 ];
 
-import FetchedDisplay from 'components/shared/FetchedDisplay/FetchedDisplay.jsx';
+import FetchedDisplay from 'components/shared/FetchedDisplay/SidePanelFetchDisplay.jsx';
 
 const LoadTool = ({
-  setShowModal,
   tool,
   keypath = '',
   refKeypath = '',
@@ -36,26 +36,28 @@ const LoadTool = ({
   outerTool = {},
   dependency = false,
 }) => {
-  const { loadNewTool, edit } = useTools(tool);
+  const { loadNewTool } = useTools(tool);
   const { showSnackbar } = useSnackbar();
   const [selected, setSelected] = useState({
     ids: get(outerTool, keypath) || [],
     refIds: get(outerTool, refKeypath) || [],
   });
-  const capsTool = tool.toUpperCase();
+
+  useEffect(() => {
+    console.log(tool, 'tool');
+  }, [tool]);
 
   const handleSelectConfirm = () => {
     outerUpdate(keypath, selected);
-    setShowModal(null);
   };
 
   const ActionClick = (e, action, { refId, id }) => {
+    console.log('ActionClick', action, { refId, id });
     e.stopPropagation();
     switch (action) {
       case 'Edit':
         return () => {
-          loadNewTool({ refId, id, setNew: true });
-          setShowModal(null);
+          loadNewTool({ refId, id, currentTool: tool });
         };
       case 'Delete':
         return async () => {
@@ -66,6 +68,19 @@ const LoadTool = ({
               data: { refId, id },
             });
             showSnackbar('Deleted successfully', 'success');
+          } catch (error) {
+            showSnackbar(error.message, 'error');
+          }
+        };
+      case 'Favorite':
+        return async () => {
+          try {
+            // await useServer({
+            //   tool,
+            //   type: 'favorite',
+            //   data: { refId, id },
+            // });
+            showSnackbar('Favorited successfully', 'success');
           } catch (error) {
             showSnackbar(error.message, 'error');
           }
@@ -82,9 +97,6 @@ const LoadTool = ({
 
   return (
     <Box sx={{ minWidth: ['100%'] }}>
-      <Typography variant="h4" gutterBottom textAlign="center">
-        LOAD {capsTool}
-      </Typography>
       <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
@@ -97,6 +109,7 @@ const LoadTool = ({
         maxSelections={maxSelections}
         onConfirm={handleSelectConfirm}
         dependency={dependency}
+        isOpen={false}
       />
       <FetchedDisplay
         onActionClick={handleActionClick}
@@ -110,6 +123,7 @@ const LoadTool = ({
         maxSelections={maxSelections}
         onConfirm={handleSelectConfirm}
         dependency={dependency}
+        isOpen={false}
       />
     </Box>
   );

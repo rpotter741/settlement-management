@@ -13,8 +13,8 @@ import useFetchReferences from 'hooks/useFetchReferences.jsx';
 
 import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
 
-const CreateCategory = () => {
-  const { updateTool, edit } = useTools('category');
+const CreateCategory = ({ id }) => {
+  const { updateTool, edit } = useTools('category', id);
   const [selected, setSelected] = useState([]);
 
   useEffect(() => {
@@ -22,10 +22,6 @@ const CreateCategory = () => {
       setSelected(edit?.dependencies?.order);
     }
   }, [edit?.dependencies?.order]);
-
-  useEffect(() => {
-    console.log(edit);
-  }, [edit]);
 
   const handleDependencyChange = async (keypath, selected) => {
     const newDependencies = await getNewDependencies({
@@ -41,6 +37,7 @@ const CreateCategory = () => {
   return (
     <CreateShell
       tool="category"
+      id={id}
       initializeTool={initializeCategory}
       validationFields={['name', 'description', 'thresholds', 'dependencies']}
       editComponent={EditCategory}
