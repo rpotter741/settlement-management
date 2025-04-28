@@ -39,9 +39,9 @@ const DragWrapper = ({
     },
   }));
 
-  // useEffect(() => {
-  //   console.log('Dragging item:', item);
-  // }, [item]);
+  useEffect(() => {
+    console.log('Dragging item:', item);
+  }, [item]);
 
   return (
     <Box

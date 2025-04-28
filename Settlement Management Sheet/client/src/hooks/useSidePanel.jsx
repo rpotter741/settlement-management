@@ -6,6 +6,8 @@ import {
   setCurrentTab,
   setBreadcrumbs,
   updateTab,
+  moveLeftToRight,
+  moveRightToLeft,
 } from 'features/sidePanel/sidePanelSlice.js';
 import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
 
@@ -21,23 +23,23 @@ export const useSidePanelActions = () => {
       tabId,
       scroll,
       activate = false,
+      side,
     }) => {
-      dispatch(addTab({ name, id, mode, type, tabId, scroll, activate }));
+      dispatch(addTab({ name, id, mode, type, tabId, scroll, activate, side }));
     },
     [dispatch]
   );
 
   const removeById = useCallback(
-    (tabId) => {
-      dispatch(removeTab({ tabId }));
+    (tabId, side, preventSplit) => {
+      dispatch(removeTab({ tabId, side, preventSplit }));
     },
     [dispatch]
   );
 
   const setActiveTab = useCallback(
-    (index, tabId) => {
-      console.log(index, tabId);
-      dispatch(setCurrentTab({ index, tabId }));
+    (index, tabId, side) => {
+      dispatch(setCurrentTab({ index, tabId, side }));
     },
     [dispatch]
   );
@@ -50,8 +52,22 @@ export const useSidePanelActions = () => {
   );
 
   const updateCurrentTab = useCallback(
-    (index, updates) => {
-      dispatch(updateTab({ index, updates }));
+    (index, updates, side) => {
+      dispatch(updateTab({ index, updates, side }));
+    },
+    [dispatch]
+  );
+
+  const moveLeft = useCallback(
+    (tabId, dropIndex) => {
+      dispatch(moveRightToLeft({ tabId, dropIndex }));
+    },
+    [dispatch]
+  );
+
+  const moveRight = useCallback(
+    (tabId, dropIndex) => {
+      dispatch(moveLeftToRight({ tabId, dropIndex }));
     },
     [dispatch]
   );
@@ -62,19 +78,31 @@ export const useSidePanelActions = () => {
     setActiveTab,
     updateBreadcrumbs,
     updateCurrentTab,
+    moveLeft,
+    moveRight,
   };
 };
 
 const useSidePanelSelectors = () => {
-  const tabs = useSelector(select.tabs);
-  const currentTab = useSelector(select.currentTab);
-  const currentIndex = useSelector(select.currentIndex);
+  const leftTabs = useSelector(select.leftTabs);
+  const rightTabs = useSelector(select.rightTabs);
+  const currentLeftTab = useSelector(select.currentLeftTab);
+  const currentRightTab = useSelector(select.currentRightTab);
+  const currentLeftIndex = useSelector(select.currentLeftIndex);
+  const currentRightIndex = useSelector(select.currentRightIndex);
+  const isSplit = useSelector(select.isSplit);
+  const preventSplit = useSelector(select.preventSplit);
   const breadcrumbs = useSelector(select.breadcrumbs);
 
   return {
-    tabs,
-    currentTab,
-    currentIndex,
+    leftTabs,
+    rightTabs,
+    currentLeftTab,
+    currentRightTab,
+    currentLeftIndex,
+    currentRightIndex,
+    isSplit,
+    preventSplit,
     breadcrumbs,
   };
 };
@@ -82,5 +110,6 @@ const useSidePanelSelectors = () => {
 export const useSidePanel = () => {
   const selectors = useSidePanelSelectors();
   const actions = useSidePanelActions();
+
   return { ...selectors, ...actions };
 };

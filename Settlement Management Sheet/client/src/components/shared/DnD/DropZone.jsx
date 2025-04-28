@@ -6,10 +6,10 @@ import { useDragContext } from '../../../context/DragContext';
 const DropZone = ({
   type,
   children,
-  handleUpdate,
+  handleUpdate = () => {},
   handleAdd,
-  handleRemove,
-  onReorder,
+  handleRemove = () => {},
+  onReorder = () => {},
   onAbsolutePlacement,
   defaultItems = [],
   bg1 = 'background.paper',
@@ -64,12 +64,13 @@ const DropZone = ({
         borderRadius: 4,
       }}
     >
-      {children({
-        droppedItems,
-        setDroppedItems,
-        handleUpdate,
-        handleRemove,
-      })}
+      {children &&
+        children({
+          droppedItems,
+          setDroppedItems,
+          handleUpdate,
+          handleRemove,
+        })}
     </Box>
   );
 };

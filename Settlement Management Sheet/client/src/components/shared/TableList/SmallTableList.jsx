@@ -233,6 +233,7 @@ const TableList = ({
           flexWrap: 'wrap',
           backgroundColor: 'background.paper',
           zIndex: 5,
+          my: 1,
         }}
       >
         <TextField

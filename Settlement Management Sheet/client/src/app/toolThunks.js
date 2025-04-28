@@ -35,11 +35,12 @@ export const loadTool =
       addTab({
         name: cachedItem.name,
         id: cachedItem.id,
-        mode: 'preview',
+        mode: 'edit',
         type: usedTool,
         tabId: newId(),
         scroll: 0,
         activate: true,
+        side: 'right',
       })
     );
   };

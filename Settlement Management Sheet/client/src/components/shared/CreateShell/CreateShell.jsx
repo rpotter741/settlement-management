@@ -30,6 +30,8 @@ const CreateShell = ({
 }) => {
   const { current, edit, allIds, saveToolEdit, errors } = useTools(tool, id);
 
+  console.log(mode, 'mode');
+
   const { errorCount } = useInitializeTool({
     tool,
     id,
