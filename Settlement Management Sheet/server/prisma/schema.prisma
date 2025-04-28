@@ -152,10 +152,31 @@ model Listener {
      // ]
 }
 
+/////////////////// KITS //////////////////////////
+
+model Kit {
+  refId        String @id @default(uuid())
+  id           String @unique
+  categories   Json
+  regions      Json
+  locations    Json
+  people       Json
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 ////////////////// STATUS //////////////////////////
 enum StatusType {
   Weather
   Morale
+  Settlement
+}
+
+enum StatusMode {
+  Simple
+  Advanced
 }
 
 model GameStatus {
@@ -166,6 +187,7 @@ model GameStatus {
   description  String
   type         StatusType
   steps        Json
+  mode         StatusMode
   isValid      Boolean
   status       Status
   contentType  ContentTypes
