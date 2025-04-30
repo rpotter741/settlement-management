@@ -3,6 +3,7 @@ import prisma from '../db/db.js';
 //helpers
 import getNextVersion from '../utils/getNextVersion.js';
 import getValidDependencies from '../utils/getValidDependencies.js';
+import toolSelectMap from '../utils/toolSelectMap.js';
 
 const getContent = async (req, res) => {
   try {
@@ -17,8 +18,6 @@ const getContent = async (req, res) => {
       depId,
     } = req.query;
 
-    console.log(scope, 'scope');
-
     if (!tool) return res.status(400).json({ message: 'Tool type required.' });
 
     const model = prisma[tool];
@@ -31,36 +30,13 @@ const getContent = async (req, res) => {
         : { NOT: { createdBy: userId } }),
     };
 
-    const normalSelect = {
-      id: true,
-      refId: true,
-      name: true,
-      description: true,
-      tags: true,
-      status: true,
-      createdBy: true,
-      contentType: true,
-    };
-
-    const dependencySelect = {
-      id: true,
-      refId: true,
-      name: true,
-      description: true,
-      tags: true,
-      status: true,
-      createdBy: true,
-      contentType: true,
-      dependencies: dependency === 'true' ? true : false,
-    };
-
     const items = await model.findMany({
       where: whereClause,
       distinct: ['refId'],
       orderBy: [{ updatedAt: 'desc' }],
       take: parseInt(limit),
       skip: parseInt(offset),
-      select: dependency === 'true' ? dependencySelect : normalSelect,
+      select: toolSelectMap[tool],
     });
     if (dependency === 'true') {
       console.log("shit's true!");

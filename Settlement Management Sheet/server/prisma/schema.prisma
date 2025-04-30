@@ -98,7 +98,7 @@ model Event {
     //[
     //  {
     //    type: 'active / immediate / passive / indefinite'
-    //    impact: see-below,
+    //    impacts: see-below,
     //    length: 0+,
     //    productivity: 0+,
     //  },
@@ -111,7 +111,7 @@ model Event {
           //{
             //name:
             //description:
-            //impact:
+            //impacts:
           //}
       //}
     //]
@@ -179,7 +179,7 @@ enum StatusMode {
   Advanced
 }
 
-model GameStatus {
+model gameStatus {
   refId        String    @id @default(uuid())
   id           String    @unique // ID for versioning or app-level tracking
   version      Int // per id
@@ -230,7 +230,7 @@ model Upgrade {
   version      Int // per id
   name         String
   description  String
-  impact       Json
+  impacts       Json
   ability      String
   upgradeType  UpgradeType
   isValid      Boolean
