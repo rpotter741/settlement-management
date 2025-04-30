@@ -13,6 +13,7 @@ const initialState = {
   currentLeftTabIndex: null,
   currentRightTabIndex: null,
   breadcrumbs: [],
+  toolOptions: {},
 };
 
 const sidePanelSlice = createSlice({
@@ -171,6 +172,10 @@ const sidePanelSlice = createSlice({
         }
       }
     },
+    setToolOptions: (state, action) => {
+      const { options } = action.payload;
+      state.toolOptions = options;
+    },
   },
 });
 
@@ -182,6 +187,7 @@ export const {
   updateTab,
   moveLeftToRight,
   moveRightToLeft,
+  setToolOptions,
 } = sidePanelSlice.actions;
 
 export default sidePanelSlice.reducer;

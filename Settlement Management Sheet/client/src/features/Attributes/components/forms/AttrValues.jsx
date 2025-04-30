@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useTools } from 'hooks/useTool.jsx';
-import {
-  selectBalance,
-  selectBalanceErrors,
-} from '../../state/attributeSelectors';
 import autobalanceSteps from '../../helpers/attributeAutoBalance.js';
 import { attributeFields } from '../../helpers/attributeFormData';
 

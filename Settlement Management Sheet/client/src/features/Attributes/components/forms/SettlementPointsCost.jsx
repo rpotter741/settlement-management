@@ -1,11 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
-import {
-  selectSettlementPointCost as selectAttrSPC,
-  selectSettlementPointCostErrors as selectAttrSPCErrors,
-  selectSettlementPointCostOrder,
-} from '../../state/attributeSelectors.js';
 
 import { useTools } from 'hooks/useTool.jsx';
 

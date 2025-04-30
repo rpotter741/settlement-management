@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAttribute } from '../../hooks/useEditAttribute.jsx';
 import { useTools } from 'hooks/useTool.jsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 

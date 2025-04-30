@@ -48,6 +48,8 @@ const SidePanel = () => {
   const [viewKits, setViewKits] = useState(false);
   const [mode, setMode] = useState('tools');
 
+  const borderColor = 'primary.light';
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -58,7 +60,7 @@ const SidePanel = () => {
           borderBottom: 1,
           borderRight: 1,
           boxSizing: 'border-box',
-          borderColor: 'accent.light',
+          borderColor,
           position: 'relative',
         }}
       >
@@ -146,7 +148,7 @@ const SidePanel = () => {
           display: 'flex',
           alignItems: 'start',
           borderRight: 1,
-          borderColor: 'accent.light',
+          borderColor,
         }}
       >
         <Box
@@ -158,7 +160,7 @@ const SidePanel = () => {
             width: 48,
             maxWidth: 48,
             borderRight: 1,
-            borderColor: 'accent.light',
+            borderColor: 'primary.light',
             boxSizing: 'border-box',
             py: 1,
           }}
@@ -205,15 +207,13 @@ const SidePanel = () => {
                 flexDirection: 'column',
                 display: 'flex',
                 py: 1,
+                position: 'relative',
+                pb: 8,
               }}
             >
               <Typography variant="h5" sx={{ height: 36, maxHeight: 36 }}>
                 Eclorean Ledger
               </Typography>
-
-              {/* {breadcrumbs.map((entry, index) => {
-        return <Typography>{entry}</Typography>;
-        })} */}
               <List sx={{ p: 0 }}>
                 {structure.map((entry, index) =>
                   entry.type === 'header' ? (
@@ -306,19 +306,20 @@ const SidePanel = () => {
               </Collapse>
               <Box
                 sx={{
-                  position: 'absolute',
-                  bottom: 42,
-                  width: '100%',
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 48,
                   boxSizing: 'border-box',
+                  width: '300px',
                   p: 2,
                   display: 'flex',
                   justifyContent: 'start',
                   alignItems: 'center',
                   height: 48,
-                  borderBottom: 1,
                   borderTop: 1,
-                  borderColor: 'accent.light',
+                  borderColor,
                   gap: 2,
+                  backgroundColor: 'background.paper',
                 }}
               >
                 <Avatar

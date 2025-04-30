@@ -9,7 +9,7 @@ import checklistContent from '../../helpers/attributeChecklist.js';
 
 import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
 
-const CreateAttribute = ({ id }) => {
+const CreateAttribute = ({ id, mode, side, tabId }) => {
   return (
     <CreateShell
       tool="attribute"
@@ -35,6 +35,9 @@ const CreateAttribute = ({ id }) => {
           id,
         },
       }}
+      side={side}
+      mode={mode}
+      tabId={tabId}
     />
   );
 };

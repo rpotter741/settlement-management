@@ -14,6 +14,7 @@ export const useToolActions = (tool, id) => {
 
   const updateTool = useCallback(
     (keypath, updates) => {
+      console.log(keypath, updates);
       dispatch(updateById({ id, tool, keypath, updates }));
     },
     [dispatch]

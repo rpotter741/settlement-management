@@ -20,8 +20,6 @@ import CustomListeners from '../Listeners/Create/CustomListeners';
 import CreateWeather from '../Weather/Create/CreateWeather';
 import { emptyWeather } from '../../helpers/weather/emptyWeatherObject.js';
 
-import CreateStatus from '../Status/CreateStatus';
-
 import CreateBuilding from '../Building/CreateBuilding';
 
 import CreateUpgrade from '../Upgrade/CreateUpgrade';

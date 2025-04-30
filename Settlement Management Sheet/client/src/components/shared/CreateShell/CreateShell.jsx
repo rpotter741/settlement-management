@@ -27,10 +27,9 @@ const CreateShell = ({
   modalComponents = {},
   modalComponentsProps = {},
   mode,
+  side,
 }) => {
   const { current, edit, allIds, saveToolEdit, errors } = useTools(tool, id);
-
-  console.log(mode, 'mode');
 
   const { errorCount } = useInitializeTool({
     tool,
@@ -106,7 +105,7 @@ const CreateShell = ({
 
   if (current !== null) {
     return (
-      <ToolContext.Provider value={{ tool, id }}>
+      <ToolContext.Provider value={{ tool, id, mode, side }}>
         <Box
           sx={{
             display: 'flex',

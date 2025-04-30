@@ -16,6 +16,7 @@ const defaultToolState = {
 const initialState = {
   attribute: cloneDeep(defaultToolState),
   category: cloneDeep(defaultToolState),
+  gameStatus: cloneDeep(defaultToolState),
 };
 
 const toolSlice = createSlice({

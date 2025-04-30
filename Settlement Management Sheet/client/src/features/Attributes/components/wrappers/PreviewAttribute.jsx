@@ -10,7 +10,8 @@ import { useTools } from 'hooks/useTool.jsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 
 const PreviewAttribute = () => {
-  const { tool, id } = useToolContext();
+  const { tool, id, mode, side } = useToolContext();
+  console.log('PreviewAttribute', tool, id, mode, side);
   const { current: attr } = useTools('attribute', id);
 
   return (

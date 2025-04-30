@@ -10,23 +10,26 @@ import { useDragContext } from 'context/DragContext.jsx';
 
 import DropZone from '../DnD/DropZone.jsx';
 
-import CloseIcon from '@mui/icons-material/Close';
+import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import CategoryIcon from '@mui/icons-material/Category';
 
 import CreateAttribute from 'features/Attributes/components/wrappers/CreateAttribute.jsx';
 import CreateCategory from 'features/Categories/components/wrappers/CreateCategory.jsx';
+import CreateStatus from 'features/Statuses/components/wrappers/CreateStatus.jsx';
 
 import RenderTabHeaders from './RenderTabHeaders.jsx';
 
 const componentMap = {
   attribute: CreateAttribute,
   category: CreateCategory,
+  gameStatus: CreateStatus,
 };
 
 const iconMap = {
   attribute: <ExtensionIcon />,
   category: <CategoryIcon />,
+  gameStatus: <CoronavirusIcon />,
 };
 
 const TabPanel = ({ children, value, id }) => (
@@ -75,22 +78,11 @@ const TabbedContainer = ({
     addNewTab,
     removeById,
     setActiveTab,
-    currentTab,
     isSplit,
-    preventSplit,
     moveLeft,
     moveRight,
   } = useSidePanel();
   const { draggedType } = useDragContext();
-
-  useEffect(() => {
-    console.log('draggedType', draggedType);
-  }, [draggedType]);
-
-  useEffect(() => {
-    console.log(leftTabs, 'currentLeftTab');
-    console.log(rightTabs, 'currentRightTab');
-  }, [leftTabs, rightTabs]);
 
   useEffect(() => {
     if (rightTabs.length > 0 && leftTabs.length === 0) {

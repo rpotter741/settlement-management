@@ -8,6 +8,7 @@ import {
   updateTab,
   moveLeftToRight,
   moveRightToLeft,
+  setToolOptions,
 } from 'features/sidePanel/sidePanelSlice.js';
 import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
 
@@ -72,6 +73,10 @@ export const useSidePanelActions = () => {
     [dispatch]
   );
 
+  const setOptions = useCallback((options) => {
+    dispatch(setToolOptions({ options }));
+  });
+
   return {
     addNewTab,
     removeById,
@@ -80,6 +85,7 @@ export const useSidePanelActions = () => {
     updateCurrentTab,
     moveLeft,
     moveRight,
+    setOptions,
   };
 };
 
@@ -93,6 +99,8 @@ const useSidePanelSelectors = () => {
   const isSplit = useSelector(select.isSplit);
   const preventSplit = useSelector(select.preventSplit);
   const breadcrumbs = useSelector(select.breadcrumbs);
+  const options = useSelector(select.options);
+  const getOptions = (keypath) => useSelector(select.selectOptions(keypath));
 
   return {
     leftTabs,
@@ -104,6 +112,8 @@ const useSidePanelSelectors = () => {
     isSplit,
     preventSplit,
     breadcrumbs,
+    options,
+    getOptions,
   };
 };
 

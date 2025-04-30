@@ -4,7 +4,7 @@ const defaultSettlement = {
   refId: newId(),
   id: newId(),
   name: 'Cyfehil',
-  categories: [
+  category: [
     {
       id: 'f4bca2b2-2f68-4fdf-ad21-0a8d176d80b4',
       refId: 'dbdaef8d-403c-434c-9b4b-45aea8c9c330',
@@ -21,7 +21,7 @@ const defaultSettlement = {
       name: 'Survival',
     },
   ],
-  attributes: [
+  attribute: [
     {
       id: '5cc3ef20-9c2c-472a-a275-d9c24a31e822',
       refId: '879fe7eb-c648-49b6-b3fe-64c21879df6f',
@@ -83,7 +83,7 @@ const defaultSettlement = {
     refId: '456def',
     name: 'Gold',
   },
-  locations: [
+  location: [
     {
       id: 'c2f1b0c5-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
       refId: 'h2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',

@@ -5,7 +5,7 @@ import { addTab } from 'features/sidePanel/sidePanelSlice.js';
 import { v4 as newId } from 'uuid';
 
 export const loadTool =
-  ({ tool, refId, id, currentTool }) =>
+  ({ tool, refId, id, currentTool, mode = 'preview' }) =>
   async (dispatch, getState) => {
     const state = getState();
     const usedTool = currentTool || tool;
@@ -20,7 +20,6 @@ export const loadTool =
             id,
           },
         });
-        console.log(data, 'dataaaaa');
         return data;
       },
     });
@@ -35,7 +34,7 @@ export const loadTool =
       addTab({
         name: cachedItem.name,
         id: cachedItem.id,
-        mode: 'edit',
+        mode,
         type: usedTool,
         tabId: newId(),
         scroll: 0,
@@ -44,3 +43,22 @@ export const loadTool =
       })
     );
   };
+
+export const returnTool = async ({ tool, refId, id }) => {
+  await queryClient.prefetchQuery({
+    queryKey: [tool, id],
+    queryFn: async () => {
+      const { data } = await api.get('/tools/getItem', {
+        params: {
+          tool,
+          refId,
+          id,
+        },
+      });
+      return data;
+    },
+  });
+
+  const cachedItem = queryClient.getQueryData([tool, id]);
+  return cachedItem;
+};

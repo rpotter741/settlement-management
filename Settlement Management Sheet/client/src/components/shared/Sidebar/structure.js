@@ -4,13 +4,8 @@ import ExtensionIcon from '@mui/icons-material/Extension';
 import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import CategoryIcon from '@mui/icons-material/Category';
 import ToolsIcon from '@mui/icons-material/Build';
+import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import { v4 as newId } from 'uuid';
-
-import { useTools } from 'hooks/useTool.jsx';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
-
-import CreateAttribute from 'features/Attributes/components/wrappers/CreateAttribute';
-import CreateCategory from 'features/Categories/components/wrappers/CreateCategory.jsx';
 
 const getTabInfo = (tool) => {
   return {
@@ -60,6 +55,21 @@ const structure = [
         ],
       },
       {
+        title: 'Statuses',
+        icon: CoronavirusIcon,
+        type: 'link',
+        tool: 'gameStatus',
+        children: [
+          {
+            title: 'Create Status +',
+            type: 'button',
+            onClick: () => {
+              return getTabInfo('gameStatus');
+            },
+          },
+        ],
+      },
+      {
         title: 'Events',
         icon: EventNoteIcon,
         type: 'link',
@@ -76,16 +86,6 @@ const structure = [
         component: {
           preview: 'ListenerPreview',
           edit: 'ListenerEdit',
-        },
-        children: [],
-      },
-      {
-        title: 'Weather',
-        icon: ThunderstormIcon,
-        type: 'link',
-        component: {
-          preview: 'WeatherPreview',
-          edit: 'WeatherEdit',
         },
         children: [],
       },

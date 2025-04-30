@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { v4 as newId } from 'uuid';
 
 import { loadTool } from 'app/toolThunks.js';
+import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import {
   Box,
@@ -25,10 +26,10 @@ import toolChoices from '../helpers/toolChoices.js';
 import mergeKit from '../helpers/mergeObjects.js';
 
 const pathToTool = {
-  categories: 'category',
-  attributes: 'attribute',
-  regions: 'region',
-  locations: 'location',
+  category: 'category',
+  attribute: 'attribute',
+  region: 'region',
+  location: 'location',
   people: 'person',
 };
 
@@ -119,6 +120,8 @@ const renderShallowPath = (obj, keypath, title) => {
 };
 
 const SidePanelKit = ({}) => {
+  const { setOptions } = useSidePanel();
+
   const [kit, setKit] = useState(defaultKit);
   const [settlement, setSettlement] = useState(defaultSettlement);
   const [kitOptions, setKitOptions] = useState([defaultKit]);
@@ -137,6 +140,10 @@ const SidePanelKit = ({}) => {
       setCombinedData(mergeKit(kit, settlement));
     }
   }, [toolChoice, kit, settlement]);
+
+  useEffect(() => {
+    setOptions(mergeKit(kit, settlement));
+  }, [kit, settlement]);
 
   return (
     <Box sx={{ pb: 3 }}>
@@ -219,10 +226,10 @@ const SidePanelKit = ({}) => {
         </IconButton>
       </Box>
       <Box sx={{ overflowY: 'scroll' }}>
-        {renderShallowPath(combinedData, 'categories', 'Categories')}
-        {renderShallowPath(combinedData, 'attributes', 'Attributes')}
-        {renderShallowPath(combinedData, 'regions', 'Regions')}
-        {renderShallowPath(combinedData, 'locations', 'Locations')}
+        {renderShallowPath(combinedData, 'attribute', 'Attributes')}
+        {renderShallowPath(combinedData, 'category', 'Categories')}
+        {renderShallowPath(combinedData, 'region', 'Regions')}
+        {renderShallowPath(combinedData, 'location', 'Locations')}
         {renderShallowPath(combinedData, 'people', 'People')}
       </Box>
     </Box>
