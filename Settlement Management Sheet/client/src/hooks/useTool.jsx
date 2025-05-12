@@ -14,7 +14,6 @@ export const useToolActions = (tool, id) => {
 
   const updateTool = useCallback(
     (keypath, updates) => {
-      console.log(keypath, updates);
       dispatch(updateById({ id, tool, keypath, updates }));
     },
     [dispatch]
@@ -70,8 +69,10 @@ export const useToolSelectors = (tool, id) => {
   const allEditIds = useSelector(select.allEditIds(tool));
   const allTools = useSelector(select.allTools(tool));
   const allEditTools = useSelector(select.allEditTools(tool));
-  const errors = useSelector(select.errors(tool));
+  const errors = useSelector(select.errors(tool, id));
   const dirty = useSelector(select.changes(tool, id));
+
+  console.log('current', current);
 
   const selectValue = (keypath) =>
     useSelector(select.selectValue(tool, id, keypath));

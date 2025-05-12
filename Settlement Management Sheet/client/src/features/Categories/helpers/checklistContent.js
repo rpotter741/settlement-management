@@ -8,12 +8,12 @@ const checklistContent = [
     label: 'Description',
   },
   {
-    keypath: 'thresholds',
+    keypath: 'thresholds.data',
     label: 'Thresholds',
     type: 'group',
   },
   {
-    keypath: 'dependencies',
+    keypath: 'dependencies.data',
     label: 'Dependencies',
     type: 'group',
   },

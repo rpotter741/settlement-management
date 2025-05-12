@@ -19,8 +19,6 @@ const AttrMetaData = ({ setShowModal }) => {
     validateToolField: validateAttributeField,
   } = useTools(tool, id);
 
-  console.log(attr, 'attr');
-
   const handleUpdate = (updates, { keypath }) => {
     updateAttribute(keypath, updates);
   };
@@ -110,7 +108,7 @@ const AttrMetaData = ({ setShowModal }) => {
               {attr?.positive ? 'Positive' : 'Negative'}
             </Typography>
             <Switch
-              checked={attr?.positive}
+              checked={attr?.positive === true}
               onChange={(e) => {
                 updateAttribute('positive', e.target.checked);
               }}

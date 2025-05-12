@@ -43,10 +43,6 @@ const LoadTool = ({
     refIds: get(outerTool, refKeypath) || [],
   });
 
-  useEffect(() => {
-    console.log(tool, 'tool');
-  }, [tool]);
-
   const handleSelectConfirm = () => {
     outerUpdate(keypath, selected);
   };

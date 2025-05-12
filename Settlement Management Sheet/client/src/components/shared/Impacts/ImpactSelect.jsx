@@ -15,7 +15,7 @@ import { useTools } from 'hooks/useTool.jsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 import { get } from 'lodash';
 
-import { returnTool } from 'app/toolThunks.js';
+import { returnTool } from 'app/toolThunks.ts';
 
 import sortByKey from 'utility/sortByKey.js';
 

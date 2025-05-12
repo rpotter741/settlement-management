@@ -15,7 +15,6 @@ import { ThemeProvider } from './context/ThemeContext';
 
 import LoginPage from './components/pages/Login';
 import Register from './components/pages/Register';
-import Dashboard from './components/Dashboard';
 import CustomCreation from './components/pages/CustomCreation';
 /*!!localStorage.getItem('token') */
 const App = () => {
@@ -41,11 +40,7 @@ const App = () => {
               {/* Protected Route */}
               <Route
                 path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
+                element={<ProtectedRoute></ProtectedRoute>}
               />
 
               {/* Fallback Route */}

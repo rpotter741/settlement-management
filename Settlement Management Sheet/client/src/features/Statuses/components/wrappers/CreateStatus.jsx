@@ -14,6 +14,7 @@ const CreateStatus = ({ id, mode, side, tabId }) => {
   return (
     <CreateShell
       tool="gameStatus"
+      toolName="Status"
       id={id}
       initializeTool={initializeStatus}
       validationFields={['name', 'description']}

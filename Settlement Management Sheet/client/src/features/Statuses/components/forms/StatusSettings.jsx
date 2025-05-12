@@ -20,13 +20,13 @@ const StatusSettings = () => {
     >
       <SelectOptions
         label="Status Type"
-        value={edit.type}
+        value={edit?.type}
         onChange={(e) => updateTool('type', e.target.value)}
         options={['Weather', 'Morale', 'Settlement']}
       />
       <SelectOptions
         label="Creation Mode"
-        value={edit.mode}
+        value={edit?.mode}
         onChange={(e) => updateTool('mode', e.target.value)}
         options={['Simple', 'Advanced']}
       />

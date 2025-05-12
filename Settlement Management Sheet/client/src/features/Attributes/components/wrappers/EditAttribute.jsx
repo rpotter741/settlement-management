@@ -11,22 +11,24 @@ import TagTable from '../forms/TagTable';
 
 import { useTools } from 'hooks/useTool.jsx';
 import { useToolContext } from 'context/ToolContext.jsx';
+import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 const EditAttribute = ({ setShowModal }) => {
+  const { isSplit } = useSidePanel();
   const { id } = useToolContext();
-  console.log(id);
   const { edit: attr } = useTools('attribute', id);
-  console.log(attr, 'attr');
   const [values, setValues] = useState(false);
   const [thresholds, setThresholds] = useState(false);
   const [tags, setTags] = useState(false);
   const [spCosts, setSpCosts] = useState(false);
 
+  const columns = isSplit ? 1 : 3;
+
   return (
     <Box
       sx={{
         display: 'grid',
-        gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
+        gridTemplateColumns: ['1fr', '1fr', `repeat(${columns}, 1fr)`],
         gridTemplateRows: 'auto',
         alignItems: 'start',
         justifyContent: 'start',
@@ -36,6 +38,8 @@ const EditAttribute = ({ setShowModal }) => {
         width: '100%',
         position: 'relative',
         // pb: 4,
+        overflowY: 'auto',
+        maxHeight: 'calc(100vh - 200px)',
       }}
     >
       <AttrMetaData setShowModal={setShowModal} id={id} />
@@ -46,11 +50,11 @@ const EditAttribute = ({ setShowModal }) => {
         defaultState={values}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{
-          gridColumn: 'span 3',
+          gridColumn: `span ${columns}`,
         }}
         noDefaultHandler={() => setValues(!values)}
       >
-        <AttrValues values={values} id={id} />
+        <AttrValues values={values} id={id} columns={columns} />
       </TitledCollapse>
       <TitledCollapse
         title="Settlement Point Costs"

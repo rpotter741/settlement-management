@@ -18,7 +18,7 @@ import themeOptions from '../themes/themeOptions.js';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeKey, setThemeKey] = useState('dark'); // Default theme key
+  const [themeKey, setThemeKey] = useState('default'); // Default theme key
 
   const changeThemeTo = (newThemeKey) => {
     if (themeOptions[newThemeKey]) {

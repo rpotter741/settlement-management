@@ -16,6 +16,8 @@ import TrashIcon from '@mui/icons-material/Delete';
 import AutoStoryIcon from '@mui/icons-material/AutoStories';
 import WarningIcon from '@mui/icons-material/Warning';
 
+import toSnakeCase from 'utility/snakeCase.js';
+
 const DynamicForm = ({
   initialValues,
   index,
@@ -33,6 +35,7 @@ const DynamicForm = ({
   isExpanded = false,
   onBlur,
   debounced = false,
+  snakeCase = false,
 }) => {
   const wrappedValidate = (value) => field.validate(value);
   const [isError, setIsError] = useState(parentError);
@@ -140,6 +143,10 @@ const DynamicForm = ({
                 type={type || 'text'}
                 value={values[name]}
                 onChange={(e) => {
+                  const value = snakeCase
+                    ? toSnakeCase(e.target.value)
+                    : e.target.value;
+                  e.target.value = value;
                   handleChange(e);
                   if (externalUpdate) {
                     if (type === 'number') {

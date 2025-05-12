@@ -7,8 +7,9 @@ import {
 } from '../app/toolSlice.js';
 import {
   validateTool,
-  initializeValidation,
+  setValidationObject,
   getErrorCount,
+  initializeObject,
 } from 'features/validation/validationSlice.js';
 
 export const useInitializeTool = ({
@@ -44,11 +45,19 @@ export const useInitializeTool = ({
   }, [current, dispatch]);
 
   useEffect(() => {
-    if (edit === undefined) {
+    if (edit === undefined && current) {
       dispatch(initializeEdit({ id, tool }));
-      dispatch(initializeValidation({ tool, obj: tool }));
+      const obj = initializeObject(current);
+      console.log(obj);
+      dispatch(
+        setValidationObject({
+          tool,
+          validationObject: obj,
+          id,
+        })
+      );
     }
-  }, [tool, dispatch]);
+  }, [tool, dispatch, edit, current]);
 
   useEffect(() => {
     if (current && validationFields.length > 0) {
@@ -56,11 +65,13 @@ export const useInitializeTool = ({
         (field) => current[field] !== undefined
       );
       if (!isReady) return;
+      console.log('validating bitches');
       dispatch(
         validateTool({
           tool,
           fields: validationFields,
           refObj: current,
+          id: current.id,
         })
       );
     }

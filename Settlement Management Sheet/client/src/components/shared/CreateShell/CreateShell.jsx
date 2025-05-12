@@ -8,6 +8,7 @@ import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
 import useServer from 'services/useServer.js';
 import prefetchToolContent from 'services/prefetchTools.js';
 import { useTools } from 'hooks/useTool.jsx';
+import { useSidePanel } from 'hooks/useSidePanel.jsx';
 import { useInitializeTool } from 'hooks/useInitializeTool.jsx';
 import { useDispatch } from 'react-redux';
 import { initializeTool as initialize } from '../../../app/toolSlice.js';
@@ -16,6 +17,7 @@ import { ToolContext } from 'context/ToolContext.jsx';
 const CreateShell = ({
   tool,
   id,
+  toolName = tool,
   initializeTool,
   validationFields,
   editComponent,
@@ -46,8 +48,6 @@ const CreateShell = ({
   const [editMode, setEditMode] = useState(mode === 'edit');
   const [showModal, setShowModal] = useState(null);
   const [expanded, setExpanded] = useState(false);
-
-  const allCapsTool = tool.toUpperCase();
 
   const handleCancel = () => {
     setEditMode(false);
@@ -116,6 +116,7 @@ const CreateShell = ({
             height: '100%',
             flexShrink: 0,
             flexGrow: 2,
+            overflowY: 'scroll',
           }}
           className="create-shell"
         >
@@ -150,15 +151,15 @@ const CreateShell = ({
               alignItems: 'center',
               px: 4,
               mb: 7,
-              overflowY: 'scroll',
               boxShadow: 4,
               borderRadius: 4,
               backgroundColor: 'background.paper',
-              width: ['100%'],
+              width: ['100%', '90%', '80%'],
               maxWidth: ['100%', '100%', 800],
               position: 'relative',
               flexShrink: 1,
               height: '100%',
+              overflowY: 'scroll',
             }}
           >
             <Box
@@ -179,9 +180,10 @@ const CreateShell = ({
             >
               <DesktopMenu
                 mode={editMode}
-                tool={tool}
+                tool={toolName}
                 isValid={errorCount === 0}
                 actions={buttonActions}
+                toolName={toolName}
               />
             </Box>
             <Modal open={showModal !== null} onClose={() => setShowModal(null)}>

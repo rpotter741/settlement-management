@@ -41,13 +41,14 @@ const EditStatus = ({}) => {
         width: '100%',
         position: 'relative',
         pb: 2,
-        overflowY: 'scroll',
+        overflowY: 'auto',
+        maxHeight: 'calc(100vh - 200px)',
       }}
     >
       <EditNameDescription tool={tool} fields={statusFormData} id={id} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <StatusSettings />
-      {status.mode === 'Advanced' ? (
+      {status?.mode === 'Advanced' ? (
         <Typography sx={{ gridColumn: 'span 3' }}>
           Advanced Creation Mode enables you to assign varying impacts to each
           step, allowing significantly more customization to the status that
@@ -62,7 +63,7 @@ const EditStatus = ({}) => {
           result in a Step 2 Impact of Food (Current) - 2.{' '}
         </Typography>
       )}
-      {status.mode === 'Advanced' && (
+      {status?.mode === 'Advanced' && (
         <Box
           sx={{
             gridColumn: 'span 3',
@@ -110,7 +111,7 @@ const EditStatus = ({}) => {
           ))}
         </Box>
       )}
-      {status.mode === 'Simple' && (
+      {status?.mode === 'Simple' && (
         <Box
           sx={{
             gridColumn: 'span 3',

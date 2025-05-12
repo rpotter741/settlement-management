@@ -458,8 +458,6 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
             flexDirection: 'column',
             backgroundColor: 'background.paper',
             width: '100%',
-            height: 36,
-            maxHeight: 36,
           }}
         >
           {entry.children.map((child, childIndex) => (

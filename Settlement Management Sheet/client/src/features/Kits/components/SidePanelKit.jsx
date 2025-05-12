@@ -2,7 +2,7 @@ import { React, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as newId } from 'uuid';
 
-import { loadTool } from 'app/toolThunks.js';
+import { loadTool } from 'app/toolThunks.ts';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import {

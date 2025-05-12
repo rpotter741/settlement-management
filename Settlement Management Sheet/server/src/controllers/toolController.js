@@ -54,6 +54,35 @@ const getContent = async (req, res) => {
   }
 };
 
+const getContentByName = async (req, res) => {
+  try {
+    const userId = req?.user?.id || 'Admin';
+    const { tool, name = '' } = req.query;
+
+    if (!tool) return res.status(400).json({ message: 'Tool type required.' });
+
+    const model = prisma[tool];
+    if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
+
+    const options = await model.findMany();
+    const data = options
+      .sort((a, b) => {
+        const aIsUser = a.createdBy === userId;
+        const bIsUser = b.createdBy === userId;
+        if (aIsUser && !bIsUser) return -1;
+        if (!aIsUser && bIsUser) return 1;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      })
+      .filter((item) => {
+        if (name === '') return true;
+        return item.name.toLowerCase().includes(name.toLowerCase());
+      });
+    res.json(data);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error getting content by name.' });
+  }
+};
+
 const saveContent = async (req, res) => {
   try {
     const userId = req?.user?.id || 'Admin';
@@ -168,4 +197,24 @@ const fetchByIds = async (req, res) => {
   }
 };
 
-export { getContent, saveContent, deleteContent, getItem, fetchByIds };
+const checkKey = async (req, res) => {
+  const name = req.query.name;
+  if (!name) return res.status(400).json({ exists: false });
+
+  const key = await prisma.key.findUnique({ where: { name } });
+  if (key) {
+    return res.json({ exists: true, key });
+  } else {
+    return res.json({ exists: false });
+  }
+};
+
+export {
+  getContent,
+  getContentByName,
+  saveContent,
+  deleteContent,
+  getItem,
+  fetchByIds,
+  checkKey,
+};

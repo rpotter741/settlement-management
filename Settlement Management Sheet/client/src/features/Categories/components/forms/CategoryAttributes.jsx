@@ -3,7 +3,7 @@ import { useTools } from 'hooks/useTool.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
 
-import AttributeCard from 'components/shared/AttributeCard/AttributeCard.jsx';
+import AttributeCard from 'components/shared/AttributeCard/AttributeCard.tsx';
 
 import useFetchReferences from 'hooks/useFetchReferences.jsx';
 

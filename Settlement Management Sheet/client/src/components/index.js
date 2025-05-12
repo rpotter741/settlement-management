@@ -1,6 +1,5 @@
 export { default as TitledCollapse } from './shared/TitledCollapse/TitledCollapse.jsx';
 export { default as TabbedContainer } from './shared/TabbedContainer/TabbedContainer.jsx';
-export { default as Sidebar } from './shared/Sidebar/Sidebar.jsx';
 export { default as Icon } from './shared/Icons/Icon.jsx';
 export { default as IconSelector } from './shared/IconSelector/IconSelector.jsx';
 export { default as IconCustomizer } from './shared/IconSelector/IconCustomizer.jsx';

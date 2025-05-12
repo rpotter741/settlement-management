@@ -20,6 +20,8 @@ const EditCategory = ({ setShowModal }) => {
   const [dependencies, setDependencies] = useState(false);
   const [tags, setTags] = useState(false);
 
+  console.log('category', category);
+
   return (
     <Box
       sx={{
@@ -34,6 +36,8 @@ const EditCategory = ({ setShowModal }) => {
         width: '100%',
         position: 'relative',
         pb: 2,
+        overflowY: 'auto',
+        maxHeight: 'calc(100vh - 200px)',
       }}
     >
       <EditNameDescription tool="category" fields={categoryFields} id={id} />

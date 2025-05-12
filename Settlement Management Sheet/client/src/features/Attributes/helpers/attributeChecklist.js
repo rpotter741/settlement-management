@@ -20,12 +20,12 @@ const checklistContent = [
     label: 'Cost Per Level',
   },
   {
-    keypath: 'settlementPointCost',
+    keypath: 'settlementPointCost.data',
     label: 'Settlement Point Cost',
     type: 'group',
   },
   {
-    keypath: 'thresholds',
+    keypath: 'thresholds.data',
     label: 'Thresholds',
     type: 'group',
   },

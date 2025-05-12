@@ -21,8 +21,8 @@ enum Status {
 /////////////////// ATTRIBUTE //////////////////////
 
 model Attribute {
-  refId               String    @id @default(uuid())
-  id                  String @unique // ID for versioning or app-level tracking
+  refId               String       @id @default(uuid())
+  id                  String       @unique // ID for versioning or app-level tracking
   version             Int // per id
   positive            Boolean
   name                String
@@ -32,25 +32,24 @@ model Attribute {
   settlementPointCost Json
   icon                Json
   iconColor           String
-  tags                String[]  // Array of strings for tags
+  tags                String[] // Array of strings for tags
   isValid             Boolean
   status              Status
   contentType         ContentTypes // for separating official from custom content
-  createdBy           String    // Potential foreign key to User model in the future
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdBy           String // Potential foreign key to User model in the future
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([contentType])
   @@index([tags])
   @@index([id, updatedAt(sort: Desc)])
 }
 
-
 ////////////////// CATEGORY //////////////////////////
 
 model Category {
-  refId        String    @id @default(uuid())
-  id           String  @unique   // ID for versioning or app-level tracking
+  refId        String       @id @default(uuid())
+  id           String       @unique // ID for versioning or app-level tracking
   version      Int // per id
   name         String
   description  String
@@ -62,8 +61,8 @@ model Category {
   status       Status
   contentType  ContentTypes
   createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   @@index([contentType])
   @@index([tags])
@@ -73,8 +72,8 @@ model Category {
 ////////////////// EVENT //////////////////////////
 
 model Event {
-  refId       String    @id @default(uuid())
-  id          String  @unique   // ID for versioning or app-level tracking
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
   version     Int // per id
   name        String
   description String
@@ -85,86 +84,115 @@ model Event {
   status      Status
   contentType ContentTypes
   createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   //flavorText:
-    //trivial: string,
-    //minor: string,
-    //...
-    //significant: string
+  //trivial: string,
+  //minor: string,
+  //...
+  //significant: string
 
   //phases:
-    //[
-    //  {
-    //    type: 'active / immediate / passive / indefinite'
-    //    impacts: see-below,
-    //    length: 0+,
-    //    productivity: 0+,
-    //  },
-    //]
+  //[
+  //  {
+  //    type: 'active / immediate / passive / indefinite'
+  //    impacts: see-below,
+  //    length: 0+,
+  //    productivity: 0+,
+  //  },
+  //]
 
   //resolutions:
-    //[
-      //{
-        //uuid():
-          //{
-            //name:
-            //description:
-            //impacts:
-          //}
-      //}
-    //]
+  //[
+  //{
+  //uuid():
+  //{
+  //name:
+  //description:
+  //impacts:
+  //}
+  //}
+  //]
 }
 
 ////////////////// LISTENER //////////////////////////
 
 model Listener {
-  refId        String    @id @default(uuid())
-  id           String   @unique  // ID for versioning or app-level tracking
-  version      Int // per id
-  name         String
-  description  String
-  conditions   Json
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId               String       @id @default(uuid())
+  id                  String       @unique // ID for versioning or app-level tracking
+  version             Int // per id
+  name                String
+  description         String
+  conditionEventPairs Json
+  isValid             Boolean
+  status              Status
+  contentType         ContentTypes
+  createdBy           String
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   //conditions:
-    //array of logic objects, eg:
-    //  [
-    //    {
-      //    logic: 'none',
-       //   condition: {
-       //     attribute_base_id: value
-       //   }
-       // },
-       // {
-        //  logic: 'and',
-         // condition: {
-          //  attribute_base_id: value,
-           // attribute_base_id: value,
-         // }
-       // }
-     // ]
+  //array of logic objects, eg:
+  //  [
+  //    {
+  //    logic: 'none',
+  //   condition: {
+  //     attribute_base_id: value
+  //   }
+  // },
+  // {
+  //  logic: 'and',
+  // condition: {
+  //  attribute_base_id: value,
+  // attribute_base_id: value,
+  // }
+  // }
+  // ]
 }
 
 /////////////////// KITS //////////////////////////
 
 model Kit {
-  refId        String @id @default(uuid())
-  id           String @unique
-  categories   Json
-  regions      Json
-  locations    Json
-  people       Json
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique
+  categories  Json
+  regions     Json
+  locations   Json
+  people      Json
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+/////////////////// KEYS ///////////////////////////
+
+model Key {
+  refId       String        @id @default(uuid())
+  id          String        @unique
+  name        String        @unique
+  version     Int
+  description String?
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  KeySettings KeySettings[]
+}
+
+model KeySettings {
+  id               String       @id @default(uuid())
+  refId            String
+  delay            Int
+  duration         Int
+  durationType     String
+  severityOverTime Json
+  contentType      ContentTypes
+  createdBy        String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  key              Key          @relation(fields: [refId], references: [refId], onDelete: Cascade)
 }
 
 ////////////////// STATUS //////////////////////////
@@ -180,41 +208,41 @@ enum StatusMode {
 }
 
 model gameStatus {
-  refId        String    @id @default(uuid())
-  id           String    @unique // ID for versioning or app-level tracking
-  version      Int // per id
-  name         String
-  description  String
-  type         StatusType
-  steps        Json
-  mode         StatusMode
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  type        StatusType
+  steps       Json
+  mode        StatusMode
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 ////////////////// BUILDING //////////////////////////
 
 model Building {
-  refId        String    @id @default(uuid())
-  id           String    @unique // ID for versioning or app-level tracking
-  version      Int // per id
-  name         String
-  description  String
-  upgrades     Json
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  upgrades    Json
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   //upgrades:
-    //upgrade_base_id
-    //upgrade_ref_id
+  //upgrade_base_id
+  //upgrade_ref_id
 }
 
 ////////////////// UPGRADE //////////////////////////
@@ -225,77 +253,77 @@ enum UpgradeType {
 }
 
 model Upgrade {
-  refId        String    @id @default(uuid())
-  id           String    @unique // ID for versioning or app-level tracking
-  version      Int // per id
-  name         String
-  description  String
-  impacts       Json
-  ability      String
-  upgradeType  UpgradeType
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  impacts     Json
+  ability     String
+  upgradeType UpgradeType
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   //impact:
-    //attribute_base_id: value
+  //attribute_base_id: value
   //ability:
-    //description of skill. eg, 'Adaptive Resources: If losing an attribute in one category, you can spend from another at a 1:1 settlement point cost ratio. E.g., if losing 3 food, you could lose 1 medical supply instead. Once per turn.'
+  //description of skill. eg, 'Adaptive Resources: If losing an attribute in one category, you can spend from another at a 1:1 settlement point cost ratio. E.g., if losing 3 food, you could lose 1 medical supply instead. Once per turn.'
 }
 
 ////////////////// TRADE HUB //////////////////////////
 
 model TradeHub {
-  refId        String    @id @default(uuid())
-  id           String    @unique // ID for versioning or app-level tracking
-  version      Int // per id
-  name         String
-  description  String
-  region       String
-  location     String @default("None")
-  stock        Json
-  trend        Json
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  region      String
+  location    String       @default("None")
+  stock       Json
+  trend       Json
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // region pulls from narrative data
   // location pulls from narrative data
   // stock:
-    // attribute_base_id
-    // attribute name
-    // number
+  // attribute_base_id
+  // attribute name
+  // number
   // trend: tuple (eg, -1, 1) for weekly loss/gain limit (0, 2) would be increasing, (-5, -2) would be decreasing
 }
 
 ////////////////// SETTLEMENT TYPE //////////////////////////
 
 model SettlementType {
-  refId               String    @id @default(uuid())
-  id                  String    @unique // ID for versioning or app-level tracking
-  version             Int // per id
-  name         String
-  description  String
-  upgrades     String[]
-  isValid      Boolean
-  status       Status
-  contentType  ContentTypes
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  upgrades    String[]
+  isValid     Boolean
+  status      Status
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 ////////////////// SETTLEMENT //////////////////////////
 
 model Settlement {
-  refId         String    @id @default(uuid())
-  id            String     @unique// ID for versioning or app-level tracking
+  refId         String       @id @default(uuid())
+  id            String       @unique // ID for versioning or app-level tracking
   version       Int // per id
   name          String
   stats         Json
@@ -306,33 +334,33 @@ model Settlement {
   isValid       Boolean
   contentType   ContentTypes
   createdBy     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   //stats includes:
-    // level
-    // health
-    // gold (currency?)
-    // calendar id
+  // level
+  // health
+  // gold (currency?)
+  // calendar id
 
   //pop includes:
-    // DM (array)
-    // players (array)
-    // residents (array)
-    // aristocrats (array)
+  // DM (array)
+  // players (array)
+  // residents (array)
+  // aristocrats (array)
 
   //categories includes:
-    //category_refId:
-      // bonus
-      // attribute refId:
-        // current
-        // bonus
+  //category_refId:
+  // bonus
+  // attribute refId:
+  // current
+  // bonus
 
   //eventLog includes:
-    // eventId keys:
-      // narrative data selections (array of details in [[description tag]] order)
-      // impacts
-      // dates (irl && calendar)
+  // eventId keys:
+  // narrative data selections (array of details in [[description tag]] order)
+  // impacts
+  // dates (irl && calendar)
 }
 
 //////////////// LOCATION //////////////
@@ -351,28 +379,28 @@ enum LocationType {
 }
 
 model Location {
-  refId           String    @id @default(uuid())
-  id              String    @unique // ID for versioning or app-level tracking
-  version         Int // per id
-  name            String
-  description     String
-  eventRefs       String[]
-  linkedRegion    String
-  linkedRegionId  String
-  type            LocationType
+  refId          String       @id @default(uuid())
+  id             String       @unique // ID for versioning or app-level tracking
+  version        Int // per id
+  name           String
+  description    String
+  eventRefs      String[]
+  linkedRegion   String
+  linkedRegionId String
+  type           LocationType
 }
 
 /////////////// REGION ////////////////
 
 model Region {
-  refId         String    @id @default(uuid())
-  id            String    @unique // ID for versioning or app-level tracking
-  version       Int // per id
-  name          String
-  description   String
-  locations     String[]
-  contentType   ContentTypes
-  createdBy     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  refId       String       @id @default(uuid())
+  id          String       @unique // ID for versioning or app-level tracking
+  version     Int // per id
+  name        String
+  description String
+  locations   String[]
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }

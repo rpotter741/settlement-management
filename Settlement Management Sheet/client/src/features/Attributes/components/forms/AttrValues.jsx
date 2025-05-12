@@ -14,7 +14,7 @@ import {
 import { DynamicForm } from '../../../../components/index.js';
 import InfoIcon from '@mui/icons-material/Info';
 
-const AttrValues = ({ values, id }) => {
+const AttrValues = ({ values, id, columns }) => {
   const {
     edit,
     updateTool: updateAttribute,
@@ -92,7 +92,7 @@ const AttrValues = ({ values, id }) => {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
+          gridTemplateColumns: ['1fr', '1fr', `repeat(${columns}, 1fr)`],
           gridTemplateRows: 'auto',
           alignItems: 'start',
           justifyContent: 'center',

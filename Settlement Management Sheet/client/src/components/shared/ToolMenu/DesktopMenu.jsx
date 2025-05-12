@@ -9,7 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import LoadIcon from '@mui/icons-material/GetApp';
 import PlusIcon from '@mui/icons-material/Add';
 
-const DesktopMenu = ({ mode, tool, isValid, actions, ...props }) => {
+const DesktopMenu = ({ mode, tool, isValid, actions, toolName, ...props }) => {
   return (
     <Box
       sx={{

@@ -48,6 +48,7 @@ const ValidationChecklist = ({
       const newErrorStates = checklistContent.map((item) => {
         const configuredItem = { ...item, type: item.type || 'single' };
         const data = get(errors, item.keypath);
+        console.log('data', data);
 
         if (item.type === 'group' && data !== undefined) {
           const { valid, total } = countValidEntries(data);

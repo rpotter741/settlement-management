@@ -9,7 +9,8 @@ import {
   moveLeftToRight,
   moveRightToLeft,
   setToolOptions,
-} from 'features/sidePanel/sidePanelSlice.js';
+  setSplit,
+} from 'features/sidePanel/sidePanelSlice.ts';
 import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
 
 export const useSidePanelActions = () => {
@@ -77,6 +78,10 @@ export const useSidePanelActions = () => {
     dispatch(setToolOptions({ options }));
   });
 
+  const setSplitState = useCallback((split) => {
+    dispatch(setSplit({ split }));
+  });
+
   return {
     addNewTab,
     removeById,
@@ -86,6 +91,7 @@ export const useSidePanelActions = () => {
     moveLeft,
     moveRight,
     setOptions,
+    setSplitState,
   };
 };
 
@@ -120,6 +126,14 @@ const useSidePanelSelectors = () => {
 export const useSidePanel = () => {
   const selectors = useSidePanelSelectors();
   const actions = useSidePanelActions();
+
+  useEffect(() => {
+    if (selectors.rightTabs.length > 0) {
+      if (selectors.isSplit === false) {
+        actions.setSplitState({ split: true });
+      }
+    }
+  });
 
   return { ...selectors, ...actions };
 };

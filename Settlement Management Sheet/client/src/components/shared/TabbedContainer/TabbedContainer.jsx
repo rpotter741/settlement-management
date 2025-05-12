@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Tab, IconButton } from '@mui/material';
-
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect } from 'react';
+import { Box, Tab } from '@mui/material';
 
 import SidePanel from '../Sidebar/SidePanel.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useTheme } from 'context/ThemeContext.jsx';
 import { useDragContext } from 'context/DragContext.jsx';
 
 import DropZone from '../DnD/DropZone.jsx';
@@ -13,10 +10,12 @@ import DropZone from '../DnD/DropZone.jsx';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import CategoryIcon from '@mui/icons-material/Category';
+import KeyIcon from '@mui/icons-material/VpnKey';
 
 import CreateAttribute from 'features/Attributes/components/wrappers/CreateAttribute.jsx';
 import CreateCategory from 'features/Categories/components/wrappers/CreateCategory.jsx';
 import CreateStatus from 'features/Statuses/components/wrappers/CreateStatus.jsx';
+import CreateKey from 'features/Keys/components/wrappers/CreateKey.jsx';
 
 import RenderTabHeaders from './RenderTabHeaders.jsx';
 
@@ -24,12 +23,14 @@ const componentMap = {
   attribute: CreateAttribute,
   category: CreateCategory,
   gameStatus: CreateStatus,
+  key: CreateKey,
 };
 
 const iconMap = {
   attribute: <ExtensionIcon />,
   category: <CategoryIcon />,
   gameStatus: <CoronavirusIcon />,
+  key: <KeyIcon />,
 };
 
 const TabPanel = ({ children, value, id }) => (

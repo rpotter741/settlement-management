@@ -2,9 +2,9 @@ const countValidEntries = (items) => {
   const total = Object.keys(items).length;
 
   const valid = Object.values(items).filter((obj) => {
-    // Check if every property (except "id") is null
+    // Check if every property (except "id / refId") is null
     return Object.entries(obj).every(
-      ([key, value]) => key === 'id' || value === null
+      ([key, value]) => key === 'id' || key === 'refId' || value === null
     );
   }).length;
 

@@ -3,8 +3,12 @@ import { useTools } from 'hooks/useTool.jsx';
 
 import DynamicForm from '../DynamicForm/DynamicForm.jsx';
 
-const EditNameDescription = ({ tool, fields, id }) => {
+const EditNameDescription = ({ tool, fields, id, snakeCaseName = false }) => {
   const { edit, errors, updateTool, validateToolField } = useTools(tool, id);
+
+  React.useEffect(() => {
+    console.log(errors, 'errors');
+  }, [errors]);
 
   const handleUpdate = (updates, { keypath }) => {
     updateTool(keypath, updates);
@@ -24,6 +28,7 @@ const EditNameDescription = ({ tool, fields, id }) => {
         parentError={errors?.name}
         onError={handleValidationUpdate}
         boxSx={{ gridColumn: 'span 3', px: 1 }}
+        snakeCase={snakeCaseName}
       />
       <DynamicForm
         initialValues={{ description: edit?.description || '' }}
