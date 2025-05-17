@@ -304,8 +304,8 @@ const TableList = ({
                 All
               </MenuItem>
               {Array.from(new Set(rows.map((row) => row?.createdBy))).map(
-                (creator) => (
-                  <MenuItem key={creator} value={creator}>
+                (creator, n) => (
+                  <MenuItem key={creator + n} value={creator}>
                     {creator}
                   </MenuItem>
                 )
@@ -324,8 +324,8 @@ const TableList = ({
             renderValue={(selected) => selected.join(', ')}
           >
             {Array.from(new Set(rows.flatMap((row) => row?.tags))).map(
-              (tag) => (
-                <MenuItem key={tag} value={tag}>
+              (tag, n) => (
+                <MenuItem key={tag + n} value={tag}>
                   <Checkbox checked={tagFilter.includes(tag)} />
                   <ListItemText primary={tag} />
                 </MenuItem>

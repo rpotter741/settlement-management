@@ -1,4 +1,20 @@
-import { GlossaryEntryType } from './index';
+import {
+  GlossaryEntryType,
+  APT,
+  Action,
+  Attribute,
+  Category,
+  BuildingTool,
+  FactionEntry,
+  KeyTool,
+  KitTool,
+  ListenerPack,
+  SettlementTool,
+  StoryThreadTool,
+  TradeHubTool,
+  UpgradeTree,
+  StatusTool,
+} from './index';
 
 export type UUID = string;
 export type Timestamp = string; // ISO 8601 format
@@ -24,11 +40,11 @@ export type ContentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type GameStatus = 'Weather' | 'Morale' | 'Settlement';
 export type GameStatusMode = 'Simple' | 'Advanced';
 export type EventSeverity =
-  | 'TRIVIAL'
-  | 'MINOR'
-  | 'NOTABLE'
-  | 'SIGNIFICANT'
-  | 'MAJOR';
+  | 'Trivial'
+  | 'Minor'
+  | 'Notable'
+  | 'Significant'
+  | 'Major';
 
 export type ReplacementTuple = Partial<Record<GlossaryEntryType, string[]>>;
 
@@ -123,3 +139,18 @@ export interface Dependencies {
   order: UUID[];
   refIds: UUID[];
 }
+
+export type Tool =
+  | APT
+  | Action
+  | Attribute
+  | BuildingTool
+  | Category
+  | KeyTool
+  | KitTool
+  | ListenerPack
+  | SettlementTool
+  | StatusTool
+  | StoryThreadTool
+  | TradeHubTool
+  | UpgradeTree;

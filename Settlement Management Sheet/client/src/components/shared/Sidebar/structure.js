@@ -24,9 +24,10 @@ const getTabInfo = (tool) => {
     name: 'Untitled',
     id: newId(),
     mode: 'edit',
-    type: tool,
+    tool,
     tabId: newId(),
     scroll: 0,
+    preventSplit: tool === 'event' ? true : false,
   };
 };
 
@@ -110,35 +111,16 @@ const structure = [
         title: 'Events',
         icon: EventNoteIcon,
         type: 'link',
+        tool: 'event',
         component: {
           preview: 'EventPreview',
           edit: 'EventEdit',
         },
-        children: [],
-      },
-      {
-        title: 'Factions',
-        icon: GroupIcon,
-        type: 'link',
-        tool: 'faction',
         children: [
           {
-            title: 'Create Faction +',
+            title: 'Create Event +',
             type: 'button',
-            onClick: () => getTabInfo('faction'),
-          },
-        ],
-      },
-      {
-        title: 'Keys',
-        icon: KeyIcon,
-        type: 'link',
-        tool: 'key',
-        children: [
-          {
-            title: 'Create Key +',
-            type: 'button',
-            onClick: () => getTabInfo('key'),
+            onClick: () => getTabInfo('event'),
           },
         ],
       },

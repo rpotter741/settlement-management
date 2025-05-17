@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 
 import DynamicForm from 'components/shared/DynamicForm/DynamicForm.jsx';
 

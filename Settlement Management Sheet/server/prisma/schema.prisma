@@ -72,20 +72,23 @@ model Category {
 ////////////////// EVENT //////////////////////////
 
 model Event {
-  refId       String       @id @default(uuid())
-  id          String       @unique // ID for versioning or app-level tracking
-  version     Int // per id
-  name        String
-  description String
-  flavorText  Json
-  phases      Json
-  resolutions Json
-  isValid     Boolean
-  status      Status
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  refId           String       @id @default(uuid())
+  id              String       @unique // ID for versioning or app-level tracking
+  version         Int // per id
+  name            String
+  description     String
+  flavorText      Json
+  narrativeWeight String?
+  phases          Json
+  replacement     Json
+  links           String[]
+  entryPhaseId    String
+  isValid         Boolean
+  status          Status
+  contentType     ContentTypes
+  createdBy       String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   //flavorText:
   //trivial: string,
@@ -125,6 +128,7 @@ model Listener {
   name                String
   description         String
   conditionEventPairs Json
+  active              Boolean?
   isValid             Boolean
   status              Status
   contentType         ContentTypes
@@ -156,10 +160,8 @@ model Listener {
 model Kit {
   refId       String       @id @default(uuid())
   id          String       @unique
-  categories  Json
-  regions     Json
-  locations   Json
-  people      Json
+  name        String
+  data        Json
   contentType ContentTypes
   createdBy   String
   createdAt   DateTime     @default(now())
@@ -178,7 +180,7 @@ model Key {
   createdBy   String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  KeySettings KeySettings[]
+  backLinks   KeySettings[] // just want keySetting ids
 }
 
 model KeySettings {
@@ -227,18 +229,24 @@ model gameStatus {
 ////////////////// BUILDING //////////////////////////
 
 model Building {
-  refId       String       @id @default(uuid())
-  id          String       @unique // ID for versioning or app-level tracking
-  version     Int // per id
-  name        String
-  description String
-  upgrades    Json
-  isValid     Boolean
-  status      Status
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  refId        String       @id @default(uuid())
+  id           String       @unique // ID for versioning or app-level tracking
+  version      Int // per id
+  name         String
+  description  String
+  metrics      Json
+  attributes   String[]
+  upgradeTree  Json?
+  initialCost  Json
+  impacts      Json
+  flavorText   String?
+  dependencies String[]
+  isValid      Boolean
+  status       Status
+  contentType  ContentTypes
+  createdBy    String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   //upgrades:
   //upgrade_base_id
@@ -258,9 +266,8 @@ model Upgrade {
   version     Int // per id
   name        String
   description String
-  impacts     Json
-  ability     String
-  upgradeType UpgradeType
+  root        String
+  nodes       Json
   isValid     Boolean
   status      Status
   contentType ContentTypes
@@ -282,10 +289,12 @@ model TradeHub {
   version     Int // per id
   name        String
   description String
-  region      String
-  location    String       @default("None")
   stock       Json
-  trend       Json
+  region      String
+  location    String
+  trend       String
+  trendRange  Int[]
+  faction     String?
   isValid     Boolean
   status      Status
   contentType ContentTypes
@@ -327,8 +336,9 @@ model Settlement {
   version       Int // per id
   name          String
   stats         Json
-  pop           Json
+  population    Json
   categories    Json
+  buildings     Json
   eventLog      Json
   narrativeData String // foreign key later
   isValid       Boolean
@@ -363,44 +373,161 @@ model Settlement {
   // dates (irl && calendar)
 }
 
-//////////////// LOCATION //////////////
+////////////// APT ////////////
 
-enum LocationType {
-  forest
-  mountain
-  plain
-  river
-  lake
-  ocean
-  ruin
-  mine
-  cave
-  poi
+model APT {
+  refId           String       @id @default(uuid())
+  id              String       @unique
+  version         Int
+  name            String
+  description     String
+  display         Json
+  eventThresholds Json
+  progressType    String
+  decay           Int
+  contentType     ContentTypes
+  createdBy       String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
-model Location {
-  refId          String       @id @default(uuid())
-  id             String       @unique // ID for versioning or app-level tracking
-  version        Int // per id
-  name           String
-  description    String
-  eventRefs      String[]
-  linkedRegion   String
-  linkedRegionId String
-  type           LocationType
-}
+////////////// Action ////////////
 
-/////////////// REGION ////////////////
-
-model Region {
+model Action {
   refId       String       @id @default(uuid())
-  id          String       @unique // ID for versioning or app-level tracking
-  version     Int // per id
+  id          String       @unique
+  version     Int
   name        String
   description String
-  locations   String[]
   contentType ContentTypes
   createdBy   String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  effects     Json
+  conditions  Json?
+  cooldown    String?
+  flavorText  String[]
+}
+
+////////////// StoryThread ////////////
+
+model StoryThread {
+  refId       String       @id @default(uuid())
+  id          String       @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  origin      Json
+  primaryKey  Json
+}
+
+////////////// Region ////////////
+
+model Region {
+  refId            String       @id @default(uuid())
+  id               String       @unique
+  version          Int
+  name             String
+  description      String
+  contentType      ContentTypes
+  createdBy        String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  tags             String[]
+  climate          String
+  terrain          String
+  factions         String[]
+  population       Json
+  notableLocations String[]
+  resources        String[]
+}
+
+////////////// Location ////////////
+
+model Location {
+  refId       String       @id @default(uuid())
+  id          String       @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tags        String[]
+  type        String
+  region      String[]
+  climate     String
+  terrain     String
+  eventLog    String[]
+}
+
+////////////// POI ////////////
+
+model POI {
+  refId            String       @id @default(uuid())
+  id               String       @unique
+  version          Int
+  name             String
+  description      String
+  contentType      ContentTypes
+  createdBy        String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  tags             String[]
+  type             String
+  region           String[]
+  currentOccupants String[]
+  nearbyFeatures   Json
+}
+
+////////////// Person ////////////
+
+model Person {
+  refId         String       @id @default(uuid())
+  id            String       @unique
+  version       Int
+  name          String
+  description   String
+  contentType   ContentTypes
+  createdBy     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  tags          String[]
+  occupation    String
+  title         String
+  traits        String[]
+  faction       String
+  location      String
+  relationships Json
+  notoriety     String
+}
+
+////////////// Faction ////////////
+
+model Faction {
+  refId          String       @id @default(uuid())
+  id             String       @unique
+  version        Int
+  name           String
+  description    String
+  contentType    ContentTypes
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  tags           String[]
+  leader         String
+  homeBase       String
+  disposition    Json
+  allies         String[]
+  enemies        String[]
+  influence      Int
+  notoriety      Int
+  cultureTags    String[]
+  activeKeys     String[]
+  passiveBonuses Json
 }

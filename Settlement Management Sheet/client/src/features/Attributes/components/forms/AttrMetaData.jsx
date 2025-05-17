@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 
 import { attributeFields } from '../../helpers/attributeFormData.js';

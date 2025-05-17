@@ -7,9 +7,8 @@ import MobileMenu from 'components/shared/ToolMenu/MobileMenu.jsx';
 import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
 import useServer from 'services/useServer.js';
 import prefetchToolContent from 'services/prefetchTools.js';
-import { useTools } from 'hooks/useTool.jsx';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useInitializeTool } from 'hooks/useInitializeTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
+import { useInitializeTool } from 'hooks/useInitializeTool.tsx';
 import { useDispatch } from 'react-redux';
 import { initializeTool as initialize } from '../../../app/toolSlice.js';
 import { ToolContext } from 'context/ToolContext.jsx';
@@ -30,6 +29,7 @@ const CreateShell = ({
   modalComponentsProps = {},
   mode,
   side,
+  width,
 }) => {
   const { current, edit, allIds, saveToolEdit, errors } = useTools(tool, id);
 
@@ -117,6 +117,7 @@ const CreateShell = ({
             flexShrink: 0,
             flexGrow: 2,
             overflowY: 'scroll',
+            overflowX: 'hidden',
           }}
           className="create-shell"
         >
@@ -155,7 +156,7 @@ const CreateShell = ({
               borderRadius: 4,
               backgroundColor: 'background.paper',
               width: ['100%', '90%', '80%'],
-              maxWidth: ['100%', '100%', 800],
+              maxWidth: width ? width : ['100%', '100%', 800],
               position: 'relative',
               flexShrink: 1,
               height: '100%',

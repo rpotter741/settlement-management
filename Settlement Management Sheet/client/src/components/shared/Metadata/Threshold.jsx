@@ -14,6 +14,7 @@ const Threshold = ({
   handleMaxChange,
   handleBalanceChange,
 }) => {
+  console.log(errors);
   return (
     <Box
       key={threshold.id}

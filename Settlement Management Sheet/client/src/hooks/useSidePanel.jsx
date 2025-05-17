@@ -10,6 +10,7 @@ import {
   moveRightToLeft,
   setToolOptions,
   setSplit,
+  setPrevent,
 } from 'features/sidePanel/sidePanelSlice.ts';
 import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
 
@@ -21,13 +22,26 @@ export const useSidePanelActions = () => {
       name = 'Untitled',
       id,
       mode,
-      type,
+      tool,
       tabId,
       scroll,
       activate = false,
       side,
+      preventSplit = false,
     }) => {
-      dispatch(addTab({ name, id, mode, type, tabId, scroll, activate, side }));
+      dispatch(
+        addTab({
+          name,
+          id,
+          mode,
+          tool,
+          tabId,
+          scroll,
+          activate,
+          side,
+          preventSplit,
+        })
+      );
     },
     [dispatch]
   );
@@ -74,13 +88,26 @@ export const useSidePanelActions = () => {
     [dispatch]
   );
 
-  const setOptions = useCallback((options) => {
-    dispatch(setToolOptions({ options }));
-  });
+  const setOptions = useCallback(
+    (options) => {
+      dispatch(setToolOptions({ options }));
+    },
+    [dispatch]
+  );
 
-  const setSplitState = useCallback((split) => {
-    dispatch(setSplit({ split }));
-  });
+  const setSplitState = useCallback(
+    (split) => {
+      dispatch(setSplit({ split }));
+    },
+    [dispatch]
+  );
+
+  const setPreventSplit = useCallback(
+    (prevent) => {
+      dispatch(setPrevent({ prevent }));
+    },
+    [dispatch]
+  );
 
   return {
     addNewTab,
@@ -92,6 +119,7 @@ export const useSidePanelActions = () => {
     moveRight,
     setOptions,
     setSplitState,
+    setPreventSplit,
   };
 };
 
@@ -104,9 +132,7 @@ const useSidePanelSelectors = () => {
   const currentRightIndex = useSelector(select.currentRightIndex);
   const isSplit = useSelector(select.isSplit);
   const preventSplit = useSelector(select.preventSplit);
-  const breadcrumbs = useSelector(select.breadcrumbs);
   const options = useSelector(select.options);
-  const getOptions = (keypath) => useSelector(select.selectOptions(keypath));
 
   return {
     leftTabs,
@@ -117,23 +143,13 @@ const useSidePanelSelectors = () => {
     currentRightIndex,
     isSplit,
     preventSplit,
-    breadcrumbs,
     options,
-    getOptions,
   };
 };
 
 export const useSidePanel = () => {
   const selectors = useSidePanelSelectors();
   const actions = useSidePanelActions();
-
-  useEffect(() => {
-    if (selectors.rightTabs.length > 0) {
-      if (selectors.isSplit === false) {
-        actions.setSplitState({ split: true });
-      }
-    }
-  });
 
   return { ...selectors, ...actions };
 };

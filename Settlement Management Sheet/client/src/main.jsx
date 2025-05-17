@@ -10,15 +10,13 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import store from './app/store.js';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-      <DndProvider backend={HTML5Backend}>
-        <DragProvider>
-          <SnackbarProvider>
-            <App />
-          </SnackbarProvider>
-        </DragProvider>
-      </DndProvider>
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <DndProvider backend={HTML5Backend}>
+      <DragProvider>
+        <SnackbarProvider>
+          <App />
+        </SnackbarProvider>
+      </DragProvider>
+    </DndProvider>
+  </Provider>
 );

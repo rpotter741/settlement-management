@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import queryClient from 'context/QueryClient.js';
-import api from 'services/interceptor.js';
+import api from 'services/interceptor.ts';
 
 const useFetchReferences = (tool, refIds = []) => {
   const [resolved, setResolved] = useState([]);

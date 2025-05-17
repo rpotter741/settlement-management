@@ -5,3 +5,5 @@ const toCamelCase = (str) => {
     .replace(/\s/g, '') // Remove spaces
     .replace(/^(.)/, (_, char) => char.toLowerCase()); // Lowercase first letter
 };
+
+export default toCamelCase;

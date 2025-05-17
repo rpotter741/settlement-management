@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 // redux
 import initializeAttribute from 'features/Attributes/helpers/initializeAttribute.js';
 // custom components

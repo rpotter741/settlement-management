@@ -1,4 +1,4 @@
-import api from 'services/interceptor.js';
+import api from 'services/interceptor.ts';
 import queryClient from 'context/QueryClient.js';
 
 const getNewDependencies = async ({ edit, selected, tool }) => {

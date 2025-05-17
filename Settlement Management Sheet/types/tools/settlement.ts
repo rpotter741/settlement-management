@@ -36,4 +36,5 @@ export interface SettlementTool extends BaseTool {
   population: PopulationStats;
   categories: CategoryStats[];
   buildings: UUID[];
+  eventLog: any;
 }

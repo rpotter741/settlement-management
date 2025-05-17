@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import confetti from 'canvas-confetti';
 import { useAttribute } from '../../hooks/useEditAttribute.jsx';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useSnackbar } from '../../../../context/SnackbarContext.jsx';
 
 import { v4 as newId } from 'uuid';

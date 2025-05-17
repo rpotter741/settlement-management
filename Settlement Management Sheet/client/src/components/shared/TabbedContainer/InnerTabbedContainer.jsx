@@ -1,32 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Tab, Tabs, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const TabPanel = ({ children, value, index }) => (
-  <div
+const TabPanel = ({ children, value, id }) => (
+  <Box
     role="tabpanel"
-    hidden={value !== index}
-    id={`tabpanel-${index}`}
-    aria-labelledby={`tab-${index}`}
+    hidden={value !== id}
+    id={`tabpanel-${id}`}
+    aria-labelledby={`tab-${id}`}
+    style={{ height: '100%', width: '100%' }}
   >
-    {value === index && (
+    {value === id && (
       <Box
+        key={id}
         sx={{
-          width: '100%',
-          height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-          boxShadow: 4,
-          borderRadius: '0 0 16px 16px',
-          border: 1,
-          borderTop: 0,
+          justifyContent: 'center',
+          alignItems: 'start',
+          flexGrow: 1,
+          flexDirection: 'row',
+          height: '100%',
+          width: '100%',
+          border: '1px solid',
+          boxSizing: 'border-box',
         }}
       >
         {children}
       </Box>
     )}
-  </div>
+  </Box>
 );
 
 const a11yProps = (index) => ({
@@ -45,7 +47,7 @@ const InnerTabbedContainer = ({
   headerSx,
   addLabel = 'Add Phase',
 }) => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(null);
 
   const handleChange = (event, newValue) => {
     if (newValue === 'add-tab') {
@@ -55,102 +57,141 @@ const InnerTabbedContainer = ({
     }
   };
 
-  const handleRemove = (index) => {
-    onRemove(index);
-    if (activeTab >= tabs.length - 1) {
-      setActiveTab(Math.max(0, tabs.length - 2)); // Adjust active tab focus if needed
+  const handleRemove = (id) => {
+    onRemove(id);
+    if (activeTab === id) {
+      setActiveTab(null); // Adjust active tab focus if needed
     }
   };
+
+  useEffect(() => {
+    if (activeTab === null && tabs.length > 0) {
+      setActiveTab(tabs[0].tabId); // Set the first tab as active if none is selected
+    }
+  }, [tabs]);
 
   return (
     <Box
       sx={{
         width: '100%', // Match the parent's width
         height: '100%', // Match the parent's height
-        maxHeight: '67rem',
         overflowY: 'scroll',
         display: 'flex',
-        borderRadius: 4,
         flexDirection: 'column',
         alignItems: 'start',
         justifyContent: 'start',
         flexShrink: 1,
+        maxWidth: [600, 800, 1200, 1600],
+        overflowX: 'show',
       }}
     >
       {/* Tabs Header */}
       <Box
         sx={{
-          ...headerSx,
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'start',
+          alignItems: 'center',
+          width: '100%',
+          boxSizing: 'border-box',
+          backgroundColor: 'background.paper',
+          maxHeight: 40,
+          boxSizing: 'border-box',
         }}
       >
-        <Tabs
-          value={activeTab}
-          onChange={handleChange}
-          aria-label="dynamic tabs"
-          variant="scrollable"
-          scrollButtons="auto"
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
         >
           {tabs.map((tab, index) => (
-            <Tab
-              key={index}
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {tab.name}
-                  {onRemove && (
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemove(index)}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
-              }
-              value={index}
-              {...a11yProps(index)}
+            <Box
               sx={{
-                backgroundColor:
-                  activeTab === index ? 'honey.light' : 'text.disabled',
-                color:
-                  activeTab === index ? 'background.paper' : 'primary.main',
-                borderRadius: '16px 16px 0 0',
-                borderWidth: 1,
-                borderColor:
-                  activeTab === index ? 'primary.main' : 'secondary.main',
-                borderStyle: 'solid',
-                borderBottom: 'none',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                border: '1px solid',
                 boxSizing: 'border-box',
-              }}
-            />
-          ))}
-          {onAdd && (
-            <Tab
-              label={addLabel}
-              value="add-tab"
-              sx={{
-                fontSize: '1rem',
-                backgroundColor: 'background.paper',
-                color: 'primary.main',
-                borderWidth: 1,
-                borderColor: 'secondary.main',
-                borderStyle: 'solid',
-                borderBottom: 'none',
+                maxHeight: 48,
+                overflow: 'hidden',
                 borderRadius: '16px 16px 0 0',
+                p: 0.5,
+                backgroundColor:
+                  activeTab === tab.tabId ? 'primary.main' : 'background.paper',
+                color: activeTab === tab.tabId ? 'white' : 'text.primary',
+                borderColor:
+                  activeTab === tab.tabId ? 'primary.main' : 'dividerDark',
               }}
+              onClick={() => {
+                setActiveTab(tab.tabId);
+              }}
+              key={tab.tabId}
+            >
+              <Tab
+                label={tab.name}
+                value={tab.tabId}
+                sx={{
+                  my: -2,
+                  p: 2,
+                  fontSize: '0.875rem',
+                  maxHeight: 44,
+                }}
+              />
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(tab.tabId);
+                }}
+              >
+                <CloseIcon fontSize="0.75rem" sx={{ color: 'warning.main' }} />
+              </IconButton>
+            </Box>
+          ))}
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              border: '1px solid',
+              boxSizing: 'border-box',
+              maxHeight: 48,
+              overflow: 'hidden',
+              borderRadius: '16px 16px 0 0',
+              p: 0.5,
+              height: 38,
+              borderColor: 'dividerDark',
+              backgroundColor: 'secondary.main',
+            }}
+          >
+            <Tab
+              label={'Add Phase'}
+              value={null}
+              sx={{
+                my: -2,
+                p: 2,
+                fontSize: '0.875rem',
+                maxHeight: 44,
+                textDecoration: 'underline',
+                color: 'white',
+                fontWeight: 'bold',
+              }}
+              onClick={onAdd}
             />
-          )}{' '}
-          {/* Add Button */}
-        </Tabs>
+          </Box>
+        </Box>
       </Box>
 
       {/* Tabs Content */}
       {tabs.map((tab, index) => (
-        <TabPanel key={index} value={activeTab} index={index}>
-          {React.isValidElement(tab.component) ? (
-            React.cloneElement(tab.component, tab.props)
-          ) : (
-            <tab.component {...tab.props} />
-          )}
+        <TabPanel key={index} value={activeTab} id={tab.tabId}>
+          {React.createElement(tab.component, tab.props || {})}
         </TabPanel>
       ))}
     </Box>

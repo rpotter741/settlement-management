@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Typography } from '@mui/material';
 import { useToolContext } from 'context/ToolContext.jsx';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { get } from 'lodash';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 

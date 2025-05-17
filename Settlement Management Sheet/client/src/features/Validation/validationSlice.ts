@@ -93,17 +93,17 @@ export const {
 
 export default validationSlice.reducer;
 
-export const initializeObject = <T extends Record<string, any>>(
+export const initializeValidationObject = <T extends Record<string, any>>(
   obj: T,
   defaultValue: any = null
 ): T => {
-  if (!obj || typeof obj !== 'object') return defaultValue;
+  if (!obj || typeof obj !== 'object') return defaultValue as T;
 
   if (Array.isArray(obj)) {
-    // Return an array where each element is initialized
+    // Recursively initialize array elements
     return obj.map((item) =>
       typeof item === 'object' && item !== null
-        ? initializeObject(item, defaultValue)
+        ? initializeValidationObject(item, defaultValue)
         : defaultValue
     ) as unknown as T;
   }
@@ -111,12 +111,17 @@ export const initializeObject = <T extends Record<string, any>>(
   return Object.keys(obj).reduce((acc: any, key) => {
     const value = obj[key];
 
-    if (key === 'id' || key === 'refId') {
-      acc[key] = value; // Preserve `id` and `refId`
-    } else if (typeof value === 'object' && value !== null) {
-      acc[key] = initializeObject(value, defaultValue); // Recurse for nested objects
-    } else {
-      acc[key] = defaultValue; // Replace primitive values
+    // Preserve key identifiers for debugging context
+    if (['id', 'refId', 'name', 'type'].includes(key)) {
+      acc[key] = value;
+    }
+    // Recursively initialize nested objects
+    else if (typeof value === 'object' && value !== null) {
+      acc[key] = initializeValidationObject(value, defaultValue);
+    }
+    // Replace primitives with the default
+    else {
+      acc[key] = defaultValue;
     }
 
     return acc;
@@ -125,7 +130,6 @@ export const initializeObject = <T extends Record<string, any>>(
 
 export const getErrorCount = (errors: Record<string, any>) => {
   let count = 0;
-  console.log('getErrorCount', errors);
 
   const countErrors = (errorObj: any) => {
     if (Array.isArray(errorObj)) {

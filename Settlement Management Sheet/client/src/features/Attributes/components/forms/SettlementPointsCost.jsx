@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
+import { useToolContext } from 'context/ToolContext.jsx';
 
 import { Box, Typography, Divider, Tooltip, IconButton } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
@@ -34,8 +34,10 @@ const settlementTypes = [
   },
 ];
 
-const SettlementPointsCost = ({ id }) => {
+const SettlementPointsCost = () => {
+  const { id } = useToolContext();
   const {
+    edit,
     selectValue,
     updateTool: updateAttribute,
     validateToolField: validateAttributeField,
@@ -43,12 +45,15 @@ const SettlementPointsCost = ({ id }) => {
   } = useTools('attribute', id);
 
   const settlementPointCost = selectValue('settlementPointCost');
-  const dispatch = useDispatch();
-  const costs = settlementPointCost.data;
+  const costs = edit?.settlementPointCost.data;
   const errors = spcErrors.settlementPointCost;
-  const order = settlementPointCost.order;
+  const order = edit?.settlementPointCost.order;
 
   const [selectedTypes, setSelectedTypes] = useState([]);
+
+  useEffect(() => {
+    console.log(edit);
+  }, [edit]);
 
   const available = useMemo(() => {
     const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {
@@ -59,7 +64,7 @@ const SettlementPointsCost = ({ id }) => {
       (type) => !assignedTypes.includes(type.id)
     );
     return types;
-  }, [costs, selectedTypes, dispatch]);
+  }, [costs, selectedTypes]);
 
   const fields = useMemo(() => {
     return Object.entries(costs || {}).map(([id, spc]) => ({
@@ -69,13 +74,17 @@ const SettlementPointsCost = ({ id }) => {
       tooltip: null,
       id,
     }));
-  }, [costs]);
+  }, [costs, edit]);
 
   const orderedList = useMemo(() => {
     return settlementPointCost.order.map((id) => ({
       id,
       ...settlementPointCost.data[id],
     }));
+  });
+
+  useEffect(() => {
+    console.log('orderedList', orderedList);
   });
 
   const handleValidationUpdate = (error, { id }) => {
@@ -95,6 +104,7 @@ const SettlementPointsCost = ({ id }) => {
       ...costs,
       [item.id]: { name: formattedName, value: 1 },
     };
+    console.log('newSPC', newSPC);
     updateAttribute('settlementPointCost.data', newSPC);
 
     const newErrors = {

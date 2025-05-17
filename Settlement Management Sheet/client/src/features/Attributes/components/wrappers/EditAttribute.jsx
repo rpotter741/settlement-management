@@ -5,11 +5,11 @@ import { TitledCollapse } from '../../../../components/index.js';
 
 import AttrMetaData from '../forms/AttrMetaData.jsx';
 import AttrValues from '../forms/AttrValues.jsx';
-import SettlementPointsCost from '../forms/SettlementPointsCost.jsx';
+import SettlementPointsCost from '../forms/SPC.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
 import TagTable from '../forms/TagTable';
 
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 

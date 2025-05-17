@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import autobalanceSteps from '../../helpers/attributeAutoBalance.js';
 import { attributeFields } from '../../helpers/attributeFormData';
 

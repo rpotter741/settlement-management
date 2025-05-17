@@ -48,7 +48,6 @@ const RenderLeads = ({ obj, keypath }) => {
             sx={{ fontSize: '0.75rem', color: 'secondary.main' }}
             key={newId()}
             onClick={() => {
-              console.log(pathToTool[keypath], obj.id[n], obj.refId);
               dispatch(
                 loadTool({
                   tool: pathToTool[keypath],

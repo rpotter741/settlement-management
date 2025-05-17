@@ -1,4 +1,4 @@
-import { Attribute, Condition, Impact, UUID } from '../index';
+import { Attribute, BaseTool, Condition, Impact, UUID } from '../index';
 
 export interface ActionEffect {
   type: 'convert' | 'modify' | 'trigger' | 'consume';
@@ -11,14 +11,11 @@ export interface ActionEffect {
   amount?: number;
 }
 
-export interface Action {
-  id: UUID;
-  name: string;
-  description?: string;
+export interface Action extends BaseTool {
   effects: ActionEffect[];
   conditions?: Condition[];
   cooldown?: string;
-  flavorText?: string;
+  flavorText?: string[];
 }
 
 export const parseAction = (action: Action, state: any) => {

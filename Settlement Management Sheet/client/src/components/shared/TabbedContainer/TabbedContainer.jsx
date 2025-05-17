@@ -1,76 +1,24 @@
-import React, { useEffect } from 'react';
-import { Box, Tab } from '@mui/material';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { Box, Divider } from '@mui/material';
 
 import SidePanel from '../Sidebar/SidePanel.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 import { useDragContext } from 'context/DragContext.jsx';
+import { useSnackbar } from 'context/SnackbarContext.jsx';
 
 import DropZone from '../DnD/DropZone.jsx';
 
-import CoronavirusIcon from '@mui/icons-material/Coronavirus';
-import ExtensionIcon from '@mui/icons-material/Extension';
-import CategoryIcon from '@mui/icons-material/Category';
-import KeyIcon from '@mui/icons-material/VpnKey';
-
-import CreateAttribute from 'features/Attributes/components/wrappers/CreateAttribute.jsx';
-import CreateCategory from 'features/Categories/components/wrappers/CreateCategory.jsx';
-import CreateStatus from 'features/Statuses/components/wrappers/CreateStatus.jsx';
-import CreateKey from 'features/Keys/components/wrappers/CreateKey.jsx';
-
 import RenderTabHeaders from './RenderTabHeaders.jsx';
+import RenderTabs from './RenderTabs.jsx';
+import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
 
-const componentMap = {
-  attribute: CreateAttribute,
-  category: CreateCategory,
-  gameStatus: CreateStatus,
-  key: CreateKey,
-};
+import {
+  LeftTabsProvider,
+  RightTabsProvider,
+} from 'context/TabsContext/TabsContext.jsx';
 
-const iconMap = {
-  attribute: <ExtensionIcon />,
-  category: <CategoryIcon />,
-  gameStatus: <CoronavirusIcon />,
-  key: <KeyIcon />,
-};
-
-const TabPanel = ({ children, value, id }) => (
-  <Box
-    role="tabpanel"
-    hidden={value !== id}
-    id={`tabpanel-${id}`}
-    aria-labelledby={`tab-${id}`}
-    style={{ height: '100%', width: '100%' }}
-  >
-    {value === id && (
-      <Box
-        key={id}
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'start',
-          flexGrow: 1,
-          flexDirection: 'row',
-          height: '100%',
-          width: '100%',
-        }}
-      >
-        {children}
-      </Box>
-    )}
-  </Box>
-);
-
-const a11yProps = (id) => ({
-  id: `tab-${id}`,
-  'aria-controls': `tabpanel-${id}`,
-});
-
-const TabbedContainer = ({
-  onAdd,
-  layout = 'row', // "row" for side-by-side, "column" for stacked
-  headerSx,
-  tabSx,
-}) => {
+const TabbedContainer = () => {
   const {
     leftTabs,
     rightTabs,
@@ -80,10 +28,43 @@ const TabbedContainer = ({
     removeById,
     setActiveTab,
     isSplit,
+    setSplit,
     moveLeft,
     moveRight,
+    preventSplit,
   } = useSidePanel();
   const { draggedType } = useDragContext();
+  const { showSnackbar } = useSnackbar();
+
+  const moveRTL = useCallback(
+    (entry) => {
+      if (rightTabs.some((tab) => tab.tabId === entry.tabId)) {
+        moveLeft(entry.tabId);
+      } else {
+        addNewTab({ ...entry, side: 'left' });
+      }
+    },
+    [rightTabs, moveLeft, addNewTab]
+  );
+
+  const moveLTR = useCallback(
+    (entry) => {
+      if (preventSplit) {
+        showSnackbar(
+          'Split view is disabled for Events, APTs, and Story Threads.',
+          'error',
+          5000
+        );
+        return;
+      }
+      if (leftTabs.some((tab) => tab.tabId === entry.tabId)) {
+        moveRight(entry.tabId);
+      } else {
+        addNewTab({ ...entry, side: 'right' });
+      }
+    },
+    [leftTabs, moveRight, addNewTab, preventSplit, showSnackbar]
+  );
 
   useEffect(() => {
     if (rightTabs.length > 0 && leftTabs.length === 0) {
@@ -91,24 +72,13 @@ const TabbedContainer = ({
     }
   }, [rightTabs, leftTabs]);
 
-  const moveRTL = (entry) => {
-    const tab = rightTabs.find((tab) => tab.tabId === entry.tabId);
-    if (tab) {
-      moveLeft(entry.tabId);
-    } else {
-      addNewTab({ ...entry, side: 'left' });
+  useEffect(() => {
+    if (rightTabs.length > 0) {
+      if (isSplit === false) {
+        setSplit(true);
+      }
     }
-  };
-
-  const moveLTR = (entry) => {
-    const tab = leftTabs.find((tab) => tab.tabId === entry.tabId);
-    console.log(entry, 'entry');
-    if (tab) {
-      moveRight(entry.tabId);
-    } else {
-      addNewTab({ ...entry, side: 'right' });
-    }
-  };
+  }, [isSplit, rightTabs, setSplit]);
 
   return (
     <Box
@@ -167,7 +137,6 @@ const TabbedContainer = ({
               currentTab={currentLeftTab}
               setActiveTab={setActiveTab}
               removeById={removeById}
-              iconMap={iconMap}
             />
             {rightTabs.length > 0 && (
               <RenderTabHeaders
@@ -176,11 +145,9 @@ const TabbedContainer = ({
                 currentTab={currentRightTab}
                 setActiveTab={setActiveTab}
                 removeById={removeById}
-                iconMap={iconMap}
                 side="right"
               />
             )}
-            {onAdd && <Tab label="+" value="add-tab" />}
           </Box>
 
           {/* Tabs Content */}
@@ -244,92 +211,17 @@ const TabbedContainer = ({
                 />
               </Box>
             )}
-
-            {leftTabs.map((tab, index) => (
-              <TabPanel
-                key={index}
-                value={currentLeftTab}
-                index={index}
-                id={tab.tabId}
-              >
-                <Box
-                  sx={
-                    tab.contentSx
-                      ? tab.contentSx
-                      : {
-                          display: 'flex',
-                          flexDirection: ['column', 'row'],
-                          overflowY: 'hidden',
-                          overflowX: 'hidden',
-                          height: '100%',
-                          width: '100%',
-                          flexGrow: 2,
-                          flexShrink: 1,
-                          gap: 2,
-                          justifyContent: 'center',
-                          backgroundColor: 'background.default',
-                          pt: 2,
-                          position: 'relative',
-                        }
-                  }
-                  role="tab_box_left"
-                >
-                  {componentMap[tab.type] ? (
-                    React.createElement(componentMap[tab.type], {
-                      id: tab.id,
-                      mode: tab.mode,
-                      tabId: tab.tabId,
-                      side: 'left',
-                    })
-                  ) : (
-                    <Box>Error: Component not found</Box>
-                  )}
-                </Box>
-              </TabPanel>
-            ))}
-            {rightTabs.map((tab, index) => (
-              <TabPanel
-                key={index}
-                value={currentRightTab}
-                index={index}
-                id={tab.tabId}
-              >
-                <Box
-                  sx={
-                    tab.contentSx
-                      ? tab.contentSx
-                      : {
-                          display: 'flex',
-                          flexDirection: ['column', 'row'],
-                          overflowY: 'hidden',
-                          overflowX: 'hidden',
-                          height: '100%',
-                          width: '100%',
-                          flexGrow: 2,
-                          flexShrink: 1,
-                          gap: 2,
-                          justifyContent: 'center',
-                          backgroundColor: 'background.default',
-                          pt: 2,
-                          position: 'relative',
-                          borderLeft: '1px solid',
-                        }
-                  }
-                  role="tab_box_right"
-                >
-                  {componentMap[tab.type] ? (
-                    React.createElement(componentMap[tab.type], {
-                      id: tab.id,
-                      mode: tab.mode,
-                      tabId: tab.tabId,
-                      side: 'right',
-                    })
-                  ) : (
-                    <Box>Error: Component not found</Box>
-                  )}
-                </Box>
-              </TabPanel>
-            ))}
+            <LeftTabsProvider>
+              <RenderTabs side="left" />
+            </LeftTabsProvider>
+            {useSelector(select.isSplit) && (
+              <>
+                <Divider flexItem orientation="vertical" />
+                <RightTabsProvider>
+                  <RenderTabs side="right" />
+                </RightTabsProvider>
+              </>
+            )}
           </Box>
         </Box>
       </Box>

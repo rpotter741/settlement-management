@@ -399,8 +399,19 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
       }
       setTool(entry.tool);
     } else {
-      const { name, id, mode, type, tabId, scroll } = clickFn();
-      addNewTab({ name, id, mode, type, tabId, scroll, activate: true });
+      const { name, id, mode, tool, tabId, scroll, preventSplit } = clickFn();
+      const wow = clickFn();
+      console.log('wow', wow);
+      addNewTab({
+        name,
+        id,
+        mode,
+        tool,
+        tabId,
+        scroll,
+        activate: true,
+        preventSplit,
+      });
     }
   };
 

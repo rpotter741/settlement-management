@@ -77,3 +77,15 @@ export interface DeleteByIdPayload {
   tool: ToolName;
   id: string;
 }
+
+export interface TabData {
+  name: string;
+  id: string;
+  mode: 'preview' | 'edit';
+  tool: ToolName;
+  tabId: string;
+  scroll: number;
+  activate: boolean;
+  side: 'left' | 'right';
+  preventSplit: boolean;
+}

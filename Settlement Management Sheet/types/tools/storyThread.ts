@@ -8,7 +8,7 @@ import {
   Impact,
 } from '../index';
 
-export type EventType = 'ACTIVE' | 'IMMEDIATE' | 'PASSIVE' | 'INDEFINITE';
+export type EventType = 'Active' | 'Immediate' | 'Passive' | 'Indefinite';
 
 export interface EventPhase {
   id: UUID;
@@ -18,9 +18,9 @@ export interface EventPhase {
   type: EventType;
   impacts: Impact[];
   resolutions: EventResolution[];
-  nextPhaseId?: UUID;
-  duration?: number; // for passive events
-  productivity?: number; // for active events
+  nextPhaseId: UUID | null;
+  duration?: number | null; // for passive events
+  productivity?: number | null; // for active events
   exposedKeys?: UUID[]; // keys that are exposed in this phase
   isTerminal?: boolean; // wraps up the thread
 }
@@ -31,7 +31,7 @@ export interface EventResolution {
   description?: string;
   impacts: Impact[];
   keys: UUID[];
-  branches: Branch[];
+  branches?: Branch[];
   successId?: UUID;
   failureId?: UUID;
 }
@@ -46,8 +46,13 @@ export interface Branch {
 }
 
 export interface Thread extends BaseTool {
-  flavorText: FlavorText;
-  narrativeWeight?: 'TRIVIAL' | 'MINOR' | 'MODERATE' | 'MAJOR' | 'CRITICAL';
+  narrativeWeight?:
+    | 'TRIVIAL'
+    | 'MINOR'
+    | 'MODERATE'
+    | 'MAJOR'
+    | 'CRITICAL'
+    | null;
   phases: EventPhase[];
   replacement?: ReplacementTuple;
   links?: UUID[];

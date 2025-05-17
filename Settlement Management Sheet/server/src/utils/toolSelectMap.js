@@ -63,6 +63,7 @@ const toolSelectMap = {
     refId: true,
     id: true,
     name: true,
+    data: true,
   },
   listener: {
     refId: true,

@@ -3,7 +3,7 @@ const sPCFormData = {
   tooltip: '',
   type: 'number',
   validate: (value) => {
-    if (value <= 0) return 'Value must be greater than 0';
+    if (value <= -1) return 'Value must be 0 or greater';
     return null;
   },
   keypath: '',

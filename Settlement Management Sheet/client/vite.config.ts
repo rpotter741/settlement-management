@@ -18,13 +18,23 @@ export default defineConfig({
       category: '/src/features/Categories',
       event: '/src/features/Events',
       listener: '/src/features/Listeners',
-      status: '/src/features/Status',
-      weather: '/src/features/Weather',
+      status: '/src/features/Statuses',
     },
+    extensions: ['.js', '.jsx', '.ts', '.tsx'], // File extensions to resolve
   },
   build: {
     outDir: path.resolve(__dirname, '../server/public'), // Server folder to store built assets
     emptyOutDir: true, // Clears the output directory before building
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'), // Main entry point
+      },
+      output: {
+        entryFileNames: '[name].js', // Output file name format
+        chunkFileNames: '[name].js', // Chunk file name format
+        assetFileNames: '[name].[ext]', // Asset file name format
+      },
+    },
   },
   server: {
     port: 5173, // Dev server port

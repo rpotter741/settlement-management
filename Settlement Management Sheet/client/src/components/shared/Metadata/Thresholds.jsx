@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import confetti from 'canvas-confetti';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
 import { v4 as newId } from 'uuid';
@@ -11,14 +11,18 @@ import { Box, Typography, Tooltip, Button } from '@mui/material';
 import Threshold from './Threshold';
 
 const ObjectThresholds = ({ tool, max = 21, id }) => {
-  const { selectValue, edit, updateTool, validateToolField, errors } = useTools(
-    tool,
-    id
-  );
-  const thresholds = selectValue('thresholds');
+  const {
+    edit,
+    updateTool,
+    validateToolField,
+    errors: threshErrors,
+  } = useTools(tool, id);
+  const thresholds = edit.thresholds;
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
   const [lastId, setLastId] = useState(null);
+
+  const errors = threshErrors.thresholds.data;
 
   const debouncedShowSnackbar = useCallback(
     debounce(
@@ -159,8 +163,8 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
     updateTool('thresholds.order', newOrder);
     updateTool('thresholds.data', updatedThresholds);
 
-    validateToolField(`thresholds.${id}`, {
-      name: null,
+    validateToolField(`thresholds.data.${id}`, {
+      name: 'Threshold name must be at least 3 characters',
       max: null,
     });
   };
@@ -184,13 +188,13 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
         <strong>Conditions and Listeners</strong> without relying on intimate
         knowledge of the {tool} itself.{' '}
       </Typography>
-      {thresholds.order.map((id, index) => {
-        const threshold = thresholds.data[id];
+      {thresholds.order.map((tId, index) => {
+        const threshold = thresholds.data[tId];
         return (
           <Threshold
-            key={id}
+            key={tId}
             threshold={threshold}
-            errors={errors[id]}
+            errors={errors[tId]}
             index={index}
             handleNameChange={handleThresholdNameChange}
             handleMaxChange={handleThresholdMaxChange}
@@ -198,7 +202,7 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
             handleNameValidation={handleNameValidation}
             handleRemove={handleRemove}
             handleBalanceChange={handleBlur}
-            id={id}
+            id={tId}
           />
         );
       })}

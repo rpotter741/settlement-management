@@ -1,5 +1,4 @@
-import api from 'services/interceptor.js';
-import queryClient from 'context/QueryClient.js';
+import api from 'services/interceptor.ts';
 
 const useServer = async ({ tool, type, data }) => {
   const { refId, id } = data;

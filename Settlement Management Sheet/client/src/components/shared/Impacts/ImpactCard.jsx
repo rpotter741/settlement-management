@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import RightArrowIcon from '@mui/icons-material/ArrowRight';
 import LeftArrowIcon from '@mui/icons-material/ArrowLeft';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 import { get } from 'lodash';
 

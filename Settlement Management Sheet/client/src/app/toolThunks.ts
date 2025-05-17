@@ -1,12 +1,13 @@
 // toolThunks.ts
 import { ThunkAction, ThunkDispatch } from '@reduxjs/toolkit';
-import queryClient from 'context/QueryClient.js';
-import api from 'services/interceptor.js';
-import { addTool } from './toolSlice.ts';
-import { addTab } from 'features/sidePanel/sidePanelSlice.ts';
+import queryClient from '../context/QueryClient.js';
+import api from '../services/interceptor.js';
+import { addTool } from './toolSlice.js';
+import { addTab } from '../features/SidePanel/sidePanelSlice.js';
 import { v4 as newId } from 'uuid';
 import { RootState } from './store.js';
-import { ToolName, ToolData, TabData } from './types.js';
+import { ToolName, Tool } from '../../../types/index.js';
+import { TabData } from './types.js';
 
 // Define the shape of the thunk's return type
 type AppThunk<ReturnType = void> = ThunkAction<
@@ -22,6 +23,7 @@ interface LoadToolParams {
   id: string;
   currentTool?: ToolName;
   mode?: 'preview' | 'edit';
+  side?: 'left' | 'right';
 }
 
 interface ReturnToolParams {
@@ -37,11 +39,11 @@ export const loadTool =
     id,
     currentTool,
     mode = 'preview',
+    side = 'right',
   }: LoadToolParams): AppThunk =>
   async (dispatch, getState) => {
     const state = getState();
     const usedTool = currentTool || tool;
-    console.log('usedTool', tool, refId, id, currentTool);
 
     // Prefetch the tool data
     await queryClient.prefetchQuery({
@@ -54,12 +56,12 @@ export const loadTool =
             id,
           },
         });
-        return data as ToolData;
+        return data as Tool;
       },
     });
 
     // Retrieve the cached item
-    const cachedItem = queryClient.getQueryData<ToolData>([usedTool, id]);
+    const cachedItem = queryClient.getQueryData<Tool>([usedTool, id]);
     console.log('cachedItem', cachedItem);
 
     // If the tool is not already in the Redux store, add it
@@ -67,16 +69,23 @@ export const loadTool =
       dispatch(addTool({ tool: usedTool, data: cachedItem }));
     }
 
+    const toolSplit: Partial<Record<ToolName, boolean>> = {
+      event: true,
+      apt: true,
+      storyThread: true,
+    };
+
     // Add a new tab
     const newTab: TabData = {
       name: cachedItem?.name || 'Untitled',
       id: cachedItem?.id || id,
       mode,
-      type: usedTool,
+      tool: usedTool,
       tabId: newId(),
       scroll: 0,
       activate: true,
-      side: 'right',
+      side,
+      preventSplit: toolSplit[usedTool] ?? false,
     };
 
     dispatch(addTab(newTab));
@@ -86,7 +95,7 @@ export const returnTool = async ({
   tool,
   refId,
   id,
-}: ReturnToolParams): Promise<ToolData | undefined> => {
+}: ReturnToolParams): Promise<Tool | undefined> => {
   // Prefetch the tool data
   await queryClient.prefetchQuery({
     queryKey: [tool, id],
@@ -98,10 +107,10 @@ export const returnTool = async ({
           id,
         },
       });
-      return data as ToolData;
+      return data as Tool;
     },
   });
 
   // Return the cached item
-  return queryClient.getQueryData<ToolData>([tool, id]);
+  return queryClient.getQueryData<Tool>([tool, id]);
 };

@@ -18,6 +18,8 @@ const getContent = async (req, res) => {
       depId,
     } = req.query;
 
+    console.log(tool, 'tool');
+
     if (!tool) return res.status(400).json({ message: 'Tool type required.' });
 
     const model = prisma[tool];

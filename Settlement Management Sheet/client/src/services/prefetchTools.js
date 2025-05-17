@@ -1,5 +1,5 @@
 import queryClient from 'context/QueryClient.js';
-import api from 'services/interceptor.js';
+import api from 'services/interceptor.ts';
 
 const prefetchToolContent = (tool, scopes = ['personal', 'community']) => {
   scopes.forEach((scope) => {

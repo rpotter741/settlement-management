@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Button, Typography, Divider } from '@mui/material';
 
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';

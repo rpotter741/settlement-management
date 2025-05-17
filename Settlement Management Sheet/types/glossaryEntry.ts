@@ -96,7 +96,7 @@ export interface POIEntry extends BaseEntry {
   type: POIType;
   region: UUID[];
   currentOccupants?: UUID[];
-  nearbyFeatures?: UUID[];
+  nearbyFeatures?: Record<string, number>; //id & distance
 }
 
 export interface PersonEntry extends BaseEntry {

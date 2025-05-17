@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 import { Box, Divider } from '@mui/material';
 import SelectOptions from 'components/shared/Select/SelectOptions.jsx';

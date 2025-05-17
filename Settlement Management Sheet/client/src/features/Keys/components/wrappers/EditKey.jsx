@@ -1,35 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Divider, Chip } from '@mui/material';
 import { useToolContext } from 'context/ToolContext.jsx';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { get } from 'lodash';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
-import KeyAutocomplete from '../forms/KeyAutocomplete.jsx';
+import KeyAutocomplete from '../forms/KeyAutocomplete.tsx';
+import KeySettingsComp from '../forms/KeySettings.tsx';
 import keyFields from '../../helpers/keyFormData.js';
 
 const EditKey = () => {
   const { tool, id } = useToolContext();
   const { options } = useSidePanel();
-  const { edit } = useTools(tool, id);
-  const key = get(edit, 'key');
+  const { edit, updateTool } = useTools(tool, id);
+  const [selectedKey, setSelectedKey] = useState(edit?.name || null);
 
-  React.useEffect(() => {
-    console.log(edit, 'edit');
-  }, [edit]);
+  const handleAdd = (key) => {
+    updateTool('name', key.name);
+    setSelectedKey(key);
+  };
 
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '1rem',
         width: '100%',
         py: 2,
       }}
     >
-      <KeyAutocomplete onSelect={() => {}} />
+      <KeyAutocomplete onAdd={handleAdd} hideHelp={selectedKey !== null} />
+      <Divider flexItem sx={{ mt: 6, mb: 4 }} />
+      {edit?.name !== '' && <KeySettings selectedKey={selectedKey} />}
     </Box>
   );
 };

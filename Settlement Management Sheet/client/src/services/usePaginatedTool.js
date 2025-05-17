@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import api from 'services/interceptor.js';
+import api from 'services/interceptor.ts';
 
 const usePaginatedTool = ({
   tool,

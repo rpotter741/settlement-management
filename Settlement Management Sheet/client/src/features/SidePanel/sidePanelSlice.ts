@@ -35,13 +35,15 @@ const sidePanelSlice = createSlice({
         name,
         mode,
         id,
-        type,
+        tool,
         tabId,
         scroll,
         activate,
         side = 'left',
+        preventSplit,
       } = action.payload;
-      const entry: Tab = { name, id, mode, type, tabId, scroll };
+      const entry: Tab = { name, id, mode, tool, tabId, scroll, preventSplit };
+      console.log('Adding tab:', entry);
       if (side === 'left' || state.preventSplit) {
         state.leftTabs.push(entry);
       } else {
@@ -58,6 +60,9 @@ const sidePanelSlice = createSlice({
           state.currentRightTabIndex = state.rightTabs.length - 1;
           state.currentRightTab = tabId;
         }
+      }
+      if (preventSplit) {
+        state.preventSplit = preventSplit;
       }
     },
     removeTab: (state, action: PayloadAction<RemoveTabPayload>) => {
@@ -188,6 +193,10 @@ const sidePanelSlice = createSlice({
       const { split } = action.payload;
       state.splitTabs = split;
     },
+    setPrevent: (state, action) => {
+      const { prevent } = action.payload;
+      state.preventSplit = prevent;
+    },
   },
 });
 
@@ -201,6 +210,7 @@ export const {
   moveRightToLeft,
   setToolOptions,
   setSplit,
+  setPrevent,
 } = sidePanelSlice.actions;
 
 export default sidePanelSlice.reducer;

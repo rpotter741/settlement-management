@@ -48,7 +48,6 @@ const ValidationChecklist = ({
       const newErrorStates = checklistContent.map((item) => {
         const configuredItem = { ...item, type: item.type || 'single' };
         const data = get(errors, item.keypath);
-        console.log('data', data);
 
         if (item.type === 'group' && data !== undefined) {
           const { valid, total } = countValidEntries(data);
@@ -86,7 +85,7 @@ const ValidationChecklist = ({
       sx={{
         position: 'absolute',
         top: 0,
-        right: expanded ? 0 : '-318px', // Move out of view when collapsed
+        right: expanded ? 0 : '-325px', // Move out of view when collapsed
         width: '300px',
         height: '100%',
         backgroundColor: 'background.default',
@@ -94,6 +93,7 @@ const ValidationChecklist = ({
         borderRadius: '8px 0 0 8px', // Rounded edge only on the left
         transition: 'right 0.4s ease-in-out',
         zIndex: 1000,
+        boxSizing: 'border-box',
       }}
     >
       {/* Tab / Button */}

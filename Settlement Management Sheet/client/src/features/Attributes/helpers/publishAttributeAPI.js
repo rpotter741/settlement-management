@@ -1,4 +1,4 @@
-import api from 'services/interceptor.js';
+import api from 'services/interceptor.ts';
 
 const publishAttributeAPI = async (attribute) => {
   const { refId, id } = attribute;

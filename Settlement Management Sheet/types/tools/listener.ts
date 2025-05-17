@@ -1,9 +1,6 @@
-import { ConditionEventPair } from '../index';
+import { BaseTool, ConditionEventPair } from '../index';
 
-export interface ListenerPack {
-  id: string;
-  name: string;
-  description?: string;
+export interface ListenerPack extends BaseTool {
   conditionEventPairs: ConditionEventPair[];
-  active: boolean;
+  active?: boolean;
 }

@@ -3,10 +3,11 @@ import { ToolName } from '../../app/types';
 export interface Tab {
   name: string;
   mode: 'edit' | 'preview';
-  type: ToolName;
+  tool: ToolName;
   id: string;
   tabId: string;
   scroll: number;
+  preventSplit: boolean;
 }
 
 export interface TabState {
@@ -25,12 +26,13 @@ export interface TabState {
 export interface AddTabPayload {
   name: string;
   mode: 'edit' | 'preview';
-  type: ToolName;
+  tool: ToolName;
   id: string;
   tabId: string;
   scroll: number;
   activate?: boolean;
   side?: 'left' | 'right';
+  preventSplit: boolean | undefined;
 }
 
 export interface RemoveTabPayload {

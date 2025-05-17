@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import useServer from '../../../services/useServer.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';

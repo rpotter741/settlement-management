@@ -7,7 +7,7 @@ import checklistContent from '../../helpers/checklistContent.js';
 import EditCategory from './EditCategory';
 import PreviewCategory from './PreviewCategory.jsx';
 import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import getNewDependencies from 'utility/alterDependencies.js';
 import useFetchReferences from 'hooks/useFetchReferences.jsx';
 

@@ -6,12 +6,13 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import DragWrapper from '../DnD/DragWrapper.jsx';
 
+import { toolMap } from 'utility/toolMap.js';
+
 const RenderTabHeaders = ({
   tabs,
   currentTab,
   setActiveTab,
   removeById,
-  iconMap,
   side = 'left',
 }) => {
   if (Array.isArray(tabs)) {
@@ -71,7 +72,7 @@ const RenderTabHeaders = ({
                 label={tab.name}
                 value={tab.tabId}
                 iconPosition="start"
-                icon={iconMap[tab.type]}
+                icon={React.createElement(toolMap[tab.tool].icon, {})}
                 sx={{
                   my: -2,
                   p: 2,
@@ -83,7 +84,7 @@ const RenderTabHeaders = ({
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeById(tab.tabId, side);
+                  removeById(tab.tabId, side, false);
                 }}
               >
                 <CloseIcon fontSize="0.75rem" />

@@ -6,7 +6,7 @@ import { Icon as CustomIcon } from '../../../../components/index.js';
 
 import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 
-import { useTools } from 'hooks/useTool.jsx';
+import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 
 const PreviewAttribute = () => {
