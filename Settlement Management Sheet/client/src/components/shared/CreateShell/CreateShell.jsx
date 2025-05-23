@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy } from 'react';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 import { Box, Typography, Modal } from '@mui/material';
 import ValidationChecklist from 'components/shared/ValidationChecklist/ValidationChecklist.jsx';
@@ -9,9 +9,12 @@ import useServer from 'services/useServer.js';
 import prefetchToolContent from 'services/prefetchTools.js';
 import { useTools } from 'hooks/useTool.tsx';
 import { useInitializeTool } from 'hooks/useInitializeTool.tsx';
-import { useDispatch } from 'react-redux';
 import { initializeTool as initialize } from '../../../app/toolSlice.js';
 import { ToolContext } from 'context/ToolContext.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateTab } from 'features/sidePanel/sidePanelSlice.js';
+import { useDebounce } from 'hooks/useDebounce.jsx';
+import useDebouncedEffect from 'hooks/useDebouncedEffect.jsx';
 
 const CreateShell = ({
   tool,
@@ -25,13 +28,22 @@ const CreateShell = ({
   loadDisplayName,
   editComponentProps = {},
   previewComponentProps = {},
-  modalComponents = {},
-  modalComponentsProps = {},
   mode,
   side,
   width,
+  tabId,
+  page = true,
+  setModalContent,
 }) => {
   const { current, edit, allIds, saveToolEdit, errors } = useTools(tool, id);
+
+  const TestComp = () => {
+    return (
+      <Box>
+        <Typography variant="h6">Test Component</Typography>
+      </Box>
+    );
+  };
 
   const { errorCount } = useInitializeTool({
     tool,
@@ -42,12 +54,29 @@ const CreateShell = ({
     initializeFn: initializeTool,
     validationFields,
   });
-
+  const dispatch = useDispatch();
   const { showSnackbar } = useSnackbar();
-
   const [editMode, setEditMode] = useState(mode === 'edit');
   const [showModal, setShowModal] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const debouncedEdit = useDebounce(edit, 1000);
+
+  useDebouncedEffect(
+    () => {
+      if (!edit) return;
+      const name = edit?.name.trim() || `Untitled`;
+      dispatch(
+        updateTab({
+          tabId: tabId,
+          side,
+          keypath: 'name',
+          updates: name,
+        })
+      );
+    },
+    300,
+    [debouncedEdit?.name, dispatch, tabId, side]
+  );
 
   const handleCancel = () => {
     setEditMode(false);
@@ -82,8 +111,6 @@ const CreateShell = ({
     }
   };
 
-  const dispatch = useDispatch();
-
   const handleAdd = async () => {
     const newTool = initializeTool(tool);
     dispatch(initialize({ tool, data: newTool }));
@@ -96,7 +123,15 @@ const CreateShell = ({
     cancel: () => handleCancel(),
     publish: () => handlePublish(),
     loadHover: () => prefetchToolContent(tool),
-    load: () => setShowModal('Load Tool'),
+    load: () =>
+      setModalContent({
+        component: LoadTool,
+        props: {
+          tool,
+          displayName: loadDisplayName,
+          setShowModal: setModalContent,
+        },
+      }),
   };
 
   if (!current) {
@@ -150,13 +185,13 @@ const CreateShell = ({
               justifyContent: 'start',
               flexDirection: 'column',
               alignItems: 'center',
-              px: 4,
-              mb: 7,
-              boxShadow: 4,
-              borderRadius: 4,
-              backgroundColor: 'background.paper',
-              width: ['100%', '90%', '80%'],
-              maxWidth: width ? width : ['100%', '100%', 800],
+              px: page ? 4 : 0,
+              mb: page ? 7 : 0,
+              boxShadow: page ? 4 : 0,
+              borderRadius: page ? 4 : 0,
+              backgroundColor: page ? 'background.paper' : 'background.default',
+              width: page ? ['100%', '90%', '80%'] : '100%',
+              maxWidth: page ? ['100%', '100%', 800] : '100%',
               position: 'relative',
               flexShrink: 1,
               height: '100%',
@@ -173,7 +208,7 @@ const CreateShell = ({
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                pt: 4,
+                pt: page ? 4 : 0,
                 backgroundColor: 'background.paper',
                 borderBottom: '1px solid',
                 borderColor: 'dividerDark',
@@ -185,46 +220,19 @@ const CreateShell = ({
                 isValid={errorCount === 0}
                 actions={buttonActions}
                 toolName={toolName}
+                page={page}
               />
             </Box>
-            <Modal open={showModal !== null} onClose={() => setShowModal(null)}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  bgcolor: 'background.default',
-                  border: '2px solid #000',
-                  borderColor: 'secondary.light',
-                  boxShadow: 24,
-                  p: 4,
-                  borderRadius: 4,
-                  ml: 1,
-                }}
-              >
-                {showModal === 'Load Tool' && (
-                  <LoadTool
-                    setShowModal={setShowModal}
-                    tool={tool}
-                    displayName={loadDisplayName}
-                  />
-                )}
-                {modalComponents[showModal] &&
-                  React.createElement(modalComponents[showModal], {
-                    ...modalComponentsProps[showModal],
-                    setShowModal,
-                  })}
-              </Box>
-            </Modal>
             {editMode
               ? React.createElement(editComponent, {
                   ...editComponentProps,
                   setShowModal,
+                  setModalContent,
                 })
               : React.createElement(previewComponent, {
                   ...previewComponentProps,
                   setShowModal,
+                  setModalContent,
                 })}
           </Box>
         </Box>

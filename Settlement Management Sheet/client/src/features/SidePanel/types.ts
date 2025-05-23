@@ -52,9 +52,10 @@ export interface SetBreadcrumbsPayload {
 }
 
 export interface UpdateTabPayload {
-  index: number;
+  tabId: string;
+  keypath: string;
   side: 'left' | 'right';
-  updates: Partial<Tab>;
+  updates: any;
 }
 
 export interface MoveTabPayload {

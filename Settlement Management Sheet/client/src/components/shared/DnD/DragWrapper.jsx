@@ -39,10 +39,6 @@ const DragWrapper = ({
     },
   }));
 
-  useEffect(() => {
-    console.log('Dragging item:', item);
-  }, [item]);
-
   return (
     <Box
       ref={drag}

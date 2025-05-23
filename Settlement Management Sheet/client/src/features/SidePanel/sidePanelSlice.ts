@@ -40,10 +40,9 @@ const sidePanelSlice = createSlice({
         scroll,
         activate,
         side = 'left',
-        preventSplit,
+        preventSplit = false,
       } = action.payload;
       const entry: Tab = { name, id, mode, tool, tabId, scroll, preventSplit };
-      console.log('Adding tab:', entry);
       if (side === 'left' || state.preventSplit) {
         state.leftTabs.push(entry);
       } else {
@@ -114,11 +113,21 @@ const sidePanelSlice = createSlice({
       state.breadcrumbs = breadcrumbs;
     },
     updateTab: (state, action: PayloadAction<UpdateTabPayload>) => {
-      const { index, side, updates } = action.payload;
+      const { tabId, side, keypath, updates } = action.payload;
       if (side === 'left' || state.preventSplit) {
-        set(state.leftTabs, index, updates);
+        const index = state.leftTabs.findIndex((tab) => tab.tabId === tabId);
+        if (index === -1) {
+          console.error(`Tab with id ${tabId} not found in left tabs`);
+          return;
+        }
+        set(state.leftTabs[index], keypath, updates);
       } else {
-        set(state.rightTabs, index, updates);
+        const index = state.rightTabs.findIndex((tab) => tab.tabId === tabId);
+        if (index === -1) {
+          console.error(`Tab with id ${tabId} not found in right tabs`);
+          return;
+        }
+        set(state.rightTabs[index], keypath, updates);
       }
     },
     moveRightToLeft: (state, action: PayloadAction<MoveTabPayload>) => {

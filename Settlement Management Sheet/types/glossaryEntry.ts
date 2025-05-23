@@ -1,10 +1,27 @@
 import { UUID, Timestamp, ContentType } from './index';
 
+export interface GlossaryNode {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  entryType: GlossaryEntryType | null;
+  parentId: string | null;
+  children?: GlossaryNode[];
+  parent?: GlossaryNode | null;
+  glossaryId: UUID;
+  sortIndex: number;
+}
+
 export interface BaseEntry {
   id: UUID;
   refID: UUID;
   name: string;
-  description: string;
+  summary: string;
+  description: string | null;
+  content: {
+    type: 'html' | 'markdown' | 'json';
+    body: string;
+  };
   tags?: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -123,4 +140,20 @@ export type GlossaryEntry =
   | POIEntry
   | PersonEntry;
 
-export type GlossaryEntryType = 'region' | 'geographic' | 'poi' | 'person';
+export type GlossaryEntryType =
+  | 'region'
+  | 'location'
+  | 'poi'
+  | 'person'
+  | 'faction';
+
+export interface Glossary {
+  id: UUID;
+  name: string;
+  description: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: UUID;
+  contentType: ContentType;
+  GlossaryNode: GlossaryNode[] | null;
+}

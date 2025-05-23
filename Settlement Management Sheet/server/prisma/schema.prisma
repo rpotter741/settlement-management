@@ -425,6 +425,45 @@ model StoryThread {
   primaryKey  Json
 }
 
+////////////// Glossary /////////////
+
+enum GlossShape {
+  folder
+  file
+}
+
+enum EntryTypes {
+  region
+  location
+  poi
+  person
+  faction
+}
+
+model Glossary {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  contentType ContentTypes
+  nodes       GlossaryNode[]
+}
+
+model GlossaryNode {
+  id         String         @id @default(uuid())
+  name       String
+  entryType  EntryTypes?
+  type       GlossShape
+  parentId   String?
+  children   GlossaryNode[] @relation("NodeHierarchy")
+  parent     GlossaryNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  glossaryId String
+  glossary   Glossary       @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
+  sortIndex  Int            @default(0)
+}
+
 ////////////// Region ////////////
 
 model Region {

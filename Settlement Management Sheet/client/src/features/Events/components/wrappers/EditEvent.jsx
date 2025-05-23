@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Divider, Typography } from '@mui/material';
+import { Box, Divider, Typography, Drawer, Collapse } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
 import { useTools } from 'hooks/useTool.tsx';
@@ -22,22 +22,28 @@ const EditEvent = ({ setShowModal }) => {
 
   useEffect(() => {
     if (edit) {
-      const newPhaseTabs = edit.phases.map((phase, index) => ({
-        name: phase.name,
+      console.log(edit.phases);
+      const newPhaseTabs = edit.phases.order.map((id, index) => ({
+        name: edit.phases.data[id]?.name,
         component: CreatePhase,
-        props: { phaseId: phase.id },
-        tabId: phase.id,
+        props: { phaseId: id },
+        tabId: id,
       }));
       setPhaseTabs(newPhaseTabs);
     }
   }, [edit]);
 
   const handleAddPhase = () => {
-    const oldPhases = [...edit.phases];
+    const oldPhaseObject = { ...edit.phases.data };
+    const oldPhases = [...edit.phases.order];
+
     const newestPhase = newPhase(oldPhases.length);
-    oldPhases.push({ ...newestPhase, name: `Phase ${count}` });
+    oldPhaseObject[newestPhase.id] = newestPhase;
+    oldPhases.push(newestPhase.id);
     setCount((prev) => prev + 1);
-    updateTool('phases', oldPhases);
+
+    updateTool('phases.data', oldPhaseObject);
+    updateTool('phases.order', oldPhases);
 
     setPhaseTabs((prev) => [
       ...prev,
@@ -51,9 +57,14 @@ const EditEvent = ({ setShowModal }) => {
   };
 
   const handleRemovePhase = (id) => {
-    const oldPhases = [...edit.phases];
-    const newPhases = oldPhases.filter((phase) => phase.id !== id);
-    updateTool('phases', newPhases);
+    const oldPhaseOrder = [...edit.phases.order];
+    const oldPhaseObject = { ...edit.phases.data };
+
+    delete oldPhaseObject[id];
+    const newPhases = oldPhaseOrder.filter((phaseId) => phaseId !== id);
+
+    updateTool('phases.data', oldPhaseObject);
+    updateTool('phases.order', newPhases);
 
     setPhaseTabs((prev) => prev.filter((tab) => tab.tabId !== id));
   };
@@ -62,30 +73,45 @@ const EditEvent = ({ setShowModal }) => {
     <Box
       sx={{
         display: 'grid',
-        gridTemplateColumns: '2fr 10px 4fr',
+        gridTemplateColumns: '1fr 6fr',
         gridTemplateRows: 'auto',
-        alignItems: 'start',
-        justifyContent: 'start',
-        gap: 1,
-        my: 2,
+        py: 2,
         backgroundColor: 'background.paper',
         width: '100%',
         position: 'relative',
         overflowY: 'auto',
-        maxHeight: 'calc(100vh - 200px)',
+        height: '100%',
       }}
     >
       {/* Add your event editing components here */}
-      <EventMetaData />
-      <Divider orientation="vertical" flexItem sx={{ mr: 1.5 }} />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'start',
+          justifyContent: 'start',
+          gap: 2,
+          backgroundColor: 'background.paper',
+          height: '100%',
+          position: 'relative',
+          overflowY: 'auto',
+        }}
+      >
+        <Typography>Meta Data</Typography>
+        <Typography>Phases</Typography>
+        <Typography>Event Map</Typography>
+        <Typography>Resolutions</Typography>
+        <Typography>Keys</Typography>
+      </Box>
+
       <InnerTabbedContainer
         tabs={[...phaseTabs]}
         onAdd={handleAddPhase}
         onRemove={handleRemovePhase}
         removeLimit={1}
-        maxContentHeight="87vh"
+        maxContentHeight="calc(100vh - 200px)"
         height="100%"
-        maxWidth="100%"
+        maxWidth="95%"
         headerSx={{}}
         addLabel="+"
       />

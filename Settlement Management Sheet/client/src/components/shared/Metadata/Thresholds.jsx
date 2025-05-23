@@ -41,7 +41,6 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
       if (lastId !== id) {
         setLastId(id);
       }
-      validateToolField(`thresholds.data.${id}.max`, updates);
     },
     [updateTool, validateToolField, lastId, setLastId]
   );
@@ -72,7 +71,6 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
 
   const handleThresholdNameChange = (updates, { id }) => {
     updateTool(`thresholds.data.${id}.name`, updates);
-    validateToolField(`thresholds.data.${id}.name`, updates);
   };
 
   const recommendThresholdValue = (thresholds) => {
@@ -119,8 +117,10 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
 
   const handleRemove = useCallback(
     (id) => {
+      console.log(id);
       let updatedThresholds = { ...thresholds.data };
       delete updatedThresholds[id];
+      console.log('updatedThresholds', updatedThresholds);
       updateTool('thresholds.data', updatedThresholds);
 
       const order = thresholds.order;
@@ -170,12 +170,12 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
   };
 
   const handleMaxValidation = useCallback((value, { id }) => {
-    validateToolField(`thresholds.${id}.max`, value);
-  });
+    validateToolField(`thresholds.data.${id}.max`, value);
+  }, []);
 
   const handleNameValidation = useCallback((value, { id }) => {
-    validateToolField(`thresholds.${id}.name`, value);
-  });
+    validateToolField(`thresholds.data.${id}.name`, value);
+  }, []);
 
   return (
     <Box>
@@ -190,17 +190,18 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
       </Typography>
       {thresholds.order.map((tId, index) => {
         const threshold = thresholds.data[tId];
+        const errors = threshErrors.thresholds.data[tId];
         return (
           <Threshold
             key={tId}
             threshold={threshold}
-            errors={errors[tId]}
+            errors={errors}
             index={index}
             handleNameChange={handleThresholdNameChange}
             handleMaxChange={handleThresholdMaxChange}
             handleMaxValidation={handleMaxValidation}
             handleNameValidation={handleNameValidation}
-            handleRemove={handleRemove}
+            handleRemove={thresholds.order.length > 2 ? handleRemove : null}
             handleBalanceChange={handleBlur}
             id={tId}
           />

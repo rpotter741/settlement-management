@@ -45,7 +45,11 @@ const RenderLeads = ({ obj, keypath }) => {
         {obj.leads.map((entry, n) => (
           <IconButton
             size="small"
-            sx={{ fontSize: '0.75rem', color: 'secondary.main' }}
+            sx={{
+              fontSize: '0.75rem',
+              color: 'secondary.main',
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            }}
             key={newId()}
             onClick={() => {
               dispatch(
@@ -99,8 +103,9 @@ const renderShallowPath = (obj, keypath, title) => {
                   justifyContent: 'space-between',
                   gap: 4,
                   px: 1,
+                  py: 0.5,
                   backgroundColor:
-                    n % 2 === 0 ? 'divider' : 'background.default',
+                    n % 2 === 0 ? 'dividerDark' : 'background.default',
                 }}
               >
                 <Typography textAlign="start"> {entry.name}</Typography>
@@ -127,7 +132,7 @@ const SidePanelKit = ({}) => {
   const [settlementOptions, setSettlementOptions] = useState([
     defaultSettlement,
   ]);
-  const [toolChoice, setToolChoice] = useState('kit');
+  const [toolChoice, setToolChoice] = useState('both');
   const [combinedData, setCombinedData] = useState([]);
 
   useEffect(() => {

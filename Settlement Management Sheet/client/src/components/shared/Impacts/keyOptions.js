@@ -1,10 +1,14 @@
-const targetOptions = {
+const keyOptions = {
   attribute: [
     { name: 'Current', value: 'current' },
     { name: 'Max', value: 'max' },
     { name: 'Bonus', value: 'bonus' },
   ],
-  category: ['Bonus', 'Add New Attribute', 'Remove Attribute'],
+  category: [
+    { name: 'Bonus', value: 'bonus' },
+    { name: 'Add New Attribute', value: 'addAttr' },
+    { name: 'Remove Attribute', value: 'removeAttr' },
+  ],
   building: ['Health', 'Durability', 'Complexity'],
   settlement: [
     'Productivity',
@@ -15,4 +19,4 @@ const targetOptions = {
   ],
 };
 
-export default targetOptions;
+export default keyOptions;

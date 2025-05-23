@@ -22,6 +22,7 @@ const TabPanel = ({ children, value, id }) => (
           height: '100%',
           width: '100%',
           border: '1px solid',
+          borderColor: 'dividerDark',
           boxSizing: 'border-box',
         }}
       >
@@ -81,8 +82,8 @@ const InnerTabbedContainer = ({
         alignItems: 'start',
         justifyContent: 'start',
         flexShrink: 1,
-        maxWidth: [600, 800, 1200, 1600],
-        overflowX: 'show',
+        boxSizing: 'border-box',
+        px: 1,
       }}
     >
       {/* Tabs Header */}

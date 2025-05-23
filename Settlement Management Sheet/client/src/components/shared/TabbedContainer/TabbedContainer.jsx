@@ -1,8 +1,14 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+  Suspense,
+} from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Divider } from '@mui/material';
+import { Box, Divider, Modal } from '@mui/material';
 
-import SidePanel from '../Sidebar/SidePanel.jsx';
+import SidePanel from 'features/SidePanel/SidePanel.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 import { useDragContext } from 'context/DragContext.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
@@ -32,9 +38,22 @@ const TabbedContainer = () => {
     moveLeft,
     moveRight,
     preventSplit,
+    setPreventSplit,
   } = useSidePanel();
   const { draggedType } = useDragContext();
   const { showSnackbar } = useSnackbar();
+  const [modalContent, setModalContent] = useState(null);
+
+  const noSplit = useMemo(
+    () => leftTabs.some((tab) => tab.tool === 'event'),
+    [leftTabs]
+  );
+
+  useEffect(() => {
+    if (noSplit && preventSplit === false) {
+      setPreventSplit(true);
+    }
+  }, [noSplit, preventSplit, setPreventSplit]);
 
   const moveRTL = useCallback(
     (entry) => {
@@ -104,7 +123,7 @@ const TabbedContainer = () => {
         className="tabbed-container"
       >
         {/* Side Panel */}
-        <SidePanel />
+        <SidePanel setModalContent={setModalContent} />
         {/* Tabs Header */}
         <Box
           sx={{
@@ -149,7 +168,32 @@ const TabbedContainer = () => {
               />
             )}
           </Box>
-
+          {modalContent && (
+            <Modal open={true} onClose={() => setModalContent(null)}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: 'calc(50% + 150px)',
+                  transform: 'translate(-50%, -50%)',
+                  bgcolor: 'background.default',
+                  border: '2px solid #000',
+                  borderColor: 'secondary.light',
+                  boxShadow: 24,
+                  p: 4,
+                  borderRadius: 4,
+                  ml: 1,
+                }}
+              >
+                <Suspense fallback={<Box>Loading...</Box>}>
+                  {React.createElement(modalContent?.component, {
+                    ...modalContent?.props,
+                    setModalContent,
+                  })}
+                </Suspense>
+              </Box>
+            </Modal>
+          )}
           {/* Tabs Content */}
           <Box
             sx={{
@@ -212,13 +256,13 @@ const TabbedContainer = () => {
               </Box>
             )}
             <LeftTabsProvider>
-              <RenderTabs side="left" />
+              <RenderTabs side="left" setModalContent={setModalContent} />
             </LeftTabsProvider>
             {useSelector(select.isSplit) && (
               <>
                 <Divider flexItem orientation="vertical" />
                 <RightTabsProvider>
-                  <RenderTabs side="right" />
+                  <RenderTabs side="right" setModalContent={setModalContent} />
                 </RightTabsProvider>
               </>
             )}

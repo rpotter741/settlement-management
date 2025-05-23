@@ -1,6 +1,45 @@
 import { v4 as newId } from 'uuid';
 
 function initializeEvent() {
+  const phaseId = newId();
+
+  const phases = {
+    data: {},
+    order: [],
+  };
+
+  const phase = {
+    id: phaseId,
+    name: 'Phase 1',
+    description: '',
+    flavorText: {
+      trivial: '',
+      minor: '',
+      notable: '',
+      significant: '',
+      major: '',
+    },
+    type: 'Immediate',
+    impacts: [],
+    resolutions: [
+      {
+        id: newId(),
+        name: 'Resolution 1',
+        description: '',
+        impacts: [],
+        keys: [],
+      },
+    ],
+    nextPhaseId: null,
+    duration: null,
+    productivity: null,
+    exposedKeys: [],
+    isTerminal: false,
+  };
+
+  phases.data[phaseId] = phase;
+  phases.order.push(phaseId);
+
   return {
     id: newId(),
     refId: newId(),
@@ -14,36 +53,7 @@ function initializeEvent() {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     narrativeWeight: null,
-    phases: [
-      {
-        id: newId(),
-        name: 'Phase 1',
-        description: '',
-        flavorText: {
-          trivial: '',
-          minor: '',
-          notable: '',
-          significant: '',
-          major: '',
-        },
-        type: 'Active',
-        impacts: [],
-        resolutions: [
-          {
-            id: newId(),
-            name: 'Resolution 1',
-            description: '',
-            impacts: [],
-            keys: [],
-          },
-        ],
-        nextPhaseId: null,
-        duration: null,
-        productivity: null,
-        exposedKeys: [],
-        isTerminal: false,
-      },
-    ],
+    phases,
   };
 }
 

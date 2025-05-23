@@ -67,39 +67,15 @@ const defaultSettlement = {
       refId: 'e12e0bed-4768-443e-aa13-0a9b53f853ce',
       name: 'Food',
     },
-  ],
-  productivity: {
-    id: 'aee0367f-c0f6-4dac-9ee4-f00bbed15631',
-    refId: '972686c3-1298-4578-abb9-a11bba79a212',
-    name: 'Productivity',
-  },
-  supplies: {
-    id: 'd2184b0b-70a2-4b01-9044-745b2cc1ac1e',
-    refId: 'cf634731-90a3-4a10-b532-11049650e675',
-    name: 'Supplies',
-  },
-  currency: {
-    id: '123abc',
-    refId: '456def',
-    name: 'Gold',
-  },
-  location: [
     {
-      id: 'c2f1b0c5-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'h2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Blackwood Forge',
+      id: 'aee0367f-c0f6-4dac-9ee4-f00bbed15631',
+      refId: '972686c3-1298-4578-abb9-a11bba79a212',
+      name: 'Productivity',
     },
     {
-      id: 'd2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'i2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'The Northern Fracture',
-    },
-  ],
-  people: [
-    {
-      id: 'a2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'f2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Mayor Elareth',
+      id: 'd2184b0b-70a2-4b01-9044-745b2cc1ac1e',
+      refId: 'cf634731-90a3-4a10-b532-11049650e675',
+      name: 'Supplies',
     },
   ],
   contentType: 'OFFICIAL',

@@ -39,7 +39,7 @@ const CreateEvent = ({ id, mode, side, tabId }) => {
       side={side}
       mode={mode}
       tabId={tabId}
-      width="100%"
+      page={false}
     />
   );
 };

@@ -14,10 +14,9 @@ const Threshold = ({
   handleMaxChange,
   handleBalanceChange,
 }) => {
-  console.log(errors);
   return (
     <Box
-      key={threshold.id}
+      key={id}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -71,16 +70,18 @@ const Threshold = ({
         onError={handleMaxValidation}
         onBlur={handleBalanceChange}
       />
-      <Tooltip title="Remove threshold">
-        <Button
-          variant="contained"
-          aria-label="Remove threshold"
-          onClick={() => handleRemove(threshold.id)}
-          sx={{ px: 4 }}
-        >
-          Remove
-        </Button>
-      </Tooltip>
+      {handleRemove !== null && (
+        <Tooltip title="Remove threshold">
+          <Button
+            variant="contained"
+            aria-label="Remove threshold"
+            onClick={() => handleRemove(id)}
+            sx={{ px: 4 }}
+          >
+            Remove
+          </Button>
+        </Tooltip>
+      )}
     </Box>
   );
 };

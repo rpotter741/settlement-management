@@ -22,8 +22,13 @@ const eventFields = {
     minRows: 3,
     validate: (value) => {
       if (!value) return 'Description is required';
-      if (value.length < 30)
-        return `Description must be at least 30 characters. You have ${30 - value.length} characters remaining.`;
+      if (value.length < 30) {
+        if (30 - value.length > 1) {
+          return `Description must be at least 30 characters. You have ${30 - value.length} characters remaining.`;
+        } else {
+          return `Description must be at least 30 characters. You have 1 character remaining.`;
+        }
+      }
       return null;
     },
     keypath: 'description',

@@ -117,7 +117,7 @@ const SettlementPointsCost = () => {
   );
 
   const handleAdd = () => {
-    if (!selectedValue.id) return;
+    if (!selectedValue?.id) return;
     const spc = selectedValue;
     const newSPC = { ...costs };
     const newErrors = { ...errors };
@@ -134,7 +134,7 @@ const SettlementPointsCost = () => {
     updateAttribute('settlementPointCost.order', newOrder);
 
     setInputValue('');
-    setSelectedType(null); // Clear after transfer
+    setSelectedValue(null); // Clear after transfer
   };
 
   if (!settlementPointCost) return <Box>Loading...</Box>;

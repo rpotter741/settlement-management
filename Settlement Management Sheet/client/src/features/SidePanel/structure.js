@@ -48,6 +48,11 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('apt'),
           },
+          {
+            title: 'What Is An APT?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
@@ -60,6 +65,11 @@ const structure = [
             title: 'Create Action +',
             type: 'button',
             onClick: () => getTabInfo('action'),
+          },
+          {
+            title: 'What Is An Action?',
+            type: 'button',
+            onClick: () => null,
           },
         ],
       },
@@ -92,6 +102,11 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('building'),
           },
+          {
+            title: 'What Is A Building?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
@@ -104,6 +119,11 @@ const structure = [
             title: 'Create Category +',
             type: 'button',
             onClick: () => getTabInfo('category'),
+          },
+          {
+            title: 'What Is A Category?',
+            type: 'button',
+            onClick: () => null,
           },
         ],
       },
@@ -122,6 +142,11 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('event'),
           },
+          {
+            title: 'What Is An Event?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
@@ -135,17 +160,34 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('kit'),
           },
+          {
+            title: 'What Is A Kit?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
         title: 'Listeners',
         icon: HearingIcon,
         type: 'link',
+        tool: 'listener',
         component: {
           preview: 'ListenerPreview',
           edit: 'ListenerEdit',
         },
-        children: [],
+        children: [
+          {
+            title: 'Create Listener +',
+            type: 'button',
+            onClick: () => getTabInfo('listener'),
+          },
+          {
+            title: 'What Is A Listener?',
+            type: 'button',
+            onClick: () => null,
+          },
+        ],
       },
       {
         title: 'Settlement Types',
@@ -157,6 +199,11 @@ const structure = [
             title: 'Create Settlement Type +',
             type: 'button',
             onClick: () => getTabInfo('settlementType'),
+          },
+          {
+            title: 'What Is A Settlement Type?',
+            type: 'button',
+            onClick: () => null,
           },
         ],
       },
@@ -172,9 +219,9 @@ const structure = [
             onClick: () => getTabInfo('settlement'),
           },
           {
-            title: 'Create Settlement +',
+            title: 'What Is A Settlement?',
             type: 'button',
-            onClick: () => getTabInfo('settlement'),
+            onClick: () => null,
           },
         ],
       },
@@ -189,6 +236,11 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('gameStatus'),
           },
+          {
+            title: 'What Is A Status?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
@@ -201,6 +253,11 @@ const structure = [
             title: 'Create Story Thread +',
             type: 'button',
             onClick: () => getTabInfo('storyThread'),
+          },
+          {
+            title: 'What Is A Story Thread?',
+            type: 'button',
+            onClick: () => null,
           },
         ],
       },
@@ -215,6 +272,11 @@ const structure = [
             type: 'button',
             onClick: () => getTabInfo('tradeHub'),
           },
+          {
+            title: 'What Is A Trade Hub?',
+            type: 'button',
+            onClick: () => null,
+          },
         ],
       },
       {
@@ -227,6 +289,11 @@ const structure = [
             title: 'Create Upgrade +',
             type: 'button',
             onClick: () => getTabInfo('upgrade'),
+          },
+          {
+            title: 'What Is An Upgrade?',
+            type: 'button',
+            onClick: () => null,
           },
         ],
       },

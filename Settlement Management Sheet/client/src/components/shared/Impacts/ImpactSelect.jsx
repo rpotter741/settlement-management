@@ -20,7 +20,7 @@ import { returnTool } from 'app/toolThunks.ts';
 import sortByKey from 'utility/sortByKey.js';
 
 import impactMap from './impactMap.js';
-import kOptions from 'features/Statuses/helpers/targetOptions.js';
+import kOptions from './keyOptions.js';
 
 const ImpactSelect = ({
   disabled = false,
@@ -50,7 +50,8 @@ const ImpactSelect = ({
       setTargetOptions(
         sortByKey(get(options, impact.system.value, []), 'name')
       );
-      setKeyOptions(sortByKey(kOptions[impact.system.value], 'name'));
+      const koptions = sortByKey(kOptions[impact.system.value], 'name');
+      setKeyOptions(koptions);
     }
   }, [options, impact.system]);
 

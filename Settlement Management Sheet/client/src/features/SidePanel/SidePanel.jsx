@@ -14,6 +14,8 @@ import {
   IconButton,
 } from '@mui/material';
 
+import { v4 as newId } from 'uuid';
+
 import SidePanelKit from 'features/Kits/components/SidePanelKit.jsx';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -32,12 +34,14 @@ import LoadTool from 'components/shared/LoadTool/SidePanelLoad.jsx';
 import { useTheme } from 'context/ThemeContext.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
+import GlossarySidePanel from 'features/Glossary/GlossarySidePanel.tsx';
+
 import getTrail from './getTrail.js';
 import structure from './structure.js';
 
 const maxTrail = 3;
 
-const SidePanel = () => {
+const SidePanel = ({ setModalContent }) => {
   const { breadcrumbs, updateBreadcrumbs, setActiveTab } = useSidePanel();
   const [active, setActive] = useState('');
   const [tool, setTool] = useState(null);
@@ -113,15 +117,16 @@ const SidePanel = () => {
                 />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Search" arrow placement="bottom">
+            <Tooltip title="Glossary" arrow placement="bottom">
               <IconButton
                 sx={{ border: 0, borderRadius: 0, height: 36, width: 48 }}
-                onClick={() => setMode('search')}
+                onClick={() => setMode('glossary')}
               >
-                <SearchIcon
+                <MenuBookIcon
                   sx={{
                     fontSize: '1rem',
-                    color: mode === 'search' ? 'success.main' : 'accent.light',
+                    color:
+                      mode === 'glossary' ? 'success.main' : 'accent.light',
                   }}
                 />
               </IconButton>
@@ -147,7 +152,7 @@ const SidePanel = () => {
         sx={{
           display: 'flex',
           alignItems: 'start',
-          borderRight: 1,
+          borderRight: minimized ? 0 : 1,
           borderColor,
         }}
       >
@@ -160,7 +165,7 @@ const SidePanel = () => {
             width: 48,
             maxWidth: 48,
             borderRight: 1,
-            borderColor: 'primary.light',
+            borderColor,
             boxSizing: 'border-box',
             py: 1,
           }}
@@ -214,124 +219,103 @@ const SidePanel = () => {
               <Typography variant="h5" sx={{ height: 36, maxHeight: 36 }}>
                 Eclorean Ledger
               </Typography>
-              <List sx={{ p: 0 }}>
-                {structure.map((entry, index) =>
-                  entry.type === 'header' ? (
-                    <RenderHeader
-                      entry={entry}
-                      index={index}
-                      key={index}
-                      setActive={setActive}
-                      active={active}
-                      setTool={setTool}
-                    />
-                  ) : entry.type === 'link' ? (
-                    <RenderEntry
-                      entry={entry}
-                      index={index}
-                      key={index}
-                      active={active === entry.title}
-                      setActive={setActive}
-                      setTool={setTool}
-                    />
-                  ) : null
-                )}
-              </List>
-              <Divider
-                flexItem
-                sx={{
-                  borderColor: 'secondary.main',
-                  px: 2,
-                  mt: 2,
-                }}
-              >
-                <Chip
-                  label="Search"
-                  sx={{
-                    backgroundColor: 'transparent',
-                    fontSize: '1rem',
-                    color: 'secondary.main',
-                    border: 1,
-                  }}
-                  onClick={() => setViewSearch(!viewSearch)}
-                />
-              </Divider>
-              <Collapse in={viewSearch}>
-                {active ? (
-                  <LoadTool tool={tool} displayName={active} />
-                ) : (
-                  <Box
+              {mode === 'tools' && (
+                <>
+                  <List sx={{ p: 0 }}>
+                    {structure.map((entry, index) =>
+                      entry.type === 'header' ? (
+                        <RenderHeader
+                          entry={entry}
+                          index={index}
+                          key={index}
+                          setActive={setActive}
+                          active={active}
+                          setTool={setTool}
+                        />
+                      ) : entry.type === 'link' ? (
+                        <RenderEntry
+                          entry={entry}
+                          index={index}
+                          key={index}
+                          active={active === entry.title}
+                          setActive={setActive}
+                          setTool={setTool}
+                        />
+                      ) : null
+                    )}
+                  </List>
+                  <Divider
+                    flexItem
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: 200,
+                      borderColor: 'secondary.main',
+                      px: 2,
+                      mt: 2,
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      fontWeight="bold"
+                    <Chip
+                      label="Search"
                       sx={{
-                        color: 'text.primary',
+                        backgroundColor: 'transparent',
+                        fontSize: '1rem',
+                        color: 'secondary.main',
+                        border: 1,
                       }}
-                    >
-                      Select a tool to search
-                    </Typography>
-                  </Box>
-                )}
-              </Collapse>
-              <Divider
-                flexItem
-                sx={{
-                  borderColor: 'secondary.main',
-                  px: 2,
-                  my: 2,
-                }}
-              >
-                <Chip
-                  label="My Kits"
-                  sx={{
-                    backgroundColor: 'transparent',
-                    fontSize: '1rem',
-                    color: 'secondary.main',
-                    borderColor: 'text.primary',
-                    border: 1,
-                  }}
-                  onClick={() => setViewKits(!viewKits)}
-                />
-              </Divider>
-              <Collapse in={viewKits}>
-                <SidePanelKit />
-              </Collapse>
-              <Box
-                sx={{
-                  position: 'fixed',
-                  bottom: 0,
-                  left: 48,
-                  boxSizing: 'border-box',
-                  width: '300px',
-                  p: 2,
-                  display: 'flex',
-                  justifyContent: 'start',
-                  alignItems: 'center',
-                  height: 48,
-                  borderTop: 1,
-                  borderColor,
-                  gap: 2,
-                  backgroundColor: 'background.paper',
-                }}
-              >
-                <Avatar
-                  size="small"
-                  alt="RobbiePottsDM"
-                  src="/static/images/avatar/1.jpg"
-                  sx={{ width: 36, height: 36 }}
-                />
-                <Typography variant="h6" noWrap component="div">
-                  robbiepottsdm
-                </Typography>
-              </Box>
+                      onClick={() => setViewSearch(!viewSearch)}
+                    />
+                  </Divider>
+                  <Collapse in={viewSearch}>
+                    {active ? (
+                      <LoadTool tool={tool} displayName={active} />
+                    ) : (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: 200,
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          fontWeight="bold"
+                          sx={{
+                            color: 'text.primary',
+                          }}
+                        >
+                          Select a tool to search
+                        </Typography>
+                      </Box>
+                    )}
+                  </Collapse>
+                  <Divider
+                    flexItem
+                    sx={{
+                      borderColor: 'secondary.main',
+                      px: 2,
+                      my: 2,
+                    }}
+                  >
+                    <Chip
+                      label="My Kits"
+                      sx={{
+                        backgroundColor: 'transparent',
+                        fontSize: '1rem',
+                        color: 'secondary.main',
+                        borderColor: 'text.primary',
+                        border: 1,
+                      }}
+                      onClick={() => setViewKits(!viewKits)}
+                    />
+                  </Divider>
+                  <Collapse in={viewKits}>
+                    <SidePanelKit />
+                  </Collapse>
+                </>
+              )}
+              {mode === 'glossary' && (
+                <GlossarySidePanel setModalContent={setModalContent} />
+              )}
             </Box>
           </Box>
         </Collapse>
@@ -400,8 +384,6 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
       setTool(entry.tool);
     } else {
       const { name, id, mode, tool, tabId, scroll, preventSplit } = clickFn();
-      const wow = clickFn();
-      console.log('wow', wow);
       addNewTab({
         name,
         id,
@@ -419,7 +401,8 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
     <Box
       key={entry.title}
       sx={{
-        backgroundColor: active === entry.title ? 'info.light' : 'transparent',
+        backgroundColor:
+          active === entry.title ? 'accent.light' : 'transparent',
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
@@ -448,7 +431,14 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
           }}
         >
           <ListItemIcon>
-            {entry.icon && <entry.icon sx={{ color: 'secondary.light' }} />}
+            {entry.icon && (
+              <entry.icon
+                sx={{
+                  color:
+                    active === entry.title ? 'success.main' : 'secondary.light',
+                }}
+              />
+            )}
           </ListItemIcon>
           <Typography
             variant="body2"
@@ -462,7 +452,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
           </Typography>
         </Box>
       </ListItemButton>
-      {active === entry.title && (
+      <Collapse in={active === entry.title}>
         <Box
           sx={{
             display: 'flex',
@@ -471,9 +461,9 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
             width: '100%',
           }}
         >
-          {entry.children.map((child, childIndex) => (
+          {(entry?.children || []).map((child, childIndex) => (
             <RenderEntry
-              key={child.title}
+              key={newId()}
               entry={child}
               index={childIndex}
               active={active}
@@ -482,7 +472,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
             />
           ))}
         </Box>
-      )}
+      </Collapse>
     </Box>
   );
 };

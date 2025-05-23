@@ -68,33 +68,6 @@ const defaultKit = {
       name: 'Survival',
     },
   ],
-  region: [
-    {
-      id: 'a2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'f2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Rock Plains',
-    },
-    {
-      id: 'b2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'g2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Mistwood',
-    },
-  ],
-  location: [
-    {
-      id: 'c2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'h2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Blackwood Forge',
-    },
-  ],
-  settlement: [
-    {
-      id: 'd2f1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      refId: 'i2a1b0c4-3d5e-4b8f-9a7c-6d3e0f5b8c1d',
-      name: 'Productivity',
-    },
-  ],
-  people: [],
   contentType: 'OFFICIAL',
   createdBy: 'robbiepottsdm',
 };

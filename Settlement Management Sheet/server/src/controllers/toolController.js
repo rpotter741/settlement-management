@@ -4,6 +4,7 @@ import prisma from '../db/db.js';
 import getNextVersion from '../utils/getNextVersion.js';
 import getValidDependencies from '../utils/getValidDependencies.js';
 import toolSelectMap from '../utils/toolSelectMap.js';
+import requireFields from '../utils/requireFields.js';
 
 const getContent = async (req, res) => {
   try {
@@ -20,7 +21,7 @@ const getContent = async (req, res) => {
 
     console.log(tool, 'tool');
 
-    if (!tool) return res.status(400).json({ message: 'Tool type required.' });
+    requireFields([tool], res);
 
     const model = prisma[tool];
     if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
@@ -61,7 +62,7 @@ const getContentByName = async (req, res) => {
     const userId = req?.user?.id || 'Admin';
     const { tool, name = '' } = req.query;
 
-    if (!tool) return res.status(400).json({ message: 'Tool type required.' });
+    requireFields([tool], res);
 
     const model = prisma[tool];
     if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
@@ -90,9 +91,7 @@ const saveContent = async (req, res) => {
     const userId = req?.user?.id || 'Admin';
     const { tool, data } = req.body;
 
-    if (!tool || !data) {
-      return res.status(400).json({ message: 'Tool and data are required.' });
-    }
+    requireFields([tool, data], res);
 
     const model = prisma[tool];
     if (!model) {
@@ -151,9 +150,7 @@ const deleteContent = async (req, res) => {
   try {
     const { tool, id } = req.body;
 
-    if (!tool || !id) {
-      return res.status(400).json({ message: 'Tool and refId are required.' });
-    }
+    requireFields([tool, id], res);
 
     const model = prisma[tool];
     if (!model) {
@@ -171,6 +168,7 @@ const deleteContent = async (req, res) => {
 const getItem = async (req, res) => {
   try {
     const { tool, id, refId } = req.query;
+    requireFields([tool, id, refId], res);
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
@@ -186,7 +184,7 @@ const getItem = async (req, res) => {
 const fetchByIds = async (req, res) => {
   try {
     const { tool, ids } = req.body;
-    console.log(ids, 'ids');
+    requireFields([tool, ids], res);
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });

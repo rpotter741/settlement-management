@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import requestLogger from './middleware/requestLogger.js';
 import userRouter from './routes/userRoutes.js';
 import toolRouter from './routes/toolRoutes.js';
-import attributeRouter from './routes/attributeRoutes.js';
+import glossaryRouter from './routes/glossaryRoutes.js';
 import prisma from './db/db.js';
 
 dotenv.config();
@@ -28,6 +28,8 @@ app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/user', userRouter);
 
 app.use('/tools', toolRouter);
+
+app.use('/glossary', glossaryRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../public/index.html'));

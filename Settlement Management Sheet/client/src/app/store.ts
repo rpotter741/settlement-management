@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import validationReducer from '../features/Validation/validationSlice';
 import toolsReducer from './toolSlice';
 import sidePanelReducer from '../features/SidePanel/sidePanelSlice';
+import glossaryReducer from '../features/Glossary/state/glossarySlice';
 
 export const store = configureStore({
   reducer: {
     validation: validationReducer,
     tools: toolsReducer,
     sidePanel: sidePanelReducer,
+    glossary: glossaryReducer,
   },
 });
 

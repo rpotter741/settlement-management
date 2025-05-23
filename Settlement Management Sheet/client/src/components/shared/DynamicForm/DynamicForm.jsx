@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { Formik, Form } from 'formik';
 import { debounce } from 'lodash';
 import {
@@ -17,6 +17,10 @@ import AutoStoryIcon from '@mui/icons-material/AutoStories';
 import WarningIcon from '@mui/icons-material/Warning';
 
 import toSnakeCase from 'utility/snakeCase.js';
+
+const debouncedUpdate = debounce((callback, value, meta) => {
+  callback(value, meta);
+}, 500);
 
 const DynamicForm = ({
   initialValues,
@@ -42,19 +46,22 @@ const DynamicForm = ({
   const [firstCheck, setFirstCheck] = useState(true);
 
   const handleExternalUpdate = useCallback(
-    (value, { keypath, id, index, name }) => {
+    (value, meta) => {
       if (debounced) {
-        debounce((value, { keypath, id, index, name }) => {
-          if (externalUpdate) {
-            externalUpdate(value, { keypath, id, index, name });
-          }
-        }, 500);
-      } else {
-        if (externalUpdate) {
-          externalUpdate(value, { keypath, id, index, name });
-        }
+        debouncedUpdate(externalUpdate, value, meta);
+      } else if (externalUpdate) {
+        externalUpdate(value, meta);
       }
-    }
+    },
+    [debounced, externalUpdate]
+  );
+
+  const handleRemove = useCallback(
+    (e, keypath) => {
+      e.stopPropagation();
+      onRemove(keypath);
+    },
+    [onRemove]
   );
 
   return (
@@ -96,10 +103,11 @@ const DynamicForm = ({
         useEffect(() => {
           if (parentError) {
             setIsError(true);
-            touched[name] = true;
             validateField(name);
+          } else if (!errors[name]) {
+            setIsError(false);
           }
-        }, [parentError, isExpanded]);
+        }, [parentError, errors, name, isExpanded]);
 
         useEffect(() => {
           if (firstCheck) {
@@ -133,6 +141,8 @@ const DynamicForm = ({
             }
           }
         }, [errors, name, keypath, id]);
+
+        const helperText = useMemo(() => errors[name] || '', [errors, name]);
 
         return (
           <Box sx={boxSx ? { ...boxSx } : {}}>
@@ -174,7 +184,7 @@ const DynamicForm = ({
                   }
                 }}
                 error={Boolean(isInvalid) || Boolean(parentError)} // Set error state
-                helperText={errors[name]} // Display error text
+                helperText={helperText} // Display error text
                 fullWidth
                 min={min}
                 margin="normal"
@@ -314,12 +324,7 @@ const DynamicForm = ({
                               }
                               arrow
                             >
-                              <IconButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onRemove(keypath);
-                                }}
-                              >
+                              <IconButton onClick={handleRemove}>
                                 <TrashIcon />
                               </IconButton>
                             </Tooltip>
@@ -334,7 +339,10 @@ const DynamicForm = ({
                       bottom: '-20px',
                       fontSize: '12px', // Optional: Adjust font size
                       color: isInvalid ? 'error.main' : 'transparent',
-                      display: ['none', 'none', 'block'], // Optional: Hide on mobile
+                      display: {
+                        xs: 'none',
+                        xl: 'block',
+                      }, // Optional: Hide on mobile
                     },
                   },
                 }}
@@ -359,4 +367,6 @@ const DynamicForm = ({
   );
 };
 
-export default DynamicForm;
+const MemoizedDynamicForm = memo(DynamicForm);
+
+export default MemoizedDynamicForm;

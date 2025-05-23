@@ -53,7 +53,10 @@ export interface Thread extends BaseTool {
     | 'MAJOR'
     | 'CRITICAL'
     | null;
-  phases: EventPhase[];
+  phases: {
+    data: Record<UUID, EventPhase>;
+    order: UUID[];
+  };
   replacement?: ReplacementTuple;
   links?: UUID[];
   entryPhaseId: UUID;

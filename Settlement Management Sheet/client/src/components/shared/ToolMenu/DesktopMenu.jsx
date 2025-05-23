@@ -9,7 +9,15 @@ import EditIcon from '@mui/icons-material/Edit';
 import LoadIcon from '@mui/icons-material/GetApp';
 import PlusIcon from '@mui/icons-material/Add';
 
-const DesktopMenu = ({ mode, tool, isValid, actions, toolName, ...props }) => {
+const DesktopMenu = ({
+  mode,
+  tool,
+  isValid,
+  actions,
+  toolName,
+  page,
+  ...props
+}) => {
   return (
     <Box
       sx={{
@@ -18,7 +26,7 @@ const DesktopMenu = ({ mode, tool, isValid, actions, toolName, ...props }) => {
         alignItems: 'center',
         justifyContent: 'space-around',
         width: '100%',
-        mb: 2,
+        mb: page ? 2 : 0,
         ...props.sx,
       }}
     >

@@ -37,6 +37,29 @@ export const options = createSelector([base], (state) => state.toolOptions);
 export const selectOptions = (keypath) =>
   createSelector([options], (mergedKits) => get(mergedKits, keypath));
 
+export const selectAllTabNames = createSelector(
+  [leftTabs, rightTabs],
+  (leftTabs, rightTabs) => {
+    const allTabs = [...leftTabs, ...rightTabs];
+    return allTabs.map((tab) => tab.name);
+  }
+);
+
+export const getUniqueName = createSelector(
+  [selectAllTabNames],
+  (tabNames) =>
+    (baseName = 'Untitled') => {
+      let count = 1;
+
+      // Check for existing Untitled tabs
+      while (tabNames.includes(`${baseName} (${count})`)) {
+        count++;
+      }
+
+      return `${baseName} (${count})`;
+    }
+);
+
 export const sidePanelSelectors = {
   leftTabs,
   rightTabs,
@@ -49,4 +72,5 @@ export const sidePanelSelectors = {
   breadcrumbs,
   options,
   selectOptions,
+  selectAllTabNames,
 };
