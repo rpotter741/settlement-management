@@ -9,7 +9,8 @@ export interface GlossaryNode {
   children?: GlossaryNode[];
   parent?: GlossaryNode | null;
   glossaryId: UUID;
-  sortIndex: number;
+  sortIndex?: number;
+  flatIndex?: number;
 }
 
 export interface BaseEntry {
@@ -145,7 +146,9 @@ export type GlossaryEntryType =
   | 'location'
   | 'poi'
   | 'person'
-  | 'faction';
+  | 'faction'
+  | 'note'
+  | null;
 
 export interface Glossary {
   id: UUID;

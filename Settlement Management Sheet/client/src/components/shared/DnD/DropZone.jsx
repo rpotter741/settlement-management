@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { Box } from '@mui/material';
-import { useDragContext } from '../../../context/DragContext';
 
 const DropZone = ({
   type,
   children,
-  handleUpdate = () => {},
   handleAdd,
-  handleRemove = () => {},
-  onReorder = () => {},
+  onReorder,
   onAbsolutePlacement,
   defaultItems = [],
-  bg1 = 'background.paper',
-  bg2 = 'background.default',
+  bg2 = 'background.paper',
+  bg1 = 'background.default',
+  draggedType = null,
+  endDrag = () => {},
 }) => {
   const [droppedItems, setDroppedItems] = useState(defaultItems);
-
-  const { draggedType, endDrag } = useDragContext();
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: type,
@@ -62,15 +59,10 @@ const DropZone = ({
         textAlign: 'center',
         height: '100%',
         borderRadius: 4,
+        zIndex: 1000,
       }}
     >
-      {children &&
-        children({
-          droppedItems,
-          setDroppedItems,
-          handleUpdate,
-          handleRemove,
-        })}
+      {children}
     </Box>
   );
 };

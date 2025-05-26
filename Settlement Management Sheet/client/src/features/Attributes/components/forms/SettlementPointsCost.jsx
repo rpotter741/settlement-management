@@ -51,10 +51,6 @@ const SettlementPointsCost = () => {
 
   const [selectedTypes, setSelectedTypes] = useState([]);
 
-  useEffect(() => {
-    console.log(edit);
-  }, [edit]);
-
   const available = useMemo(() => {
     const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {
       types.push(id);
@@ -83,10 +79,6 @@ const SettlementPointsCost = () => {
     }));
   });
 
-  useEffect(() => {
-    console.log('orderedList', orderedList);
-  });
-
   const handleValidationUpdate = (error, { id }) => {
     validateAttributeField(`settlementPointCost.${id}.value`, error);
   };
@@ -104,7 +96,6 @@ const SettlementPointsCost = () => {
       ...costs,
       [item.id]: { name: formattedName, value: 1 },
     };
-    console.log('newSPC', newSPC);
     updateAttribute('settlementPointCost.data', newSPC);
 
     const newErrors = {

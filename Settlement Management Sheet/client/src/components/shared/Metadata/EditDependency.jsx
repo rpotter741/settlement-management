@@ -13,10 +13,6 @@ const EditDependency = ({ tool, id }) => {
   const { showSnackbar } = useSnackbar();
   const [open, setOpen] = useState(new Array(order.length).fill(false));
 
-  React.useEffect(() => {
-    console.log('order', order);
-  }, [order]);
-
   const handleModifierChange = useCallback(
     (updates, { id, index }) => {
       updateTool(

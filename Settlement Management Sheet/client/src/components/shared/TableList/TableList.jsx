@@ -78,10 +78,6 @@ const TableList = ({
   ]);
 
   useEffect(() => {
-    console.log(selected, 'selected');
-  }, [selected]);
-
-  useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage) return;
     const observer = new IntersectionObserver(
       ([entry]) => {

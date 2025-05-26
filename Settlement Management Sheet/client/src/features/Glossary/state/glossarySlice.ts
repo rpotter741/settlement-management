@@ -8,6 +8,7 @@ import sortByIndex from '../helpers/sortByIndex';
 const defaultGlossaryState: GlossaryState = {
   glossaries: {},
   activeGlossaryId: null,
+  snackbar: null,
 };
 
 const glossarySlice = createSlice({
@@ -32,7 +33,7 @@ const glossarySlice = createSlice({
         error: null,
         nodes: {},
         structure: [],
-        expanded: {},
+        renderState: {},
       };
     },
     setGlossaryLoading: (
@@ -55,20 +56,23 @@ const glossarySlice = createSlice({
         glossaryId: string;
         nodes: Record<string, GlossaryNode>;
         structure: GlossaryNode[];
+        renderState: Record<string, { expanded: boolean; rename: boolean }>;
       }>
     ) => {
-      const { glossaryId, nodes, structure } = action.payload;
+      const { glossaryId, nodes, structure, renderState } = action.payload;
       state.glossaries[glossaryId].nodes = nodes;
       state.glossaries[glossaryId].structure = structure;
+      state.glossaries[glossaryId].renderState = renderState;
     },
     rehydrateTree: (
       state,
       action: PayloadAction<{ glossaryId: string; treeData: any }>
     ) => {
       const { glossaryId, treeData } = action.payload;
-      const { roots, nodeMap } = rehydrateGlossaryTree(treeData);
+      const { roots, nodeMap, renderState } = rehydrateGlossaryTree(treeData);
       state.glossaries[glossaryId].nodes = nodeMap;
-      state.glossaries[glossaryId].structure = roots;
+      state.glossaries[glossaryId].structure = treeData;
+      state.glossaries[glossaryId].renderState = renderState;
     },
     updateGlossaryNode: (
       state,
@@ -82,9 +86,10 @@ const glossarySlice = createSlice({
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
         const node = glossary.nodes[nodeId];
-        if (node) {
+        if (node && node.flatIndex !== undefined) {
           Object.assign(node, nodeData);
-          glossary.structure = sortByIndex(glossary.nodes);
+          glossary.structure[node.flatIndex].name = node.name;
+          glossary.structure = sortByIndex([...glossary.structure]);
         }
       }
     },
@@ -102,7 +107,7 @@ const glossarySlice = createSlice({
           const node = glossary.nodes[nodeId];
           if (node) Object.assign(node, nodeData);
         });
-        glossary.structure = sortByIndex(glossary.nodes);
+        glossary.structure = sortByIndex([...glossary.structure]);
       }
     },
     addGlossaryNode: (
@@ -115,9 +120,24 @@ const glossarySlice = createSlice({
     ) => {
       const { glossaryId, nodeId, nodeData } = action.payload;
       const glossary = state.glossaries[glossaryId];
-      if (glossary) {
-        glossary.nodes[nodeId] = nodeData;
-        glossary.structure = sortByIndex(glossary.nodes);
+      if (!glossary) return;
+
+      const withFlatIndex = {
+        ...nodeData,
+        flatIndex: glossary.structure.length,
+      };
+
+      glossary.nodes[nodeId] = withFlatIndex;
+      glossary.structure.push(withFlatIndex);
+      glossary.renderState[nodeId] = { expanded: false, rename: false };
+      glossary.structure = sortByIndex([...glossary.structure]);
+
+      if (withFlatIndex.parentId) {
+        const parent = glossary.nodes[withFlatIndex.parentId];
+        if (parent) {
+          if (!parent.children) parent.children = [];
+          parent.children.push(withFlatIndex);
+        }
       }
     },
     removeGlossaryNode: (
@@ -126,23 +146,42 @@ const glossarySlice = createSlice({
     ) => {
       const { glossaryId, nodeId } = action.payload;
       const glossary = state.glossaries[glossaryId];
-      if (glossary) {
-        const node = glossary.nodes[nodeId];
-        if (node) {
-          remove(glossary.structure, (n) => n.id === nodeId);
-          delete glossary.nodes[nodeId];
-        }
-        glossary.structure = sortByIndex(glossary.nodes);
-      }
+      if (!glossary) return;
+
+      const collectDescendantIds = (id: string, acc: string[]) => {
+        const node = glossary.nodes[id];
+        if (!node) return;
+        acc.push(id);
+        const children = Object.values(glossary.nodes).filter(
+          (n) => n.parentId === id
+        );
+        children.forEach((child) => collectDescendantIds(child.id, acc));
+      };
+
+      const allToDelete: string[] = [];
+      collectDescendantIds(nodeId, allToDelete);
+
+      allToDelete.forEach((id) => {
+        delete glossary.nodes[id];
+        delete glossary.renderState[id];
+      });
+
+      glossary.structure = glossary.structure.filter(
+        (node) => !allToDelete.includes(node.id)
+      );
+
+      glossary.structure = sortByIndex([...glossary.structure]);
     },
     toggleExpand: (
       state,
-      action: PayloadAction<{ glossaryId: string; nodeId: string }>
+      action: PayloadAction<{ glossaryId: string | null; nodeId: string }>
     ) => {
       const { glossaryId, nodeId } = action.payload;
+      if (glossaryId === null) return;
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
-        glossary.expanded[nodeId] = !glossary.expanded[nodeId];
+        glossary.renderState[nodeId].expanded =
+          !glossary.renderState[nodeId].expanded;
       }
     },
     toggleExpandAll: (
@@ -153,7 +192,7 @@ const glossarySlice = createSlice({
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
         glossary.structure.forEach((node) => {
-          glossary.expanded[node.id] = expand;
+          glossary.renderState[node.id].expanded = expand;
         });
       }
     },
@@ -163,6 +202,38 @@ const glossarySlice = createSlice({
     ) => {
       const { glossaryId } = action.payload;
       state.activeGlossaryId = glossaryId;
+    },
+    setSnackbar: (
+      state,
+      action: PayloadAction<{
+        snackbar: {
+          message: string;
+          type: 'error' | 'success' | 'info' | 'warning';
+          duration: number;
+          rollback?: any;
+          rollbackFn?: (rollback: any) => void;
+        } | null;
+      }>
+    ) => {
+      const { snackbar } = action.payload;
+      state.snackbar = snackbar;
+    },
+    toggleNameEdit: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        nodeId: string;
+      }>
+    ) => {
+      const { glossaryId, nodeId } = action.payload;
+      const glossary = state.glossaries[glossaryId];
+      if (glossary) {
+        if (!glossary.renderState[nodeId]?.rename) {
+          glossary.renderState[nodeId].rename = true;
+        } else {
+          glossary.renderState[nodeId].rename = false;
+        }
+      }
     },
   },
 });
@@ -177,6 +248,11 @@ export const {
   updateGlossaryNodes,
   addGlossaryNode,
   removeGlossaryNode,
+  setSnackbar,
+  setActiveGlossaryId,
+  toggleExpand,
+  toggleExpandAll,
+  toggleNameEdit,
 } = glossarySlice.actions;
 
 export default glossarySlice.reducer;

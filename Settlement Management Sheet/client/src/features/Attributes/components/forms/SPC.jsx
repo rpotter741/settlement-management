@@ -22,8 +22,6 @@ import {
 } from '../../../../components/index.js';
 import sPCFormData from '../../helpers/sPCFormData.js';
 
-import capitalize from 'utility/capitalize.js';
-
 const settlementTypes = [
   {
     name: 'Fortified',
@@ -62,10 +60,6 @@ const SettlementPointsCost = () => {
 
   const [selectedValue, setSelectedValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
-
-  useEffect(() => {
-    console.log(edit);
-  }, [edit]);
 
   const available = useMemo(() => {
     const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {

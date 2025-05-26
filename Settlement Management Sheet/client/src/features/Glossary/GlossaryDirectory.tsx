@@ -1,4 +1,5 @@
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, MouseEvent, useRef } from 'react';
+import { v4 as newId } from 'uuid';
 import {
   Box,
   Typography,
@@ -15,60 +16,119 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import WarningIcon from '@mui/icons-material/Warning';
-import { GlossaryNode } from '../../../../types';
+import CheckIcon from '@mui/icons-material/Check';
+import RoomIcon from '@mui/icons-material/Room';
+import MapIcon from '@mui/icons-material/Map';
+import PublicIcon from '@mui/icons-material/Public';
+import GroupsIcon from '@mui/icons-material/Groups';
+import PersonIcon from '@mui/icons-material/Person';
+import { GlossaryEntryType, GlossaryNode } from '../../../../types';
+import { useTheme } from '../../context/ThemeContext';
 import { set } from 'lodash';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  nodeRenderState,
+  selectActiveId,
+  selectNodeById,
+} from './state/glossarySelectors';
+import { toggleExpand, toggleNameEdit } from './state/glossarySlice';
+import { AppDispatch } from '@/app/store';
+import capitalize from '../../utility/capitalize';
 
 interface GlossaryDirectoryProps {
   structure: GlossaryNode[] | [];
-  onSelect: (node: GlossaryNode) => void;
-  onRename: (node: GlossaryNode, newName: string) => void;
-  onDelete: (node: GlossaryNode) => void;
-  onNewFile: (parent: GlossaryNode, entryType: string) => void;
+  onRename: (node: GlossaryNode) => void;
+  onDelete: ({
+    id,
+    entryType,
+    glossaryId,
+  }: {
+    id: string;
+    entryType: GlossaryEntryType;
+    glossaryId: string | null;
+  }) => void;
+  onNewFile: ({
+    id,
+    parentId,
+    entryType,
+  }: {
+    id: string;
+    parentId: string | null;
+    entryType: GlossaryEntryType;
+  }) => void;
   onNewFolder: ({
+    id,
     name,
-    type,
     parentId,
   }: {
+    id: string;
     name: string;
-    type: 'file' | 'folder';
     parentId: string | null;
   }) => void;
 }
 
-const entryTypes = ['Region', 'Location', 'POI', 'Person', 'Faction'];
+const entryTypes = ['region', 'location', 'poi', 'person', 'faction', 'note'];
+
+const entryTypeColors: Record<string, string> = {
+  region: 'secondary.main',
+  location: 'honey.main',
+  poi: 'rgba(185, 80 , 222, 1)',
+  person: 'success.main',
+  faction: 'error.main',
+  note: 'text.primary',
+};
+
+const entryTypeIcons: Record<string, React.ReactNode> = {
+  region: <PublicIcon sx={{ color: entryTypeColors.region }} />,
+  location: <MapIcon sx={{ color: entryTypeColors.location }} />,
+  poi: <RoomIcon sx={{ color: entryTypeColors.poi }} />,
+  person: <PersonIcon sx={{ color: entryTypeColors.person }} />,
+  faction: <GroupsIcon sx={{ color: entryTypeColors.faction }} />,
+  note: <DescriptionIcon sx={{ color: entryTypeColors.note }} />,
+};
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
-  onSelect,
   onRename,
   onDelete,
   onNewFile,
   onNewFolder,
 }) => {
-  console.log(structure);
   const [contextMenu, setContextMenu] = useState<{
     mouseX: number;
     mouseY: number;
     node: GlossaryNode | null;
   } | null>(null);
   const [submenuAnchor, setSubmenuAnchor] = useState<null | HTMLElement>(null);
-  const [renameTarget, setRenameTarget] = useState<GlossaryNode | null>(null);
-  const [newName, setNewName] = useState('');
-  const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const glossaryId = useSelector(selectActiveId());
 
-  React.useEffect(() => {
-    console.log(activeFolder);
-  }, [activeFolder]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const onClickFolder = (node: GlossaryNode) => {
-    if (activeFolder === node.id) {
-      return setActiveFolder(null);
+  //theme-aware highlight color... kind of
+  const { themeKey } = useTheme();
+  const softHighlight =
+    themeKey === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const setRenameTarget = (node: GlossaryNode | null) => {
+    if (node && glossaryId) {
+      dispatch(toggleNameEdit({ glossaryId, nodeId: node.id }));
     }
-    setActiveFolder(node.id);
   };
 
   const handleAddFolder = () => {
-    onNewFolder({ name: 'Untitled', type: 'folder', parentId: activeFolder });
+    contextMenu?.node
+      ? onNewFolder({
+          id: newId(),
+          name: 'Untitled',
+          parentId: contextMenu.node.id,
+        })
+      : onNewFolder({
+          id: newId(),
+          name: 'Untitled',
+          parentId: null,
+        });
   };
 
   const handleContextMenu = (event: MouseEvent, node: GlossaryNode) => {
@@ -85,56 +145,113 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     setSubmenuAnchor(null);
   };
 
-  const handleRename = () => {
-    if (renameTarget && newName.trim() !== '') {
-      onRename(renameTarget, newName.trim());
-      setRenameTarget(null);
-      setNewName('');
-    }
-  };
-
-  const NodeItem = ({
-    node,
-    onClickFolder,
-  }: {
-    node: GlossaryNode;
-    onClickFolder: (node: GlossaryNode) => void;
-  }) => {
-    const [isExpanded, setExpanded] = useState(false);
+  const NodeItem = ({ id }: { id: string }) => {
+    if (glossaryId === null) return null;
+    const data = useSelector(selectNodeById(glossaryId, id));
+    if (!data) return null;
+    const { expanded, rename } = useSelector(nodeRenderState(glossaryId, id));
+    const [name, setName] = useState(data.name);
 
     React.useEffect(() => {
-      console.log(isExpanded);
-    }, [isExpanded]);
+      if (rename && inputRef.current) {
+        requestAnimationFrame(() => {
+          inputRef.current.focus();
+          inputRef.current.select();
+        });
+      }
+    }, [rename]);
 
     const toggle = () => {
-      if (node.type === 'folder') {
-        // onClickFolder(node);
-        setExpanded((prev) => !prev);
+      if (data.type === 'folder') {
+        dispatch(toggleExpand({ glossaryId, nodeId: id }));
       }
     };
 
+    const processRename = (
+      name: string,
+      target: GlossaryNode | null,
+      nodeId: string
+    ) => {
+      setName(name);
+      setRenameTarget(target);
+      dispatch(toggleNameEdit({ glossaryId, nodeId }));
+    };
+
     return (
-      <Box sx={{ pl: 2 }} onClick={toggle}>
+      <Box sx={{ pl: 2 }}>
         <Box
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          onContextMenu={(e) => handleContextMenu(e, node)}
+          sx={{
+            display: 'grid',
+            cursor: 'pointer',
+            gridTemplateColumns: '24px 24px auto',
+            alignItems: 'center',
+            minHeight: '32px',
+            '&:hover': {
+              backgroundColor: softHighlight,
+            },
+            backgroundColor:
+              contextMenu?.node?.id === id ? softHighlight : 'inherit',
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            handleContextMenu(e, data);
+          }}
+          onClick={toggle}
         >
-          {node.type === 'folder' &&
-            (isExpanded ? <ExpandMoreIcon /> : <ChevronRightIcon />)}
-          {node.type === 'folder' ? <FolderIcon /> : <DescriptionIcon />}
-          <Typography sx={{ ml: 1 }} onClick={() => onSelect(node)}>
-            {node.name}
-          </Typography>
+          {data.type === 'folder' && (
+            <IconButton size="small">
+              {expanded ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+            </IconButton>
+          )}
+          {data.type === 'file' && <Box sx={{ width: '24px' }} />}
+          {data.type === 'folder' ? (
+            <FolderIcon sx={{ color: 'primary.main' }} />
+          ) : data.entryType !== null ? (
+            entryTypeIcons[data.entryType]
+          ) : null}
+          {rename ? (
+            <TextField
+              inputRef={inputRef}
+              variant="standard"
+              value={name}
+              onBlur={(e) => {
+                if (name.trim() === '') {
+                  processRename(data.name, null, data.id);
+                  return;
+                }
+                processRename(name, null, data.id);
+                onRename({ ...data, name });
+              }}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (name.trim() === '') {
+                    processRename(data.name, null, data.id);
+                    return;
+                  }
+                  processRename(name, null, data.id);
+                  onRename({ ...data, name });
+                } else if (e.key === 'Escape') {
+                  processRename(data.name, null, data.id);
+                }
+              }}
+            />
+          ) : (
+            <Typography
+              sx={{
+                ml: 1,
+                textAlign: 'left',
+              }}
+            >
+              {data.name}
+            </Typography>
+          )}
         </Box>
 
-        {node.children && node.children.length > 0 && (
-          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-            {node.children.map((child) => (
-              <NodeItem
-                key={child.id}
-                node={child}
-                onClickFolder={onClickFolder}
-              />
+        {data.children && data.children.length > 0 && (
+          <Collapse in={expanded} timeout="auto" unmountOnExit>
+            {data.children.map((child) => (
+              <NodeItem key={child.id} id={child.id} />
             ))}
           </Collapse>
         )}
@@ -149,9 +266,10 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         <Button onClick={(e) => setSubmenuAnchor(e.currentTarget)}>
           Add File
         </Button>
+        <Button>Sort</Button>
       </ButtonGroup>
       {structure.map((node) => (
-        <NodeItem key={node.id} node={node} onClickFolder={onClickFolder} />
+        <NodeItem key={node.id} id={node.id} />
       ))}
       {/* Context menu */}
       <Menu
@@ -167,7 +285,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         {contextMenu?.node && (
           <>
             <MenuItem
-              onClick={() => {
+              onClick={(e) => {
                 setRenameTarget(contextMenu.node);
                 closeContextMenu();
               }}
@@ -175,9 +293,14 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               Rename
             </MenuItem>
             <MenuItem
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 if (contextMenu.node) {
-                  onDelete(contextMenu.node);
+                  onDelete({
+                    id: contextMenu.node.id,
+                    entryType: contextMenu.node.entryType,
+                    glossaryId,
+                  });
                   closeContextMenu();
                 }
               }}
@@ -188,15 +311,21 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               <>
                 <MenuItem
                   onClick={(e) => {
+                    e.preventDefault();
                     setSubmenuAnchor(e.currentTarget);
                   }}
                 >
                   New File
                 </MenuItem>
                 <MenuItem
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     if (contextMenu.node) {
-                      onNewFolder(contextMenu.node, 'New Folder');
+                      onNewFolder({
+                        id: newId(),
+                        name: 'Untitled',
+                        parentId: contextMenu.node.id,
+                      });
                       closeContextMenu();
                     }
                   }}
@@ -220,47 +349,20 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         {entryTypes.map((type) => (
           <MenuItem
             key={type}
-            onClick={() => {
-              if (contextMenu?.node) {
-                onNewFile(contextMenu.node, type);
-              }
+            onClick={(e) => {
+              e.preventDefault();
+              onNewFile({
+                id: newId(),
+                parentId: contextMenu?.node?.id || null,
+                entryType: type as GlossaryEntryType,
+              });
               closeContextMenu();
             }}
           >
-            {type}
+            {capitalize(type)}
           </MenuItem>
         ))}
       </Menu>
-
-      {/* Rename prompt */}
-      {renameTarget && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: contextMenu?.mouseY,
-            left: contextMenu?.mouseX,
-            backgroundColor: 'background.paper',
-            p: 2,
-            boxShadow: 2,
-            borderRadius: 2,
-          }}
-        >
-          <TextField
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="New Name"
-            autoFocus
-          />
-          <Button
-            onClick={handleRename}
-            variant="contained"
-            size="small"
-            sx={{ ml: 1 }}
-          >
-            Rename
-          </Button>
-        </Box>
-      )}
     </Box>
   );
 };

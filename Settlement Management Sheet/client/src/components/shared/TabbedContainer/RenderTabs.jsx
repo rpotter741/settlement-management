@@ -4,7 +4,6 @@ import TabPanel from './TabPanel.jsx';
 import { toolMap } from 'utility/toolMap.js';
 
 import { useLeftTabs, useRightTabs } from 'context/TabsContext/TabsContext.jsx';
-import { ToolWrapper } from 'utility/fetchComponents.jsx';
 
 const RenderTabs = memo(({ side, setModalContent }) => {
   const { tabs, current } = side === 'left' ? useLeftTabs() : useRightTabs();

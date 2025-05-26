@@ -20,8 +20,6 @@ const EditCategory = ({ setShowModal }) => {
   const [dependencies, setDependencies] = useState(false);
   const [tags, setTags] = useState(false);
 
-  console.log('category', category);
-
   return (
     <Box
       sx={{

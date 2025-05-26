@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { useDrag } from 'react-dnd';
-import { useDragContext } from '../../../context/DragContext';
 
 const DragWrapper = ({
   type,
@@ -10,9 +9,10 @@ const DragWrapper = ({
   onDropEnd,
   onReorder,
   index = null,
+  startDrag = () => {},
+  endDrag = () => {},
+  ...props
 }) => {
-  const { startDrag, endDrag } = useDragContext();
-
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
     item: () => {

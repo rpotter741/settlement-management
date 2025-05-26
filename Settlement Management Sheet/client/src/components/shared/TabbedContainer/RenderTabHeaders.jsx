@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
@@ -11,6 +11,7 @@ import DragWrapper from '../DnD/DragWrapper.jsx';
 import { toolMap } from 'utility/toolMap.js';
 
 import truncateWithEllipsis from 'utility/truncateWithEllipses.js';
+import { useTabDrag } from 'context/DnD/TabDragContext.jsx';
 
 const RenderTabHeaders = ({
   tabs,
@@ -18,7 +19,19 @@ const RenderTabHeaders = ({
   setActiveTab,
   removeById,
   side = 'left',
+  setDragSide = () => {},
 }) => {
+  const { startDrag, endDrag, draggedType } = useTabDrag();
+  useEffect(() => {
+    if (draggedType === 'leftTab') {
+      return setDragSide('right');
+    }
+    if (draggedType === 'rightTab') {
+      return setDragSide('left');
+    }
+    setDragSide(null);
+  }, [draggedType, setDragSide]);
+
   if (Array.isArray(tabs)) {
     return (
       <Box
@@ -40,6 +53,8 @@ const RenderTabHeaders = ({
             index={index}
             onDropEnd={(draggedItem) => {}}
             onReorder={(draggedIndex, targetIndex) => {}}
+            startDrag={startDrag}
+            endDrag={endDrag}
           >
             <Box
               sx={{

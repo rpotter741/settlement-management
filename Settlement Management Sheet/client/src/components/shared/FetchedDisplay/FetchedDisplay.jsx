@@ -3,7 +3,7 @@ import queryClient from 'context/QueryClient.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
 import { useTools } from 'hooks/useTool.tsx';
 
-import capitalize from 'utility/capitalize.js';
+import capitalize from 'utility/capitalize.ts';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/TableList.jsx';

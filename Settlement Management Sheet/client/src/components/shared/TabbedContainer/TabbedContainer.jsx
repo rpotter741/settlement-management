@@ -10,10 +10,11 @@ import { Box, Divider, Modal } from '@mui/material';
 
 import SidePanel from 'features/SidePanel/SidePanel.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useDragContext } from 'context/DragContext.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
-import DropZone from '../DnD/DropZone.jsx';
+import { TabDragProvider } from 'context/DnD/TabDragContext.tsx';
+import TabDragBox from './TabDragBox.tsx';
+import DropZone from 'components/shared/DnD/DropZone.jsx';
 
 import RenderTabHeaders from './RenderTabHeaders.jsx';
 import RenderTabs from './RenderTabs.jsx';
@@ -40,9 +41,9 @@ const TabbedContainer = () => {
     preventSplit,
     setPreventSplit,
   } = useSidePanel();
-  const { draggedType } = useDragContext();
   const { showSnackbar } = useSnackbar();
   const [modalContent, setModalContent] = useState(null);
+  const [dragSide, setDragSide] = useState(null);
 
   const noSplit = useMemo(
     () => leftTabs.some((tab) => tab.tool === 'event'),
@@ -68,6 +69,7 @@ const TabbedContainer = () => {
 
   const moveLTR = useCallback(
     (entry) => {
+      console.log('moveLTR', entry);
       if (preventSplit) {
         showSnackbar(
           'Split view is disabled for Events, APTs, and Story Threads.',
@@ -125,149 +127,115 @@ const TabbedContainer = () => {
         {/* Side Panel */}
         <SidePanel setModalContent={setModalContent} />
         {/* Tabs Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            width: '100%',
-            overflowY: 'hidden',
-            overflowX: 'hidden',
-            backgroundColor: 'background.default',
-          }}
-        >
+        <TabDragProvider>
           <Box
             sx={{
-              borderColor: 'divider',
               display: 'flex',
-              justifyContent: 'start',
-              alignItems: 'center',
+              flexDirection: 'column',
+              height: '100%',
               width: '100%',
-              boxSizing: 'border-box',
-              backgroundColor: 'background.paper',
-              maxHeight: 40,
-              boxSizing: 'border-box',
+              overflowY: 'hidden',
+              overflowX: 'hidden',
+              backgroundColor: 'background.default',
             }}
-            className="tab-header"
           >
-            <RenderTabHeaders
-              isSplit={isSplit}
-              tabs={leftTabs}
-              currentTab={currentLeftTab}
-              setActiveTab={setActiveTab}
-              removeById={removeById}
-            />
-            {rightTabs.length > 0 && (
+            <Box
+              sx={{
+                borderColor: 'divider',
+                display: 'flex',
+                justifyContent: 'start',
+                alignItems: 'center',
+                width: '100%',
+                boxSizing: 'border-box',
+                backgroundColor: 'background.paper',
+                maxHeight: 40,
+                boxSizing: 'border-box',
+              }}
+              className="tab-header"
+            >
               <RenderTabHeaders
                 isSplit={isSplit}
-                tabs={rightTabs}
-                currentTab={currentRightTab}
+                tabs={leftTabs}
+                currentTab={currentLeftTab}
                 setActiveTab={setActiveTab}
                 removeById={removeById}
-                side="right"
+                setDragSide={setDragSide}
               />
-            )}
-          </Box>
-          {modalContent && (
-            <Modal open={true} onClose={() => setModalContent(null)}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: 'calc(50% + 150px)',
-                  transform: 'translate(-50%, -50%)',
-                  bgcolor: 'background.default',
-                  border: '2px solid #000',
-                  borderColor: 'secondary.light',
-                  boxShadow: 24,
-                  p: 4,
-                  borderRadius: 4,
-                  ml: 1,
-                }}
-              >
-                <Suspense fallback={<Box>Loading...</Box>}>
-                  {React.createElement(modalContent?.component, {
-                    ...modalContent?.props,
-                    setModalContent,
-                  })}
-                </Suspense>
-              </Box>
-            </Modal>
-          )}
-          {/* Tabs Content */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexGrow: 1,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            {(draggedType === 'rightTab' || draggedType === 'anyTab') && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '50%',
-                  height: '100%',
-                  opacity: 0.5,
-                  zIndex: 11,
-                }}
-              >
-                <DropZone
-                  type={'rightTab' || 'anyTab'}
-                  handleUpdate={() => {}}
-                  handleAdd={(entry) => {
-                    moveRTL(entry);
-                  }}
-                  handleRemove={() => {}}
-                  onReorder={() => {}}
-                  bg1="rgba(100, 100, 100, 0.5)"
-                  bg2="rgba(255, 255, 255, 0.5)"
-                  defaultItems={[]}
+              {rightTabs.length > 0 && (
+                <RenderTabHeaders
+                  isSplit={isSplit}
+                  tabs={rightTabs}
+                  currentTab={currentRightTab}
+                  setActiveTab={setActiveTab}
+                  removeById={removeById}
+                  side="right"
                 />
-              </Box>
-            )}
-            {(draggedType === 'leftTab' || draggedType === 'anyTab') && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: '50%',
-                  height: '100%',
-                  opacity: 1,
-                  zIndex: 1000,
-                }}
-              >
-                <DropZone
-                  type={draggedType}
-                  handleUpdate={() => {}}
-                  handleAdd={(entry) => {
-                    moveLTR(entry);
+              )}
+            </Box>
+            {modalContent && (
+              <Modal open={true} onClose={() => setModalContent(null)}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: 'calc(50% + 150px)',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.default',
+                    border: '2px solid #000',
+                    borderColor: 'secondary.light',
+                    boxShadow: 24,
+                    p: 4,
+                    borderRadius: 4,
+                    ml: 1,
                   }}
-                  handleRemove={() => {}}
-                  onReorder={() => {}}
-                  bg1="rgba(100, 100, 100, 0.5)"
-                  bg2="rgba(255, 255, 255, 0.5)"
-                  defaultItems={[]}
+                >
+                  <Suspense fallback={<Box>Loading...</Box>}>
+                    {React.createElement(modalContent?.component, {
+                      ...modalContent?.props,
+                      setModalContent,
+                    })}
+                  </Suspense>
+                </Box>
+              </Modal>
+            )}
+            {/* Tabs Content */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexGrow: 1,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {dragSide === 'left' && (
+                <TabDragBox side="left" moveFn={moveRTL} />
+              )}
+              {dragSide === 'right' && (
+                <TabDragBox side="right" moveFn={moveLTR} />
+              )}
+
+              <LeftTabsProvider>
+                <RenderTabs
+                  side="left"
+                  setModalContent={setModalContent}
+                  moveFn={moveRTL}
                 />
-              </Box>
-            )}
-            <LeftTabsProvider>
-              <RenderTabs side="left" setModalContent={setModalContent} />
-            </LeftTabsProvider>
-            {useSelector(select.isSplit) && (
-              <>
-                <Divider flexItem orientation="vertical" />
-                <RightTabsProvider>
-                  <RenderTabs side="right" setModalContent={setModalContent} />
-                </RightTabsProvider>
-              </>
-            )}
+              </LeftTabsProvider>
+              {useSelector(select.isSplit) && (
+                <>
+                  <Divider flexItem orientation="vertical" />
+                  <RightTabsProvider>
+                    <RenderTabs
+                      side="right"
+                      setModalContent={setModalContent}
+                      moveFn={moveLTR}
+                    />
+                  </RightTabsProvider>
+                </>
+              )}
+            </Box>
           </Box>
-        </Box>
+        </TabDragProvider>
       </Box>
     </Box>
   );

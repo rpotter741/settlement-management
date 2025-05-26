@@ -11,7 +11,6 @@ import { useToolContext } from 'context/ToolContext.jsx';
 
 const PreviewAttribute = () => {
   const { tool, id, mode, side } = useToolContext();
-  console.log('PreviewAttribute', tool, id, mode, side);
   const { current: attr } = useTools('attribute', id);
 
   return (

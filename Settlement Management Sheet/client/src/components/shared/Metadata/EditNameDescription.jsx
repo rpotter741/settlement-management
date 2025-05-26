@@ -5,11 +5,6 @@ import DynamicForm from '../DynamicForm/DynamicForm.jsx';
 
 const EditNameDescription = ({ tool, fields, id, snakeCaseName = false }) => {
   const { edit, errors, updateTool, validateToolField } = useTools(tool, id);
-
-  React.useEffect(() => {
-    console.log(errors, 'errors');
-  }, [errors]);
-
   const handleUpdate = (updates, { keypath }) => {
     updateTool(keypath, updates);
   };

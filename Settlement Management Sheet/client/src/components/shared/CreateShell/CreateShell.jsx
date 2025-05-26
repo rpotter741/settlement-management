@@ -65,14 +65,16 @@ const CreateShell = ({
     () => {
       if (!edit) return;
       const name = edit?.name.trim() || `Untitled`;
-      dispatch(
-        updateTab({
-          tabId: tabId,
-          side,
-          keypath: 'name',
-          updates: name,
-        })
-      );
+      if (edit.name !== current.name) {
+        dispatch(
+          updateTab({
+            tabId: tabId,
+            side,
+            keypath: 'name',
+            updates: name,
+          })
+        );
+      }
     },
     300,
     [debouncedEdit?.name, dispatch, tabId, side]

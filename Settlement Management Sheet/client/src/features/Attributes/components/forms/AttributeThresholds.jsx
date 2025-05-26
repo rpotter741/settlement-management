@@ -30,7 +30,6 @@ const AttributeThresholds = () => {
     errors: thresholdErrors,
   } = useTools('attribute');
   const thresholds = selectValue('thresholds');
-  console.log(thresholds);
   const [placeholders, setPlaceholders] = useState(placeholderArray);
   const [showTooltip, setShowTooltip] = useState(false);
   const { showSnackbar } = useSnackbar();
@@ -50,7 +49,6 @@ const AttributeThresholds = () => {
 
   const handleThresholdMaxChange = useCallback(
     (updates, { id }) => {
-      console.log(thresholds, updates);
       updateAttribute(`thresholds.data.${id}.max`, updates);
       if (lastId !== id) {
         setLastId(id);

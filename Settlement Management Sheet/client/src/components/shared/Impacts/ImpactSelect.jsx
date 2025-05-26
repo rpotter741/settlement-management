@@ -42,10 +42,6 @@ const ImpactSelect = ({
   const impact = get(edit, keypath);
 
   useEffect(() => {
-    console.log(impact, 'impact');
-  }, [impact]);
-
-  useEffect(() => {
     if (impact.system?.name !== (null || undefined)) {
       setTargetOptions(
         sortByKey(get(options, impact.system.value, []), 'name')
@@ -71,7 +67,6 @@ const ImpactSelect = ({
     const fetchData = async () => {
       const system = impact.system;
       const target = impact.target;
-      console.log(system, target, 'here i am bitches!');
 
       if (system && target) {
         switch (system.value) {

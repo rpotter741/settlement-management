@@ -2,6 +2,7 @@ import prisma from '../db/db.js';
 
 //helpers
 import requireFields from '../utils/requireFields.js';
+import glossaryTypeMap from '../utils/glossaryTypeMap.js';
 
 const getGlossaries = async (req, res) => {
   try {
@@ -158,7 +159,8 @@ const createEntryWithNode = async (req, res) => {
     const { id, name, entryType, type, glossaryId, parentId, entryData } =
       req.body;
     const entryModel = prisma[entryType];
-    if (!model) {
+    if (!entryModel) {
+      console.log(`Invalid entry type:`, entryType);
       return res.status(400).json({ message: `Invalid entry type.` });
     }
     if (
@@ -170,6 +172,10 @@ const createEntryWithNode = async (req, res) => {
     )
       return;
 
+    const baseEntry = glossaryTypeMap[entryType];
+    const contentType = baseEntry?.contentType || 'CUSTOM';
+    const createdBy = req?.user?.id || 'robbiepottsdm';
+
     const nodeData = {
       id,
       name,
@@ -179,7 +185,13 @@ const createEntryWithNode = async (req, res) => {
       parentId: parentId || null,
     };
 
-    const entryInsert = { id, name, ...entryData };
+    const entryInsert = {
+      id,
+      name,
+      ...baseEntry,
+      contentType,
+      createdBy,
+    };
 
     const [node, entry] = await prisma.$transaction([
       prisma.glossaryNode.create({ data: nodeData }),
@@ -197,7 +209,7 @@ const deleteEntryWithNode = async (req, res) => {
   try {
     const { id, entryType } = req.body;
     const entryModel = prisma[entryType];
-    if (!model) {
+    if (!entryModel) {
       return res.status(400).json({ message: `Invalid entry type.` });
     }
     if (!requireFields(['id', 'entryType'], req.body, res)) return;

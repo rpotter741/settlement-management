@@ -5,18 +5,21 @@ import {
   setGlossaryLoading,
   setGlossaryError,
   setGlossaryNodes,
-  rehydrateTree,
   updateGlossaryNode,
   updateGlossaryNodes,
   addGlossaryNode,
   removeGlossaryNode,
+  setSnackbar,
+  toggleNameEdit,
+  toggleExpand,
 } from './glossarySlice';
+import { rehydrateGlossaryTree } from '../helpers/rehydrateGlossary';
 import { GlossaryEntryType, GlossaryNode } from '../../../../../types';
 import { RootState } from '../../../app/store';
 import { GlossaryState, GlossaryStateEntry } from './types';
 import { selectNodeById } from './glossarySelectors';
-import { cloneDeep } from 'lodash';
-import makeSnackbarMessage from '@/utility/makeSnackbar';
+import { cloneDeep, get } from 'lodash';
+import makeSnackbarMessage from '../../../utility/makeSnackbar';
 
 type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
@@ -42,11 +45,12 @@ export const getGlossaries =
       );
     } catch (error) {
       console.error('Error fetching glossaries:', error);
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error fetching glossaries. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
@@ -71,11 +75,12 @@ export const getGlossaryById =
       });
     } catch (error) {
       console.error('Error fetching glossary:', error);
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error fetching glossary. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
@@ -84,20 +89,23 @@ export const getGlossaryNodes =
   async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     try {
       const nodes = await serverAction.getGlossaryNodes({ glossaryId });
+      const { nodeMap, roots, renderState } = rehydrateGlossaryTree(nodes);
       dispatch(
         setGlossaryNodes({
           glossaryId,
-          nodes,
+          nodes: nodeMap,
           structure: nodes,
+          renderState,
         })
       );
     } catch (error) {
       console.error('Error fetching glossary nodes:', error);
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error fetching glossary structure. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
@@ -127,17 +135,18 @@ export const createGlossary =
       );
     } catch (error) {
       console.error('Error creating glossary:', error);
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error creating glossary. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
 export const addFolder =
   ({ node }: { node: GlossaryNode }): AppThunk =>
-  async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const { name, parentId, id, glossaryId } = node;
     dispatch(addGlossaryNode({ glossaryId, nodeId: id, nodeData: node }));
     try {
@@ -147,20 +156,54 @@ export const addFolder =
         parentId,
         glossaryId,
       });
+      dispatch(
+        toggleNameEdit({
+          glossaryId,
+          nodeId: id,
+        })
+      );
+      if (parentId) {
+        const parentExpand =
+          getState().glossary.glossaries[glossaryId].renderState[parentId]
+            .expanded;
+        if (!parentExpand) {
+          dispatch(toggleExpand({ glossaryId, nodeId: parentId }));
+        }
+      }
     } catch (error) {
       console.error('Error adding node:', error);
       dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error adding folder. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
+    }
+  };
+
+export const removeFolder =
+  ({ node }: { node: GlossaryNode }): AppThunk =>
+  async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const { id, glossaryId } = node;
+    dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));
+    try {
+      await serverAction.deleteNode({ id });
+    } catch (error) {
+      console.error('Error removing node:', error);
+      dispatch(addGlossaryNode({ glossaryId, nodeId: id, nodeData: node }));
+      const snackbar = makeSnackbarMessage({
+        message: 'Error removing folder. Try again later.',
+        type: 'error',
+        duration: 3000,
+      });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
 export const addEntry =
   ({ node }: { node: GlossaryNode }): AppThunk =>
-  async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const { id, name, entryType, type, parentId, glossaryId } = node;
     dispatch(addGlossaryNode({ glossaryId, nodeId: id, nodeData: node }));
     try {
@@ -173,18 +216,33 @@ export const addEntry =
         glossaryId,
         entryData: node,
       });
+      dispatch(
+        toggleNameEdit({
+          glossaryId,
+          nodeId: id,
+        })
+      );
+      if (parentId) {
+        const parentExpand =
+          getState().glossary.glossaries[glossaryId].renderState[parentId]
+            .expanded;
+        if (!parentExpand) {
+          dispatch(toggleExpand({ glossaryId, nodeId: parentId }));
+        }
+      }
     } catch (error) {
       console.error('Error adding node:', error);
       dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error adding entry. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
-export const renameEntry =
+export const renameFolder =
   ({
     id,
     glossaryId,
@@ -214,11 +272,12 @@ export const renameEntry =
           nodeData: { ...backupNode },
         })
       );
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error renaming entry. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
@@ -237,7 +296,7 @@ export const deleteEntry =
     dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));
     try {
       await serverAction.deleteEntry({ id, entryType });
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: `${backupNode.name} successfully deleted.`,
         type: 'success',
         duration: 10000,
@@ -252,16 +311,18 @@ export const deleteEntry =
           );
         },
       });
+      dispatch(setSnackbar({ snackbar }));
     } catch (error) {
       console.error('Error removing node:', error);
       dispatch(
         addGlossaryNode({ glossaryId, nodeId: id, nodeData: backupNode })
       );
-      return makeSnackbarMessage({
+      const snackbar = makeSnackbarMessage({
         message: 'Error removing entry. Try again later.',
         type: 'error',
         duration: 3000,
       });
+      dispatch(setSnackbar({ snackbar }));
     }
   };
 
@@ -283,9 +344,25 @@ export const updateEntry =
         })
       );
     }
-    return makeSnackbarMessage({
+    const snackbar = makeSnackbarMessage({
       message: `${node.name} failed to update. Try again later.`,
       type: 'error',
       duration: 3000,
     });
+    dispatch(setSnackbar({ snackbar }));
   };
+
+const thunks = {
+  getGlossaries,
+  getGlossaryById,
+  getGlossaryNodes,
+  createGlossary,
+  addFolder,
+  removeFolder,
+  addEntry,
+  renameFolder,
+  deleteEntry,
+  updateEntry,
+};
+
+export default thunks;

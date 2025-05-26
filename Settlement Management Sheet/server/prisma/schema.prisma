@@ -438,6 +438,7 @@ enum EntryTypes {
   poi
   person
   faction
+  note
 }
 
 model Glossary {
@@ -507,7 +508,7 @@ model Location {
 
 ////////////// POI ////////////
 
-model POI {
+model Poi {
   refId            String       @id @default(uuid())
   id               String       @unique
   version          Int
@@ -569,4 +570,17 @@ model Faction {
   cultureTags    String[]
   activeKeys     String[]
   passiveBonuses Json
+}
+
+////////////// Note ////////////
+model Note {
+  refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

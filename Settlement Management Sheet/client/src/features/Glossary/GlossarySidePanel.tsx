@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy } from 'react';
+import React, { useEffect, useState, lazy, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as newId } from 'uuid';
 import {
@@ -25,9 +25,21 @@ import SearchIcon from '@mui/icons-material/Search';
 import GlossaryDirectory from './GlossaryDirectory';
 import actions from './helpers/glossaryActions';
 import { rehydrateGlossaryTree } from './helpers/rehydrateGlossary';
-import placeholderFn from 'utility/placeholderFn';
 import { prepareCssVars } from '@mui/system';
-import { GlossaryNode } from '../../../../types';
+import { GlossaryEntryType, GlossaryNode } from '../../../../types';
+import {
+  selectActiveId,
+  selectAllGlossaries,
+  selectGlossaryStructure,
+  selectGlossaryNodes,
+  selectSnackbar,
+} from './state/glossarySelectors';
+import { useSnackbar } from '../../context/SnackbarContext';
+import thunks from './state/glossaryThunks';
+import { thunk } from 'redux-thunk';
+import { AppDispatch } from '@/app/store';
+import { set } from 'lodash';
+import { setActiveGlossaryId, setSnackbar } from './state/glossarySlice';
 
 const nameNewGlossary = lazy(() => import('./NameNewGlossary.js'));
 
@@ -40,34 +52,80 @@ interface GlossarySidePanelProps {
 
 interface Glossary {
   name: string;
-  id: string;
+  id: string | null;
   description: string;
 }
 
 const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
   setModalContent,
 }) => {
-  const [glossary, setGlossary] = useState({
+  const dispatch = useDispatch<AppDispatch>();
+  const [glossary, setGlossary] = useState<Glossary>({
     name: '',
     id: '',
     description: '',
   });
-  const [glossaries, setGlossaries] = useState<Glossary[]>([]);
-  const [activeFolder, setActiveFolder] = useState<string>('root');
-  const [nodes, setNodes] = useState<GlossaryNode[]>([]);
+
+  const glossaryId = useSelector(selectActiveId());
+  const glossaries = useSelector(selectAllGlossaries());
+  const nodes = useSelector(selectGlossaryStructure(glossaryId ?? ''));
+  const structure = useRef<GlossaryNode[]>([]);
+  const [nodeMap, setNodeMap] = useState<Record<string, GlossaryNode>>({});
+  const { showSnackbar } = useSnackbar();
+
+  const snackbarMessage = useSelector(selectSnackbar());
 
   useEffect(() => {
-    const getGlossaries = async () => {
-      const glossaries = await actions.getGlossaries();
-      console.log('glizzy', glossaries);
-      if (!glossaries) return;
-      setGlossaries(glossaries);
-    };
-    getGlossaries();
+    dispatch(thunks.getGlossaries());
   }, []);
 
   useEffect(() => {
-    if (glossary.id === 'createNew') {
+    if (glossaries.length > 0 && glossary.id === '') {
+      setGlossary(glossaries[0]);
+      dispatch(setActiveGlossaryId({ glossaryId: glossaries[0].id }));
+    }
+  }, [glossaries, glossary.id]);
+
+  useEffect(() => {
+    if (glossaryId) {
+      dispatch(thunks.getGlossaryNodes({ glossaryId }));
+    }
+  }, [glossaryId]);
+
+  const rehydrate = () => {
+    if (nodes) {
+      const { roots, nodeMap } = rehydrateGlossaryTree(nodes);
+      structure.current = roots;
+      setNodeMap(nodeMap);
+    }
+  };
+
+  useEffect(() => {
+    rehydrate();
+  }, [nodes, structure.current.length]);
+
+  useEffect(() => {
+    if (snackbarMessage !== null) {
+      const {
+        message,
+        type,
+        duration,
+        rollback,
+        rollbackFn,
+      }: {
+        message: string;
+        type: string;
+        duration: number;
+        rollback?: any;
+        rollbackFn?: ((rollback: any) => void) | (() => void);
+      } = snackbarMessage;
+      showSnackbar(message, type, duration);
+      dispatch(setSnackbar({ snackbar: null }));
+    }
+  }, [snackbarMessage]);
+
+  const handleSelect = (gloss: any) => {
+    if (gloss.id === 'createNew') {
       setModalContent({
         component: nameNewGlossary,
         props: {
@@ -76,43 +134,73 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
       });
       setGlossary({ name: '', id: '', description: '' });
     }
-  });
-
-  useEffect(() => {
-    if (glossaries.length > 0 && glossary.id === '') {
-      setGlossary(glossaries[0]);
-      buildStructure(glossaries[0].id);
-    }
-  }, [glossaries, glossary.id]);
-
-  const handleSelect = (gloss: any) => {
     setGlossary(gloss);
-    buildStructure(gloss.id);
   };
 
-  const buildStructure = async (glossaryId: string) => {
-    const structure = await actions.getGlossaryNodes({
-      glossaryId: glossaryId,
-    });
-    const { roots, nodeMap } = rehydrateGlossaryTree(structure);
-    setNodes(roots);
-  };
-
-  const handleAddNode = ({
+  const handleAddFolder = ({
+    id,
     name,
-    type,
     parentId,
   }: {
+    id: string;
     name: string;
-    type: 'file' | 'folder';
     parentId: string | null;
   }) => {
-    const node = actions.createNode({
+    if (glossary.id === null) return;
+    const node: GlossaryNode = {
+      id,
       name,
-      type,
+      type: 'folder',
       parentId,
       glossaryId: glossary.id,
-    });
+      entryType: null,
+      children: [],
+    };
+    dispatch(thunks.addFolder({ node }));
+  };
+
+  const handleDelete = (node: any) => {
+    if (node === null) return;
+    if (node.entryType === null) {
+      dispatch(thunks.removeFolder({ node }));
+    } else if (glossaryId) {
+      dispatch(
+        thunks.deleteEntry({
+          id: node.id,
+          entryType: node.entryType,
+          glossaryId,
+        })
+      );
+    }
+  };
+
+  const handleRename = (node: GlossaryNode) => {
+    if (node === null) return;
+    const { id, name } = node;
+    if (glossaryId === null) return;
+    dispatch(thunks.renameFolder({ id, glossaryId, name }));
+  };
+
+  const handleAddEntry = ({
+    id,
+    parentId,
+    entryType,
+  }: {
+    id: string;
+    parentId: string | null;
+    entryType: GlossaryEntryType;
+  }) => {
+    if (entryType === null) return;
+    if (glossaryId === null) return;
+    const node: GlossaryNode = {
+      id,
+      name: 'Untitled',
+      entryType,
+      type: 'file',
+      parentId,
+      glossaryId,
+    };
+    dispatch(thunks.addEntry({ node }));
   };
 
   return (
@@ -162,13 +250,11 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
         )}
       />
       <GlossaryDirectory
-        structure={nodes}
-        onSelect={placeholderFn}
-        loadChildren={rehydrateGlossaryTree}
-        onRename={placeholderFn}
-        onDelete={placeholderFn}
-        onNewFiled={placeholderFn}
-        onNewFolder={handleAddNode}
+        structure={structure.current}
+        onRename={handleRename}
+        onDelete={handleDelete}
+        onNewFile={handleAddEntry}
+        onNewFolder={handleAddFolder}
       />
       <Button
         variant="contained"

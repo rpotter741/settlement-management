@@ -2,7 +2,6 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import api from 'services/interceptor.ts';
 
 const fetchAttributes = async ({ pageParam = 0, type, search = '' }) => {
-  console.log(type, 'type');
   const { data } = await api.get(`/attributes/${type}`, {
     params: { limit: 10, offset: pageParam, search },
   });

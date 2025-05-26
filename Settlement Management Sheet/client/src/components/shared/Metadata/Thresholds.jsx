@@ -117,10 +117,8 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
 
   const handleRemove = useCallback(
     (id) => {
-      console.log(id);
       let updatedThresholds = { ...thresholds.data };
       delete updatedThresholds[id];
-      console.log('updatedThresholds', updatedThresholds);
       updateTool('thresholds.data', updatedThresholds);
 
       const order = thresholds.order;

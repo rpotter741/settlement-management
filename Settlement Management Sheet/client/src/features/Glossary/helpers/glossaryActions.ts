@@ -69,7 +69,13 @@ const createEntry = async ({
 };
 
 const renameNode = async ({ id, name }: { id: string; name: string }) => {
-  return api.post('/glossary/entry/rename', { id, name }).then((res: any) => {
+  return api.post('/glossary/node/rename', { id, name }).then((res: any) => {
+    return res.data;
+  });
+};
+
+const deleteNode = async ({ id }: { id: string }) => {
+  return api.post('/glossary/node/delete', { id }).then((res: any) => {
     return res.data;
   });
 };
@@ -177,6 +183,7 @@ const actions = {
   getGlossaryNodes,
   createGlossary,
   renameNode,
+  deleteNode,
   deleteEntry,
   createEntry,
   updateEntry,

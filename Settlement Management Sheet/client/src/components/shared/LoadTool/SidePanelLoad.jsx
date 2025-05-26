@@ -48,7 +48,6 @@ const LoadTool = ({
   };
 
   const ActionClick = (e, action, { refId, id }) => {
-    console.log('ActionClick', action, { refId, id });
     e.stopPropagation();
     switch (action) {
       case 'Edit':

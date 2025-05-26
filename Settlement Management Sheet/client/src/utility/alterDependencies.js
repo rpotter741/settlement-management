@@ -4,7 +4,6 @@ import queryClient from 'context/QueryClient.js';
 const getNewDependencies = async ({ edit, selected, tool }) => {
   const dependencies = { ...edit.dependencies.data };
   const existing = { ...edit.dependencies.data };
-  console.log('selected', selected);
   await api
     .post('/tools/fetchByIds', {
       tool,
@@ -30,7 +29,6 @@ const getNewDependencies = async ({ edit, selected, tool }) => {
     });
     existing[id] = item;
   });
-  console.log('existing', existing);
   return existing;
 };
 

@@ -21,7 +21,7 @@ const getContent = async (req, res) => {
 
     console.log(tool, 'tool');
 
-    requireFields([tool], res);
+    if (!requireFields(['tool'], req.query, res)) return;
 
     const model = prisma[tool];
     if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
@@ -62,7 +62,7 @@ const getContentByName = async (req, res) => {
     const userId = req?.user?.id || 'Admin';
     const { tool, name = '' } = req.query;
 
-    requireFields([tool], res);
+    if (!requireFields(['tool'], req.query, res)) return;
 
     const model = prisma[tool];
     if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
@@ -91,7 +91,7 @@ const saveContent = async (req, res) => {
     const userId = req?.user?.id || 'Admin';
     const { tool, data } = req.body;
 
-    requireFields([tool, data], res);
+    if (!requireFields(['tool', 'data'], req.body, res)) return;
 
     const model = prisma[tool];
     if (!model) {
@@ -150,7 +150,7 @@ const deleteContent = async (req, res) => {
   try {
     const { tool, id } = req.body;
 
-    requireFields([tool, id], res);
+    if (!requireFields(['tool', 'id'], req.body, res)) return;
 
     const model = prisma[tool];
     if (!model) {
@@ -168,7 +168,7 @@ const deleteContent = async (req, res) => {
 const getItem = async (req, res) => {
   try {
     const { tool, id, refId } = req.query;
-    requireFields([tool, id, refId], res);
+    if (!requireFields(['tool', 'id', 'refId'], req.query, res)) return;
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
@@ -184,7 +184,7 @@ const getItem = async (req, res) => {
 const fetchByIds = async (req, res) => {
   try {
     const { tool, ids } = req.body;
-    requireFields([tool, ids], res);
+    if (!requireFields(['tool', 'ids'], req.body, res)) return;
     const model = prisma[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });

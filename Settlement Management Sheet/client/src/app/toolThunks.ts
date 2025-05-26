@@ -62,7 +62,6 @@ export const loadTool =
 
     // Retrieve the cached item
     const cachedItem = queryClient.getQueryData<Tool>([usedTool, id]);
-    console.log('cachedItem', cachedItem);
 
     // If the tool is not already in the Redux store, add it
     if (cachedItem && !state.tools[usedTool].static.byId[id]) {
