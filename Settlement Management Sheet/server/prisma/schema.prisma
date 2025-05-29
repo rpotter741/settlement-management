@@ -31,7 +31,6 @@ model Attribute {
   thresholds          Json
   settlementPointCost Json
   icon                Json
-  iconColor           String
   tags                String[] // Array of strings for tags
   isValid             Boolean
   status              Status
@@ -433,12 +432,17 @@ enum GlossShape {
 }
 
 enum EntryTypes {
+  continent
+  nation
+  settlement
   region
   location
   poi
   person
   faction
   note
+  event
+  geography
 }
 
 model Glossary {
@@ -457,6 +461,7 @@ model GlossaryNode {
   name       String
   entryType  EntryTypes?
   type       GlossShape
+  icon       Json?
   parentId   String?
   children   GlossaryNode[] @relation("NodeHierarchy")
   parent     GlossaryNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
@@ -467,7 +472,7 @@ model GlossaryNode {
 
 ////////////// Region ////////////
 
-model Region {
+model RegionGlossary {
   refId            String       @id @default(uuid())
   id               String       @unique
   version          Int
@@ -488,7 +493,7 @@ model Region {
 
 ////////////// Location ////////////
 
-model Location {
+model LocationGlossary {
   refId       String       @id @default(uuid())
   id          String       @unique
   version     Int
@@ -508,7 +513,7 @@ model Location {
 
 ////////////// POI ////////////
 
-model Poi {
+model PoiGlossary {
   refId            String       @id @default(uuid())
   id               String       @unique
   version          Int
@@ -527,7 +532,7 @@ model Poi {
 
 ////////////// Person ////////////
 
-model Person {
+model PersonGlossary {
   refId         String       @id @default(uuid())
   id            String       @unique
   version       Int
@@ -549,7 +554,7 @@ model Person {
 
 ////////////// Faction ////////////
 
-model Faction {
+model FactionGlossary {
   refId          String       @id @default(uuid())
   id             String       @unique
   version        Int
@@ -573,8 +578,73 @@ model Faction {
 }
 
 ////////////// Note ////////////
-model Note {
+model NoteGlossary {
   refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/////////////////// continent //////////
+model ContinentGlossary {
+  refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/////////////////// nation ///////////////
+model NationGlossary {
+    refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+///////////////////// settlementGlossary //////////////
+model SettlementGlossary {
+    refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+///////////////////// eventGlossary //////////////
+model EventGlossary {
+    refId       String @id @default(uuid())
+  id          String @unique
+  version     Int
+  name        String
+  description String
+  contentType ContentTypes
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+///////////////////// geographyGlossary //////////////
+model GeographyGlossary {
+    refId       String @id @default(uuid())
   id          String @unique
   version     Int
   name        String

@@ -1,28 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Typography, Card, Button } from '@mui/material';
 import Icon from '../Icons/Icon.jsx';
 import iconList from './iconList';
 import IconColorPicker from './IconColorPicker.jsx';
 import { useTools } from 'hooks/useTool.tsx';
 
-const IconSelector = ({ tool, setShowModal, id }) => {
+const IconSelector = ({ tool, setModalContent, id }) => {
   const { edit, updateTool } = useTools(tool, id);
   const [selectedIcon, setSelectedIcon] = useState(edit.icon);
+  const [iconColor, setIconColor] = useState(edit.icon.color);
+  const [bg, setBg] = useState(edit.icon.backgroundColor || '#fbf7ef');
 
   const handleIconChange = (event, newValue) => {
     setSelectedIcon(newValue);
-    updateTool('icon', newValue);
+  };
+
+  const handleBackgroundChange = (newBg) => {
+    setBg(newBg);
   };
 
   const handleColorChange = (color) => {
-    updateTool('iconColor', color);
+    setIconColor(color);
   };
 
-  const onConfirm = (icon, color) => {
-    updateTool('icon', icon);
-    updateTool('iconColor', color);
-    setShowModal(null);
+  const onConfirm = () => {
+    const completeIcon = {
+      ...selectedIcon,
+      color: iconColor,
+      backgroundColor: bg,
+    };
+    updateTool('icon', completeIcon);
+    setModalContent(null);
   };
+
+  const sortedList = useMemo(
+    () => [...iconList].sort((a, b) => a.name.localeCompare(b.name)),
+    []
+  );
 
   return (
     <Box
@@ -57,15 +71,17 @@ const IconSelector = ({ tool, setShowModal, id }) => {
             viewBox={selectedIcon.viewBox}
             path={selectedIcon.d}
             size={48}
-            color={edit.iconColor}
+            color={iconColor}
+            backgroundColor={bg}
           />
         </Box>
         <IconColorPicker
+          sourceColor={iconColor}
           onChange={handleColorChange}
-          sourceColor={edit.iconColor}
+          onBackgroundChange={handleBackgroundChange}
         />
       </Box>
-      {iconList.map(
+      {sortedList.map(
         (icon, index) =>
           icon.name !== selectedIcon.name && (
             <Card
@@ -79,25 +95,54 @@ const IconSelector = ({ tool, setShowModal, id }) => {
                   justifyContent: 'center',
                   width: ['60px', '80px', '100px'],
                   height: ['60px', '80px', '100px'],
+                  position: 'relative',
                 }}
               >
                 <Icon
                   viewBox={icon.viewBox}
                   path={icon.d}
                   size={48}
-                  color={edit.iconColor}
+                  color={iconColor}
                 />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    display: {
+                      xs: 'none',
+                      md: 'block',
+                    },
+                  }}
+                >
+                  {icon.name}
+                </Typography>
               </Button>
             </Card>
           )
       )}
-      <Button
-        variant="contained"
-        sx={{ gridColumn: 'span 6', mt: 2 }}
-        onClick={() => onConfirm(selectedIcon, edit.iconColor)}
+      <Box
+        sx={{
+          gridColumn: 'span 6',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
       >
-        Confirm
-      </Button>
+        <Button
+          variant="outlined"
+          sx={{ width: '50%', mt: 2 }}
+          onClick={() => setModalContent(null)}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ width: '50%', mt: 2 }}
+          onClick={onConfirm}
+        >
+          Confirm
+        </Button>
+      </Box>
     </Box>
   );
 };

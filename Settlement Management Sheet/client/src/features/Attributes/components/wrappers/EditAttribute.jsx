@@ -13,7 +13,7 @@ import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
-const EditAttribute = ({ setShowModal }) => {
+const EditAttribute = ({ setModalContent }) => {
   const { isSplit } = useSidePanel();
   const { id } = useToolContext();
   const { edit: attr } = useTools('attribute', id);
@@ -42,7 +42,7 @@ const EditAttribute = ({ setShowModal }) => {
         maxHeight: 'calc(100vh - 200px)',
       }}
     >
-      <AttrMetaData setShowModal={setShowModal} id={id} />
+      <AttrMetaData setModalContent={setModalContent} id={id} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
         title="Values"

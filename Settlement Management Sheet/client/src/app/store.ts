@@ -3,6 +3,7 @@ import validationReducer from '../features/Validation/validationSlice';
 import toolsReducer from './toolSlice';
 import sidePanelReducer from '../features/SidePanel/sidePanelSlice';
 import glossaryReducer from '../features/Glossary/state/glossarySlice';
+import selectionReducer from '../features/Selection/state/selectionSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     tools: toolsReducer,
     sidePanel: sidePanelReducer,
     glossary: glossaryReducer,
+    selection: selectionReducer,
   },
 });
 

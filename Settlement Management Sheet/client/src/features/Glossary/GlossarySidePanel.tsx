@@ -14,6 +14,7 @@ import {
   TextField,
   ButtonGroup,
   Autocomplete,
+  InputAdornment,
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
@@ -40,6 +41,7 @@ import { thunk } from 'redux-thunk';
 import { AppDispatch } from '@/app/store';
 import { set } from 'lodash';
 import { setActiveGlossaryId, setSnackbar } from './state/glossarySlice';
+import { render } from 'react-dom';
 
 const nameNewGlossary = lazy(() => import('./NameNewGlossary.js'));
 
@@ -141,10 +143,12 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
     id,
     name,
     parentId,
+    entryType = null,
   }: {
     id: string;
     name: string;
     parentId: string | null;
+    entryType: GlossaryEntryType;
   }) => {
     if (glossary.id === null) return;
     const node: GlossaryNode = {
@@ -153,17 +157,15 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
       type: 'folder',
       parentId,
       glossaryId: glossary.id,
-      entryType: null,
+      entryType: entryType,
       children: [],
     };
     dispatch(thunks.addFolder({ node }));
   };
 
   const handleDelete = (node: any) => {
-    if (node === null) return;
-    if (node.entryType === null) {
-      dispatch(thunks.removeFolder({ node }));
-    } else if (glossaryId) {
+    if (node === null || glossaryId === null) return;
+    const modelDelete = () => {
       dispatch(
         thunks.deleteEntry({
           id: node.id,
@@ -171,14 +173,20 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
           glossaryId,
         })
       );
-    }
+    };
+    setModalContent({
+      component: lazy(() => import('./ConfirmDelete')),
+      props: {
+        setModalContent,
+        onDelete: modelDelete,
+      },
+    });
   };
 
   const handleRename = (node: GlossaryNode) => {
     if (node === null) return;
-    const { id, name } = node;
     if (glossaryId === null) return;
-    dispatch(thunks.renameFolder({ id, glossaryId, name }));
+    dispatch(thunks.updateEntry({ node, glossaryId }));
   };
 
   const handleAddEntry = ({
@@ -230,6 +238,14 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
             label="Select a glossary"
             variant="outlined"
             fullWidth
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <InputAdornment position="start">
+                  <FindInPageIcon />
+                </InputAdornment>
+              ),
+            }}
           />
         )}
         renderOption={(props, option) => (
@@ -256,19 +272,6 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
         onNewFile={handleAddEntry}
         onNewFolder={handleAddFolder}
       />
-      <Button
-        variant="contained"
-        color="error"
-        onClick={() => {}}
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          width: '90%',
-          boxSizing: 'border-box',
-        }}
-      >
-        Delete Glossary
-      </Button>
     </Box>
   );
 };

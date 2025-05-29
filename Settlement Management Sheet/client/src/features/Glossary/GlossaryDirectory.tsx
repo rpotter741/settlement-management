@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent, useRef } from 'react';
+import React, { useState, MouseEvent, useRef, useEffect, useMemo } from 'react';
 import { v4 as newId } from 'uuid';
 import {
   Box,
@@ -17,6 +17,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckIcon from '@mui/icons-material/Check';
+import TerrainIcon from '@mui/icons-material/Terrain';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import FlagIcon from '@mui/icons-material/Flag';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import WbShadeIcon from '@mui/icons-material/WbShade';
 import RoomIcon from '@mui/icons-material/Room';
 import MapIcon from '@mui/icons-material/Map';
 import PublicIcon from '@mui/icons-material/Public';
@@ -34,6 +39,7 @@ import {
 import { toggleExpand, toggleNameEdit } from './state/glossarySlice';
 import { AppDispatch } from '@/app/store';
 import capitalize from '../../utility/capitalize';
+import flattenVisibleNodes from '../Selection/helpers/flattenVisibleNodes';
 
 interface GlossaryDirectoryProps {
   structure: GlossaryNode[] | [];
@@ -60,31 +66,52 @@ interface GlossaryDirectoryProps {
     id,
     name,
     parentId,
+    entryType,
   }: {
     id: string;
     name: string;
     parentId: string | null;
+    entryType: GlossaryEntryType;
   }) => void;
 }
 
-const entryTypes = ['region', 'location', 'poi', 'person', 'faction', 'note'];
+const entryTypes = ['location', 'poi', 'person', 'note', 'event'];
+
+const folderTypes = [
+  'continent',
+  'nation',
+  'region',
+  'settlement',
+  'faction',
+  'geography',
+];
 
 const entryTypeColors: Record<string, string> = {
+  continent: 'info.main',
+  nation: 'primary.main',
+  settlement: 'warning.main',
   region: 'secondary.main',
   location: 'honey.main',
   poi: 'rgba(185, 80 , 222, 1)',
   person: 'success.main',
   faction: 'error.main',
   note: 'text.primary',
+  event: 'text.secondary',
+  geography: 'success.dark',
 };
 
 const entryTypeIcons: Record<string, React.ReactNode> = {
-  region: <PublicIcon sx={{ color: entryTypeColors.region }} />,
+  continent: <PublicIcon sx={{ color: entryTypeColors.continent }} />,
+  nation: <AccountBalanceIcon sx={{ color: entryTypeColors.nation }} />,
+  settlement: <WbShadeIcon sx={{ color: entryTypeColors.settlement }} />,
+  region: <FlagIcon sx={{ color: entryTypeColors.region }} />,
   location: <MapIcon sx={{ color: entryTypeColors.location }} />,
   poi: <RoomIcon sx={{ color: entryTypeColors.poi }} />,
   person: <PersonIcon sx={{ color: entryTypeColors.person }} />,
   faction: <GroupsIcon sx={{ color: entryTypeColors.faction }} />,
   note: <DescriptionIcon sx={{ color: entryTypeColors.note }} />,
+  event: <CalendarMonthIcon sx={{ color: entryTypeColors.event }} />,
+  geography: <TerrainIcon sx={{ color: entryTypeColors.geography }} />,
 };
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
@@ -99,10 +126,36 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     mouseY: number;
     node: GlossaryNode | null;
   } | null>(null);
-  const [submenuAnchor, setSubmenuAnchor] = useState<null | HTMLElement>(null);
-  const glossaryId = useSelector(selectActiveId());
-
   const dispatch = useDispatch<AppDispatch>();
+
+  const [submenuAnchor, setSubmenuAnchor] = useState<null | HTMLElement>(null);
+  const [folderAnchor, setFolderAnchor] = useState<null | HTMLElement>(null);
+  const glossaryId = useSelector(selectActiveId());
+  const renderState = useSelector((state: any) =>
+    glossaryId !== null
+      ? state.glossary.glossaries[glossaryId]?.renderState || {}
+      : {}
+  );
+  const visibleNodeList = useMemo(
+    () => flattenVisibleNodes({ tree: structure, renderState }),
+    [structure, renderState]
+  );
+  const idToIndex = useMemo(() => {
+    const map: Record<string, number> = {};
+    visibleNodeList.forEach((id, index) => {
+      map[id] = index;
+    });
+    return map;
+  }, [visibleNodeList]);
+
+  const [selected, setSelected] = useState<string[]>([]);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    console.log(selected, 'selected nodes');
+  }, [selected]);
 
   //theme-aware highlight color... kind of
   const { themeKey } = useTheme();
@@ -117,20 +170,6 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     }
   };
 
-  const handleAddFolder = () => {
-    contextMenu?.node
-      ? onNewFolder({
-          id: newId(),
-          name: 'Untitled',
-          parentId: contextMenu.node.id,
-        })
-      : onNewFolder({
-          id: newId(),
-          name: 'Untitled',
-          parentId: null,
-        });
-  };
-
   const handleContextMenu = (event: MouseEvent, node: GlossaryNode) => {
     event.preventDefault();
     setContextMenu({
@@ -143,7 +182,32 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   const closeContextMenu = () => {
     setContextMenu(null);
     setSubmenuAnchor(null);
+    setFolderAnchor(null);
   };
+
+  const isMultiSelect = (e) => e.metaKey || e.ctrlKey;
+
+  const handleClick = (e, nodeId, index) => {
+    if (e.shiftKey && lastSelectedIndex !== null) {
+      const range = [lastSelectedIndex, index].sort((a, b) => a - b);
+      const rangeIds = visibleNodeList
+        .slice(range[0], range[1] + 1)
+        .map((node) => node.id);
+      setSelected((prev) => Array.from(new Set([...prev, ...rangeIds])));
+    } else if (isMultiSelect(e)) {
+      setSelected((prev) =>
+        prev.includes(nodeId)
+          ? prev.filter((id) => id !== nodeId)
+          : [...prev, nodeId]
+      );
+      setLastSelectedIndex(index);
+    } else {
+      setSelected([nodeId]);
+      setLastSelectedIndex(index);
+    }
+  };
+
+  console.log(structure);
 
   const NodeItem = ({ id }: { id: string }) => {
     if (glossaryId === null) return null;
@@ -151,20 +215,24 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     if (!data) return null;
     const { expanded, rename } = useSelector(nodeRenderState(glossaryId, id));
     const [name, setName] = useState(data.name);
+    const [open, setOpen] = useState(expanded);
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (rename && inputRef.current) {
         requestAnimationFrame(() => {
+          if (inputRef.current === null) return;
           inputRef.current.focus();
           inputRef.current.select();
         });
       }
     }, [rename]);
 
+    useEffect(() => {
+      setOpen(expanded);
+    }, [expanded]);
+
     const toggle = () => {
-      if (data.type === 'folder') {
-        dispatch(toggleExpand({ glossaryId, nodeId: id }));
-      }
+      setOpen((prev) => !prev);
     };
 
     const processRename = (
@@ -190,21 +258,29 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               backgroundColor: softHighlight,
             },
             backgroundColor:
-              contextMenu?.node?.id === id ? softHighlight : 'inherit',
+              contextMenu?.node?.id === id
+                ? softHighlight
+                : selected.includes(id)
+                  ? softHighlight
+                  : 'transparent',
           }}
           onContextMenu={(e) => {
             e.preventDefault();
             handleContextMenu(e, data);
           }}
-          onClick={toggle}
+          onClick={(e) => {
+            e.preventDefault();
+            handleClick(e, data.id, idToIndex[data.id]);
+          }}
         >
           {data.type === 'folder' && (
-            <IconButton size="small">
-              {expanded ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+            <IconButton onClick={toggle} size="small">
+              {open ? <ExpandMoreIcon /> : <ChevronRightIcon />}
             </IconButton>
           )}
           {data.type === 'file' && <Box sx={{ width: '24px' }} />}
-          {data.type === 'folder' ? (
+          {data.type === 'folder' &&
+          !folderTypes.includes(data.entryType as string) ? (
             <FolderIcon sx={{ color: 'primary.main' }} />
           ) : data.entryType !== null ? (
             entryTypeIcons[data.entryType]
@@ -249,7 +325,21 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         </Box>
 
         {data.children && data.children.length > 0 && (
-          <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit={true}
+            onExited={() => {
+              dispatch(
+                toggleExpand({ glossaryId, nodeId: data.id, expanded: false })
+              );
+            }}
+            onEntered={() => {
+              dispatch(
+                toggleExpand({ glossaryId, nodeId: data.id, expanded: true })
+              );
+            }}
+          >
             {data.children.map((child) => (
               <NodeItem key={child.id} id={child.id} />
             ))}
@@ -262,7 +352,9 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   return (
     <Box>
       <ButtonGroup variant="text">
-        <Button onClick={handleAddFolder}>Add Folder</Button>
+        <Button onClick={(e) => setFolderAnchor(e.currentTarget)}>
+          Add Folder
+        </Button>
         <Button onClick={(e) => setSubmenuAnchor(e.currentTarget)}>
           Add File
         </Button>
@@ -320,14 +412,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
                 <MenuItem
                   onClick={(e) => {
                     e.preventDefault();
-                    if (contextMenu.node) {
-                      onNewFolder({
-                        id: newId(),
-                        name: 'Untitled',
-                        parentId: contextMenu.node.id,
-                      });
-                      closeContextMenu();
-                    }
+                    setFolderAnchor(e.currentTarget);
                   }}
                 >
                   New Folder
@@ -353,6 +438,33 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               e.preventDefault();
               onNewFile({
                 id: newId(),
+                parentId: contextMenu?.node?.id || null,
+                entryType: type as GlossaryEntryType,
+              });
+              closeContextMenu();
+            }}
+          >
+            {type !== 'poi' ? capitalize(type) : 'Point of Interest'}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Submenu for New Folder */}
+      <Menu
+        anchorEl={folderAnchor}
+        open={Boolean(folderAnchor)}
+        onClose={() => setFolderAnchor(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      >
+        {folderTypes.map((type) => (
+          <MenuItem
+            key={type}
+            onClick={(e) => {
+              e.preventDefault();
+              onNewFolder({
+                id: newId(),
+                name: 'Untitled',
                 parentId: contextMenu?.node?.id || null,
                 entryType: type as GlossaryEntryType,
               });

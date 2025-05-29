@@ -41,8 +41,11 @@ function initializeAttribute() {
     },
     thresholds,
     settlementPointCost,
-    icon: { ...iconList[0] },
-    iconColor: '#000000',
+    icon: {
+      ...iconList[0],
+      color: 'slateblue',
+      backgroundColor: '#fbf7ef',
+    }, // Default icon with black color
     tags: [],
     isValid: false,
     status: 'DRAFT',

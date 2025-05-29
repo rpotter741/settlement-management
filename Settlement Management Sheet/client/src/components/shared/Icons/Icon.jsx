@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Typography } from '@mui/material';
 const Icon = ({
   viewBox,
   path,
+  backgroundColor = 'transparent',
   size = 24,
   color = 'currentColor',
   mode = 'box', // Default mode: 'box', can also be 'card'
@@ -23,7 +24,7 @@ const Icon = ({
           '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.05)' },
         }}
       >
-        <CardContent>
+        <div style={{ backgroundColor }}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox={viewBox}
@@ -38,7 +39,7 @@ const Icon = ({
               {label}
             </Typography>
           )}
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -47,9 +48,11 @@ const Icon = ({
   return (
     <Box
       sx={{
-        p: 1,
+        p: 1.5,
         display: 'flex',
         alignItems: 'center',
+        backgroundColor,
+        borderRadius: '50%',
       }}
     >
       <svg

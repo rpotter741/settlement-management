@@ -29,18 +29,22 @@ type AppThunk<ReturnType = void> = ThunkAction<
 >;
 
 export const getGlossaries =
-  (): AppThunk => async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  (): AppThunk =>
+  async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const glossaries = await serverAction.getGlossaries();
+      const existingState = getState().glossary.glossaries;
       glossaries.forEach(
         (glossary: { id: string; name: string; description: string }) => {
-          dispatch(
-            initializeGlossary({
-              glossaryId: glossary.id,
-              name: glossary.name,
-              description: glossary.description,
-            })
-          );
+          if (!existingState[glossary.id]) {
+            dispatch(
+              initializeGlossary({
+                glossaryId: glossary.id,
+                name: glossary.name,
+                description: glossary.description,
+              })
+            );
+          }
         }
       );
     } catch (error) {
@@ -86,10 +90,16 @@ export const getGlossaryById =
 
 export const getGlossaryNodes =
   ({ glossaryId }: { glossaryId: string }): AppThunk =>
-  async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
+      const glossary = getState().glossary.glossaries[glossaryId];
+      if (glossary.hydrated) return; // already hydrated, no need to fetch again
       const nodes = await serverAction.getGlossaryNodes({ glossaryId });
-      const { nodeMap, roots, renderState } = rehydrateGlossaryTree(nodes);
+      const existingState = glossary.renderState;
+      const { nodeMap, roots, renderState } = rehydrateGlossaryTree(
+        nodes,
+        existingState
+      );
       dispatch(
         setGlossaryNodes({
           glossaryId,
@@ -147,15 +157,28 @@ export const createGlossary =
 export const addFolder =
   ({ node }: { node: GlossaryNode }): AppThunk =>
   async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const { name, parentId, id, glossaryId } = node;
+    const { name, parentId, id, glossaryId, entryType } = node;
     dispatch(addGlossaryNode({ glossaryId, nodeId: id, nodeData: node }));
     try {
-      await serverAction.createFolder({
-        id,
-        name,
-        parentId,
-        glossaryId,
-      });
+      if (entryType === null) {
+        await serverAction.createFolder({
+          id,
+          name,
+          entryType,
+          parentId,
+          glossaryId,
+        });
+      } else {
+        await serverAction.createEntry({
+          id,
+          name,
+          entryType,
+          type: 'folder',
+          parentId,
+          glossaryId,
+          entryData: node,
+        });
+      }
       dispatch(
         toggleNameEdit({
           glossaryId,
@@ -223,12 +246,9 @@ export const addEntry =
         })
       );
       if (parentId) {
-        const parentExpand =
-          getState().glossary.glossaries[glossaryId].renderState[parentId]
-            .expanded;
-        if (!parentExpand) {
-          dispatch(toggleExpand({ glossaryId, nodeId: parentId }));
-        }
+        dispatch(
+          toggleExpand({ glossaryId, nodeId: parentId, expanded: true })
+        );
       }
     } catch (error) {
       console.error('Error adding node:', error);
@@ -242,15 +262,17 @@ export const addEntry =
     }
   };
 
-export const renameFolder =
+export const renameNodeAndEntry =
   ({
     id,
     glossaryId,
     name,
+    entryType,
   }: {
     id: string;
     glossaryId: string;
     name: string;
+    entryType: GlossaryEntryType;
   }): AppThunk =>
   async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const backupNode = cloneDeep(selectNodeById(glossaryId, id)(getState()));
@@ -262,7 +284,7 @@ export const renameFolder =
       })
     );
     try {
-      await serverAction.renameNode({ id, name });
+      await serverAction.updateEntry({ id, name, entryType });
     } catch (error) {
       console.error('Error renaming node:', error);
       dispatch(
@@ -295,11 +317,11 @@ export const deleteEntry =
     const backupNode = cloneDeep(selectNodeById(glossaryId, id)(getState()));
     dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));
     try {
-      await serverAction.deleteEntry({ id, entryType });
+      await serverAction.deleteEntry({ id, entryType, glossaryId });
       const snackbar = makeSnackbarMessage({
         message: `${backupNode.name} successfully deleted.`,
         type: 'success',
-        duration: 10000,
+        duration: 3000,
         rollback: backupNode,
         rollbackAction: (rollback) => {
           dispatch(
@@ -327,9 +349,16 @@ export const deleteEntry =
   };
 
 export const updateEntry =
-  ({ node }: { node: GlossaryNode }): AppThunk =>
+  ({
+    node,
+    glossaryId,
+  }: {
+    node: GlossaryNode;
+    glossaryId: string;
+  }): AppThunk =>
   async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const { id, entryType, glossaryId } = node;
+    const { id, entryType } = node;
+    console.log('Updating entry:', node, glossaryId);
     const backupNode = cloneDeep(selectNodeById(glossaryId, id)(getState()));
     dispatch(updateGlossaryNode({ glossaryId, nodeId: id, nodeData: node }));
     try {
@@ -343,13 +372,13 @@ export const updateEntry =
           nodeData: { ...backupNode },
         })
       );
+      const snackbar = makeSnackbarMessage({
+        message: `${node.name} failed to update. Try again later.`,
+        type: 'error',
+        duration: 3000,
+      });
+      dispatch(setSnackbar({ snackbar }));
     }
-    const snackbar = makeSnackbarMessage({
-      message: `${node.name} failed to update. Try again later.`,
-      type: 'error',
-      duration: 3000,
-    });
-    dispatch(setSnackbar({ snackbar }));
   };
 
 const thunks = {
@@ -360,7 +389,7 @@ const thunks = {
   addFolder,
   removeFolder,
   addEntry,
-  renameFolder,
+  renameNodeAndEntry,
   deleteEntry,
   updateEntry,
 };

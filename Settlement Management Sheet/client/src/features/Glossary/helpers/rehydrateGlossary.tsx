@@ -47,11 +47,15 @@ import { GlossaryNode } from '../../../../../types';
  * but keeps the returned nodeMap flat and serializable.
  * Each node in the map has a `flatIndex` (its order in the original array).
  */
-export function rehydrateGlossaryTree(flatNodes: GlossaryNode[]): {
+export function rehydrateGlossaryTree(
+  flatNodes: GlossaryNode[],
+  existingState: Record<string, { expanded: boolean; rename: boolean }> = {}
+): {
   roots: GlossaryNode[];
   nodeMap: Record<string, GlossaryNode & { flatIndex: number }>;
   renderState: Record<string, { expanded: boolean; rename: boolean }>;
 } {
+  console.log(existingState, 'existing state');
   const nodeMap: Record<string, GlossaryNode & { flatIndex: number }> = {};
   const roots: GlossaryNode[] = [];
   const renderState: Record<string, { expanded: boolean; rename: boolean }> =
@@ -77,10 +81,17 @@ export function rehydrateGlossaryTree(flatNodes: GlossaryNode[]): {
     } else {
       roots.push(node);
     }
-    renderState[node.id] = {
-      expanded: false,
-      rename: false,
-    };
+    if (existingState[node.id]) {
+      console.log(node.name, 'mx state');
+
+      renderState[node.id] = existingState[node.id];
+    } else {
+      // console.log(node.name, 'going false');
+      renderState[node.id] = {
+        expanded: false,
+        rename: false,
+      };
+    }
   });
 
   return { roots, nodeMap, renderState };

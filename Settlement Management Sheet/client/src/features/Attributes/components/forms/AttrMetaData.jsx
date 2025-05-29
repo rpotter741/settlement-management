@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { useTools } from 'hooks/useTool.tsx';
 import { useToolContext } from 'context/ToolContext.jsx';
 
@@ -10,7 +10,7 @@ import {
 
 import { Box, Typography, Button, Tooltip, Switch } from '@mui/material';
 
-const AttrMetaData = ({ setShowModal }) => {
+const AttrMetaData = ({ setModalContent }) => {
   const { tool, id } = useToolContext();
   const {
     edit: attr,
@@ -48,17 +48,35 @@ const AttrMetaData = ({ setShowModal }) => {
         >
           <Typography variant="h6">Icon</Typography>
           <Button
-            onClick={() => setShowModal('Change Icon')}
+            onClick={() =>
+              setModalContent({
+                component: lazy(
+                  () =>
+                    import(
+                      '../../../../components/shared/IconSelector/IconSelector.jsx'
+                    )
+                ),
+                props: {
+                  tool,
+                  id,
+                },
+              })
+            }
             sx={{
               boxShadow: 4,
-              borderRadius: 4,
+              borderRadius: '50%',
+              height: 64,
+              width: 64,
             }}
           >
             <CustomIcon
               viewBox={attr?.icon?.viewBox || '0 0 664 512'}
               path={attr?.icon?.d || ''}
               size={24}
-              color={attr?.iconColor}
+              color={attr?.icon?.color || 'primary'}
+              backgroundColor={
+                attr?.icon?.backgroundColor || 'background.paper'
+              }
             />
           </Button>
         </Box>

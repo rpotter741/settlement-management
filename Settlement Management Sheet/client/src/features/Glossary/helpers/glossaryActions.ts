@@ -83,12 +83,14 @@ const deleteNode = async ({ id }: { id: string }) => {
 const deleteEntry = async ({
   id,
   entryType,
+  glossaryId,
 }: {
   id: string;
   entryType: GlossaryEntryType;
+  glossaryId: string;
 }) => {
   return api
-    .post('/glossary/entry/delete', { id, entryType })
+    .post('/glossary/entry/delete', { id, entryType, glossaryId })
     .then((res: any) => {
       return res.data;
     });
@@ -157,11 +159,13 @@ const createFolder = async ({
   name,
   parentId,
   glossaryId,
+  entryType = null,
 }: {
   id: string;
   name: string;
   parentId: string | null;
   glossaryId: string;
+  entryType: GlossaryEntryType;
 }) => {
   return api
     .post('/glossary/folder', {
@@ -169,7 +173,7 @@ const createFolder = async ({
       name,
       type: 'folder',
       parentId,
-      entryType: null,
+      entryType,
       glossaryId,
     })
     .then((res: any) => {

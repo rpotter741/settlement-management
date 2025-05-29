@@ -3,6 +3,9 @@ import prisma from '../db/db.js';
 //helpers
 import requireFields from '../utils/requireFields.js';
 import glossaryTypeMap from '../utils/glossaryTypeMap.js';
+import glossaryModelMap from '../utils/glossaryModelMap.js';
+import collectEntriesByTypeFromFlat from '../utils/collectEntriesByType.ts';
+import modelUpdateKeys from '../utils/modelKeys.js';
 
 const getGlossaries = async (req, res) => {
   try {
@@ -61,7 +64,6 @@ const getGlossaryNodes = async (req, res) => {
   try {
     const { glossaryId } = req.query;
     if (!requireFields(['glossaryId'], req.query, res)) return;
-    console.log('glossaryId', glossaryId);
     const structure = await prisma.glossaryNode.findMany({
       where: {
         glossaryId: glossaryId,
@@ -120,6 +122,7 @@ const renameNode = async (req, res) => {
   }
 };
 const deleteNode = async (req, res) => {
+  console.log('deleting node');
   try {
     const { id } = req.body;
     if (!requireFields(['id'], req.body, res)) return;
@@ -135,13 +138,16 @@ const deleteNode = async (req, res) => {
 };
 const createFolder = async (req, res) => {
   try {
-    const { id, name, parentId, glossaryId } = req.body;
-    if (!requireFields(['id', 'name', 'glossaryId'], req.body, res)) return;
+    const { id, name, parentId, glossaryId, entryType } = req.body;
+    if (
+      !requireFields(['id', 'name', 'glossaryId', 'entryType'], req.body, res)
+    )
+      return;
     const newEntry = await prisma.glossaryNode.create({
       data: {
         id,
         name,
-        entryType: null,
+        entryType,
         type: 'folder',
         parentId,
         glossaryId,
@@ -156,9 +162,17 @@ const createFolder = async (req, res) => {
 
 const createEntryWithNode = async (req, res) => {
   try {
-    const { id, name, entryType, type, glossaryId, parentId, entryData } =
-      req.body;
-    const entryModel = prisma[entryType];
+    const {
+      id,
+      name,
+      entryType,
+      type,
+      glossaryId,
+      parentId,
+      entryData,
+      version,
+    } = req.body;
+    const entryModel = glossaryModelMap[entryType];
     if (!entryModel) {
       console.log(`Invalid entry type:`, entryType);
       return res.status(400).json({ message: `Invalid entry type.` });
@@ -175,6 +189,7 @@ const createEntryWithNode = async (req, res) => {
     const baseEntry = glossaryTypeMap[entryType];
     const contentType = baseEntry?.contentType || 'CUSTOM';
     const createdBy = req?.user?.id || 'robbiepottsdm';
+    const newVersion = version ? version : baseEntry?.version || 1;
 
     const nodeData = {
       id,
@@ -191,6 +206,7 @@ const createEntryWithNode = async (req, res) => {
       ...baseEntry,
       contentType,
       createdBy,
+      version: newVersion,
     };
 
     const [node, entry] = await prisma.$transaction([
@@ -207,18 +223,38 @@ const createEntryWithNode = async (req, res) => {
 
 const deleteEntryWithNode = async (req, res) => {
   try {
-    const { id, entryType } = req.body;
-    const entryModel = prisma[entryType];
+    const { id, entryType, glossaryId } = req.body;
+    const entryModel = glossaryModelMap[entryType];
     if (!entryModel) {
       return res.status(400).json({ message: `Invalid entry type.` });
     }
-    if (!requireFields(['id', 'entryType'], req.body, res)) return;
+    if (!requireFields(['id', 'entryType', 'glossaryId'], req.body, res))
+      return;
+
+    const structure = await prisma.glossaryNode.findMany({
+      where: {
+        glossaryId: glossaryId,
+      },
+      orderBy: [{ sortIndex: 'asc' }],
+      select: {
+        id: true,
+        name: true,
+        entryType: true,
+        type: true,
+        parentId: true,
+        sortIndex: true,
+      },
+    });
+
+    const idsByType = collectEntriesByTypeFromFlat(id, structure);
 
     await prisma.$transaction([
       prisma.glossaryNode.delete({ where: { id } }),
-      entryModel.delete({ where: { id } }),
+      ...Object.entries(idsByType).flatMap(([type, ids]) => {
+        const model = glossaryModelMap[type];
+        return model ? [model.deleteMany({ where: { id: { in: ids } } })] : [];
+      }),
     ]);
-
     return res.json({ message: 'Entry and node deleted successfully.' });
   } catch (error) {
     console.error(`Error deleting entry with node:`, error);
@@ -229,11 +265,18 @@ const deleteEntryWithNode = async (req, res) => {
 const updateEntryWithNode = async (req, res) => {
   try {
     const { id, entryType, entryData } = req.body;
-    const entryModel = prisma[entryType];
-    if (!model) {
+    const entryModel = glossaryModelMap[entryType];
+    if (!entryModel) {
       return res.status(400).json({ message: `Invalid entry type.` });
     }
     if (!requireFields(['id', 'entryType', 'entryData'], req.body, res)) return;
+
+    const matchedShape = modelUpdateKeys[entryType].reduce((acc, key) => {
+      if (entryData[key] !== undefined) {
+        acc[key] = entryData[key];
+      }
+      return acc;
+    }, {});
 
     const updatedEntry = await prisma.$transaction([
       prisma.glossaryNode.update({
@@ -242,7 +285,7 @@ const updateEntryWithNode = async (req, res) => {
       }),
       entryModel.update({
         where: { id },
-        data: { ...entryData },
+        data: { ...matchedShape, updatedAt: new Date() },
       }),
     ]);
 

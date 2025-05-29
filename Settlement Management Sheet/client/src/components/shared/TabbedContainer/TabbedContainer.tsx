@@ -13,7 +13,7 @@ import { useSidePanel } from 'hooks/useSidePanel.jsx';
 import { useSnackbar } from 'context/SnackbarContext.jsx';
 
 import { TabDragProvider } from 'context/DnD/TabDragContext.tsx';
-import TabDragBox from './TabDragBox.tsx';
+import TabDragBox from './TabDragBox.js';
 import DropZone from 'components/shared/DnD/DropZone.jsx';
 
 import RenderTabHeaders from './RenderTabHeaders.jsx';
@@ -24,8 +24,9 @@ import {
   LeftTabsProvider,
   RightTabsProvider,
 } from 'context/TabsContext/TabsContext.jsx';
+import { TabData } from '@/app/types.js';
 
-const TabbedContainer = () => {
+const TabbedContainer: React.FC = () => {
   const {
     leftTabs,
     rightTabs,
@@ -42,11 +43,16 @@ const TabbedContainer = () => {
     setPreventSplit,
   } = useSidePanel();
   const { showSnackbar } = useSnackbar();
-  const [modalContent, setModalContent] = useState(null);
-  const [dragSide, setDragSide] = useState(null);
+  type ModalContent = {
+    component: React.ElementType;
+    props?: Record<string, any>;
+  } | null;
+
+  const [modalContent, setModalContent] = useState<ModalContent>(null);
+  const [dragSide, setDragSide] = useState<'left' | 'right' | null>(null);
 
   const noSplit = useMemo(
-    () => leftTabs.some((tab) => tab.tool === 'event'),
+    () => leftTabs.some((tab: TabData) => tab.tool === 'event'),
     [leftTabs]
   );
 
@@ -57,8 +63,8 @@ const TabbedContainer = () => {
   }, [noSplit, preventSplit, setPreventSplit]);
 
   const moveRTL = useCallback(
-    (entry) => {
-      if (rightTabs.some((tab) => tab.tabId === entry.tabId)) {
+    (entry: TabData) => {
+      if (rightTabs.some((tab: TabData) => tab.tabId === entry.tabId)) {
         moveLeft(entry.tabId);
       } else {
         addNewTab({ ...entry, side: 'left' });
@@ -68,7 +74,7 @@ const TabbedContainer = () => {
   );
 
   const moveLTR = useCallback(
-    (entry) => {
+    (entry: TabData) => {
       console.log('moveLTR', entry);
       if (preventSplit) {
         showSnackbar(
@@ -78,7 +84,7 @@ const TabbedContainer = () => {
         );
         return;
       }
-      if (leftTabs.some((tab) => tab.tabId === entry.tabId)) {
+      if (leftTabs.some((tab: TabData) => tab.tabId === entry.tabId)) {
         moveRight(entry.tabId);
       } else {
         addNewTab({ ...entry, side: 'right' });
@@ -149,7 +155,6 @@ const TabbedContainer = () => {
                 boxSizing: 'border-box',
                 backgroundColor: 'background.paper',
                 maxHeight: 40,
-                boxSizing: 'border-box',
               }}
               className="tab-header"
             >
@@ -178,7 +183,7 @@ const TabbedContainer = () => {
                   sx={{
                     position: 'absolute',
                     top: '50%',
-                    left: 'calc(50% + 150px)',
+                    left: [0, '50%', '50%', 'calc(50% + 174px)'],
                     transform: 'translate(-50%, -50%)',
                     bgcolor: 'background.default',
                     border: '2px solid #000',
@@ -186,7 +191,7 @@ const TabbedContainer = () => {
                     boxShadow: 24,
                     p: 4,
                     borderRadius: 4,
-                    ml: 1,
+                    boxSizing: 'border-box',
                   }}
                 >
                   <Suspense fallback={<Box>Loading...</Box>}>
@@ -221,7 +226,7 @@ const TabbedContainer = () => {
                   moveFn={moveRTL}
                 />
               </LeftTabsProvider>
-              {useSelector(select.isSplit) && (
+              {(useSelector(select.rightTabs) as TabData[]).length > 0 && (
                 <>
                   <Divider flexItem orientation="vertical" />
                   <RightTabsProvider>

@@ -45,12 +45,22 @@ const PreviewAttribute = () => {
         >
           Icon
         </Typography>
-        <Button sx={{ boxShadow: 4, borderRadius: 4 }} disabled>
+        <Button
+          sx={{
+            boxShadow: 4,
+            borderRadius: '50%',
+            height: 64,
+            width: 64,
+            backgroundColor: attr.icon.backgroundColor || 'background.paper',
+          }}
+          disabled
+        >
           <CustomIcon
             viewBox={attr?.icon?.viewBox || '0 0 664 512'}
             path={attr?.icon?.d || ''}
             size={24}
-            color={attr?.iconColor}
+            color={attr?.icon?.color || 'primary'}
+            backgroundColor={attr.icon.backgroundColor || 'background.paper'}
           />
         </Button>
       </Box>

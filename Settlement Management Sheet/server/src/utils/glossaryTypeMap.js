@@ -60,6 +60,26 @@ const glossaryTypeMap = {
     version: 1,
     description: '',
   },
+  continent: {
+    version: 1,
+    description: '',
+  },
+  nation: {
+    version: 1,
+    description: '',
+  },
+  settlement: {
+    version: 1,
+    description: '',
+  },
+  event: {
+    version: 1,
+    description: '',
+  },
+  geography: {
+    version: 1,
+    description: '',
+  },
 };
 
 export default glossaryTypeMap;

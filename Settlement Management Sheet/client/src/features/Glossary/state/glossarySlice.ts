@@ -63,17 +63,9 @@ const glossarySlice = createSlice({
       state.glossaries[glossaryId].nodes = nodes;
       state.glossaries[glossaryId].structure = structure;
       state.glossaries[glossaryId].renderState = renderState;
+      state.glossaries[glossaryId].hydrated = true;
     },
-    rehydrateTree: (
-      state,
-      action: PayloadAction<{ glossaryId: string; treeData: any }>
-    ) => {
-      const { glossaryId, treeData } = action.payload;
-      const { roots, nodeMap, renderState } = rehydrateGlossaryTree(treeData);
-      state.glossaries[glossaryId].nodes = nodeMap;
-      state.glossaries[glossaryId].structure = treeData;
-      state.glossaries[glossaryId].renderState = renderState;
-    },
+
     updateGlossaryNode: (
       state,
       action: PayloadAction<{
@@ -86,6 +78,8 @@ const glossarySlice = createSlice({
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
         const node = glossary.nodes[nodeId];
+        console.log(node.name, 'node name before update:', node);
+        console.log(nodeData.name, 'nodeData to update:', nodeData);
         if (node && node.flatIndex !== undefined) {
           Object.assign(node, nodeData);
           glossary.structure[node.flatIndex].name = node.name;
@@ -174,14 +168,17 @@ const glossarySlice = createSlice({
     },
     toggleExpand: (
       state,
-      action: PayloadAction<{ glossaryId: string | null; nodeId: string }>
+      action: PayloadAction<{
+        glossaryId: string | null;
+        nodeId: string;
+        expanded: boolean;
+      }>
     ) => {
-      const { glossaryId, nodeId } = action.payload;
+      const { glossaryId, nodeId, expanded } = action.payload;
       if (glossaryId === null) return;
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
-        glossary.renderState[nodeId].expanded =
-          !glossary.renderState[nodeId].expanded;
+        glossary.renderState[nodeId].expanded = expanded;
       }
     },
     toggleExpandAll: (
@@ -243,7 +240,6 @@ export const {
   setGlossaryLoading,
   setGlossaryError,
   setGlossaryNodes,
-  rehydrateTree,
   updateGlossaryNode,
   updateGlossaryNodes,
   addGlossaryNode,

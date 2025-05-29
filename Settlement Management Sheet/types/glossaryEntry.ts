@@ -9,6 +9,13 @@ export interface GlossaryNode {
   children?: GlossaryNode[];
   parent?: GlossaryNode | null;
   glossaryId: UUID;
+  icon?: {
+    name: string;
+    color: string;
+    viewBox: string;
+    path: string;
+    size: number;
+  };
   sortIndex?: number;
   flatIndex?: number;
 }
@@ -142,12 +149,17 @@ export type GlossaryEntry =
   | PersonEntry;
 
 export type GlossaryEntryType =
+  | 'continent'
+  | 'nation'
+  | 'settlement'
   | 'region'
   | 'location'
   | 'poi'
   | 'person'
   | 'faction'
+  | 'event'
   | 'note'
+  | 'geography'
   | null;
 
 export interface Glossary {
