@@ -14,14 +14,27 @@ import commonStyles from '../themes/commonStyles.js';
 
 import themeOptions from '../themes/themeOptions.js';
 
+// Add this type assertion or define the type in themeOptions.ts for better safety
+const themeOptionsTyped: { [key: string]: typeof themeOptions.default } =
+  themeOptions;
+
+interface ThemeContextType {
+  themeKey: string;
+  changeThemeTo: (newThemeKey: string) => void;
+}
+
 // ThemeContext
-const ThemeContext = createContext();
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider = ({ children }) => {
-  const [themeKey, setThemeKey] = useState('default'); // Default theme key
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
 
-  const changeThemeTo = (newThemeKey) => {
-    if (themeOptions[newThemeKey]) {
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [themeKey, setThemeKey] = useState<string>('default');
+  // Function to change the theme key
+  const changeThemeTo = (newThemeKey: string) => {
+    if (themeOptionsTyped[newThemeKey]) {
       setThemeKey(newThemeKey); // Change to the provided theme key
     } else {
       console.warn(`Theme "${newThemeKey}" is not defined in themeOptions.`);
@@ -31,10 +44,14 @@ export const ThemeProvider = ({ children }) => {
 
   // Dynamically generate the theme based on the themeKey state
   const muiTheme = useMemo(() => {
-    const selectedTheme = themeOptions[themeKey] || themeOptions.default;
+    const selectedTheme = themeOptionsTyped[themeKey] || themeOptions.default;
     return createTheme({
       ...selectedTheme,
-      components: { ...commonStyles },
+      //@ts-ignore
+      components: {
+        ...commonStyles,
+        ...(selectedTheme.components || {}),
+      },
     });
   }, [themeKey]);
 

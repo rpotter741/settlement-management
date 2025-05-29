@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { verifyAuth } from '../middleware/authMiddleware.js';
+import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 import {
   getGlossaries,
@@ -18,7 +18,7 @@ import {
   createEntryWithNode,
   deleteEntryWithNode,
   updateEntryWithNode,
-} from '../controllers/glossaryController.js';
+} from '../controllers/glossaryController.ts';
 
 const router = express.Router();
 

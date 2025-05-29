@@ -1,4 +1,4 @@
-import prisma from '../db/db.js';
+import prisma from '../db/db.ts';
 
 const glossaryModelMap = {
   continent: prisma.continentGlossary,

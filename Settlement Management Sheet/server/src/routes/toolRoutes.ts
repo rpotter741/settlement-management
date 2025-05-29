@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { verifyAuth } from '../middleware/authMiddleware.js';
+import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 import {
   getContent,
@@ -10,7 +10,7 @@ import {
   fetchByIds,
   checkKey,
   getContentByName,
-} from '../controllers/toolController.js';
+} from '../controllers/toolController.ts';
 
 const router = express.Router();
 

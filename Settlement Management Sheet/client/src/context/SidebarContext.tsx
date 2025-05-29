@@ -1,10 +1,10 @@
 import React, { createContext, useContext } from 'react';
 
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useSidePanel } from '@/hooks/useSidePanel.jsx';
 
-const SidebarContext = createContext();
+const SidebarContext = createContext<ReturnType<typeof useSidePanel> | undefined>(undefined);
 
-export const SidebarProvider = ({ children }) => {
+export const SidebarProvider = ({ children } : {children: React.ReactNode}) => {
   const sidePanel = useSidePanel();
   return (
     <>

@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SelectionState, SelectionObject } from './types.js';
 import { cloneDeep } from 'lodash';
-import flattenVisibleNodes from '../helpers/flattenVisibleNodes.js';
 
 const initialState: SelectionState = {
   selectedIds: [],
@@ -59,7 +58,7 @@ const selectionSlice = createSlice({
       const { id, feature } = action.payload;
       if (state[feature].selectedIds.includes(id)) {
         state[feature].selectedIds = state[feature].selectedIds.filter(
-          (selectedId) => selectedId !== id
+          (selectedId: string) => selectedId !== id
         );
       } else {
         state[feature].selectedIds.push(id);

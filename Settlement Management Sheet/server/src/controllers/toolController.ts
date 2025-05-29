@@ -1,10 +1,10 @@
-import prisma from '../db/db.js';
+import prisma from '../db/db.ts';
 
 //helpers
-import getNextVersion from '../utils/getNextVersion.js';
-import getValidDependencies from '../utils/getValidDependencies.js';
-import toolSelectMap from '../utils/toolSelectMap.js';
-import requireFields from '../utils/requireFields.js';
+import getNextVersion from '../utils/getNextVersion.ts';
+import getValidDependencies from '../utils/getValidDependencies.ts';
+import toolSelectMap from '../utils/toolSelectMap.ts';
+import requireFields from '../utils/requireFields.ts';
 
 const getContent = async (req, res) => {
   try {
@@ -121,10 +121,7 @@ const saveContent = async (req, res) => {
         // Update the existing draft version
         await model.update({
           where: { refId: latest.refId },
-          data: {
-            ...data,
-            updatedAt: new Date(),
-          },
+          data: { ...data, updatedAt: new Date() },
         });
         return res.json({ message: 'Draft updated successfully.' });
       }

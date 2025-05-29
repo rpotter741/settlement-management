@@ -6,8 +6,8 @@ import {
   updateUserSettings,
   invitePlayer,
   joinGame,
-} from '../controllers/userController.js';
-import { verifyAuth } from '../middleware/authMiddleware.js';
+} from '../controllers/userController.ts';
+import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 const router = express.Router();
 

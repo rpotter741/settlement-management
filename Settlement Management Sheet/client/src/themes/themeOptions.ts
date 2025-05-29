@@ -1,4 +1,4 @@
-import commonStyles from './commonStyles';
+import commonStyles from './commonStyles.js';
 
 const themeOptions = {
   default: {

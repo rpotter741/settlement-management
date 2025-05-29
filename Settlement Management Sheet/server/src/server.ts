@@ -4,11 +4,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import requestLogger from './middleware/requestLogger.js';
-import userRouter from './routes/userRoutes.js';
-import toolRouter from './routes/toolRoutes.js';
-import glossaryRouter from './routes/glossaryRoutes.js';
-import prisma from './db/db.js';
+import requestLogger from './middleware/requestLogger.ts';
+import toolRouter from './routes/toolRoutes.ts';
+import glossaryRouter from './routes/glossaryRoutes.ts';
+import prisma from './db/db.ts';
 
 dotenv.config();
 
@@ -24,8 +23,6 @@ app.use(cookieParser()); // Parse cookies g
 app.use(requestLogger); // Log requests
 // serve static files
 app.use(express.static(path.resolve(__dirname, '../public')));
-
-app.use('/user', userRouter);
 
 app.use('/tools', toolRouter);
 

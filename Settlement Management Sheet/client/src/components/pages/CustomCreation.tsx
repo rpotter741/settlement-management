@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import TabbedContainer from '../shared/TabbedContainer/TabbedContainer';
+import TabbedContainer from '../../components/shared/TabbedContainer/TabbedContainer.jsx';
 
 const CustomCreation = () => {
   return (

@@ -1,12 +1,22 @@
 import { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-const AuthContext = createContext();
+interface AuthContextType {
+  user: any;
+  login: (token: string) => void;
+  logout: () => void;
+}
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: () => {},
+  logout: () => {},
+});
 
-  const login = (token) => {
+export const AuthProvider = ({ children } : {children: React.ReactNode}) => {
+  const [user, setUser] = useState<any>(null);
+
+  const login = (token : string) => {
     const decoded = jwtDecode(token);
     setUser({ ...decoded, token });
   };

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { verifyAuth } from '../middleware/authMiddleware.js';
+import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 import {
   saveAttribute,
@@ -8,7 +8,7 @@ import {
   getUserAttributes,
   getAttributeById,
   publishAttribute,
-} from '../controllers/attributeController.js';
+} from '../controllers/attributeController.ts';
 
 const router = express.Router(); // Create a new router instance
 

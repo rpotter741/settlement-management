@@ -10,7 +10,7 @@ import {
   SaveToolPayload,
   UpdateByIdPayload,
   DeleteByIdPayload,
-} from './types';
+} from './types.js';
 
 const defaultToolState: ToolState = {
   static: {
@@ -23,11 +23,28 @@ const defaultToolState: ToolState = {
   },
 };
 
+export interface ToolStateTree {
+  attribute: ToolState;
+  category: ToolState;
+  gameStatus: ToolState;
+  apt: ToolState;
+  action: ToolState;
+  building: ToolState;
+  event: ToolState;
+  faction: ToolState;
+  kit: ToolState;
+  listener: ToolState;
+  settlementType: ToolState;
+  settlement: ToolState;
+  storyThread: ToolState;
+  tradeHub: ToolState;
+  upgrade: ToolState;
+}
+
 const initialState: ToolsState = {
   attribute: cloneDeep(defaultToolState),
   category: cloneDeep(defaultToolState),
   gameStatus: cloneDeep(defaultToolState),
-  key: cloneDeep(defaultToolState),
   apt: cloneDeep(defaultToolState),
   action: cloneDeep(defaultToolState),
   building: cloneDeep(defaultToolState),

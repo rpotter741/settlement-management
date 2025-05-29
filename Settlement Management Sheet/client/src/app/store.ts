@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import validationReducer from '../features/Validation/validationSlice';
-import toolsReducer from './toolSlice';
-import sidePanelReducer from '../features/SidePanel/sidePanelSlice';
-import glossaryReducer from '../features/Glossary/state/glossarySlice';
-import selectionReducer from '../features/Selection/state/selectionSlice';
+import validationReducer from '../features/Validation/validationSlice.js';
+import toolsReducer from './toolSlice.js';
+import sidePanelReducer from '../features/SidePanel/sidePanelSlice.js';
+import glossaryReducer from '../features/Glossary/state/glossarySlice.js';
+import selectionReducer from '../features/Selection/state/selectionSlice.js';
 
 export const store = configureStore({
   reducer: {

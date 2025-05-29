@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
-import { RootState } from './store';
-import { ToolsState, ToolName, ToolData } from './types';
+
+import { isEqual, get } from 'lodash';
+import { RootState } from './store.js';
+import { ToolsState, ToolName, ToolData } from './types.js';
 
 // Base Selectors
 const base = (state: RootState): ToolsState => state.tools;
@@ -35,7 +35,7 @@ export const selectAllEditTools = (tool: ToolName) =>
 // Factories
 export const selectToolValue = (tool: ToolName, id: string, keypath: string) =>
   createSelector([selectToolById(tool, id)], (toolData) =>
-    get(toolData, keypath)
+    get(toolData, keypath, null)
   );
 
 export const selectEditToolValue = (
@@ -44,7 +44,7 @@ export const selectEditToolValue = (
   keypath: string
 ) =>
   createSelector([selectEditToolById(tool, id)], (editTool) =>
-    get(editTool, keypath)
+    get(editTool, keypath, null)
   );
 
 // Dirty state detection
