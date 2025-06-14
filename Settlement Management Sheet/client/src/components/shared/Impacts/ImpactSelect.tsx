@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { get } from 'lodash';
 
-import { returnTool } from 'app/toolThunks.ts';
+import { returnTool } from '@/app/thunks/toolThunks.js';
 
 import sortByKey from 'utility/sortByKey.js';
 
@@ -29,7 +29,7 @@ const ImpactSelect = ({
   onRemove = () => {},
   isAdvanced = false,
 }) => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { edit, updateTool } = useTools(tool, id);
   const [step, setStep] = useState(0);
   const { getOptions, options } = useSidePanel();

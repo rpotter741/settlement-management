@@ -8,23 +8,38 @@ import React, {
 import { useSelector } from 'react-redux';
 import { Box, Divider, Modal } from '@mui/material';
 
-import SidePanel from 'features/SidePanel/SidePanel.jsx';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useSnackbar } from 'context/SnackbarContext.jsx';
+import SidePanel from '@/features/SidePanel/SidePanel.jsx';
+import { useSidePanel } from '@/hooks/useSidePanel.jsx';
+import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 
-import { TabDragProvider } from 'context/DnD/TabDragContext.tsx';
+import { TabDragProvider } from '@/context/DnD/TabDragContext.jsx';
 import TabDragBox from './TabDragBox.js';
-import DropZone from 'components/shared/DnD/DropZone.jsx';
 
 import RenderTabHeaders from './RenderTabHeaders.jsx';
 import RenderTabs from './RenderTabs.jsx';
-import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
+import {
+  activeTab,
+  focusedTab,
+  sidePanelSelectors as select,
+  selectAllTabs,
+} from '@/app/selectors/sidePanelSelectors.js';
 
 import {
   LeftTabsProvider,
   RightTabsProvider,
-} from 'context/TabsContext/TabsContext.jsx';
-import { TabData } from '@/app/types.js';
+} from '@/context/TabsContext/TabsContext.jsx';
+import { TabDataPayload } from '@/app/types/ToolTypes.js';
+import { Tab } from '@/app/types/SidePanelTypes.js';
+import GeographyForm from '@/features/Glossary/forms/GeographyForm.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import useToolHotkeys from '@/hooks/useGlobalHotkeys.js';
+import { updateTab } from '@/app/slice/sidePanelSlice.js';
+
+export type ModalContent = {
+  component: React.ElementType;
+  props?: Record<string, any>;
+} | null;
 
 const TabbedContainer: React.FC = () => {
   const {
@@ -36,23 +51,20 @@ const TabbedContainer: React.FC = () => {
     removeById,
     setActiveTab,
     isSplit,
-    setSplit,
+    setSplitState: setSplit,
     moveLeft,
     moveRight,
     preventSplit,
     setPreventSplit,
   } = useSidePanel();
-  const { showSnackbar } = useSnackbar();
-  type ModalContent = {
-    component: React.ElementType;
-    props?: Record<string, any>;
-  } | null;
+  const dispatch: AppDispatch = useDispatch();
 
   const [modalContent, setModalContent] = useState<ModalContent>(null);
   const [dragSide, setDragSide] = useState<'left' | 'right' | null>(null);
+  const activeTab = useSelector(focusedTab);
 
   const noSplit = useMemo(
-    () => leftTabs.some((tab: TabData) => tab.tool === 'event'),
+    () => leftTabs.some((tab: Tab) => tab.tool === 'event'),
     [leftTabs]
   );
 
@@ -63,9 +75,9 @@ const TabbedContainer: React.FC = () => {
   }, [noSplit, preventSplit, setPreventSplit]);
 
   const moveRTL = useCallback(
-    (entry: TabData) => {
-      if (rightTabs.some((tab: TabData) => tab.tabId === entry.tabId)) {
-        moveLeft(entry.tabId);
+    (entry: TabDataPayload, dropIndex: number) => {
+      if (rightTabs.some((tab: Tab) => tab.tabId === entry.tabId)) {
+        moveLeft(entry.tabId, dropIndex);
       } else {
         addNewTab({ ...entry, side: 'left' });
       }
@@ -74,18 +86,21 @@ const TabbedContainer: React.FC = () => {
   );
 
   const moveLTR = useCallback(
-    (entry: TabData) => {
+    (entry: TabDataPayload, dropIndex: number) => {
       console.log('moveLTR', entry);
       if (preventSplit) {
-        showSnackbar(
-          'Split view is disabled for Events, APTs, and Story Threads.',
-          'error',
-          5000
+        dispatch(
+          showSnackbar({
+            message:
+              'Split view is disabled for Events, APTs, and Story Threads.',
+            type: 'error',
+            duration: 5000,
+          })
         );
         return;
       }
-      if (leftTabs.some((tab: TabData) => tab.tabId === entry.tabId)) {
-        moveRight(entry.tabId);
+      if (leftTabs.some((tab: Tab) => tab.tabId === entry.tabId)) {
+        moveRight(entry.tabId, dropIndex);
       } else {
         addNewTab({ ...entry, side: 'right' });
       }
@@ -95,7 +110,7 @@ const TabbedContainer: React.FC = () => {
 
   useEffect(() => {
     if (rightTabs.length > 0 && leftTabs.length === 0) {
-      moveLeft(rightTabs[0].tabId);
+      moveLeft(rightTabs[0].tabId, 0);
     }
   }, [rightTabs, leftTabs]);
 
@@ -106,6 +121,56 @@ const TabbedContainer: React.FC = () => {
       }
     }
   }, [isSplit, rightTabs, setSplit]);
+
+  useToolHotkeys(activeTab, {
+    tool: {
+      'mod+shift+p': () =>
+        dispatch(
+          updateTab({
+            tabId: activeTab?.tabId || '',
+            side: activeTab?.side || 'left',
+            keypath: 'mode',
+            updates: 'preview',
+          })
+        ),
+      'mod+shift+e': () =>
+        dispatch(
+          updateTab({
+            tabId: activeTab?.tabId || '',
+            side: activeTab?.side || 'left',
+            keypath: 'mode',
+            updates: 'edit',
+          })
+        ),
+      'mod+w': () => {
+        if (!activeTab) return;
+        const freshTab = [...leftTabs, ...rightTabs].find(
+          (tab: Tab) => tab.tabId === activeTab.tabId
+        );
+        if (!freshTab) return;
+        if (freshTab.isDirty) {
+          setModalContent({
+            component: React.lazy(
+              () =>
+                import(
+                  '@/components/shared/TabbedContainer/ConfirmDirtyClose.jsx'
+                )
+            ),
+            props: {
+              onClose: () => removeById(freshTab.tabId, freshTab.side, false),
+              tab: freshTab,
+              side: freshTab.side,
+              setModalContent,
+            },
+          });
+        } else {
+          removeById(activeTab.tabId, activeTab.side, false);
+        }
+      },
+    },
+    glossary: {},
+    other: {},
+  });
 
   return (
     <Box
@@ -158,23 +223,23 @@ const TabbedContainer: React.FC = () => {
               }}
               className="tab-header"
             >
-              <RenderTabHeaders
-                isSplit={isSplit}
-                tabs={leftTabs}
-                currentTab={currentLeftTab}
-                setActiveTab={setActiveTab}
-                removeById={removeById}
-                setDragSide={setDragSide}
-              />
-              {rightTabs.length > 0 && (
+              <LeftTabsProvider>
                 <RenderTabHeaders
-                  isSplit={isSplit}
-                  tabs={rightTabs}
-                  currentTab={currentRightTab}
                   setActiveTab={setActiveTab}
                   removeById={removeById}
-                  side="right"
+                  setDragSide={setDragSide}
+                  setModalContent={setModalContent}
                 />
+              </LeftTabsProvider>
+              {rightTabs.length > 0 && (
+                <RightTabsProvider>
+                  <RenderTabHeaders
+                    setActiveTab={setActiveTab}
+                    removeById={removeById}
+                    side="right"
+                    setModalContent={setModalContent}
+                  />
+                </RightTabsProvider>
               )}
             </Box>
             {modalContent && (
@@ -220,20 +285,15 @@ const TabbedContainer: React.FC = () => {
               )}
 
               <LeftTabsProvider>
-                <RenderTabs
-                  side="left"
-                  setModalContent={setModalContent}
-                  moveFn={moveRTL}
-                />
+                <RenderTabs side="left" setModalContent={setModalContent} />
               </LeftTabsProvider>
-              {(useSelector(select.rightTabs) as TabData[]).length > 0 && (
+              {(useSelector(select.rightTabs) as Tab[]).length > 0 && (
                 <>
                   <Divider flexItem orientation="vertical" />
                   <RightTabsProvider>
                     <RenderTabs
                       side="right"
                       setModalContent={setModalContent}
-                      moveFn={moveLTR}
                     />
                   </RightTabsProvider>
                 </>

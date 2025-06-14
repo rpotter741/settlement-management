@@ -1,4 +1,4 @@
-import api from 'services/interceptor.ts';
+import api from 'services/interceptor.js';
 
 const saveCategoryAPI = async (category) => {
   const modifiedCategory = {

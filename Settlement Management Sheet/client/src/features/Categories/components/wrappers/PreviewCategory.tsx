@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Box, Button, Typography, Divider } from '@mui/material';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';
 import useFetchReferences from 'hooks/useFetchReferences.jsx';
@@ -12,7 +12,7 @@ import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 import PreviewDependencies from 'components/shared/Metadata/PreviewDependencies.jsx';
 
 const PreviewCategory = () => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { current: category } = useTools(tool, id);
   const attributes = useFetchReferences('attribute', category.attributes);
   return (

@@ -1,32 +1,22 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { Box, Typography } from '@mui/material';
+import React from 'react';
+import { Threshold, Thresholds } from 'types/common.js';
+import RowDisplay from '../Layout/RowDisplay.js';
 
-const ThresholdPreview = ({ threshold, even }) => {
-  const test = threshold.name !== '';
-  return test ? (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'start',
-        transition: 'top 0.3s ease, left 0.3s ease',
-        gap: 2,
-        backgroundColor: even ? 'background.default' : 'background.paper',
-      }}
-    >
-      <Typography sx={{ width: '66%', textAlign: 'left' }}>
-        {threshold.name}:
-      </Typography>
-      <Typography>{threshold.max}</Typography>
-    </Box>
-  ) : null;
-};
+interface PreviewThresholdsProps {
+  data: Record<string, Threshold>;
+  order: string[];
+}
 
-const PreviewThresholds = ({ data, order }) => {
+const PreviewThresholds: React.FC<PreviewThresholdsProps> = ({
+  data,
+  order,
+}) => {
   return (
     <Box
       sx={{
         gridColumn: 'span 3',
-        // gap: 2,
+        columnGap: 2,
         display: 'grid',
         gridTemplateRows: 'repeat(7, 1fr)',
         gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
@@ -34,12 +24,13 @@ const PreviewThresholds = ({ data, order }) => {
       }}
     >
       {order.map((id, n) => {
-        const threshold = data[id];
+        const { name, max } = data[id];
         return (
-          <ThresholdPreview
+          <RowDisplay
             key={id}
-            threshold={threshold}
-            sx={{ gridColumn: 'span 3' }}
+            name={name}
+            value={max}
+            style={{ width: '100%', maxWidth: '256px' }}
             even={n % 2 === 0}
           />
         );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import { Box, Divider, Button, Typography } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
@@ -11,7 +11,7 @@ import StatusSettings from '../forms/StatusSettings.jsx';
 import ImpactSelect from 'components/shared/Impacts/ImpactSelect.jsx';
 
 const EditStatus = ({}) => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { edit: status, updateTool } = useTools(tool, id);
   const [advanced, setAdvanced] = useState(false);
   const [steps, setSteps] = useState([false, false, false, false, false]);
@@ -45,7 +45,7 @@ const EditStatus = ({}) => {
         maxHeight: 'calc(100vh - 200px)',
       }}
     >
-      <EditNameDescription tool={tool} fields={statusFormData} id={id} />
+      <EditNameDescription fields={statusFormData} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <StatusSettings />
       {status?.mode === 'Advanced' ? (
@@ -77,8 +77,8 @@ const EditStatus = ({}) => {
               key={index}
               title={`Step ${index + 1}`}
               titleType="h6"
-              defaultState={steps[index]}
-              noDefaultHandler={() => {
+              open={steps[index]}
+              toggleOpen={() => {
                 const newSteps = [...steps];
                 newSteps[index] = !newSteps[index];
                 setSteps(newSteps);

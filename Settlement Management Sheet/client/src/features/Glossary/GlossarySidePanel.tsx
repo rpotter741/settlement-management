@@ -3,53 +3,48 @@ import { useDispatch, useSelector } from 'react-redux';
 import { v4 as newId } from 'uuid';
 import {
   Box,
-  FormControl,
-  Select,
-  InputLabel,
-  MenuItem,
   Typography,
-  Divider,
-  Button,
-  IconButton,
   TextField,
-  ButtonGroup,
   Autocomplete,
   InputAdornment,
+  IconButton,
+  Button,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import NoteAddIcon from '@mui/icons-material/NoteAdd';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import FindInPageIcon from '@mui/icons-material/FindInPage';
-import SearchIcon from '@mui/icons-material/Search';
+import {
+  Settings as SettingsIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 
-import GlossaryDirectory from './GlossaryDirectory';
-import actions from './helpers/glossaryActions';
-import { rehydrateGlossaryTree } from './helpers/rehydrateGlossary';
-import { prepareCssVars } from '@mui/system';
-import { GlossaryEntryType, GlossaryNode } from '../../../../types';
+import GlossaryDirectory from './GlossaryDirectory.js';
+import { rehydrateGlossaryTree } from './helpers/rehydrateGlossary.js';
+import {
+  GlossaryEntryType,
+  GlossaryNode,
+} from '../../../../types/glossaryEntry.js';
 import {
   selectActiveId,
   selectAllGlossaries,
   selectGlossaryStructure,
   selectGlossaryNodes,
   selectSnackbar,
-} from './state/glossarySelectors';
-import { useSnackbar } from '../../context/SnackbarContext';
-import thunks from './state/glossaryThunks';
+} from '../../app/selectors/glossarySelectors.js';
+import { SnackbarType } from '@/app/types/SnackbarTypes.js';
+import { showSnackbar } from '@/app/slice/snackbarSlice.js';
+import thunks from '../../app/thunks/glossaryThunks.js';
 import { thunk } from 'redux-thunk';
-import { AppDispatch } from '@/app/store';
+import { AppDispatch } from '@/app/store.js';
 import { set } from 'lodash';
-import { setActiveGlossaryId, setSnackbar } from './state/glossarySlice';
-import { render } from 'react-dom';
+import { setActiveGlossaryId } from '../../app/slice/glossarySlice.js';
+import { GlossaryDragProvider } from '@/context/DnD/GlossaryDragContext.js';
+import actions from '@/services/glossaryServices.js';
+import { useSidePanel } from '@/hooks/useSidePanel.js';
 
 const nameNewGlossary = lazy(() => import('./NameNewGlossary.js'));
 
 interface GlossarySidePanelProps {
-  setModalContent: (content: {
-    component: React.LazyExoticComponent<React.ComponentType<any>>;
-    props: any;
-  }) => void;
+  setModalContent: (content: { component: any; props: any }) => void;
 }
 
 interface Glossary {
@@ -62,34 +57,32 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
   setModalContent,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [glossary, setGlossary] = useState<Glossary>({
-    name: '',
-    id: '',
-    description: '',
-  });
+  const [glossary, setGlossary] = useState<Glossary | null>(null);
 
   const glossaryId = useSelector(selectActiveId());
   const glossaries = useSelector(selectAllGlossaries());
-  const nodes = useSelector(selectGlossaryStructure(glossaryId ?? ''));
+  const nodes = useSelector(selectGlossaryStructure(glossaryId || ''));
   const structure = useRef<GlossaryNode[]>([]);
   const [nodeMap, setNodeMap] = useState<Record<string, GlossaryNode>>({});
-  const { showSnackbar } = useSnackbar();
+  const { addNewTab } = useSidePanel();
 
   const snackbarMessage = useSelector(selectSnackbar());
+
+  const [options, setOptions] = useState<any[]>([]);
 
   useEffect(() => {
     dispatch(thunks.getGlossaries());
   }, []);
 
   useEffect(() => {
-    if (glossaries.length > 0 && glossary.id === '') {
+    if (glossaries.length > 0 && glossary === null) {
       setGlossary(glossaries[0]);
       dispatch(setActiveGlossaryId({ glossaryId: glossaries[0].id }));
     }
-  }, [glossaries, glossary.id]);
+  }, [glossaries, glossary]);
 
   useEffect(() => {
-    if (glossaryId) {
+    if (glossaryId !== null) {
       dispatch(thunks.getGlossaryNodes({ glossaryId }));
     }
   }, [glossaryId]);
@@ -103,7 +96,9 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
   };
 
   useEffect(() => {
-    rehydrate();
+    if (glossaryId !== null) {
+      rehydrate();
+    }
   }, [nodes, structure.current.length]);
 
   useEffect(() => {
@@ -116,27 +111,29 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
         rollbackFn,
       }: {
         message: string;
-        type: string;
+        type: SnackbarType;
         duration: number;
         rollback?: any;
         rollbackFn?: ((rollback: any) => void) | (() => void);
       } = snackbarMessage;
-      showSnackbar(message, type, duration);
-      dispatch(setSnackbar({ snackbar: null }));
+      dispatch(showSnackbar({ message, type, duration }));
     }
   }, [snackbarMessage]);
 
   const handleSelect = (gloss: any) => {
     if (gloss.id === 'createNew') {
-      setModalContent({
-        component: nameNewGlossary,
-        props: {
-          setGlossary,
-        },
-      });
       setGlossary({ name: '', id: '', description: '' });
     }
     setGlossary(gloss);
+  };
+
+  const handleCreateGlossary = () => {
+    setModalContent({
+      component: lazy(() => import('./NameNewGlossary.js')),
+      props: {
+        setGlossary,
+      },
+    });
   };
 
   const handleAddFolder = ({
@@ -150,17 +147,17 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
     parentId: string | null;
     entryType: GlossaryEntryType;
   }) => {
-    if (glossary.id === null) return;
+    if (!glossaryId) return;
     const node: GlossaryNode = {
       id,
       name,
       type: 'folder',
       parentId,
-      glossaryId: glossary.id,
+      glossaryId,
       entryType: entryType,
       children: [],
     };
-    dispatch(thunks.addFolder({ node }));
+    dispatch(thunks.addEntry({ node }));
   };
 
   const handleDelete = (node: any) => {
@@ -175,10 +172,11 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
       );
     };
     setModalContent({
-      component: lazy(() => import('./ConfirmDelete')),
+      component: lazy(() => import('./ConfirmDeleteEntry.js')),
       props: {
         setModalContent,
         onDelete: modelDelete,
+        name: node.name,
       },
     });
   };
@@ -186,7 +184,9 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
   const handleRename = (node: GlossaryNode) => {
     if (node === null) return;
     if (glossaryId === null) return;
-    dispatch(thunks.updateEntry({ node, glossaryId }));
+    dispatch(
+      thunks.updateEntry({ node, glossaryId, content: { name: node.name } })
+    );
   };
 
   const handleAddEntry = ({
@@ -211,6 +211,22 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
     dispatch(thunks.addEntry({ node }));
   };
 
+  const handleSettingsClick = () => {
+    if (glossary === null || glossaryId === null) return;
+    addNewTab({
+      name: glossary?.name,
+      id: glossaryId,
+      mode: 'edit',
+      tool: 'editGlossary',
+      tabId: newId(),
+      scroll: 0,
+      preventSplit: false,
+      activate: true,
+      side: 'left',
+      disableMenu: true,
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -223,55 +239,64 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
         height: '100%',
       }}
     >
-      <Autocomplete
-        inputValue={glossary.name}
-        options={[...glossaries, { name: 'Create New', id: 'createNew' }]}
-        getOptionLabel={(option: any) => option.name}
-        onChange={(event, newValue) => {
-          if (newValue) {
-            handleSelect(newValue);
-          }
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Select a glossary"
-            variant="outlined"
-            fullWidth
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <InputAdornment position="start">
-                  <FindInPageIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
-        renderOption={(props, option) => (
-          <li {...props} key={option.id}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Autocomplete
+          value={glossary ? glossary : null}
+          options={[...glossaries]}
+          getOptionLabel={(option: any) => option.name}
+          onChange={(_, newValue) => {
+            if (newValue) {
+              handleSelect(newValue);
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Select a glossary"
+              variant="outlined"
+              fullWidth
+              sx={{ width: '100%', position: 'relative' }}
+            />
+          )}
+          renderOption={(props, option) => (
             <Box
+              component="li"
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%',
                 padding: 1,
               }}
+              {...props}
             >
               <Typography variant="body1" sx={{ marginLeft: 1 }}>
                 {option.name}
               </Typography>
             </Box>
-          </li>
-        )}
-      />
-      <GlossaryDirectory
-        structure={structure.current}
-        onRename={handleRename}
-        onDelete={handleDelete}
-        onNewFile={handleAddEntry}
-        onNewFolder={handleAddFolder}
-      />
+          )}
+          sx={{ width: '100%' }}
+        />
+        <IconButton
+          sx={{ cursor: 'pointer', pr: 0 }}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSettingsClick();
+          }}
+        >
+          <SettingsIcon />
+        </IconButton>
+      </Box>
+      <GlossaryDragProvider>
+        <GlossaryDirectory
+          structure={structure.current}
+          nodeMap={nodeMap}
+          onRename={handleRename}
+          onDelete={handleDelete}
+          onNewFile={handleAddEntry}
+          onNewFolder={handleAddFolder}
+          handleCreateGlossary={handleCreateGlossary}
+        />
+      </GlossaryDragProvider>
     </Box>
   );
 };

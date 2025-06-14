@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { LazyExoticComponent, useState } from 'react';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
@@ -7,15 +7,26 @@ import AttrMetaData from '../forms/AttrMetaData.jsx';
 import AttrValues from '../forms/AttrValues.jsx';
 import SettlementPointsCost from '../forms/SPC.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
-import TagTable from '../forms/TagTable';
+import TagTable from '../forms/TagTable.jsx';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import GeographyForm from '@/features/Glossary/forms/GeographyForm.jsx';
 
-const EditAttribute = ({ setModalContent }) => {
+interface EditAttributeProps {
+  setModalContent: ({
+    component,
+    props,
+  }: {
+    component: LazyExoticComponent<any>;
+    props: any;
+  }) => void;
+}
+
+const EditAttribute: React.FC<EditAttributeProps> = ({ setModalContent }) => {
   const { isSplit } = useSidePanel();
-  const { id } = useToolContext();
+  const { id } = useShellContext();
   const { edit: attr } = useTools('attribute', id);
   const [values, setValues] = useState(false);
   const [thresholds, setThresholds] = useState(false);
@@ -39,52 +50,52 @@ const EditAttribute = ({ setModalContent }) => {
         position: 'relative',
         // pb: 4,
         overflowY: 'auto',
-        maxHeight: 'calc(100vh - 200px)',
+        maxHeight: 'calc(100vh - 125px)',
       }}
     >
-      <AttrMetaData setModalContent={setModalContent} id={id} />
+      <AttrMetaData setModalContent={setModalContent} />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
         title="Values"
         titleType="h6"
-        defaultState={values}
-        styles={{ width: '100%', mb: 2 }}
+        open={values}
+        styles={{ width: '100%', marginBottom: 2 }}
         boxSx={{
-          gridColumn: `span ${columns}`,
+          gridColumn: `span 3`,
         }}
-        noDefaultHandler={() => setValues(!values)}
+        toggleOpen={() => setValues(!values)}
       >
-        <AttrValues values={values} id={id} columns={columns} />
+        <AttrValues columns={columns} />
       </TitledCollapse>
       <TitledCollapse
         title="Settlement Point Costs"
         titleType="h6"
-        defaultState={spCosts}
-        styles={{ width: '100%', mb: 2 }}
+        open={spCosts}
+        styles={{ width: '100%', marginBottom: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setSpCosts(!spCosts)}
+        toggleOpen={() => setSpCosts(!spCosts)}
       >
-        <SettlementPointsCost id={id} />
+        <SettlementPointsCost />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
         titleType="h6"
-        defaultState={thresholds}
-        styles={{ width: '100%', mb: 2 }}
+        open={thresholds}
+        styles={{ width: '100%', marginBottom: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setThresholds(!thresholds)}
+        toggleOpen={() => setThresholds(!thresholds)}
       >
-        <ObjectThresholds tool="attribute" id={id} />
+        <ObjectThresholds />
       </TitledCollapse>
       <TitledCollapse
         title={`Tags (${attr?.tags?.length} / 5)`}
         titleType="h6"
-        defaultState={tags}
-        styles={{ width: '100%', mb: 2 }}
+        open={tags}
+        styles={{ width: '100%', marginBottom: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setTags(!tags)}
+        toggleOpen={() => setTags(!tags)}
       >
-        <TagTable attr={attr} />
+        <TagTable />
       </TitledCollapse>
     </Box>
   );

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import PhaseTypeSelect from '../inputs/PhaseTypeSelect.jsx';
 
 const CreatePhase = ({ phaseId }) => {
-  const { id } = useToolContext();
+  const { id } = useShellContext();
   const { edit } = useTools('event', id);
   return (
     <Box

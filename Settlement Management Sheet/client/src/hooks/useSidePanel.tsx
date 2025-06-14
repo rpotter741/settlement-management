@@ -11,8 +11,13 @@ import {
   setToolOptions,
   setSplit,
   setPrevent,
-} from 'features/sidePanel/sidePanelSlice.ts';
-import { sidePanelSelectors as select } from 'features/SidePanel/sidePanelSelectors.js';
+} from '@/app/slice/sidePanelSlice.js';
+import { sidePanelSelectors as select } from '../app/selectors/sidePanelSelectors.js';
+import { TabDataPayload } from '@/app/types/ToolTypes.js';
+import { OptionObject } from '@/app/types/SidePanelTypes.js';
+import { set } from 'lodash';
+
+export type SidePanelSide = 'left' | 'right';
 
 export const useSidePanelActions = () => {
   const dispatch = useDispatch();
@@ -28,7 +33,10 @@ export const useSidePanelActions = () => {
       activate = false,
       side,
       preventSplit = false,
-    }) => {
+      tabType = 'tool',
+      disableMenu = false,
+      glossaryId = undefined,
+    }: TabDataPayload) => {
       dispatch(
         addTab({
           name,
@@ -40,6 +48,9 @@ export const useSidePanelActions = () => {
           activate,
           side,
           preventSplit,
+          tabType,
+          disableMenu,
+          glossaryId,
         })
       );
     },
@@ -47,63 +58,63 @@ export const useSidePanelActions = () => {
   );
 
   const removeById = useCallback(
-    (tabId, side, preventSplit) => {
+    (tabId: string, side: SidePanelSide, preventSplit: boolean) => {
       dispatch(removeTab({ tabId, side, preventSplit }));
     },
     [dispatch]
   );
 
   const setActiveTab = useCallback(
-    (index, tabId, side) => {
+    (index: number, tabId: string, side: SidePanelSide) => {
       dispatch(setCurrentTab({ index, tabId, side }));
     },
     [dispatch]
   );
 
   const updateBreadcrumbs = useCallback(
-    (breadcrumbs) => {
+    (breadcrumbs: string[]) => {
       dispatch(setBreadcrumbs({ breadcrumbs }));
     },
     [dispatch]
   );
 
   const updateCurrentTab = useCallback(
-    (index, updates, side) => {
-      dispatch(updateTab({ index, updates, side }));
+    (tabId: string, keypath: string, updates: any, side: SidePanelSide) => {
+      dispatch(updateTab({ tabId, keypath, updates, side }));
     },
     [dispatch]
   );
 
   const moveLeft = useCallback(
-    (tabId, dropIndex) => {
+    (tabId: string, dropIndex: number) => {
       dispatch(moveRightToLeft({ tabId, dropIndex }));
     },
     [dispatch]
   );
 
   const moveRight = useCallback(
-    (tabId, dropIndex) => {
+    (tabId: string, dropIndex: number) => {
       dispatch(moveLeftToRight({ tabId, dropIndex }));
     },
     [dispatch]
   );
 
   const setOptions = useCallback(
-    (options) => {
+    (options: Record<string, OptionObject[]>) => {
       dispatch(setToolOptions({ options }));
     },
     [dispatch]
   );
 
   const setSplitState = useCallback(
-    (split) => {
+    (split: boolean) => {
       dispatch(setSplit({ split }));
     },
     [dispatch]
   );
 
   const setPreventSplit = useCallback(
-    (prevent) => {
+    (prevent: boolean) => {
       dispatch(setPrevent({ prevent }));
     },
     [dispatch]

@@ -1,11 +1,11 @@
 import React from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { Box, Divider } from '@mui/material';
-import SelectOptions from 'components/shared/Select/SelectOptions.jsx';
+import ToolSelect from 'components/shared/DynamicForm/ToolSelect.jsx';
 
 const StatusSettings = () => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { edit, updateTool } = useTools(tool, id);
 
   return (
@@ -18,16 +18,14 @@ const StatusSettings = () => {
         gap: 2,
       }}
     >
-      <SelectOptions
+      <ToolSelect
         label="Status Type"
-        value={edit?.type}
-        onChange={(e) => updateTool('type', e.target.value)}
         options={['Weather', 'Morale', 'Settlement']}
+        keypath="type"
       />
-      <SelectOptions
+      <ToolSelect
         label="Creation Mode"
-        value={edit?.mode}
-        onChange={(e) => updateTool('mode', e.target.value)}
+        keypath="mode"
         options={['Simple', 'Advanced']}
       />
     </Box>

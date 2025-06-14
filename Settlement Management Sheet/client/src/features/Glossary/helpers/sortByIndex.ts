@@ -1,4 +1,4 @@
-import { GlossaryNode } from '../../../../../types';
+import { GlossaryNode } from 'types/index.js';
 
 export default function sortGlossaryNodes(
   nodes: GlossaryNode[]
@@ -6,10 +6,9 @@ export default function sortGlossaryNodes(
   return nodes.sort(smartSort);
 }
 
-function smartSort<T extends { name: string; sortIndex?: number }>(
-  a: T,
-  b: T
-): number {
+function smartSort<
+  T extends { name: string; sortIndex?: number; type: 'file' | 'folder' },
+>(a: T, b: T): number {
   const aPriority = a.sortIndex ?? 0;
   const bPriority = b.sortIndex ?? 0;
 
@@ -22,6 +21,10 @@ function smartSort<T extends { name: string; sortIndex?: number }>(
     return -1;
   } else if (bHasCustom) {
     return 1;
+  } else if (a.type === 'folder' && b.type === 'file') {
+    return -1; // Folders come before files
+  } else if (a.type === 'file' && b.type === 'folder') {
+    return 1; // Files come after folders
   } else {
     return a.name.localeCompare(b.name);
   }

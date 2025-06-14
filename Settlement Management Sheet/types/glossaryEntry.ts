@@ -1,4 +1,4 @@
-import { UUID, Timestamp, ContentType } from './index';
+import { UUID, Timestamp, ContentType, EventSeverity } from './index';
 
 export interface GlossaryNode {
   id: string;
@@ -37,27 +37,14 @@ export interface BaseEntry {
   createdBy: UUID;
 }
 
-export interface RegionEntry extends BaseEntry {
-  climate:
-    | 'tropical'
-    | 'arid'
-    | 'temperate'
-    | 'polar'
-    | 'subtropical'
-    | 'mountainous';
-  terrain:
-    | 'forest'
-    | 'mountain'
-    | 'desert'
-    | 'swamp'
-    | 'plains'
-    | 'hills'
-    | 'tundra';
-  factions: UUID[];
-  population: number | string;
-  notableLocations: UUID[];
-  resources?: UUID[];
-}
+export type TerrainType =
+  | 'forest'
+  | 'mountain'
+  | 'desert'
+  | 'swamp'
+  | 'plains'
+  | 'hills'
+  | 'tundra';
 
 export type GeographicEntryType =
   | 'forest'
@@ -79,49 +66,29 @@ export type GeographicEntryType =
   | 'gulf'
   | 'fjord';
 
+export type ClimateType =
+  | 'tropical'
+  | 'arid'
+  | 'temperate'
+  | 'polar'
+  | 'subtropical'
+  | 'mountainous';
+
+export interface RegionEntry extends BaseEntry {
+  climate: ClimateType;
+  terrain: TerrainType;
+  factions: UUID[];
+  population: number | string;
+  notableLocations: UUID[];
+  resources?: string[];
+}
+
 export interface GeographicEntry extends BaseEntry {
   type: GeographicEntryType;
   region: UUID[];
-  climate:
-    | 'tropical'
-    | 'arid'
-    | 'temperate'
-    | 'polar'
-    | 'subtropical'
-    | 'mountainous';
-  terrain:
-    | 'forest'
-    | 'mountain'
-    | 'desert'
-    | 'swamp'
-    | 'plains'
-    | 'hills'
-    | 'tundra';
+  climate: ClimateType;
+  terrain: TerrainType;
   eventLog: UUID[];
-}
-
-export type POIType =
-  | 'ruin'
-  | 'temple'
-  | 'cave'
-  | 'dungeon'
-  | 'fortress'
-  | 'castle'
-  | 'tower'
-  | 'shrine'
-  | 'monument'
-  | 'mine'
-  | 'village'
-  | 'town'
-  | 'city'
-  | 'capital'
-  | 'outpost';
-
-export interface POIEntry extends BaseEntry {
-  type: POIType;
-  region: UUID[];
-  currentOccupants?: UUID[];
-  nearbyFeatures?: Record<string, number>; //id & distance
 }
 
 export interface PersonEntry extends BaseEntry {
@@ -130,7 +97,7 @@ export interface PersonEntry extends BaseEntry {
   traits: string[];
   faction: UUID;
   location: UUID;
-  relationships: { personId: UUID; relationship: string }[];
+  relationships: { id: UUID; type: string; relationship: string }[];
   notoriety?:
     | 'unknown'
     | 'local'
@@ -142,24 +109,217 @@ export interface PersonEntry extends BaseEntry {
     | 'universal';
 }
 
+export interface ContinentEntry extends BaseEntry {
+  nations: UUID[];
+  regions: UUID[];
+  notableLocations: UUID[];
+  resources?: string[];
+  population: number | string;
+  climate: ClimateType[];
+  terrain: GeographicEntryType[];
+  eventLog?: UUID[];
+}
+
+export interface NationEntry extends BaseEntry {
+  continent: UUID;
+  regions: UUID[];
+  capital: UUID;
+  population: number | string;
+  governmentType: string;
+  economy: string;
+  culture: string;
+  languages: string[];
+  notableFigures: UUID[];
+  notableEvents?: UUID[];
+  resources?: string[];
+  flags?: string[]; // URLs or base64 encoded images
+  history?: string; // A brief history of the nation
+  relationships?: { id: UUID; type: string; relationship: string }[]; // Relationships with other nations or factions
+  notableLocations?: UUID[]; // Significant locations within the nation
+  geography?: GeographicEntry[]; // Geographic features within the nation
+}
+
+export interface SettlementEntry extends BaseEntry {
+  nation: UUID;
+  region: UUID;
+  population: number | string;
+  type: 'hamlet' | 'village' | 'town' | 'city' | 'capital';
+  economy: string;
+  government: string;
+  culture: string;
+  notableFigures: UUID[];
+  notableEvents?: UUID[];
+  notableLocations?: UUID[]; // Significant locations within the settlement
+  history?: string; // A brief history of the settlement
+  relationships?: { id: UUID; type: string; relationship: string }[];
+}
+
+export interface FactionEntry extends BaseEntry {
+  leader: UUID;
+  members: UUID[];
+  allies: UUID[];
+  enemies: UUID[];
+  homeBase: UUID;
+  relationships: { id: UUID; type: string; relationship: string }[];
+  influence: number;
+  notoriety: number;
+  cultureTags: string[];
+  activeKeys: string[];
+  passiveBonuses: Record<string, any>; // flesh out later
+}
+
+export type LocationType =
+  | 'Ruin'
+  | 'Temple'
+  | 'Cave'
+  | 'Dungeon'
+  | 'Fortress'
+  | 'Castle'
+  | 'Tower'
+  | 'Shrine'
+  | 'Monument'
+  | 'Mine'
+  | 'Village'
+  | 'Town'
+  | 'City'
+  | 'Capital'
+  | 'Outpost'
+  | 'Mountain'
+  | 'Hill'
+  | 'Glade'
+  | 'Graveyard'
+  | 'Store'
+  | 'Market'
+  | 'Library'
+  | 'Academy'
+  | 'Inn'
+  | 'Tavern'
+  | 'Farm'
+  | 'Port'
+  | 'Dock'
+  | 'Ship'
+  | 'Manor'
+  | 'Barracks'
+  | 'Watchtower'
+  | 'Lighthouse'
+  | 'Garden'
+  | 'Arena'
+  | 'Guildhall'
+  | 'Workshop'
+  | 'Palace'
+  | 'Keep'
+  | 'Sanctuary'
+  | 'Camp'
+  | 'Lumberyard'
+  | 'Quarry';
+
+export const LocationTypes: LocationType[] = [
+  'Ruin',
+  'Temple',
+  'Cave',
+  'Dungeon',
+  'Fortress',
+  'Castle',
+  'Tower',
+  'Shrine',
+  'Monument',
+  'Mine',
+  'Village',
+  'Town',
+  'City',
+  'Capital',
+  'Outpost',
+  'Mountain',
+  'Hill',
+  'Glade',
+  'Graveyard',
+  'Store',
+  'Market',
+  'Library',
+  'Academy',
+  'Inn',
+  'Tavern',
+  'Farm',
+  'Port',
+  'Dock',
+  'Ship',
+  'Manor',
+  'Barracks',
+  'Watchtower',
+  'Lighthouse',
+  'Garden',
+  'Arena',
+  'Guildhall',
+  'Workshop',
+  'Palace',
+  'Keep',
+  'Sanctuary',
+  'Camp',
+  'Lumberyard',
+  'Quarry',
+];
+
+export interface LocationEntry extends BaseEntry {
+  type: LocationType;
+  region: UUID;
+  currentOccupants?: UUID[];
+  nearbyFeatures?: Record<string, number>; //id & distance
+  resources?: string[];
+  eventLog?: UUID[];
+}
+
+export interface EventEntry extends BaseEntry {
+  significance: EventSeverity;
+  gameDate: string;
+  frequency: 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  location: UUID | null; // Location of the event, if applicable
+  relatedEntries?: UUID[]; // Related entries, such as people, factions, or locations
+  tags?: string[]; // Tags for categorization
+}
+
+export interface NoteEntry extends BaseEntry {
+  type: 'general' | 'task' | 'reminder' | 'idea' | 'reference';
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: Timestamp | null; // Optional due date for tasks or reminders
+  relatedEntries?: { id: string; type: string }[]; // Related entries, such as people, factions, or locations
+  tags?: string[]; // Tags for categorization
+  isArchived?: boolean; // Flag to indicate if the note is archived
+  isPinned?: boolean; // Flag to indicate if the note is pinned for quick access
+  isShared?: boolean; // Flag to indicate if the note is shared with others
+  sharedWith?: UUID[]; // List of user IDs with whom the note is shared
+  attachments?: {
+    id: UUID;
+    name: string;
+    url: string; // URL to the attachment
+    type: 'image' | 'document' | 'audio' | 'video' | 'other';
+    createdAt: Timestamp;
+    createdBy: UUID; // User ID of the creator
+  }[]; // List of attachments related to the note
+}
+
 export type GlossaryEntry =
+  | ContinentEntry
+  | NationEntry
   | RegionEntry
   | GeographicEntry
-  | POIEntry
-  | PersonEntry;
+  | FactionEntry
+  | SettlementEntry
+  | LocationEntry
+  | PersonEntry
+  | EventEntry
+  | NoteEntry;
 
 export type GlossaryEntryType =
   | 'continent'
   | 'nation'
-  | 'settlement'
   | 'region'
-  | 'location'
-  | 'poi'
-  | 'person'
+  | 'geography'
+  | 'settlement'
   | 'faction'
+  | 'location'
+  | 'person'
   | 'event'
   | 'note'
-  | 'geography'
   | null;
 
 export interface Glossary {

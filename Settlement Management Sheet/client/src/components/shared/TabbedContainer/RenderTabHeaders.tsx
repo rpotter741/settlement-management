@@ -1,27 +1,66 @@
 import React, { useEffect } from 'react';
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import {
+  Box,
+  Tab,
+  IconButton,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import { Circle, Close as CloseIcon } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
 
 import DragWrapper from '../DnD/DragWrapper.jsx';
 
-import { toolMap } from 'utility/toolMap.js';
+import { tabMap } from '@/utility/tabMap.js';
 
 import truncateWithEllipsis from 'utility/truncateWithEllipses.js';
 import { useTabDrag } from 'context/DnD/TabDragContext.jsx';
+import { Tab as TabType } from '@/app/types/SidePanelTypes.js';
+import {
+  isToolDirty,
+  selectEditToolById,
+  selectToolById,
+} from '@/app/selectors/toolSelectors.js';
+import { AppDispatch, RootState } from '@/app/store.js';
+import { capitalize, isEqual } from 'lodash';
+import { useDispatch } from 'react-redux';
+import {
+  useLeftTabs,
+  useRightTabs,
+} from '@/context/TabsContext/TabsContext.js';
+import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
 
-const RenderTabHeaders = ({
-  tabs,
-  currentTab,
+interface RenderTabHeadersProps {
+  setActiveTab: (index: number, tabId: string, side: 'left' | 'right') => void;
+  removeById: (
+    tabId: string,
+    side: 'left' | 'right',
+    preventSplit: boolean
+  ) => void;
+  side?: 'left' | 'right';
+  setDragSide?: (side: 'left' | 'right' | null) => void;
+  setModalContent: ({
+    component,
+    props,
+  }: {
+    component: React.ElementType;
+    props?: Record<string, any>;
+  }) => void;
+}
+
+const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
   setActiveTab,
   removeById,
   side = 'left',
-  setDragSide = () => {},
+  setDragSide = (side: 'left' | 'right' | null) => {},
+  setModalContent,
 }) => {
+  const { tabs, current } = side === 'left' ? useLeftTabs() : useRightTabs();
   const { startDrag, endDrag, draggedType } = useTabDrag();
+  const dispatch: AppDispatch = useDispatch();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   useEffect(() => {
     if (draggedType === 'leftTab') {
       return setDragSide('right');
@@ -32,92 +71,148 @@ const RenderTabHeaders = ({
     setDragSide(null);
   }, [draggedType, setDragSide]);
 
+  const activeTab = useSelector(focusedTab);
+
   if (Array.isArray(tabs)) {
     return (
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'row',
-          display: 'flex',
           justifyContent: 'start',
           alignItems: 'center',
           width: '100%',
           boxSizing: 'border-box',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
         }}
       >
-        {tabs.map((tab, index) => (
-          <DragWrapper
-            type={side === 'left' ? 'leftTab' : 'rightTab'}
-            item={tab}
-            key={tab.tabId}
-            index={index}
-            onDropEnd={(draggedItem) => {}}
-            onReorder={(draggedIndex, targetIndex) => {}}
-            startDrag={startDrag}
-            endDrag={endDrag}
-          >
-            <Box
-              sx={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                border: '1px solid',
-                color:
-                  currentTab === tab.tabId
-                    ? 'primary.contrastText'
-                    : 'text.primary',
-                borderColor:
-                  currentTab === tab.tabId
-                    ? side === 'right'
-                      ? 'secondary.main'
-                      : 'primary.main'
-                    : 'dividerDark',
-                backgroundColor:
-                  currentTab === tab.tabId
-                    ? side === 'right'
-                      ? 'secondary.main'
-                      : 'primary.main'
-                    : 'divider',
-                boxSizing: 'border-box',
-                maxHeight: 48,
-                overflow: 'hidden',
-              }}
-              onClick={() => {
-                setActiveTab('', tab.tabId, side);
-              }}
+        {tabs.map((tab, index) => {
+          return (
+            <DragWrapper
+              type={side === 'left' ? 'leftTab' : 'rightTab'}
+              item={tab}
               key={tab.tabId}
+              index={index}
+              onDropEnd={(draggedItem) => {}}
+              onReorder={(draggedIndex, targetIndex) => {}}
+              startDrag={startDrag}
+              endDrag={endDrag}
             >
-              <Tooltip
-                title={<Typography>{tab.name}</Typography>}
-                placement="top"
-                arrow
-              >
-                <Tab
-                  label={truncateWithEllipsis(tab.name, 20)}
-                  value={tab.tabId}
-                  iconPosition="start"
-                  icon={React.createElement(toolMap[tab.tool].icon, {})}
-                  sx={{
-                    my: -2,
-                    p: 2,
-                    fontSize: '0.875rem',
-                    maxHeight: 44,
-                  }}
-                />
-              </Tooltip>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeById(tab.tabId, side, false);
+              <Box
+                sx={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderBottom: '2px solid',
+                  color:
+                    current === tab.tabId
+                      ? 'primary.contrastText'
+                      : 'text.primary',
+                  borderColor:
+                    activeTab?.tabId === tab.tabId
+                      ? isDarkMode
+                        ? 'honey.main'
+                        : 'success.main'
+                      : current === tab.tabId
+                        ? side === 'right'
+                          ? 'secondary.main'
+                          : 'primary.main'
+                        : 'transparent',
+                  backgroundColor:
+                    current === tab.tabId
+                      ? side === 'right'
+                        ? 'secondary.main'
+                        : 'primary.main'
+                      : 'divider',
+                  boxSizing: 'border-box',
+                  maxHeight: 40,
+                  overflow: 'hidden',
                 }}
-                sx={{ zIndex: 4 }}
+                onClick={() => {
+                  setActiveTab(index, tab.tabId, side);
+                }}
+                key={tab.tabId}
               >
-                <CloseIcon fontSize="0.75rem" />
-              </IconButton>
-            </Box>
-          </DragWrapper>
-        ))}
+                <Tooltip
+                  title={
+                    <Typography>
+                      {tab.name}{' '}
+                      {tab.tool &&
+                      tabMap[tab.tool as keyof typeof tabMap]?.headerName
+                        ? `(${tabMap[tab.tool as keyof typeof tabMap]?.headerName})`
+                        : ''}
+                    </Typography>
+                  }
+                  placement="top"
+                  arrow
+                  enterDelay={500}
+                >
+                  <Tab
+                    label={truncateWithEllipsis(tab.name, 20)}
+                    value={tab.tabId}
+                    iconPosition="start"
+                    icon={
+                      tabMap[tab.tool as keyof typeof tabMap].icon
+                        ? React.createElement(
+                            tabMap[tab.tool as keyof typeof tabMap]
+                              .icon as unknown as React.ElementType,
+                            {}
+                          )
+                        : undefined
+                    }
+                    sx={{
+                      my: -2,
+                      p: 2,
+                      fontSize: '0.875rem',
+                      maxHeight: 44,
+                    }}
+                  />
+                </Tooltip>
+                {tab?.isDirty && (
+                  <Circle
+                    sx={{
+                      color:
+                        current === tab.tabId ? 'warning.main' : 'error.main',
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                )}
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (tab.isDirty) {
+                      setModalContent({
+                        component: React.lazy(
+                          () =>
+                            import(
+                              '@/components/shared/TabbedContainer/ConfirmDirtyClose.jsx'
+                            )
+                        ),
+                        props: {
+                          onClose: () => removeById(tab.tabId, side, false),
+                          tab,
+                          side,
+                          setModalContent,
+                        },
+                      });
+                    } else {
+                      removeById(tab.tabId, side, false);
+                    }
+                  }}
+                  sx={{
+                    zIndex: 4,
+                    color:
+                      current === tab.tabId ? 'warning.main' : 'error.main',
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </DragWrapper>
+          );
+        })}
       </Box>
     );
   }

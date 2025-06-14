@@ -1,18 +1,40 @@
 import React, { memo } from 'react';
 import { Box, Button, Tooltip } from '@mui/material';
-import { DynamicForm } from 'components/index.js';
+import ToolInput from '../DynamicForm/ToolInput.js';
 
-const Threshold = ({
-  threshold,
-  errors,
-  index,
+const ThresholdNameField = {
+  label: '',
+  type: 'text',
+  tooltip: '',
+  validateFn: (value: string) => {
+    if (value.length < 3) {
+      return 'oh shitty fuck, name must be at least 3 characters long';
+    }
+    return null;
+  },
+};
+
+const ThresholdMaxField = {
+  label: 'Value',
+  type: 'number',
+  validateFn: (value: number) => {
+    if (value < 0 || value > 100) {
+      return 'Value must be between 0 and 100';
+    }
+    return null;
+  },
+};
+
+interface ThresholdProps {
+  id: string;
+  handleRemove?: (id: string) => void;
+  handleBlur?: () => void;
+}
+
+const Threshold: React.FC<ThresholdProps> = ({
   id,
   handleRemove,
-  handleNameValidation,
-  handleMaxValidation,
-  handleNameChange,
-  handleMaxChange,
-  handleBalanceChange,
+  handleBlur,
 }) => {
   return (
     <Box
@@ -20,62 +42,32 @@ const Threshold = ({
       sx={{
         display: 'flex',
         alignItems: 'center',
-        px: 12,
+        px: { sm: 0, md: 4, lg: 6, xl: 8, xxl: 12 },
         transition: 'top 0.3s ease, left 0.3s ease',
         gap: 2,
       }}
     >
-      <DynamicForm
-        initialValues={{ name: threshold.name }}
-        field={{
-          name: 'name',
-          type: 'text',
-          value: threshold.name,
-          textSx: { width: '100%' },
-          validate: (value) => {
-            if (value.length < 3) {
-              return 'Name must be longer than 3 characters';
-            }
-            return null;
-          },
-          id,
-          keypath: `thresholds.${id}.name`,
+      <ToolInput
+        inputConfig={{
+          ...ThresholdNameField,
+          keypath: `thresholds.data.${id}.name`,
         }}
-        shrink={true}
-        boxSx={{ width: '100%' }}
-        externalUpdate={handleNameChange}
-        parentError={errors?.name}
-        onError={handleNameValidation}
+        style={{ width: '100%' }}
       />
-      <DynamicForm
-        initialValues={{ max: threshold.max }}
-        field={{
-          name: 'max',
-          label: 'Value',
-          value: threshold.max,
-          type: 'number',
-          textSx: { width: '100%' },
-          validate: (value) => {
-            if (value < 0 || value > 100) {
-              return 'Value must be between 0 and 100';
-            }
-            return null;
-          },
-          id,
+      <ToolInput
+        inputConfig={{
+          ...ThresholdMaxField,
+          keypath: `thresholds.data.${id}.max`,
         }}
-        boxSx={{ width: '66%' }}
-        shrink={true}
-        externalUpdate={handleMaxChange}
-        parentError={errors?.max || null}
-        onError={handleMaxValidation}
-        onBlur={handleBalanceChange}
+        style={{ width: '66%' }}
+        onBlur={handleBlur}
       />
       {handleRemove !== null && (
         <Tooltip title="Remove threshold">
           <Button
             variant="contained"
             aria-label="Remove threshold"
-            onClick={() => handleRemove(id)}
+            onClick={handleRemove ? () => handleRemove(id) : () => {}}
             sx={{ px: 4 }}
           >
             Remove

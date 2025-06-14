@@ -5,7 +5,7 @@ import initializeKey from 'features/Keys/helpers/initializeKey.js';
 import EditKey from './EditKey.jsx';
 import PreviewKey from './PreviewKey.jsx';
 
-import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
+import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
 
 const CreateKey = ({ id, mode, side, tabId }) => {
   return (

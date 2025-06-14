@@ -1,4 +1,9 @@
-import { SelectionObject } from '../state/types';
+import { SelectionObject } from '@/app/types/SelectionTypes.js';
+
+interface DepthEntry {
+  id: string;
+  depth: number;
+}
 
 function flattenVisibleNodes({
   tree,
@@ -6,23 +11,23 @@ function flattenVisibleNodes({
 }: {
   tree: SelectionObject[];
   renderState: Record<string, { expanded: boolean }>;
-}): string[] {
+}): DepthEntry[] {
   if (!tree.length || !renderState) return [];
-  const visible: string[] = [];
-  const traverse = (node: SelectionObject) => {
-    visible.push(node.id);
+  const visible: DepthEntry[] = [];
+  const traverse = (node: SelectionObject, depth: number) => {
+    visible.push({ id: node.id, depth });
     if (
       node.type === 'folder' &&
       renderState[node.id]?.expanded &&
       node.children
     ) {
       node.children.forEach((childNode: SelectionObject) => {
-        traverse(childNode);
+        traverse(childNode, depth + 1);
       });
     }
   };
   tree.forEach((node: SelectionObject) => {
-    traverse(node);
+    traverse(node, 0);
   });
   return visible;
 }

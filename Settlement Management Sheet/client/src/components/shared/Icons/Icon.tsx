@@ -1,14 +1,26 @@
 import React from 'react';
 import { Box, Card, CardContent, Typography } from '@mui/material';
 
-const Icon = ({
+interface IconProps {
+  viewBox: string;
+  path: string;
+  backgroundColor?: string;
+  size?: number;
+  color?: string;
+  mode?: 'box' | 'card'; // 'box' for small icon, 'card' for larger icon with label
+  label?: string; // Optional label for card mode
+  padding?: number; // Padding for the box mode
+}
+
+const Icon: React.FC<IconProps> = ({
   viewBox,
   path,
   backgroundColor = 'transparent',
   size = 24,
   color = 'currentColor',
   mode = 'box', // Default mode: 'box', can also be 'card'
-  label,
+  label = undefined,
+  padding = 1.5,
 }) => {
   if (mode === 'card') {
     return (
@@ -48,7 +60,7 @@ const Icon = ({
   return (
     <Box
       sx={{
-        p: 1.5,
+        p: padding,
         display: 'flex',
         alignItems: 'center',
         backgroundColor,

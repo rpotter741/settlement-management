@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 const PreviewEvent = ({}) => {

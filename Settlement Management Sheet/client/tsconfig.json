@@ -15,6 +15,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "features/*": ["src/features/*"],
+      "components/*": ["src/components/*"],
+      "hooks/*": ["src/hooks/*"],
+      "utility/*": ["src/utility/*"],
+      "types/*": ["../types/*"],
+      "types": ["../types/index.ts"],
+      "context/*": ["src/context/*"]
     }
   },
   "include": ["src/**/*", "../types/common.ts", "../types/index.ts"],

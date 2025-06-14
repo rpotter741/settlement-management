@@ -1,6 +1,16 @@
 import { Box, Typography } from '@mui/material';
+import { DependencyThreshold } from './Dependency.js';
+import React from 'react';
 
-const DependencyPreview = ({ threshold, style }) => {
+interface DependencyPreviewProps {
+  threshold: DependencyThreshold;
+  style?: React.CSSProperties;
+}
+
+const DependencyPreview: React.FC<DependencyPreviewProps> = ({
+  threshold,
+  style,
+}) => {
   const test = threshold.name !== '';
   return test ? (
     <Box
@@ -20,7 +30,15 @@ const DependencyPreview = ({ threshold, style }) => {
   ) : null;
 };
 
-const PreviewDependencies = ({ data, name }) => {
+interface PreviewDependenciesProps {
+  data: DependencyThreshold[];
+  name: string;
+}
+
+const PreviewDependencies: React.FC<PreviewDependenciesProps> = ({
+  data,
+  name,
+}) => {
   return (
     <Box
       sx={{

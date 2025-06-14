@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import queryClient from 'context/QueryClient.js';
+import services from '@/services/toolServices.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
-import { useTools } from 'hooks/useTool.tsx';
+import { useTools } from 'hooks/useTools.jsx';
 
-import capitalize from 'utility/capitalize.ts';
+import capitalize from 'utility/capitalize.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/TableList.jsx';
@@ -21,14 +22,14 @@ const FetchedDisplay = ({
   onConfirm = () => {},
   dependency = false,
 }) => {
-  const { selectValue } = useTools(tool);
-  const depId = selectValue('refId');
+  const { selectStaticValue } = useTools(tool);
+  const depId = selectStaticValue('refId');
   const [myTools, setMyTools] = useState(true);
   const [myData, setMyData] = useState([]);
   const [search, setSearch] = useState('');
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    usePaginatedTool({
+    services.paginateToolContent({
       tool: tool,
       scope: type,
       search,
@@ -67,10 +68,10 @@ const FetchedDisplay = ({
         type === 'personal' ? `My ${displayName}` : `Community ${displayName}`
       }
       titleType="h5"
-      defaultState={myTools}
+      open={myTools}
       styles={{ width: '100%', mb: 2 }}
       titleSx={{ color: 'secondary.light', textAlign: 'center' }}
-      noDefaultHandler={() => setMyTools(!myTools)}
+      toggleOpen={() => setMyTools(!myTools)}
     >
       <TableList
         options={options}

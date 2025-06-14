@@ -1,25 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import get from 'lodash/get';
+import { get } from 'lodash';
 import { useSelector } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
+import { useDispatch } from 'react-redux';
 
 import { Box, Button, Tooltip, Typography } from '@mui/material';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
-import { getErrorCount } from 'features/validation/validationSlice.js';
+import { getErrorCount } from '@/app/slice/validationSlice.js';
 
 import ChecklistItem from './ChecklistItem.jsx';
 import countValidEntries from './countValidEntries.js';
 import calculateProgressColor from './calculateProgressColor.js';
+import { AppDispatch } from '@/app/store.js';
+import { updateTab } from '@/app/slice/sidePanelSlice.js';
 
 const ValidationChecklist = ({
   defaultExpand,
   checklistContent,
   errors,
   tool,
+  side,
   ...props
 }) => {
+  const dispatch: AppDispatch = useDispatch();
   const theme = useTheme();
   const [expanded, setExpanded] = useState(defaultExpand || false);
   const [errorStates, setErrorStates] = useState([]);
@@ -78,6 +83,14 @@ const ValidationChecklist = ({
 
   const toggleExpand = () => {
     setExpanded(!expanded);
+    dispatch(
+      updateTab({
+        tabId: props.tabId,
+        side: side,
+        keypath: 'tabExpansionState.validationChecklist',
+        updates: !expanded,
+      })
+    );
   };
 
   return (
@@ -110,7 +123,8 @@ const ValidationChecklist = ({
             left: '-64px', // Place just outside the card
             width: '48px',
             height: '48px',
-            backgroundColor: 'primary.main',
+            backgroundColor:
+              side === 'left' ? 'primary.main' : 'secondary.main',
             borderRadius: '8px 0 0 8px ', // Rounded edge on the left
             display: 'flex',
             alignItems: 'center',

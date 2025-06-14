@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import useOrderedData from '@/hooks/useOrderedData.js';
 
 import {
   Box,
@@ -13,14 +14,11 @@ import {
   TextField,
   Chip,
 } from '@mui/material';
-import ArrowForward from '@mui/icons-material/ArrowForward';
+import { ArrowForward, Delete } from '@mui/icons-material';
 
-import {
-  DraggableList,
-  DropZone,
-  DynamicForm,
-} from '../../../../components/index.js';
 import sPCFormData from '../../helpers/sPCFormData.js';
+import ToolInput from '@/components/shared/DynamicForm/ToolInput.js';
+import { set } from 'lodash';
 
 const settlementTypes = [
   {
@@ -44,28 +42,26 @@ const settlementTypes = [
 ];
 
 const SettlementPointsCost = () => {
-  const { id } = useToolContext();
+  const { tool, id } = useShellContext();
   const {
-    edit,
-    selectValue,
-    updateTool: updateAttribute,
-    validateToolField: validateAttributeField,
-    errors: spcErrors,
-  } = useTools('attribute', id);
+    data: costs,
+    order,
+    errors,
+    add,
+    remove,
+  } = useOrderedData(tool, id, 'settlementPointCost');
 
-  const settlementPointCost = selectValue('settlementPointCost');
-  const costs = edit?.settlementPointCost.data;
-  const errors = spcErrors.settlementPointCost;
-  const order = edit?.settlementPointCost.order;
-
-  const [selectedValue, setSelectedValue] = useState(null);
+  const [selectedValue, setSelectedValue] = useState<any>(null);
   const [inputValue, setInputValue] = useState('');
 
   const available = useMemo(() => {
-    const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {
-      types.push(id);
-      return types;
-    }, []);
+    const assignedTypes = Object.keys(costs || {}).reduce(
+      (types: Array<string>, id) => {
+        types.push(id);
+        return types;
+      },
+      []
+    );
     const types = settlementTypes.filter(
       (type) => !assignedTypes.includes(type.id)
     );
@@ -73,65 +69,20 @@ const SettlementPointsCost = () => {
   }, [costs]);
 
   const fields = useMemo(() => {
-    return Object.entries(costs || {}).map(([id, spc]) => ({
-      ...sPCFormData,
-      name: spc.name,
-      label: spc.name.charAt(0).toUpperCase() + spc.name.slice(1),
-      tooltip: null,
-      id,
-    }));
-  }, [costs, edit]);
+    return Object.entries(costs || {}).map(([id, spc]) => {
+      const typedSpc = spc as { name: string; value: number };
+      return {
+        ...sPCFormData,
+        name: typedSpc.name,
+        label: typedSpc.name.charAt(0).toUpperCase() + typedSpc.name.slice(1),
+        tooltip: undefined,
+        id,
+        keypath: `settlementPointCost.data.${id}.value`,
+      };
+    });
+  }, [costs]);
 
-  const handleValidationUpdate = (error, { id }) => {
-    validateAttributeField(`settlementPointCost.${id}.value`, error);
-  };
-
-  // Handle value change
-  const handleValueChange = useCallback(
-    (value, { id }) => {
-      updateAttribute(`settlementPointCost.data.${id}.value`, value);
-    },
-    [costs]
-  );
-
-  const handleRemoveSettlementType = useCallback(
-    (id) => {
-      const newSPC = { ...costs };
-      delete newSPC[id];
-      updateAttribute('settlementPointCost.data', newSPC);
-
-      const newErrors = { ...errors };
-      delete newErrors[id];
-      validateAttributeField('settlementPointCost', newErrors);
-
-      const newOrder = order.filter((order) => order !== id);
-      updateAttribute('settlementPointCost.order', newOrder);
-    },
-    [costs, errors]
-  );
-
-  const handleAdd = () => {
-    if (!selectedValue?.id) return;
-    const spc = selectedValue;
-    const newSPC = { ...costs };
-    const newErrors = { ...errors };
-    const newOrder = [...order];
-
-    newSPC[spc.id] = { name: spc.name.toLowerCase(), value: 1 };
-    newErrors[spc.id] = { name: null, value: null };
-    newOrder.push(spc.id);
-
-    updateAttribute('settlementPointCost.data', newSPC);
-
-    validateAttributeField('settlementPointCost', newErrors);
-
-    updateAttribute('settlementPointCost.order', newOrder);
-
-    setInputValue('');
-    setSelectedValue(null); // Clear after transfer
-  };
-
-  if (!settlementPointCost) return <Box>Loading...</Box>;
+  if (!order) return <Box>Loading...</Box>;
 
   return (
     <Box
@@ -184,7 +135,15 @@ const SettlementPointsCost = () => {
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleAdd();
+                  add({
+                    id: selectedValue.id,
+                    entry: {
+                      name: selectedValue.name,
+                      value: 1, // Default value
+                    },
+                    sort: false,
+                  });
+                  setInputValue('');
                 }
               }}
             />
@@ -196,6 +155,7 @@ const SettlementPointsCost = () => {
           renderOption={(props, option) => (
             <Box
               {...props}
+              component="li"
               key={option.name}
               sx={{ display: 'flex', alignItems: 'center' }}
             >
@@ -214,42 +174,48 @@ const SettlementPointsCost = () => {
       <Divider orientation="vertical" flexItem>
         <Chip
           label={<ArrowForward />}
-          onClick={handleAdd}
+          onClick={
+            () => {
+              add({
+                id: selectedValue.id,
+                entry: {
+                  name: selectedValue.name,
+                  value: 1, // Default value
+                },
+                sort: false,
+              });
+              setInputValue('');
+            } // Clear input after adding
+          }
           sx={{ width: '100%', color: 'white' }}
         />
       </Divider>
       <Box>
-        {order.map((id, index) => {
+        {order.map((id: string, index: number) => {
           const field = fields.find((f) => f.id === id);
           if (!field) return null;
           return (
-            <DynamicForm
-              key={costs[id].name}
-              initialValues={{
-                [costs[id].name]: costs[id].value || 1,
-              }}
-              field={field}
-              validate={field.validate}
-              externalUpdate={handleValueChange}
-              boxSx={{
-                width: '100%',
-                m: 0,
-                p: 0,
-              }}
-              onRemove={
-                costs[id].name !== 'default'
-                  ? () => handleRemoveSettlementType(id)
-                  : null
-              }
-              onMoreDetails={
-                costs[id].name !== 'default'
-                  ? () => console.log('More details')
-                  : null
-              }
-              shrink
-              parentError={errors[id] ? errors[id].value : null}
-              onError={handleValidationUpdate}
-            />
+            <React.Fragment key={id}>
+              <ToolInput
+                inputConfig={field}
+                style={{
+                  width: '100%',
+                  m: 0,
+                  p: 0,
+                }}
+                shrink
+                onMoreDetails={
+                  field.name !== 'default'
+                    ? () => {
+                        console.log('More details clicked');
+                      }
+                    : undefined
+                }
+                onRemove={
+                  field.name !== 'default' ? () => remove(id) : undefined
+                }
+              />
+            </React.Fragment>
           );
         })}
       </Box>

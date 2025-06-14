@@ -23,35 +23,6 @@ const getGlossaries = async (req, res) => {
   }
 };
 
-const getGlossaryById = async (req, res) => {
-  try {
-    const { glossaryId } = req.query;
-    if (!requireFields([glossaryId], req.query, res)) return;
-    const glossary = await prisma.glossary.findUnique({
-      where: { id: glossaryId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        nodes: {
-          select: {
-            id: true,
-            name: true,
-            entryType: true,
-            type: true,
-            parentId: true,
-            sortIndex: true,
-          },
-        },
-      },
-    });
-    return res.json({ glossary });
-  } catch (error) {
-    console.error(`Error getting glossary:`, error);
-    return res.status(500).json({ message: `Error getting glossary.` });
-  }
-};
-
 const getGlossaryNodes = async (req, res) => {
   try {
     const { glossaryId } = req.query;
@@ -66,6 +37,7 @@ const getGlossaryNodes = async (req, res) => {
         type: true,
         parentId: true,
         sortIndex: true,
+        glossaryId: true,
       },
     });
     return res.json({ structure });
@@ -77,9 +49,34 @@ const getGlossaryNodes = async (req, res) => {
   }
 };
 
+const getGlossaryEntryById = async (req, res) => {
+  try {
+    const { id, entryType } = req.query;
+    if (!requireFields(['id', 'entryType'], req.query, res)) return;
+    const entryModel = glossaryModelMap[entryType];
+    if (!entryModel) {
+      console.log(`Invalid entry type:`, entryType);
+      return res.status(400).json({ message: `Invalid entry type.` });
+    }
+    const entry = await entryModel.findUnique({
+      where: { id },
+    });
+    if (!entry) {
+      return res.status(404).json({ message: `Entry not found.` });
+    }
+    console.log(`Found entry:`, entry);
+    return res.json({ entry });
+  } catch (error) {
+    console.error(`Error getting glossary node by ID:`, error);
+    return res
+      .status(500)
+      .json({ message: `Error getting glossary node by ID.` });
+  }
+};
+
 const createGlossary = async (req, res) => {
   try {
-    const { id, name, description } = req.body;
+    const { id, name, description, theme = 'default' } = req.body;
     if (!requireFields(['id', 'name', 'description'], req.body, res)) return;
     const newGlossary = await prisma.glossary.create({
       data: {
@@ -88,6 +85,7 @@ const createGlossary = async (req, res) => {
         description,
         createdBy: req?.user?.id || 'robbiepottsdm',
         contentType: 'CUSTOM',
+        theme,
       },
     });
     return res.json({ glossary: newGlossary });
@@ -97,62 +95,10 @@ const createGlossary = async (req, res) => {
   }
 };
 
-const renameNode = async (req, res) => {
-  try {
-    const { id, name } = req.body;
-    if (!requireFields(['id', 'name'], req.body, res)) return;
-    const updatedEntry = await prisma.glossaryNode.update({
-      where: { id },
-      data: { name },
-    });
-    return res.json({ entry: updatedEntry });
-  } catch (error) {
-    console.error(`Error renaming entry:`, error);
-    return res.status(500).json({ message: `Error renaming entry.` });
-  }
-};
-const deleteNode = async (req, res) => {
-  console.log('deleting node');
-  try {
-    const { id } = req.body;
-    if (!requireFields(['id'], req.body, res)) return;
-
-    await prisma.glossaryNode.delete({ where: { id } });
-    return res.json({ message: 'Entry deleted successfully.' });
-  } catch (error) {
-    console.error(`Error deleting entry:`, error);
-    return res.status(500).json({ message: `Error deleting entry.` });
-  }
-};
-const createFolder = async (req, res) => {
-  try {
-    const { id, name, parentId, glossaryId, entryType } = req.body;
-    if (
-      !requireFields(['id', 'name', 'glossaryId', 'entryType'], req.body, res)
-    )
-      return;
-    const newEntry = await prisma.glossaryNode.create({
-      data: { id, name, entryType, type: 'folder', parentId, glossaryId },
-    });
-    return res.json({ entry: newEntry });
-  } catch (error) {
-    console.error(`Error creating entry:`, error);
-    return res.status(500).json({ message: `Error creating entry.` });
-  }
-};
-
 const createEntryWithNode = async (req, res) => {
   try {
-    const {
-      id,
-      name,
-      entryType,
-      type,
-      glossaryId,
-      parentId,
-      entryData,
-      version,
-    } = req.body;
+    const { id, name, entryType, type, glossaryId, parentId, version } =
+      req.body;
     const entryModel = glossaryModelMap[entryType];
     if (!entryModel) {
       console.log(`Invalid entry type:`, entryType);
@@ -250,21 +196,14 @@ const updateEntryWithNode = async (req, res) => {
     }
     if (!requireFields(['id', 'entryType', 'entryData'], req.body, res)) return;
 
-    const matchedShape = modelUpdateKeys[entryType].reduce((acc, key) => {
-      if (entryData[key] !== undefined) {
-        acc[key] = entryData[key];
-      }
-      return acc;
-    }, {});
-
     const updatedEntry = await prisma.$transaction([
       prisma.glossaryNode.update({
         where: { id },
-        data: { name: entryData.name },
+        data: entryData?.name ? { name: entryData.name } : {},
       }),
       entryModel.update({
         where: { id },
-        data: { ...matchedShape, updatedAt: new Date() },
+        data: { ...entryData, updatedAt: new Date() },
       }),
     ]);
 
@@ -352,7 +291,39 @@ const deleteGlossary = async (req, res) => {
   try {
     const { id } = req.body;
     if (!requireFields(['id'], req.body, res)) return;
-    await prisma.glossary.delete({ where: { id } });
+
+    const structure = await prisma.glossaryNode.findMany({
+      where: { glossaryId: id },
+      orderBy: [{ sortIndex: 'asc' }],
+      select: {
+        id: true,
+        name: true,
+        entryType: true,
+        type: true,
+        parentId: true,
+        sortIndex: true,
+      },
+    });
+
+    const onlyTops = structure.filter((node) => !node.parentId);
+
+    const idsByType = onlyTops.reduce((acc, node) => {
+      const nodeChildrenIds = collectEntriesByTypeFromFlat(node.id, structure);
+      Object.entries(nodeChildrenIds).forEach(([type, ids]) => {
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(...ids);
+      });
+      return acc;
+    }, {});
+
+    await prisma.$transaction([
+      prisma.glossary.delete({ where: { id } }),
+      ...Object.entries(idsByType).flatMap(([type, ids]) => {
+        const model = glossaryModelMap[type];
+        return model ? [model.deleteMany({ where: { id: { in: ids } } })] : [];
+      }),
+    ]);
+
     return res.json({ message: 'Glossary deleted successfully.' });
   } catch (error) {
     console.error(`Error deleting glossary:`, error);
@@ -362,12 +333,9 @@ const deleteGlossary = async (req, res) => {
 
 export {
   getGlossaries,
-  getGlossaryById,
   getGlossaryNodes,
+  getGlossaryEntryById,
   createGlossary,
-  renameNode,
-  deleteNode,
-  createFolder,
   updateNode,
   updateNodeSortIndexes,
   updateNodeParentId,

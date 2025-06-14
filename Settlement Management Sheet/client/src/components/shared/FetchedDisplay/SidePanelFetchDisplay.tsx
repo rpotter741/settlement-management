@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import queryClient from 'context/QueryClient.js';
+import services from '@/services/toolServices.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
-import { useTools } from 'hooks/useTool.tsx';
+import { useTools } from 'hooks/useTools.jsx';
 
-import capitalize from 'utility/capitalize.ts';
+import capitalize from 'utility/capitalize.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/SmallTableList.jsx';
 
-const FetchedDisplay = ({
+const SidePanelFetchedDisplay = ({
   onActionClick,
   options,
   type,
@@ -22,14 +23,14 @@ const FetchedDisplay = ({
   dependency = false,
   isOpen = true,
 }) => {
-  const { selectValue } = useTools(tool);
-  const depId = selectValue('refId');
-  const [myTools, setMyTools] = useState(isOpen);
-  const [myData, setMyData] = useState([]);
-  const [search, setSearch] = useState('');
+  const { selectStaticValue } = useTools(tool);
+  const depId = selectStaticValue('refId');
+  const [myTools, setMyTools] = useState<boolean>(isOpen);
+  const [myData, setMyData] = useState<any>([]);
+  const [search, setSearch] = useState<string>('');
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    usePaginatedTool({
+    services.paginateToolContent({
       tool: tool,
       scope: type,
       search,
@@ -68,14 +69,14 @@ const FetchedDisplay = ({
         type === 'personal' ? `My ${displayName}` : `Community ${displayName}`
       }
       titleType="body2"
-      defaultState={myTools}
+      open={myTools}
       styles={{ width: '100%', mb: 2, px: 2 }}
       titleSx={{
         color: 'secondary.light',
         textAlign: 'center',
         fontSize: '1rem',
       }}
-      noDefaultHandler={() => setMyTools(!myTools)}
+      toggleOpen={() => setMyTools(!myTools)}
     >
       <TableList
         options={options}
@@ -97,4 +98,4 @@ const FetchedDisplay = ({
   );
 };
 
-export default FetchedDisplay;
+export default SidePanelFetchedDisplay;

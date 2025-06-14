@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import { Box, Typography, Divider, Tooltip, IconButton } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
@@ -35,7 +35,7 @@ const settlementTypes = [
 ];
 
 const SettlementPointsCost = () => {
-  const { id } = useToolContext();
+  const { id } = useShellContext();
   const {
     edit,
     selectValue,

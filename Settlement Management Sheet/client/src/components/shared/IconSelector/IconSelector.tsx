@@ -3,7 +3,7 @@ import { Box, Typography, Card, Button } from '@mui/material';
 import Icon from '../Icons/Icon.jsx';
 import iconList from './iconList';
 import IconColorPicker from './IconColorPicker.jsx';
-import { useTools } from 'hooks/useTool.tsx';
+import { useTools } from 'hooks/useTools.jsx';
 
 const IconSelector = ({ tool, setModalContent, id }) => {
   const { edit, updateTool } = useTools(tool, id);

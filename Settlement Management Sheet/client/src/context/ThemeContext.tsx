@@ -14,7 +14,7 @@ import commonStyles from '../themes/commonStyles.js';
 
 import themeOptions from '../themes/themeOptions.js';
 
-// Add this type assertion or define the type in themeOptions.ts for better safety
+// Add this type assertion or define the type in themeOptions.js for better safety
 const themeOptionsTyped: { [key: string]: typeof themeOptions.default } =
   themeOptions;
 
@@ -31,7 +31,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [themeKey, setThemeKey] = useState<string>('default');
+  const [themeKey, setThemeKey] = useState<string>('dark');
   // Function to change the theme key
   const changeThemeTo = (newThemeKey: string) => {
     if (themeOptionsTyped[newThemeKey]) {

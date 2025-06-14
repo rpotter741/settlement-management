@@ -1,4 +1,4 @@
-import { AppDispatch } from '@/app/store';
+import { AppDispatch } from '@/app/store.js';
 
 /**
  * Standardized optimistic update helper.

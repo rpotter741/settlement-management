@@ -1,22 +1,29 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useSnackbar } from 'context/SnackbarContext.jsx';
+import React, { useCallback, useState, useEffect, lazy } from 'react';
+import { useTools } from '@/hooks/useTools.jsx';
 
 import { v4 as newId } from 'uuid';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';
-import EditDependency from 'components/shared/Metadata/EditDependency.jsx';
-import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
+import EditDependency from '@/components/shared/Metadata/EditDependency.jsx';
+import { ToolName } from '@/app/types/ToolTypes.js';
+import { ModalContent } from '../TabbedContainer/TabbedContainer.js';
 
-const ObjectDependencies = ({ tool, setShowModal, id }) => {
-  const { selectValue, edit, updateTool, validateToolField, errors } = useTools(
-    tool,
-    id
-  );
-  const dependencies = selectValue('dependencies');
-  const [showTooltip, setShowTooltip] = useState(false);
-  const { showSnackbar } = useSnackbar();
-  const [lastId, setLastId] = useState(null);
+interface ObjectDependenciesProps {
+  tool: ToolName;
+  setModalContent: (content: ModalContent) => void;
+  id: string;
+  displayName: string;
+}
+
+const ObjectDependencies: React.FC<ObjectDependenciesProps> = ({
+  tool,
+  setModalContent,
+  id,
+  displayName,
+}) => {
+  const { edit } = useTools(tool, id);
+
+  const outerUpdate = useCallback(() => {}, [tool, id]);
 
   return (
     <Box>
@@ -30,14 +37,26 @@ const ObjectDependencies = ({ tool, setShowModal, id }) => {
         modifier of 0.75 means this {tool} will be 25% less at the other {tool}
         's threshold.
       </Typography>
-      <EditDependency tool={tool} id={id} />
+      <EditDependency />
       <Button
         variant="contained"
         color="success"
-        aria-label="Add threshold"
+        aria-label="Add dependency"
         sx={{ px: 4 }}
         onClick={() => {
-          setShowModal('Select Category');
+          setModalContent({
+            component: lazy(() => import('../LoadTool/LoadTool.jsx')),
+            props: {
+              tool,
+              displayName,
+              keypath: 'dependencies.order',
+              refKeypath: 'dependencies.refIds',
+              selectionMode: true,
+              outerUpdate,
+              outerTool: edit,
+              dependency: true,
+            },
+          });
         }}
       >
         Add Dependency

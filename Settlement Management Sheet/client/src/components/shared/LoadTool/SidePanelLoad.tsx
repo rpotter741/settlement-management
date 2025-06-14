@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useSnackbar } from 'context/SnackbarContext.jsx';
-import useServer from '../../../services/useServer.js';
+import { useTools } from 'hooks/useTools.jsx';
+import { showSnackbar } from '@/app/slice/snackbarSlice.js';
+import { useDispatch } from 'react-redux';
+import toolServices from '@/services/toolServices.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import { Box, Typography } from '@mui/material';
 
@@ -24,6 +25,7 @@ const options = [
 ];
 
 import FetchedDisplay from 'components/shared/FetchedDisplay/SidePanelFetchDisplay.jsx';
+import { AppDispatch } from '@/app/store.js';
 
 const LoadTool = ({
   tool,
@@ -36,8 +38,8 @@ const LoadTool = ({
   outerTool = {},
   dependency = false,
 }) => {
+  const dispatch: AppDispatch = useDispatch();
   const { loadNewTool } = useTools(tool);
-  const { showSnackbar } = useSnackbar();
   const [selected, setSelected] = useState({
     ids: get(outerTool, keypath) || [],
     refIds: get(outerTool, refKeypath) || [],
@@ -57,27 +59,33 @@ const LoadTool = ({
       case 'Delete':
         return async () => {
           try {
-            await useServer({
+            await toolServices.deleteTool({
               tool,
-              type: 'delete',
-              data: { refId, id },
+              id,
             });
-            showSnackbar('Deleted successfully', 'success');
+            dispatch(
+              showSnackbar({ message: 'Deleted successfully', type: 'success' })
+            );
           } catch (error) {
-            showSnackbar(error.message, 'error');
+            dispatch(
+              showSnackbar({
+                message: `Unable to delete ${tool}. Try again later.`,
+                type: 'error',
+              })
+            );
           }
         };
       case 'Favorite':
         return async () => {
           try {
-            // await useServer({
-            //   tool,
-            //   type: 'favorite',
-            //   data: { refId, id },
-            // });
-            showSnackbar('Favorited successfully', 'success');
-          } catch (error) {
-            showSnackbar(error.message, 'error');
+            dispatch(
+              showSnackbar({
+                message: 'Favorited successfully',
+                type: 'success',
+              })
+            );
+          } catch (error: any) {
+            dispatch(showSnackbar({ message: error.message, type: 'error' }));
           }
         };
       default:

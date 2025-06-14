@@ -149,12 +149,12 @@ const deleteContent = async (req, res) => {
 
     if (!requireFields(['tool', 'id'], req.body, res)) return;
 
-    const model = prisma[tool];
-    if (!model) {
+    const model = (prisma as any)[tool];
+    if (!model || typeof model.delete !== 'function') {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }
 
-    await model.deleteMany({ where: { id } });
+    await model.delete({ where: { id } });
     return res.status(200).json({ message: 'Content deleted successfully.' });
   } catch (error) {
     console.error('Error deleting content:', error);

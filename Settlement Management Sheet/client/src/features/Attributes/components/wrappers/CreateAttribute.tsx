@@ -7,37 +7,37 @@ import EditAttribute from './EditAttribute.jsx';
 import PreviewAttribute from './PreviewAttribute.jsx';
 import checklistContent from '../../helpers/attributeChecklist.js';
 
-import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
+import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
+import { Tab } from '@/app/types/SidePanelTypes.js';
 
-const CreateAttribute = ({ id, mode, side, tabId, setModalContent }) => {
+export const validationFields = [
+  'name',
+  'description',
+  'balance',
+  'thresholds',
+  'settlementPointCost',
+];
+
+interface CreateAttributeProps {
+  tab: Tab;
+  setModalContent: (content: {
+    component: React.ComponentType;
+    props?: Record<string, any>;
+  }) => void;
+}
+
+const CreateAttribute: React.FC<CreateAttributeProps> = ({
+  tab,
+  setModalContent,
+}) => {
   return (
     <CreateShell
-      tool="attribute"
-      id={id}
+      tab={tab}
       initializeTool={initializeAttribute}
-      validationFields={[
-        'name',
-        'description',
-        'balance',
-        'thresholds',
-        'settlementPointCost',
-      ]}
+      validationFields={validationFields}
       editComponent={EditAttribute}
       previewComponent={PreviewAttribute}
       checklistContent={checklistContent}
-      loadDisplayName="Load Attribute"
-      modalComponents={{
-        'Change Icon': IconSelector,
-      }}
-      modalComponentsProps={{
-        'Change Icon': {
-          tool: 'attribute',
-          id,
-        },
-      }}
-      side={side}
-      mode={mode}
-      tabId={tabId}
       setModalContent={setModalContent}
     />
   );

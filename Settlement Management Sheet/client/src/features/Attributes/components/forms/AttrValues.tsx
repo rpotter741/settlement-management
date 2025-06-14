@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
+import React, { useContext, useState } from 'react';
+import { useTools } from 'hooks/useTools.jsx';
 import autobalanceSteps from '../../helpers/attributeAutoBalance.js';
-import { attributeFields } from '../../helpers/attributeFormData';
+import { attributeFields } from '../../helpers/attributeFormData.js';
 
 import {
   Box,
@@ -11,55 +11,48 @@ import {
   Switch,
   FormLabel,
 } from '@mui/material';
-import { DynamicForm } from '../../../../components/index.js';
-import InfoIcon from '@mui/icons-material/Info';
+import { ShellContext } from '@/context/ShellContext.js';
+import ToolInput from '@/components/shared/DynamicForm/ToolInput.js';
+import { Info as InfoIcon } from '@mui/icons-material';
 
-const AttrValues = ({ values, id, columns }) => {
-  const {
-    edit,
-    updateTool: updateAttribute,
-    validateToolField: validateAttributeField,
-    errors,
-  } = useTools('attribute', id);
+interface AttrValuesProps {
+  columns: number;
+}
+
+const AttrValues: React.FC<AttrValuesProps> = ({ columns }) => {
+  const { tool, id } = useContext(ShellContext);
+  const { selectEditValue } = useTools(tool, id);
 
   const [autobalance, setAutobalance] = useState(false);
 
-  const handleUpdate = (updates, { keypath }) => {
-    updateAttribute(keypath, updates);
-  };
+  // const handleAutobalanceChange = ({ field, value, values, setValues }) => {
+  //   if (field === 'costPerLevel' || 'maxPerLevel') {
+  //     const stepMap = autobalanceSteps[field];
+  //     if (!stepMap) {
+  //       return;
+  //     }
+  //     const closestStep = Object.keys(stepMap).reduce((closest, current) => {
+  //       return Math.abs(current - value) < Math.abs(closest - value)
+  //         ? current
+  //         : closest;
+  //     }, Object.keys(stepMap)[0]);
 
-  const handleValidationUpdate = (error, { keypath }) => {
-    validateAttributeField(keypath, error);
-  };
-
-  const handleAutobalanceChange = ({ field, value, values, setValues }) => {
-    if (field === 'costPerLevel' || 'maxPerLevel') {
-      const stepMap = autobalanceSteps[field];
-      if (!stepMap) {
-        return;
-      }
-      const closestStep = Object.keys(stepMap).reduce((closest, current) => {
-        return Math.abs(current - value) < Math.abs(closest - value)
-          ? current
-          : closest;
-      }, Object.keys(stepMap)[0]);
-
-      if (field === 'costPerLevel') {
-        setValues({
-          ...values,
-          costPerLevel: value, // User input
-          ...stepMap[closestStep], // Adjust related fields
-        });
-      }
-      if (field === 'maxPerLevel') {
-        setValues({
-          ...values,
-          maxPerLevel: value,
-          ...stepMap[closestStep],
-        });
-      }
-    }
-  };
+  //     if (field === 'costPerLevel') {
+  //       setValues({
+  //         ...values,
+  //         costPerLevel: value, // User input
+  //         ...stepMap[closestStep], // Adjust related fields
+  //       });
+  //     }
+  //     if (field === 'maxPerLevel') {
+  //       setValues({
+  //         ...values,
+  //         maxPerLevel: value,
+  //         ...stepMap[closestStep],
+  //       });
+  //     }
+  //   }
+  // };
 
   return (
     <Box>
@@ -104,36 +97,9 @@ const AttrValues = ({ values, id, columns }) => {
           gridColumn: 'span 3',
         }}
       >
-        <DynamicForm
-          initialValues={{ maxPerLevel: edit.balance.maxPerLevel || 0 }}
-          validate={attributeFields.maxPerLevel.validate}
-          field={attributeFields.maxPerLevel}
-          externalUpdate={handleUpdate}
-          shrink
-          parentError={errors.balance.maxPerLevel}
-          onError={handleValidationUpdate}
-          isExpanded={values}
-        />
-        <DynamicForm
-          initialValues={{ healthPerLevel: edit.balance.healthPerLevel || 0 }}
-          validate={attributeFields.healthPerLevel.validate}
-          field={attributeFields.healthPerLevel}
-          externalUpdate={handleUpdate}
-          shrink
-          parentError={errors.balance.healthPerLevel}
-          onError={handleValidationUpdate}
-          isExpanded={values}
-        />
-        <DynamicForm
-          initialValues={{ costPerLevel: edit.balance.costPerLevel || 0 }}
-          validate={attributeFields.costPerLevel.validate}
-          field={attributeFields.costPerLevel}
-          externalUpdate={handleUpdate}
-          shrink
-          parentError={errors.balance.costPerLevel}
-          onError={handleValidationUpdate}
-          isExpanded={values}
-        />
+        <ToolInput inputConfig={attributeFields.maxPerLevel} />
+        <ToolInput inputConfig={attributeFields.healthPerLevel} />
+        <ToolInput inputConfig={attributeFields.costPerLevel} />
       </Box>
     </Box>
   );

@@ -1,15 +1,30 @@
 import React, { memo } from 'react';
-import { Box, Button, Tooltip, Typography } from '@mui/material';
-import { DynamicForm } from 'components/index.js';
+import { Box, Typography } from '@mui/material';
+import ToolInput from '@/components/shared/DynamicForm/ToolInput.jsx';
 
-const Dependency = ({
-  threshold,
-  errors,
-  index,
-  id,
-  handleModifierValidation,
-  handleModifierChange,
-}) => {
+export interface DependencyThreshold {
+  id: string;
+  name: string;
+  modifier: number;
+}
+
+interface DependencyProps {
+  threshold: DependencyThreshold;
+  keypath: string;
+}
+
+const modifierField = {
+  label: 'Modifier',
+  type: 'number',
+  validateFn: (value: number) => {
+    if (value < 0 || value > 5) {
+      return 'Value must be between 0 and 5';
+    }
+    return null;
+  },
+};
+
+const Dependency: React.FC<DependencyProps> = ({ threshold, keypath }) => {
   return (
     <Box
       key={threshold.id}
@@ -24,28 +39,9 @@ const Dependency = ({
       <Typography sx={{ width: '33%', textAlign: 'left' }} variant="h6">
         {threshold.name.charAt(0).toUpperCase() + threshold.name.slice(1)}:
       </Typography>
-      <DynamicForm
-        initialValues={{ modifier: threshold.modifier }}
-        field={{
-          name: 'modifier',
-          label: 'Modifier',
-          value: threshold.modifier,
-          type: 'number',
-          textSx: { width: '100%' },
-          validate: (value) => {
-            if (value < 0 || value > 5) {
-              return 'Value must be between 0 and 5';
-            }
-            return null;
-          },
-          id: id,
-          index: index,
-        }}
-        boxSx={{ width: '66%' }}
-        shrink={true}
-        externalUpdate={handleModifierChange}
-        parentError={errors?.max || null}
-        onError={handleModifierValidation}
+      <ToolInput
+        inputConfig={{ ...modifierField, keypath }}
+        style={{ width: '66%' }}
       />
     </Box>
   );

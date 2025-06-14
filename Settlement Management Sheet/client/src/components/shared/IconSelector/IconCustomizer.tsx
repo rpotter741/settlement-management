@@ -4,18 +4,29 @@ import { SketchPicker } from 'react-color';
 import Icon from '../Icons/Icon.jsx';
 import iconList from './iconList.jsx';
 
-const IconCustomizer = ({ icons, onSelect }) => {
-  const [selectedIcon, setSelectedIcon] = useState(null);
+interface IconCustomizerProps {
+  icons: Array<Icon>;
+  onSelect?: ({ icon, color }: { icon: Icon; color: string }) => void;
+}
+
+interface Icon {
+  name: string;
+  viewBox: string;
+  d: string;
+}
+
+const IconCustomizer: React.FC<IconCustomizerProps> = ({ icons, onSelect }) => {
+  const [selectedIcon, setSelectedIcon] = useState<Icon | null>(null);
   const [color, setColor] = useState('#000000');
 
-  const handleIconChange = (event, newValue) => {
+  const handleIconChange = (event: any, newValue: Icon) => {
     setSelectedIcon(newValue);
     if (onSelect) {
       onSelect({ icon: newValue, color });
     }
   };
 
-  const handleColorChange = (newColor) => {
+  const handleColorChange = (newColor: any) => {
     setColor(newColor.hex);
     if (onSelect && selectedIcon) {
       onSelect({ icon: selectedIcon, color: newColor.hex });
@@ -31,6 +42,7 @@ const IconCustomizer = ({ icons, onSelect }) => {
           getOptionLabel={(option) => option.name}
           renderOption={(props, option) => (
             <Box
+              component="li"
               {...props}
               sx={{
                 display: 'flex',
@@ -39,11 +51,13 @@ const IconCustomizer = ({ icons, onSelect }) => {
                 cursor: 'pointer',
               }}
             >
-              <Icon viewBox={option.viewBox} path={option.path} size={24} />
+              <Icon viewBox={option.viewBox} path={option.d} size={24} />
               <Typography>{option.name}</Typography>
             </Box>
           )}
-          onChange={handleIconChange}
+          onChange={(e, newValue) =>
+            newValue !== null ? handleIconChange(e, newValue) : () => {}
+          }
           renderInput={(params) => (
             <TextField {...params} label="Select Icon" variant="outlined" />
           )}

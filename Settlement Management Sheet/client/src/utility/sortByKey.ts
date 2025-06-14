@@ -1,4 +1,4 @@
-export const sortByKey = (array = [], key) => {
+export const sortByKey = (array = [], key: string) => {
   if (!Array.isArray(array) || !key) return [];
 
   return [...array].sort((a, b) => {

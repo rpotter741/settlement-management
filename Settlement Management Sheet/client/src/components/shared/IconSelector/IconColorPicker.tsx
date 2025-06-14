@@ -2,27 +2,34 @@ import React, { useState } from 'react';
 import { Box, ButtonGroup, Button } from '@mui/material';
 import { HexColorPicker } from 'react-colorful';
 
-const IconColorPicker = ({
+interface IconColorPickerProps {
+  onChange: (color: string) => void;
+  sourceColor?: string;
+  onBackgroundChange?: (color: string) => void;
+  bgColor?: 'light' | 'dark';
+}
+
+const IconColorPicker: React.FC<IconColorPickerProps> = ({
   onChange,
   sourceColor = '#000',
   onBackgroundChange = () => {},
   bgColor = 'light',
 }) => {
-  const [color, setColor] = useState(sourceColor);
-  const [background, setBackground] = useState(bgColor);
-  const [mode, setMode] = useState('icon');
+  const [color, setColor] = useState<string>(sourceColor);
+  const [background, setBackground] = useState<string>(bgColor);
+  const [mode, setMode] = useState<'icon' | 'background'>('icon');
 
-  const handleBackgroundChange = (newBackground) => {
+  const handleBackgroundChange = (newBackground: string) => {
     setBackground(newBackground);
     onBackgroundChange(newBackground);
   };
 
-  const handleColorChange = (newColor) => {
+  const handleColorChange = (newColor: string) => {
     setColor(newColor);
     onChange(newColor);
   };
 
-  const handleChange = (newColor) => {
+  const handleChange = (newColor: string) => {
     if (mode === 'icon') {
       handleColorChange(newColor);
     } else {

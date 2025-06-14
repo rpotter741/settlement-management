@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField } from '@mui/material';
+import { v4 as newId } from 'uuid';
 
-import actions from './helpers/glossaryActions.js';
+import actions from '../../services/glossaryServices.js';
+import thunks from '../../app/thunks/glossaryThunks.js';
 
 interface NameNewGlossaryProps {
   setModalContent: (content: React.ReactNode | null) => void;
@@ -40,16 +42,19 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = ({
         color="primary"
         onClick={async () => {
           // Handle the creation of the new glossary here
+          const id = newId();
           const newGloss = await actions
             .createGlossary({
+              id,
               name: glossaryName,
               description,
             })
             .then((response) => {
-              return response.data;
+              console.log('Glossary created:', response.glossary);
+              return response.glossary;
             });
           setModalContent(null);
-          setGlossary(newGloss.name);
+          setGlossary(newGloss);
         }}
       >
         Create Glossary

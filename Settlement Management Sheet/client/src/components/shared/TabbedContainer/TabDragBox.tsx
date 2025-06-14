@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-import Box from '@mui/material/Box';
-import { useTabDrag } from 'context/DnD/TabDragContext';
+import { Box } from '@mui/material';
+import { useTabDrag } from '@/context/DnD/TabDragContext.jsx';
 import DropZone from '../DnD/DropZone.jsx';
-import { Tab } from 'features/SidePanel/types';
+import { Tab } from '@/app/types/SidePanelTypes.js';
+import { TabDataPayload } from '@/app/types/ToolTypes.js';
 
 interface TabDropBoxProps {
   side: 'left' | 'right';
-  moveFn: (entry: Tab) => void;
+  moveFn: (entry: TabDataPayload, dropIndex: number) => void;
 }
 
 const TabDropBox: React.FC<TabDropBoxProps> = ({ side, moveFn }) => {
@@ -32,11 +33,9 @@ const TabDropBox: React.FC<TabDropBoxProps> = ({ side, moveFn }) => {
     >
       <DropZone
         type={side === 'left' ? ['rightTab', 'anyTab'] : ['leftTab', 'anyTab']}
-        handleUpdate={() => {}}
-        handleAdd={(entry: Tab) => {
-          moveFn(entry);
+        handleAdd={(entry: TabDataPayload, index) => {
+          moveFn(entry, index);
         }}
-        handleRemove={() => {}}
         onReorder={() => {}}
         bg1="rgba(100, 100, 100, 0.5)"
         bg2="rgba(255, 255, 255, 0.5)"

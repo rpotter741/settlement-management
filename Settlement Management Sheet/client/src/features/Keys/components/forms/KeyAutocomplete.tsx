@@ -12,12 +12,12 @@ import {
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useDebounce } from 'hooks/useDebounce.jsx';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
-import api from 'services/interceptor.ts';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import api from 'services/interceptor.js';
 import toSnakeCase from 'utility/snakeCase.js';
 
-import { loadTool } from 'app/toolThunks.ts';
+import { loadTool } from 'app/toolThunks.js';
 
 const KeyAutocomplete = ({
   onAdd,
@@ -27,7 +27,7 @@ const KeyAutocomplete = ({
   hideHelp: boolean;
 }) => {
   const dispatch = useDispatch();
-  const { tool, id, side } = useToolContext();
+  const { tool, id, side } = useShellContext();
   const { runServerActions, edit } = useTools(tool, id);
   const [inputValue, setInputValue] = useState(edit?.name || '');
   const [options, setOptions] = useState([]);

@@ -1,48 +1,44 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import debounce from 'lodash/debounce';
+import React, { useCallback, useState, useContext } from 'react';
+import { debounce } from 'lodash';
 import confetti from 'canvas-confetti';
-import { useTools } from 'hooks/useTool.tsx';
-import { useSnackbar } from 'context/SnackbarContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { ShellContext } from '@/context/ShellContext.js';
+import { SnackbarType } from '@/app/types/SnackbarTypes.js';
+
+import { showSnackbar } from '@/app/slice/snackbarSlice.js';
+import { useDispatch } from 'react-redux';
 
 import { v4 as newId } from 'uuid';
-import resolveDuplicates from 'utility/resolveDuplicates';
+import resolveDuplicates from '@/features/Attributes/helpers/resolveDuplicates.js';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';
-import Threshold from './Threshold';
+import Threshold from './Threshold.jsx';
+import { Thresholds } from 'types/common.js';
+import useOrderedData from 'hooks/useOrderedData.js';
+import { AppDispatch } from '@/app/store.js';
 
-const ObjectThresholds = ({ tool, max = 21, id }) => {
-  const {
-    edit,
-    updateTool,
-    validateToolField,
-    errors: threshErrors,
-  } = useTools(tool, id);
+const ObjectThresholds = ({ max = 21 }) => {
+  const dispatch: AppDispatch = useDispatch();
+  const { tool, id } = useContext(ShellContext);
+  const { data, order, errors, add, remove, reorder } = useOrderedData(
+    tool,
+    id,
+    'thresholds'
+  );
+  const { edit, updateTool } = useTools(tool, id);
   const thresholds = edit.thresholds;
   const [showTooltip, setShowTooltip] = useState(false);
-  const { showSnackbar } = useSnackbar();
   const [lastId, setLastId] = useState(null);
-
-  const errors = threshErrors.thresholds.data;
 
   const debouncedShowSnackbar = useCallback(
     debounce(
-      (message, severity) => {
-        showSnackbar(message, severity);
+      (message: string, type: SnackbarType) => {
+        dispatch(showSnackbar({ message, type }));
       },
       300,
       { leading: true, trailing: false }
     ),
-    [showSnackbar]
-  );
-
-  const handleThresholdMaxChange = useCallback(
-    (updates, { id }) => {
-      updateTool(`thresholds.data.${id}.max`, updates);
-      if (lastId !== id) {
-        setLastId(id);
-      }
-    },
-    [updateTool, validateToolField, lastId, setLastId]
+    [showSnackbar, dispatch]
   );
 
   const handleBlur = useCallback(() => {
@@ -57,7 +53,7 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
     updateTool('thresholds.data', thresholdsClone);
     updateTool('thresholds.order', newOrder);
     if (changes) {
-      changes.forEach((change) => {
+      changes.forEach((change: any) => {
         debouncedShowSnackbar(change, 'warning');
       });
     }
@@ -69,12 +65,8 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
     debouncedShowSnackbar,
   ]);
 
-  const handleThresholdNameChange = (updates, { id }) => {
-    updateTool(`thresholds.data.${id}.name`, updates);
-  };
-
-  const recommendThresholdValue = (thresholds) => {
-    if (thresholds.length === 0) {
+  const recommendThresholdValue = (thresholds: Thresholds) => {
+    if (thresholds.order.length === 0) {
       return 33; // Default starting value
     }
 
@@ -116,28 +108,19 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
   };
 
   const handleRemove = useCallback(
-    (id) => {
-      let updatedThresholds = { ...thresholds.data };
-      delete updatedThresholds[id];
-      updateTool('thresholds.data', updatedThresholds);
-
-      const order = thresholds.order;
-      const newOrder = order.filter((item) => item !== id);
-      updateTool('thresholds.order', newOrder);
-
-      // Remove the error from the store
-      const newErrors = { ...errors };
-      delete newErrors[id];
-      validateToolField('thresholds.errors', newErrors);
+    (id: string) => {
+      remove(id);
     },
-    [thresholds.data, errors]
+    [remove]
   );
 
   const handleAdd = () => {
     if (thresholds.order.length >= max) {
-      showSnackbar(
-        `Congrats on clicking at least ${max - 7} times! ${max} is the limit, friend. Hope that's enough!`,
-        'info'
+      dispatch(
+        showSnackbar({
+          message: `Congrats on clicking at least ${max - 7} times! ${max} is the limit, friend. Hope that's enough!`,
+          type: 'info',
+        })
       );
       confetti({
         particleCount: 100,
@@ -147,33 +130,14 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
       setShowTooltip(true);
       return;
     }
-    let updatedThresholds = { ...thresholds.data };
     const id = newId();
-    updatedThresholds[id] = {
+    const entry = {
       id,
       name: '',
-      max: recommendThresholdValue(thresholds),
+      max: recommendThresholdValue(thresholds), // Default max for first threshold
     };
-    const newOrder = [...thresholds.order, id];
-    newOrder.sort(
-      (a, b) => updatedThresholds[a].max - updatedThresholds[b].max
-    );
-    updateTool('thresholds.order', newOrder);
-    updateTool('thresholds.data', updatedThresholds);
-
-    validateToolField(`thresholds.data.${id}`, {
-      name: 'Threshold name must be at least 3 characters',
-      max: null,
-    });
+    add({ id, entry, sort: true });
   };
-
-  const handleMaxValidation = useCallback((value, { id }) => {
-    validateToolField(`thresholds.data.${id}.max`, value);
-  }, []);
-
-  const handleNameValidation = useCallback((value, { id }) => {
-    validateToolField(`thresholds.data.${id}.name`, value);
-  }, []);
 
   return (
     <Box>
@@ -186,22 +150,15 @@ const ObjectThresholds = ({ tool, max = 21, id }) => {
         <strong>Conditions and Listeners</strong> without relying on intimate
         knowledge of the {tool} itself.{' '}
       </Typography>
-      {thresholds.order.map((tId, index) => {
-        const threshold = thresholds.data[tId];
-        const errors = threshErrors.thresholds.data[tId];
+      {thresholds.order.map((tId: string) => {
         return (
           <Threshold
-            key={tId}
-            threshold={threshold}
-            errors={errors}
-            index={index}
-            handleNameChange={handleThresholdNameChange}
-            handleMaxChange={handleThresholdMaxChange}
-            handleMaxValidation={handleMaxValidation}
-            handleNameValidation={handleNameValidation}
-            handleRemove={thresholds.order.length > 2 ? handleRemove : null}
-            handleBalanceChange={handleBlur}
+            handleRemove={
+              thresholds.order.length > 2 ? handleRemove : undefined
+            }
+            handleBlur={handleBlur}
             id={tId}
+            key={tId}
           />
         );
       })}

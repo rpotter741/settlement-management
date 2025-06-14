@@ -6,7 +6,6 @@ const glossaryModelMap = {
   location: prisma.locationGlossary,
   note: prisma.noteGlossary,
   person: prisma.personGlossary,
-  poi: prisma.poiGlossary,
   region: prisma.regionGlossary,
   nation: prisma.nationGlossary,
   settlement: prisma.settlementGlossary,

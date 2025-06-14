@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import DragWrapper from './DragWrapper';
-import SearchIcon from '@mui/icons-material/Search';
+import DragWrapper from './DragWrapper.js';
 import {
   Box,
   Button,
@@ -11,10 +10,22 @@ import {
   IconButton,
   Checkbox,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import DragIndicator from '@mui/icons-material/DragIndicator';
 
-const DraggableList = ({
+interface DraggableListProps {
+  list: { id: string; name: string; description?: string }[];
+  label: string;
+  type: string; // Type for the DragWrapper
+  onDropEnd: (item: { id: string; name: string }, index: number) => void;
+  height?: number;
+  onCheck?: (checked: boolean, item: { id: string; name: string }) => void;
+  onDetails?: boolean;
+  selected?: { id: string; name: string }[];
+}
+
+const DraggableList: React.FC<DraggableListProps> = ({
   list,
   label,
   type,
@@ -63,6 +74,7 @@ const DraggableList = ({
         slotProps={{
           input: {
             endAdornment: (
+              // @ts-ignore
               <SearchIcon sx={{ color: 'action.active', mr: 1, ml: 1 }} />
             ),
           },
@@ -76,6 +88,7 @@ const DraggableList = ({
             type={type} // Matches the DropTarget "accept" type
             item={{ id: item.id, name: item.name }}
             onDropEnd={onDropEnd}
+            onReorder={() => {}}
           >
             <Box
               sx={{
@@ -90,7 +103,8 @@ const DraggableList = ({
                 height: '100%',
               }}
             >
-              <DragIndicatorIcon sx={{ color: 'text.primary' }} />
+              {/* @ts-ignore */}
+              <DragIndicator sx={{ color: 'text.primary' }} />
               <Typography
                 variant="body1"
                 sx={{
@@ -108,6 +122,7 @@ const DraggableList = ({
                   enterDelay={500}
                 >
                   <IconButton>
+                    {/* @ts-ignore */}
                     <AutoStoriesIcon
                       fontSize="small"
                       sx={{
@@ -125,8 +140,8 @@ const DraggableList = ({
                   enterDelay={500}
                 >
                   <Checkbox
-                    checked={selected.includes(item)}
-                    onChange={(e) => {
+                    checked={selected ? selected.includes(item) : false}
+                    onChange={(e: any) => {
                       onCheck(e.target.checked, item);
                     }}
                   />

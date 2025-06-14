@@ -3,3 +3,8 @@
   text-align: center;
   height: 100vh;
 }
+
+.tiptap {
+  padding-right: 1rem;
+  padding-left: 1rem;
+}

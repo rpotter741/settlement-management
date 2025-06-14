@@ -6,11 +6,12 @@ import { Icon as CustomIcon } from '../../../../components/index.js';
 
 import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import RowDisplay from '@/components/shared/Layout/RowDisplay.js';
 
 const PreviewAttribute = () => {
-  const { tool, id, mode, side } = useToolContext();
+  const { tool, id, mode, side } = useShellContext();
   const { current: attr } = useTools('attribute', id);
 
   return (
@@ -35,8 +36,10 @@ const PreviewAttribute = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 2,
-          height: '100%',
+          gap: 1,
+          height: '88px',
+          flexGrow: 1,
+          flexShrink: 2,
         }}
       >
         <Typography
@@ -51,7 +54,6 @@ const PreviewAttribute = () => {
             borderRadius: '50%',
             height: 64,
             width: 64,
-            backgroundColor: attr.icon.backgroundColor || 'background.paper',
           }}
           disabled
         >
@@ -60,7 +62,7 @@ const PreviewAttribute = () => {
             path={attr?.icon?.d || ''}
             size={24}
             color={attr?.icon?.color || 'primary'}
-            backgroundColor={attr.icon.backgroundColor || 'background.paper'}
+            backgroundColor={attr?.icon?.backgroundColor || 'background.paper'}
           />
         </Button>
       </Box>
@@ -108,7 +110,7 @@ const PreviewAttribute = () => {
             Type:
           </Typography>
           <Typography variant="body1">
-            {attr?.positive ? 'Positive' : 'Negative' || 'None'}
+            {attr?.positive ? 'Positive' : 'Negative'}
           </Typography>
         </Box>
       </Box>
@@ -127,57 +129,24 @@ const PreviewAttribute = () => {
           display: 'grid',
           gridTemplateColumns: ['1fr', '1fr 1fr', 'repeat(3, 1fr)'],
           gridColumn: 'span 3',
+          columnGap: 2,
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center',
-            justifyContent: 'start',
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
-          >
-            Max:
-          </Typography>
-          <Typography>{attr?.balance?.maxPerLevel}</Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center',
-            justifyContent: 'start',
-            backgroundColor: 'background.default',
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
-          >
-            Health:
-          </Typography>
-          <Typography>{attr?.balance?.healthPerLevel}</Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center',
-            justifyContent: 'start',
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: 'bold', width: '50%', textAlign: 'start' }}
-          >
-            Cost:
-          </Typography>
-          <Typography>{attr?.balance?.costPerLevel}</Typography>
-        </Box>
+        <RowDisplay
+          name="Max"
+          value={attr?.balance?.maxPerLevel}
+          even={false}
+        />
+        <RowDisplay
+          name="Health"
+          value={attr?.balance?.healthPerLevel}
+          even={true}
+        />
+        <RowDisplay
+          name="Cost"
+          value={attr?.balance?.costPerLevel}
+          even={false}
+        />
       </Box>
 
       <Divider
@@ -186,29 +155,13 @@ const PreviewAttribute = () => {
         SETTLEMENT POINT COSTS
       </Divider>
 
-      {attr.settlementPointCost.order.map((id) => (
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center',
-            justifyContent: 'start',
-            gridColumn: 'span 3',
-          }}
+      {attr.settlementPointCost.order.map((id: string, index: number) => (
+        <RowDisplay
           key={id}
-        >
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: 'bold', width: '20%', textAlign: 'start' }}
-          >
-            {attr.settlementPointCost.data[id].name.charAt(0).toUpperCase() +
-              attr.settlementPointCost.data[id].name.slice(1)}
-            :
-          </Typography>
-          <Typography>
-            <strong>{attr.settlementPointCost.data[id].value}</strong>
-          </Typography>
-        </Box>
+          name={attr.settlementPointCost.data[id].name}
+          value={attr.settlementPointCost.data[id].value}
+          even={index % 2 === 0}
+        />
       ))}
       <Divider
         sx={{ gridColumn: 'span 3', borderColor: '#ccc', fontWeight: 'bold' }}

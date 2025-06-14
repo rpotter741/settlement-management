@@ -7,11 +7,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 const PhaseTypeSelect = ({ phaseId }) => {
-  const { id } = useToolContext();
+  const { id } = useShellContext();
   const { edit, updateTool } = useTools('event', id);
   const phase = edit?.phases.data[phaseId];
   const [eventType, setEventType] = useState(edit?.type || 'default');

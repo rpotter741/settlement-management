@@ -1,8 +1,25 @@
 import React, { useEffect } from 'react';
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import { useDrag } from 'react-dnd';
 
-const DragWrapper = ({
+interface DragWrapperProps {
+  type: string;
+  item: any; // Define a more specific type if possible
+  children: React.ReactNode;
+  onDropEnd?: (item: { id: string; name: string }, index: number) => void; // Callback when drag ends
+  onReorder?: (fromIndex: number, toIndex: number) => void; // Callback for reordering
+  index?: number | null; // Optional index for reordering
+  startDrag?: (type: any, item: any) => void; // Callback to set context when drag starts
+  endDrag?: () => void; // Callback to reset context when drag ends
+  [key: string]: any; // Allow additional props
+}
+
+export interface DropResult {
+  hoverIndex?: number;
+  [key: string]: any; // Allow additional properties in drop result
+}
+
+const DragWrapper: React.FC<DragWrapperProps> = ({
   type,
   item,
   children,
@@ -26,13 +43,14 @@ const DragWrapper = ({
       if (monitor.didDrop()) {
         if (onReorder && draggedItem.index !== null) {
           // Reorder-specific handling
-          const targetIndex = monitor.getDropResult()?.hoverIndex;
+          const targetIndex = (monitor.getDropResult() as DropResult)
+            ?.hoverIndex;
           if (targetIndex !== undefined) {
             onReorder(draggedItem.index, targetIndex);
           }
         } else if (onDropEnd) {
           // Standard drop handling
-          onDropEnd(draggedItem);
+          onDropEnd(draggedItem, draggedItem.index || 0);
         }
       }
       endDrag(); // Reset context
@@ -45,7 +63,6 @@ const DragWrapper = ({
       style={{
         opacity: isDragging ? 0.5 : 1,
         cursor: 'move',
-        display: 'inline-block',
         height: 'fit-content',
       }}
     >

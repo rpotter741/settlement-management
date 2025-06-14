@@ -437,12 +437,51 @@ enum EntryTypes {
   settlement
   region
   location
-  poi
   person
   faction
   note
   event
   geography
+}
+
+enum ClimateTypes {
+  tropical
+  arid
+  temperate
+  polar
+  subtropical
+  mountainous
+}
+
+enum TerrainTypes {
+  forest
+  mountains
+  desert
+  swamp
+  plains
+  hills
+  tundra
+}
+
+enum GeographicTypes {
+  forest
+  mountain
+  river
+  lake
+  ocean
+  desert
+  swamp
+  cave
+  hill
+  plain
+  valley
+  plateau
+  island
+  archipelago
+  peninsula
+  bay
+  gulf
+  fjord
 }
 
 model Glossary {
@@ -454,6 +493,20 @@ model Glossary {
   updatedAt   DateTime       @updatedAt
   contentType ContentTypes
   nodes       GlossaryNode[]
+  theme       String
+}
+
+model GlossaryTheme {
+  id           String @id @default(uuid())
+  refId        String
+  name         String
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  contentType  ContentTypes
+  description  String
+  palettes     Json
+  glossaries   String[]
 }
 
 model GlossaryNode {
@@ -487,33 +540,13 @@ model RegionGlossary {
   terrain          String
   factions         String[]
   population       Json
-  notableLocations String[]
+  locations        String[]
   resources        String[]
 }
 
 ////////////// Location ////////////
 
 model LocationGlossary {
-  refId       String       @id @default(uuid())
-  id          String       @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  tags        String[]
-  type        String
-  region      String[]
-  climate     String
-  terrain     String
-  eventLog    String[]
-}
-
-////////////// POI ////////////
-
-model PoiGlossary {
   refId            String       @id @default(uuid())
   id               String       @unique
   version          Int
@@ -525,9 +558,10 @@ model PoiGlossary {
   updatedAt        DateTime     @updatedAt
   tags             String[]
   type             String
-  region           String[]
+  region           String
   currentOccupants String[]
   nearbyFeatures   Json
+  eventLog         String[]
 }
 
 ////////////// Person ////////////
@@ -567,7 +601,7 @@ model FactionGlossary {
   tags           String[]
   leader         String
   homeBase       String
-  disposition    Json
+  relationships  Json
   allies         String[]
   enemies        String[]
   influence      Int
@@ -579,78 +613,128 @@ model FactionGlossary {
 
 ////////////// Note ////////////
 model NoteGlossary {
-  refId       String @id @default(uuid())
-  id          String @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  refId          String       @id @default(uuid())
+  id             String       @unique
+  version        Int
+  name           String
+  description    String
+  contentType    ContentTypes
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  type           String
+  priority       String
+  dueDate        String
+  relatedEntries Json
+  tags           String[]
+  isArchived     Boolean
+  isPinned       Boolean
+  isShared       Boolean
+  sharedWith     String[]
+  attachments    Json
 }
 
 /////////////////// continent //////////
 model ContinentGlossary {
-  refId       String @id @default(uuid())
-  id          String @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  refId            String            @id @default(uuid())
+  id               String            @unique
+  version          Int
+  name             String
+  description      String
+  contentType      ContentTypes
+  createdBy        String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  nations          String[]
+  regions          String[]
+  locations        String[]
+  resources        String[]
+  population       Json
+  climate          ClimateTypes
+  terrain          GeographicTypes[]
+  eventLog         String[]
 }
 
 /////////////////// nation ///////////////
 model NationGlossary {
-    refId       String @id @default(uuid())
-  id          String @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  refId         String       @id @default(uuid())
+  id            String       @unique
+  version       Int
+  name          String
+  description   String
+  contentType   ContentTypes
+  createdBy     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  continent     String
+  regions       String[]
+  capital       String[]
+  population    Json
+  economy       String
+  culture       String
+  languages     String[]
+  persons       String[]
+  eventLog      String[]
+  flags         String[]
+  history       String[]
+  relationships Json
+  locations     String[]
+  geography     String[]
 }
 
 ///////////////////// settlementGlossary //////////////
 model SettlementGlossary {
-    refId       String @id @default(uuid())
-  id          String @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  refId          String       @id @default(uuid())
+  id             String       @unique
+  version        Int
+  name           String
+  description    String
+  contentType    ContentTypes
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  nation         String
+  region         String
+  persons        String[]
+  eventLog       String[]
+  locations      String[]
+  history        String
+  relationships  Json
 }
 
 ///////////////////// eventGlossary //////////////
 model EventGlossary {
-    refId       String @id @default(uuid())
-  id          String @unique
-  version     Int
-  name        String
-  description String
-  contentType ContentTypes
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  refId          String       @id @default(uuid())
+  id             String       @unique
+  version        Int
+  name           String
+  description    String
+  contentType    ContentTypes
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  significance   String
+  gameDate       String
+  frequency      String
+  location       String
+  relatedEntries String[]
+  tags           String[]
 }
 
 ///////////////////// geographyGlossary //////////////
 model GeographyGlossary {
-    refId       String @id @default(uuid())
-  id          String @unique
+  refId       String          @id @default(uuid())
+  id          String          @unique
   version     Int
   name        String
   description String
   contentType ContentTypes
   createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  type        GeographicTypes
+  region      String[]
+  climate     ClimateTypes
+  terrain     TerrainTypes
+  eventLog    String[]
 }

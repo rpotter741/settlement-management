@@ -1,10 +1,11 @@
-import iconList from '../../../components/shared/IconSelector/iconList';
+import { SPCs, Thresholds } from 'types/common.js';
+import iconList from '../../../components/shared/IconSelector/iconList.js';
 import { v4 as newId } from 'uuid';
 
 function initializeAttribute() {
   // Generate thresholds
   const maxThresholds = [9, 29, 49, 69, 84, 99, 100];
-  const thresholds = {
+  const thresholds: Thresholds = {
     data: {},
     order: [],
   };
@@ -15,7 +16,7 @@ function initializeAttribute() {
   });
 
   // Generate settlementPointCost
-  const settlementPointCost = {
+  const settlementPointCost: SPCs = {
     data: {},
     order: [],
   };
@@ -43,7 +44,7 @@ function initializeAttribute() {
     settlementPointCost,
     icon: {
       ...iconList[0],
-      color: 'slateblue',
+      color: 'black',
       backgroundColor: '#fbf7ef',
     }, // Default icon with black color
     tags: [],

@@ -1,8 +1,8 @@
 import { Box, Typography, Card, Collapse, Divider, Chip } from '@mui/material';
 import React, { useState } from 'react';
-import changeIconDimensions from 'utility/halveIconDimensions.js';
+import changeIconDimensions from '../../../utility/changeIconDimensions.js';
 
-import Icon from 'components/shared/Icons/Icon.jsx';
+import Icon from '../Icons/Icon.jsx';
 
 export interface AttrCard {
   name: string;
@@ -11,6 +11,9 @@ export interface AttrCard {
     d: string;
     fill: string;
     viewBox: string;
+    color: string;
+    backgroundColor?: string; // Optional, for card mode
+    name?: string; // Optional, for card mode
   };
   description: string;
   balance: {
@@ -51,7 +54,7 @@ const AttributeCard: React.FC<AttributeCardProps> = ({ attr }) => {
           viewBox={changeIconDimensions(attr.icon.viewBox, 1)}
           path={attr.icon.d}
           size={40}
-          color={attr.iconColor}
+          color={attr.icon.color}
         />
       </Box>
       <Divider sx={{ fontSize: '0.75rem' }}>Per Level</Divider>

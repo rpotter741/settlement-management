@@ -1,8 +1,21 @@
 import React from 'react';
 
 import { Box, Typography } from '@mui/material';
+interface DataDisplayProps {
+  label: string;
+  data: string | number | null | undefined;
+  isLoading?: boolean;
+  edit?: React.CSSProperties;
+  type?: 'h6' | 'body1' | 'subtitle1';
+}
 
-const DataDisplay = ({ label, data, isLoading, edit, type = 'h6' }) => {
+const DataDisplay: React.FC<DataDisplayProps> = ({
+  label,
+  data,
+  isLoading,
+  edit,
+  type = 'h6',
+}) => {
   return (
     <Box
       sx={{

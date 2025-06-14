@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { Box, Typography } from '@mui/material';
-import { useToolContext } from 'context/ToolContext.jsx';
-import { useTools } from 'hooks/useTool.tsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import { useTools } from 'hooks/useTools.jsx';
 import { get } from 'lodash';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 const PreviewKey = ({ mode, side, tabId }) => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { options } = useSidePanel();
   const { current } = useTools(tool, id);
 

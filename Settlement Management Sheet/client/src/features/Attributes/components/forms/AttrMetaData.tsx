@@ -1,31 +1,24 @@
 import React, { lazy } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import { attributeFields } from '../../helpers/attributeFormData.js';
-import {
-  Icon as CustomIcon,
-  DynamicForm,
-} from '../../../../components/index.js';
+import { Icon as CustomIcon } from '@/components/index.js';
+import ToolInput from 'components/shared/DynamicForm/ToolInput.jsx';
 
 import { Box, Typography, Button, Tooltip, Switch } from '@mui/material';
 
-const AttrMetaData = ({ setModalContent }) => {
-  const { tool, id } = useToolContext();
-  const {
-    edit: attr,
-    errors,
-    updateTool: updateAttribute,
-    validateToolField: validateAttributeField,
-  } = useTools(tool, id);
+interface AttrMetaDataProps {
+  setModalContent: (content: {
+    component: React.LazyExoticComponent<any>;
+    props: any;
+  }) => void;
+}
 
-  const handleUpdate = (updates, { keypath }) => {
-    updateAttribute(keypath, updates);
-  };
-  const handleValidationUpdate = (error, { keypath }) => {
-    validateAttributeField(keypath, error);
-  };
-  //
+const AttrMetaData: React.FC<AttrMetaDataProps> = ({ setModalContent }) => {
+  const { tool, id } = useShellContext();
+  const { edit: attr, updateTool: updateAttribute } = useTools(tool, id);
+
   return (
     <>
       <Box
@@ -80,24 +73,15 @@ const AttrMetaData = ({ setModalContent }) => {
             />
           </Button>
         </Box>
-        <DynamicForm
-          initialValues={{ name: attr?.name || '' }}
-          field={attributeFields.name}
-          boxSx={{ flexGrow: 2, flexShrink: 1, px: 1 }}
-          externalUpdate={handleUpdate}
-          shrink
-          parentError={errors?.name}
-          onError={handleValidationUpdate}
+        <ToolInput
+          inputConfig={attributeFields.name}
+          style={{ flexGrow: 2, flexShrink: 1, px: 1 }}
         />
       </Box>
-      <DynamicForm
-        initialValues={{ description: attr?.description || '' }}
-        field={attributeFields.description}
-        boxSx={{ gridColumn: 'span 3', px: 1 }}
-        externalUpdate={handleUpdate}
-        shrink
-        parentError={errors?.description}
-        onError={handleValidationUpdate}
+      <ToolInput
+        inputConfig={attributeFields.description}
+        style={{ gridColumn: 'span 3', px: 1 }}
+        multiline
       />
       <Box
         sx={{

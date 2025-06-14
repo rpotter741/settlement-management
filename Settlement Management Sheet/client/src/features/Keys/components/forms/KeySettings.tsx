@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Select, MenuItem } from '@mui/material';
-import { useToolContext } from 'context/ToolContext.jsx';
-import { useTools } from 'hooks/useTool.tsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import { useTools } from 'hooks/useTools.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import { KeyTool, EventSeverity, KeySettings } from '../../../../../../types';
 
 const KeySettingsComp = ({ selectedKey }: { selectedKey: KeyTool }) => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { options } = useSidePanel();
   const { edit } = useTools(tool, id);
   const [selectedSettings, setSelectedSettings] = useState<KeySettings>({

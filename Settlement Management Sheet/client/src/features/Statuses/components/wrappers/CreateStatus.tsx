@@ -8,24 +8,18 @@ import EditStatus from 'features/Statuses/components/wrappers/EditStatus.jsx';
 import PreviewStatus from 'features/Statuses/components/wrappers/PreviewStatus.jsx';
 import checklistContent from '../../helpers/statusChecklist.js';
 
-import CreateShell from 'components/shared/CreateShell/CreateShell.jsx';
+import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
 
-const CreateStatus = ({ id, mode, side, tabId }) => {
+const CreateStatus = ({ tab, setModalContent }) => {
   return (
     <CreateShell
-      tool="gameStatus"
-      toolName="Status"
-      id={id}
+      tab={tab}
       initializeTool={initializeStatus}
       validationFields={['name', 'description']}
       editComponent={EditStatus}
       previewComponent={PreviewStatus}
       checklistContent={checklistContent}
-      loadDisplayName="Load Status"
-      modalComponents={{}}
-      side={side}
-      mode={mode}
-      tabId={tabId}
+      setModalContent={setModalContent}
     />
   );
 };

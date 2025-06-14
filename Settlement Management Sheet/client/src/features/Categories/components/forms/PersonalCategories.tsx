@@ -35,10 +35,10 @@ const PersonalAttributes = ({ onActionClick, options }) => {
     <TitledCollapse
       title="My Attributes"
       titleType="h5"
-      defaultState={myTools}
+      open={myTools}
       styles={{ width: '100%', mb: 2 }}
       titleSx={{ color: 'secondary.light', textAlign: 'center' }}
-      noDefaultHandler={() => setMyTools(!myTools)}
+      toggleOpen={() => setMyTools(!myTools)}
     >
       <TableList
         options={options}

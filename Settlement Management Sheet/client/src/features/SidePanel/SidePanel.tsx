@@ -34,7 +34,7 @@ import LoadTool from 'components/shared/LoadTool/SidePanelLoad.jsx';
 import { useTheme } from 'context/ThemeContext.jsx';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
-import GlossarySidePanel from 'features/Glossary/GlossarySidePanel.tsx';
+import GlossarySidePanel from '../Glossary/GlossarySidePanel.js';
 
 import getTrail from './getTrail.js';
 import structure from './structure.js';
@@ -42,7 +42,6 @@ import structure from './structure.js';
 const maxTrail = 3;
 
 const SidePanel = ({ setModalContent }) => {
-  const { breadcrumbs, updateBreadcrumbs, setActiveTab } = useSidePanel();
   const [active, setActive] = useState('');
   const [tool, setTool] = useState(null);
   const { themeKey, changeThemeTo } = useTheme();
@@ -384,6 +383,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
       setTool(entry.tool);
     } else {
       const { name, id, mode, tool, tabId, scroll, preventSplit } = clickFn();
+
       addNewTab({
         name,
         id,
@@ -393,6 +393,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
         scroll,
         activate: true,
         preventSplit,
+        side: 'left',
       });
     }
   };

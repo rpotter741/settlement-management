@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Divider, Typography, Drawer, Collapse } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import InnerTabbedContainer from 'components/shared/TabbedContainer/InnerTabbedContainer.jsx';
@@ -15,7 +15,7 @@ import EventMetaData from '../forms/EventMetaData.jsx';
 
 const EditEvent = ({ setShowModal }) => {
   const { preventSplit, setPreventSplit } = useSidePanel();
-  const { id } = useToolContext();
+  const { id } = useShellContext();
   const { edit, updateTool } = useTools('event', id);
   const [phaseTabs, setPhaseTabs] = useState([]);
   const [count, setCount] = useState(edit?.phases.length || 2);

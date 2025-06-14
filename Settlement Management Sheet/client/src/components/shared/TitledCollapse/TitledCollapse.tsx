@@ -7,21 +7,35 @@ import {
   Divider,
   Button,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import TrashIcon from '@mui/icons-material/Delete';
+import {
+  ExpandMore as ExpandMoreIcon,
+  Delete as TrashIcon,
+} from '@mui/icons-material';
 
-const CustomCollapse = ({
+interface TitledCollapseProps {
+  title: string;
+  titleType?: 'h6' | 'h5' | 'h4';
+  toggleOpen: () => void;
+  children: React.ReactNode;
+  open: boolean;
+  onRemove?: () => void;
+  width?: string | number;
+  color?: string;
+  styles?: React.CSSProperties;
+  boxSx?: Record<string, any>;
+  [key: string]: any; // Allow additional props
+}
+
+const TitledCollapse: React.FC<TitledCollapseProps> = ({
   title,
   titleType = 'h6',
-  noDefaultHandler,
+  toggleOpen,
   children,
-  defaultState = false,
+  open = false,
   onRemove,
   width,
   color,
   styles,
-  PreviewComponent,
-  previewProps,
   boxSx,
   ...props
 }) => {
@@ -29,7 +43,7 @@ const CustomCollapse = ({
     <Box sx={{ width: '100%', borderRadius: 4, ...boxSx }}>
       {/* Title Bar */}
       <Box
-        onClick={noDefaultHandler}
+        onClick={toggleOpen}
         sx={{
           width: '100%',
           display: 'flex',
@@ -37,15 +51,14 @@ const CustomCollapse = ({
           alignItems: 'center',
           cursor: 'pointer',
           py: 1,
-          backgroundColor: defaultState
-            ? 'background.default'
-            : 'background.paper',
+          backgroundColor: open ? 'background.default' : 'background.paper',
           '&:hover': { backgroundColor: 'action.hover' },
           mt: 2,
           gridColumn: 'span 3',
           ...styles,
         }}
       >
+        {props?.icon && React.createElement(props.icon, { ...props.iconProps })}
         {/* Title */}
         <Typography
           variant={titleType}
@@ -58,11 +71,12 @@ const CustomCollapse = ({
           {title}
         </Typography>
         <IconButton
-          onClick={noDefaultHandler}
+          onClick={toggleOpen}
           size="small"
           sx={{
-            transform: defaultState ? 'rotate(180deg)' : 'rotate(0deg)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s ease',
+            ...props.iconButtonSx,
           }}
         >
           <ExpandMoreIcon />
@@ -70,7 +84,7 @@ const CustomCollapse = ({
       </Box>
       <Divider sx={{ gridColumn: 'span 3' }} />
       {/* Collapsible Content */}
-      <Collapse in={defaultState} timeout="auto" unmountOnExit>
+      <Collapse in={open} timeout="auto" unmountOnExit>
         {onRemove && (
           <Button onClick={onRemove} startIcon={<TrashIcon />}>
             Delete
@@ -78,19 +92,8 @@ const CustomCollapse = ({
         )}
         <Box sx={{ height: '100%' }}>{children}</Box>
       </Collapse>
-      {PreviewComponent && (
-        <Collapse in={!defaultState} timeout="auto" unmountOnExit>
-          <Box sx={{ padding: '12px 16px', height: '100%' }}>
-            {React.isValidElement(PreviewComponent) ? (
-              React.cloneElement(PreviewComponent, previewProps)
-            ) : (
-              <PreviewComponent {...previewProps} />
-            )}
-          </Box>
-        </Collapse>
-      )}
     </Box>
   );
 };
 
-export default CustomCollapse;
+export default TitledCollapse;

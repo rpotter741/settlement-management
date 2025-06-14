@@ -10,8 +10,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import RightArrowIcon from '@mui/icons-material/ArrowRight';
 import LeftArrowIcon from '@mui/icons-material/ArrowLeft';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 import { get } from 'lodash';
 
 import { returnTool } from 'app/toolThunks.js';
@@ -23,7 +23,7 @@ import tOptions from 'features/Statuses/helpers/targetOptions.js';
 
 const ImpactCard = ({ keypath }) => {
   const [step, setStep] = useState(0);
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { edit, updateTool } = useTools(tool, id);
   const { getOptions, options } = useSidePanel();
   const [systemOptions, setSystemOptions] = useState(impactMap.system);

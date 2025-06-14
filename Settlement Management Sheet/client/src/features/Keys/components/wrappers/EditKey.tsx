@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Divider, Chip } from '@mui/material';
-import { useToolContext } from 'context/ToolContext.jsx';
-import { useTools } from 'hooks/useTool.tsx';
+import { useShellContext } from '@/context/ShellContext.js';
+import { useTools } from 'hooks/useTools.jsx';
 import { get } from 'lodash';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
@@ -11,7 +11,7 @@ import KeySettingsComp from '../forms/KeySettings.tsx';
 import keyFields from '../../helpers/keyFormData.js';
 
 const EditKey = () => {
-  const { tool, id } = useToolContext();
+  const { tool, id } = useShellContext();
   const { options } = useSidePanel();
   const { edit, updateTool } = useTools(tool, id);
   const [selectedKey, setSelectedKey] = useState(edit?.name || null);

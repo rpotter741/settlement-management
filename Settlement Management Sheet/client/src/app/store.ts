@@ -1,9 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import validationReducer from '../features/Validation/validationSlice.js';
-import toolsReducer from './toolSlice.js';
-import sidePanelReducer from '../features/SidePanel/sidePanelSlice.js';
-import glossaryReducer from '../features/Glossary/state/glossarySlice.js';
-import selectionReducer from '../features/Selection/state/selectionSlice.js';
+import validationReducer from './slice/validationSlice.js';
+import toolsReducer from './slice/toolSlice.js';
+import sidePanelReducer from './slice/sidePanelSlice.js';
+import glossaryReducer from './slice/glossarySlice.js';
+import selectionReducer from './slice/selectionSlice.js';
+import snackbarReducer from './slice/snackbarSlice.js';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     sidePanel: sidePanelReducer,
     glossary: glossaryReducer,
     selection: selectionReducer,
+    snackbar: snackbarReducer,
   },
 });
 

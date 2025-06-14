@@ -1,62 +1,55 @@
-import React, { useState, useCallback } from 'react';
-import { useTools } from 'hooks/useTool.tsx';
-import { useSnackbar } from 'context/SnackbarContext.jsx';
+import React, { useState, useCallback, useContext } from 'react';
+import { useTools } from 'hooks/useTools.jsx';
 
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
-import Dependency from 'components/shared/Metadata/Dependency.jsx';
+import Dependency, {
+  DependencyThreshold,
+} from 'components/shared/Metadata/Dependency.jsx';
+import { ShellContext } from '@/context/ShellContext.js';
 
-const EditDependency = ({ tool, id }) => {
+const EditDependency = () => {
+  const { tool, id } = useContext(ShellContext);
   const { selectValue, updateTool, validateToolField } = useTools(tool, id);
   const data = selectValue('dependencies.data');
   const order = selectValue('dependencies.order');
-  const { showSnackbar } = useSnackbar();
   const [open, setOpen] = useState(new Array(order.length).fill(false));
 
-  const handleModifierChange = useCallback(
-    (updates, { id, index }) => {
-      updateTool(
-        `dependencies.data.${id}.thresholds.${index}.modifier`,
-        updates
-      );
-      validateToolField(`dependencies.data.${id}.modifier`, updates);
+  const handleRemove = useCallback(
+    (id: string) => {
+      const newOrder = order.filter((item: any) => item !== id);
+      const newData = { ...data };
+      delete newData[id];
+
+      updateTool('dependencies.data', newData);
+      updateTool('dependencies.order', newOrder);
     },
-    [updateTool, validateToolField]
+    [order, data, updateTool]
   );
-
-  const handleRemove = useCallback((id) => {
-    const newOrder = order.filter((item) => item !== id);
-    const newData = { ...data };
-    delete newData[id];
-
-    updateTool('dependencies.data', newData);
-    updateTool('dependencies.order', newOrder);
-  });
 
   return (
     <Box>
       {order.map(
-        (id, index) =>
+        (id: string, index: number) =>
           data[id] && (
             <TitledCollapse
-              defaultState={open[index]}
+              open={open[index]}
               key={id}
               title={data[id].name}
-              noDefaultHandler={() => {
+              toggleOpen={() => {
                 const newOpen = [...open];
                 newOpen[index] = !newOpen[index];
                 setOpen(newOpen);
               }}
             >
-              {data[id].thresholds.map((thresh, n) => (
-                <Dependency
-                  threshold={thresh}
-                  key={thresh.name}
-                  index={n}
-                  id={id}
-                  handleModifierChange={handleModifierChange}
-                />
-              ))}
+              {data[id].thresholds.map(
+                (thresh: DependencyThreshold, n: number) => (
+                  <Dependency
+                    threshold={thresh}
+                    keypath={`dependencies.data.${id}.thresholds.${n}.modifier`}
+                  />
+                )
+              )}
               <Button variant="contained" onClick={() => handleRemove(id)}>
                 Remove {data[id].name} Dependency
               </Button>

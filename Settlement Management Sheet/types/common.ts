@@ -26,8 +26,6 @@ export type ToolName =
   | 'building'
   | 'category'
   | 'event'
-  | 'faction'
-  | 'key'
   | 'kit'
   | 'listener'
   | 'settlementType'
@@ -46,7 +44,9 @@ export type EventSeverity =
   | 'Significant'
   | 'Major';
 
-export type ReplacementTuple = Partial<Record<GlossaryEntryType, string[]>>;
+export type ReplacementTuple = Partial<
+  Record<Exclude<GlossaryEntryType, null>, string[]>
+>;
 
 export type FlavorText = Partial<
   Record<

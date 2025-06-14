@@ -19,6 +19,8 @@ export default defineConfig({
       event: '/src/features/Events',
       listener: '/src/features/Listeners',
       status: '/src/features/Statuses',
+      '@': '/src', // General alias for src
+      types: '/../types',
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx'], // File extensions to resolve
   },

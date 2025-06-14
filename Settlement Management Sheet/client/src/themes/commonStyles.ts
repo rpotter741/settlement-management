@@ -18,6 +18,11 @@ const commonStyles = {
       },
     },
   },
+  MuiTooltip: {
+    defaultProps: {
+      enterDelay: 500,
+    },
+  },
 };
 
 export default commonStyles;

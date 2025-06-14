@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useTools } from 'hooks/useTool.tsx';
-import { useToolContext } from 'context/ToolContext.jsx';
+import { useTools } from 'hooks/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
 
 import { Box, Divider } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
@@ -12,8 +12,8 @@ import ObjectDependencies from 'components/shared/Metadata/Dependencies.jsx';
 import categoryFields from '../../helpers/categoryFormData.js';
 import CategoryAttributes from '../forms/CategoryAttributes.jsx';
 
-const EditCategory = ({ setShowModal }) => {
-  const { tool, id } = useToolContext();
+const EditCategory = ({ setModalContent }) => {
+  const { tool, id } = useShellContext();
   const { edit: category } = useTools(tool, id);
   const [attributes, setAttributes] = useState(false);
   const [thresholds, setThresholds] = useState(false);
@@ -43,44 +43,45 @@ const EditCategory = ({ setShowModal }) => {
       <TitledCollapse
         title="Attributes"
         titleType="h6"
-        defaultState={attributes}
+        open={attributes}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setAttributes(!attributes)}
+        toggleOpen={() => setAttributes(!attributes)}
       >
-        <CategoryAttributes setShowModal={setShowModal} id={id} />
+        <CategoryAttributes setModalContent={setModalContent} id={id} />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
         titleType="h6"
-        defaultState={thresholds}
+        open={thresholds}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setThresholds(!thresholds)}
+        toggleOpen={() => setThresholds(!thresholds)}
       >
         <ObjectThresholds tool="category" id={id} />
       </TitledCollapse>
       <TitledCollapse
         title="Dependencies"
         titleType="h6"
-        defaultState={dependencies}
+        open={dependencies}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setDependencies(!dependencies)}
+        toggleOpen={() => setDependencies(!dependencies)}
       >
         <ObjectDependencies
           tool="category"
-          setShowModal={setShowModal}
+          setModalContent={setModalContent}
           id={id}
+          displayName="Categories"
         />
       </TitledCollapse>
       <TitledCollapse
         title="Tags"
         titleType="h6"
-        defaultState={tags}
+        open={tags}
         styles={{ width: '100%', mb: 2 }}
         boxSx={{ gridColumn: 'span 3' }}
-        noDefaultHandler={() => setTags(!tags)}
+        toggleOpen={() => setTags(!tags)}
       >
         tags
       </TitledCollapse>

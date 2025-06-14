@@ -1,4 +1,11 @@
-import React, { useState, MouseEvent, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  MouseEvent,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import { v4 as newId } from 'uuid';
 import {
   Box,
@@ -10,159 +17,109 @@ import {
   Collapse,
   IconButton,
   ButtonGroup,
+  Tooltip,
 } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
-import DescriptionIcon from '@mui/icons-material/Description';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import WarningIcon from '@mui/icons-material/Warning';
-import CheckIcon from '@mui/icons-material/Check';
-import TerrainIcon from '@mui/icons-material/Terrain';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import FlagIcon from '@mui/icons-material/Flag';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import WbShadeIcon from '@mui/icons-material/WbShade';
-import RoomIcon from '@mui/icons-material/Room';
-import MapIcon from '@mui/icons-material/Map';
-import PublicIcon from '@mui/icons-material/Public';
-import GroupsIcon from '@mui/icons-material/Groups';
-import PersonIcon from '@mui/icons-material/Person';
-import { GlossaryEntryType, GlossaryNode } from '../../../../types';
-import { useTheme } from '../../context/ThemeContext';
-import { set } from 'lodash';
+import {
+  Folder as FolderIcon,
+  ExpandMore as ExpandMoreIcon,
+  ChevronRight as ChevronRightIcon,
+  Edit,
+  OpenInFull,
+  OpenInNew,
+  Delete,
+  Create,
+  DocumentScanner,
+  Drafts,
+  InsertDriveFileSharp,
+  Description,
+  NoteAdd,
+  CreateNewFolder,
+  Sort,
+  AddToPhotos,
+} from '@mui/icons-material';
+import {
+  GlossaryEntryType,
+  GlossaryNode,
+} from '../../../../types/glossaryEntry.js';
+import { useTheme } from '@/context/ThemeContext.js';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSidePanel } from '@/hooks/useSidePanel.js';
 import {
   nodeRenderState,
   selectActiveId,
   selectNodeById,
-} from './state/glossarySelectors';
-import { toggleExpand, toggleNameEdit } from './state/glossarySlice';
-import { AppDispatch } from '@/app/store';
-import capitalize from '../../utility/capitalize';
-import flattenVisibleNodes from '../Selection/helpers/flattenVisibleNodes';
-
-interface GlossaryDirectoryProps {
-  structure: GlossaryNode[] | [];
-  onRename: (node: GlossaryNode) => void;
-  onDelete: ({
-    id,
-    entryType,
-    glossaryId,
-  }: {
-    id: string;
-    entryType: GlossaryEntryType;
-    glossaryId: string | null;
-  }) => void;
-  onNewFile: ({
-    id,
-    parentId,
-    entryType,
-  }: {
-    id: string;
-    parentId: string | null;
-    entryType: GlossaryEntryType;
-  }) => void;
-  onNewFolder: ({
-    id,
-    name,
-    parentId,
-    entryType,
-  }: {
-    id: string;
-    name: string;
-    parentId: string | null;
-    entryType: GlossaryEntryType;
-  }) => void;
-}
-
-const entryTypes = ['location', 'poi', 'person', 'note', 'event'];
-
-const folderTypes = [
-  'continent',
-  'nation',
-  'region',
-  'settlement',
-  'faction',
-  'geography',
-];
-
-const entryTypeColors: Record<string, string> = {
-  continent: 'info.main',
-  nation: 'primary.main',
-  settlement: 'warning.main',
-  region: 'secondary.main',
-  location: 'honey.main',
-  poi: 'rgba(185, 80 , 222, 1)',
-  person: 'success.main',
-  faction: 'error.main',
-  note: 'text.primary',
-  event: 'text.secondary',
-  geography: 'success.dark',
-};
-
-const entryTypeIcons: Record<string, React.ReactNode> = {
-  continent: <PublicIcon sx={{ color: entryTypeColors.continent }} />,
-  nation: <AccountBalanceIcon sx={{ color: entryTypeColors.nation }} />,
-  settlement: <WbShadeIcon sx={{ color: entryTypeColors.settlement }} />,
-  region: <FlagIcon sx={{ color: entryTypeColors.region }} />,
-  location: <MapIcon sx={{ color: entryTypeColors.location }} />,
-  poi: <RoomIcon sx={{ color: entryTypeColors.poi }} />,
-  person: <PersonIcon sx={{ color: entryTypeColors.person }} />,
-  faction: <GroupsIcon sx={{ color: entryTypeColors.faction }} />,
-  note: <DescriptionIcon sx={{ color: entryTypeColors.note }} />,
-  event: <CalendarMonthIcon sx={{ color: entryTypeColors.event }} />,
-  geography: <TerrainIcon sx={{ color: entryTypeColors.geography }} />,
-};
+  glossaryRenderState,
+} from '../../app/selectors/glossarySelectors.js';
+import { toggleExpand, toggleNameEdit } from '../../app/slice/glossarySlice.js';
+import { AppDispatch } from '@/app/store.js';
+import capitalize from '../../utility/capitalize.js';
+import flattenVisibleNodes from '../Selection/helpers/flattenVisibleNodes.js';
+import {
+  entryTypeIcons,
+  entryTypes,
+  folderTypes,
+} from './helpers/glossaryTypeIcon.js';
+import { useGlossaryDrag } from '@/context/DnD/GlossaryDragContext.js';
+import { DragWrapper, DropZone } from '@/components/index.js';
+import { GlossaryDirectoryProps } from '@/app/types/GlossaryTypes.js';
+import { find, set } from 'lodash';
+import { removeTab } from '@/app/slice/sidePanelSlice.js';
+import { findAndDeleteTab } from '@/app/thunks/sidePanelThunks.js';
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
+  nodeMap,
   onRename,
   onDelete,
   onNewFile,
   onNewFolder,
+  handleCreateGlossary,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const [contextMenu, setContextMenu] = useState<{
     mouseX: number;
     mouseY: number;
     node: GlossaryNode | null;
   } | null>(null);
-  const dispatch = useDispatch<AppDispatch>();
-
   const [submenuAnchor, setSubmenuAnchor] = useState<null | HTMLElement>(null);
   const [folderAnchor, setFolderAnchor] = useState<null | HTMLElement>(null);
-  const glossaryId = useSelector(selectActiveId());
-  const renderState = useSelector((state: any) =>
-    glossaryId !== null
-      ? state.glossary.glossaries[glossaryId]?.renderState || {}
-      : {}
-  );
-  const visibleNodeList = useMemo(
-    () => flattenVisibleNodes({ tree: structure, renderState }),
-    [structure, renderState]
-  );
-  const idToIndex = useMemo(() => {
-    const map: Record<string, number> = {};
-    visibleNodeList.forEach((id, index) => {
-      map[id] = index;
-    });
-    return map;
-  }, [visibleNodeList]);
-
   const [selected, setSelected] = useState<string[]>([]);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
     null
   );
-
-  useEffect(() => {
-    console.log(selected, 'selected nodes');
-  }, [selected]);
+  const { draggedType, endDrag, startDrag, draggedItem } = useGlossaryDrag();
+  const { addNewTab } = useSidePanel();
 
   //theme-aware highlight color... kind of
-  const { themeKey } = useTheme();
+  const themeContext = useTheme();
+  const themeKey = themeContext?.themeKey ?? 'light';
   const softHighlight =
     themeKey === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const glossaryId = useSelector(selectActiveId());
+  const renderState = useSelector(glossaryRenderState(glossaryId));
+
+  //click delineation
+
+  const visibleNodeList = useMemo(
+    () =>
+      flattenVisibleNodes({ tree: structure, renderState: renderState ?? {} }),
+    [structure, renderState]
+  );
+  const idToIndex = useMemo(() => {
+    const map: Record<string, number> = {};
+    visibleNodeList.forEach((node, index) => {
+      map[node.id] = index;
+    });
+    return map;
+  }, [visibleNodeList]);
+
+  useEffect(() => {
+    console.log(selected, 'selected nodes');
+  }, [selected]);
 
   const setRenameTarget = (node: GlossaryNode | null) => {
     if (node && glossaryId) {
@@ -185,37 +142,81 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     setFolderAnchor(null);
   };
 
-  const isMultiSelect = (e) => e.metaKey || e.ctrlKey;
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleClick = (e, nodeId, index) => {
-    if (e.shiftKey && lastSelectedIndex !== null) {
-      const range = [lastSelectedIndex, index].sort((a, b) => a - b);
-      const rangeIds = visibleNodeList
-        .slice(range[0], range[1] + 1)
-        .map((node) => node.id);
-      setSelected((prev) => Array.from(new Set([...prev, ...rangeIds])));
-    } else if (isMultiSelect(e)) {
-      setSelected((prev) =>
-        prev.includes(nodeId)
-          ? prev.filter((id) => id !== nodeId)
-          : [...prev, nodeId]
-      );
-      setLastSelectedIndex(index);
-    } else {
-      setSelected([nodeId]);
-      setLastSelectedIndex(index);
-    }
-  };
+  const isMultiSelect = (e: any) => e.metaKey || e.ctrlKey;
 
-  console.log(structure);
+  const singleClick = useCallback(
+    (e: MouseEvent, nodeId: string, index: number) => {
+      if (e.shiftKey && lastSelectedIndex !== null) {
+        const range = [lastSelectedIndex, index].sort((a, b) => a - b);
+        const rangeIds = visibleNodeList
+          .slice(range[0], range[1] + 1)
+          .map((node: any) => node.id);
 
-  const NodeItem = ({ id }: { id: string }) => {
+        const allSelected = rangeIds.every((id) => selected.includes(id));
+        if (allSelected) {
+          setSelected((prev) => prev.filter((id) => !rangeIds.includes(id)));
+        } else {
+          setSelected((prev) => Array.from(new Set([...prev, ...rangeIds])));
+        }
+      } else if (isMultiSelect(e)) {
+        setSelected((prev) =>
+          prev.includes(nodeId)
+            ? prev.filter((id) => id !== nodeId)
+            : [...prev, nodeId]
+        );
+        setLastSelectedIndex(index);
+      } else {
+        selected.includes(nodeId) ? setSelected([]) : setSelected([nodeId]);
+        setLastSelectedIndex(index);
+      }
+    },
+    [visibleNodeList, lastSelectedIndex, selected]
+  );
+
+  const doubleClick = useCallback(
+    (e: MouseEvent, nodeId: string) => {
+      if (nodeMap[nodeId].entryType === null) return;
+      addNewTab({
+        name: nodeMap[nodeId].name,
+        id: nodeId,
+        mode: 'edit',
+        tool: nodeMap[nodeId].entryType,
+        tabId: newId(),
+        scroll: 0,
+        preventSplit: false,
+        activate: true,
+        side: 'left',
+        tabType: 'glossary',
+        glossaryId: glossaryId ?? undefined,
+      });
+    },
+    [nodeMap, addNewTab, glossaryId]
+  );
+
+  const NodeItem = ({ id, offset }: { id: string; offset: number }) => {
     if (glossaryId === null) return null;
     const data = useSelector(selectNodeById(glossaryId, id));
     if (!data) return null;
     const { expanded, rename } = useSelector(nodeRenderState(glossaryId, id));
-    const [name, setName] = useState(data.name);
-    const [open, setOpen] = useState(expanded);
+    const [name, setName] = useState<string>(data.name);
+    const [open, setOpen] = useState<boolean>(expanded);
+
+    const handleSingleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      clickTimeout.current = setTimeout(() => {
+        singleClick(e, data.id, idToIndex[data.id]);
+      }, 150);
+    };
+
+    const handleDoubleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+      doubleClick(e, data.id);
+    };
 
     useEffect(() => {
       if (rename && inputRef.current) {
@@ -233,6 +234,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
     const toggle = () => {
       setOpen((prev) => !prev);
+      dispatch(toggleExpand({ glossaryId, nodeId: data.id, expanded: !open }));
     };
 
     const processRename = (
@@ -246,123 +248,173 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
     };
 
     return (
-      <Box sx={{ pl: 2 }}>
-        <Box
-          sx={{
-            display: 'grid',
-            cursor: 'pointer',
-            gridTemplateColumns: '24px 24px auto',
-            alignItems: 'center',
-            minHeight: '32px',
-            '&:hover': {
-              backgroundColor: softHighlight,
-            },
-            backgroundColor:
-              contextMenu?.node?.id === id
+      <Box
+        sx={{
+          pl: 2,
+          ml: offset * 2,
+          display: 'grid',
+          cursor: 'pointer',
+          gridTemplateColumns: '24px 24px auto',
+          alignItems: 'center',
+          minHeight: '32px',
+          '&:hover': {
+            backgroundColor: softHighlight,
+          },
+          backgroundColor:
+            contextMenu?.node?.id === id
+              ? softHighlight
+              : selected.includes(id)
                 ? softHighlight
-                : selected.includes(id)
-                  ? softHighlight
-                  : 'transparent',
-          }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            handleContextMenu(e, data);
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            handleClick(e, data.id, idToIndex[data.id]);
-          }}
-        >
-          {data.type === 'folder' && (
-            <IconButton onClick={toggle} size="small">
-              {open ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-            </IconButton>
-          )}
-          {data.type === 'file' && <Box sx={{ width: '24px' }} />}
-          {data.type === 'folder' &&
-          !folderTypes.includes(data.entryType as string) ? (
-            <FolderIcon sx={{ color: 'primary.main' }} />
-          ) : data.entryType !== null ? (
-            entryTypeIcons[data.entryType]
-          ) : null}
-          {rename ? (
-            <TextField
-              inputRef={inputRef}
-              variant="standard"
-              value={name}
-              onBlur={(e) => {
+                : 'transparent',
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          handleContextMenu(e, data);
+        }}
+      >
+        {data.type === 'folder' && (
+          <IconButton onClick={toggle} size="small" sx={{ zIndex: 3 }}>
+            {open ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        )}
+        {data.type === 'file' && <Box sx={{ width: '24px' }} />}
+        {data.type === 'folder' &&
+        !folderTypes.includes(data.entryType as string) ? (
+          <FolderIcon sx={{ color: 'primary.main' }} />
+        ) : data.entryType !== null ? (
+          entryTypeIcons[data.entryType]
+        ) : null}
+        {rename ? (
+          <TextField
+            inputRef={inputRef}
+            variant="standard"
+            value={name}
+            onBlur={(e) => {
+              if (name.trim() === '') {
+                processRename(data.name, null, data.id);
+                return;
+              }
+              processRename(name, null, data.id);
+              onRename({ ...data, name });
+            }}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
                 if (name.trim() === '') {
                   processRename(data.name, null, data.id);
                   return;
                 }
                 processRename(name, null, data.id);
                 onRename({ ...data, name });
-              }}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  if (name.trim() === '') {
-                    processRename(data.name, null, data.id);
-                    return;
-                  }
-                  processRename(name, null, data.id);
-                  onRename({ ...data, name });
-                } else if (e.key === 'Escape') {
-                  processRename(data.name, null, data.id);
-                }
-              }}
-            />
-          ) : (
-            <Typography
-              sx={{
-                ml: 1,
-                textAlign: 'left',
-              }}
-            >
-              {data.name}
-            </Typography>
-          )}
-        </Box>
-
-        {data.children && data.children.length > 0 && (
-          <Collapse
-            in={open}
-            timeout="auto"
-            unmountOnExit={true}
-            onExited={() => {
-              dispatch(
-                toggleExpand({ glossaryId, nodeId: data.id, expanded: false })
-              );
+              } else if (e.key === 'Escape') {
+                processRename(data.name, null, data.id);
+              }
             }}
-            onEntered={() => {
-              dispatch(
-                toggleExpand({ glossaryId, nodeId: data.id, expanded: true })
-              );
+          />
+        ) : (
+          <Typography
+            role="button"
+            tabIndex={0}
+            sx={{
+              ml: 1,
+              textAlign: 'left',
+              width: '100%',
+              cursor: 'pointer',
+              userSelect: 'none',
+              fontSize: '0.875rem',
             }}
+            onClick={handleSingleClick}
+            onDoubleClick={handleDoubleClick}
           >
-            {data.children.map((child) => (
-              <NodeItem key={child.id} id={child.id} />
-            ))}
-          </Collapse>
+            {data.name}
+          </Typography>
         )}
       </Box>
     );
   };
 
+  const fileTypes = ['person', 'note', 'event', 'location'];
+
+  const dragAcceptMap = {
+    continent: [
+      'nation',
+      'region',
+      'geography',
+      'settlement',
+      'faction',
+      ...fileTypes,
+    ],
+    nation: ['region', 'geography', 'settlement', 'faction', ...fileTypes],
+    region: ['geography', 'settlement', 'faction', ...fileTypes],
+    geography: ['settlement', 'faction', ...fileTypes],
+    settlement: ['faction', , ...fileTypes],
+    faction: [...fileTypes],
+  };
+
   return (
     <Box>
       <ButtonGroup variant="text">
-        <Button onClick={(e) => setFolderAnchor(e.currentTarget)}>
-          Add Folder
-        </Button>
-        <Button onClick={(e) => setSubmenuAnchor(e.currentTarget)}>
-          Add File
-        </Button>
-        <Button>Sort</Button>
+        <Tooltip title={<Typography>Create New Glossary</Typography>}>
+          <IconButton onClick={handleCreateGlossary}>
+            <AddToPhotos />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={<Typography>Add New Section</Typography>}>
+          <span>
+            <IconButton
+              disabled={!glossaryId}
+              onClick={(e) => setFolderAnchor(e.currentTarget)}
+            >
+              <CreateNewFolder />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title={<Typography>Add New Detail</Typography>}>
+          <span>
+            <IconButton
+              disabled={!glossaryId}
+              onClick={(e) => setSubmenuAnchor(e.currentTarget)}
+            >
+              <NoteAdd />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title={<Typography>Sort</Typography>}>
+          <IconButton>
+            <Sort />
+          </IconButton>
+        </Tooltip>
       </ButtonGroup>
-      {structure.map((node) => (
-        <NodeItem key={node.id} id={node.id} />
-      ))}
+      {visibleNodeList.map((entry) => {
+        const node = nodeMap[entry.id];
+        return (
+          <DropZone
+            key={entry.id}
+            type={
+              node.entryType && node.entryType in dragAcceptMap
+                ? dragAcceptMap[node.entryType as keyof typeof dragAcceptMap]
+                    .filter((t): t is string => typeof t === 'string')
+                    .filter((t): t is string => t !== undefined)
+                : []
+            }
+            handleAdd={() => {}}
+            draggedType={draggedType}
+            endDrag={endDrag}
+            styleType="glossary"
+            bg2="success.main"
+            onReorder={() => {}}
+          >
+            <DragWrapper
+              type={node.entryType ?? ''}
+              item={node}
+              startDrag={startDrag}
+              endDrag={endDrag}
+            >
+              <NodeItem key={node.id} id={node.id} offset={entry.depth} />
+            </DragWrapper>
+          </DropZone>
+        );
+      })}
       {/* Context menu */}
       <Menu
         open={Boolean(contextMenu)}
@@ -378,25 +430,54 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           <>
             <MenuItem
               onClick={(e) => {
+                e.preventDefault();
+                if (contextMenu.node) {
+                  addNewTab({
+                    name: contextMenu.node.name,
+                    id: contextMenu.node.id,
+                    mode: 'edit',
+                    tool: contextMenu.node.entryType,
+                    tabId: newId(),
+                    scroll: 0,
+                    preventSplit: false,
+                    activate: true,
+                    side: 'left',
+                    tabType: 'glossary',
+                    glossaryId: glossaryId ?? undefined,
+                  });
+                }
+                closeContextMenu();
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              {<OpenInNew />}
+              Open
+            </MenuItem>
+            <MenuItem
+              onClick={(e) => {
                 setRenameTarget(contextMenu.node);
                 closeContextMenu();
               }}
+              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
             >
+              {<Edit />}
               Rename
             </MenuItem>
             <MenuItem
               onClick={(e) => {
                 e.preventDefault();
                 if (contextMenu.node) {
-                  onDelete({
-                    id: contextMenu.node.id,
-                    entryType: contextMenu.node.entryType,
-                    glossaryId,
-                  });
+                  onDelete(contextMenu.node);
                   closeContextMenu();
                 }
               }}
+              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
             >
+              <Delete />
               Delete
             </MenuItem>
             {contextMenu.node.type === 'folder' && (
@@ -406,17 +487,23 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
                     e.preventDefault();
                     setSubmenuAnchor(e.currentTarget);
                   }}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
                 >
-                  New File
+                  <InsertDriveFileSharp />
+                  New Detail
                 </MenuItem>
-                <MenuItem
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setFolderAnchor(e.currentTarget);
-                  }}
-                >
-                  New Folder
-                </MenuItem>
+                {contextMenu.node.entryType !== 'faction' && (
+                  <MenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setFolderAnchor(e.currentTarget);
+                    }}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                  >
+                    <FolderIcon />
+                    New Section
+                  </MenuItem>
+                )}
               </>
             )}
           </>
@@ -443,8 +530,12 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               });
               closeContextMenu();
             }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
           >
-            {type !== 'poi' ? capitalize(type) : 'Point of Interest'}
+            {entryTypeIcons[type] || (
+              <FolderIcon sx={{ color: 'primary.main' }} />
+            )}
+            {capitalize(type)}
           </MenuItem>
         ))}
       </Menu>
@@ -457,23 +548,45 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        {folderTypes.map((type) => (
-          <MenuItem
-            key={type}
-            onClick={(e) => {
-              e.preventDefault();
-              onNewFolder({
-                id: newId(),
-                name: 'Untitled',
-                parentId: contextMenu?.node?.id || null,
-                entryType: type as GlossaryEntryType,
-              });
-              closeContextMenu();
-            }}
-          >
-            {capitalize(type)}
-          </MenuItem>
-        ))}
+        {folderTypes.map((type, n) => {
+          const parentIndex = folderTypes.indexOf(
+            contextMenu?.node?.entryType || ''
+          );
+          if (contextMenu !== null) {
+            if (
+              parentIndex === -1 ||
+              (contextMenu?.node?.type && contextMenu.node.type !== 'folder')
+            )
+              return null; // Only show folder types if parent is a folder
+            if (n <= parentIndex) return null; // Only show folder types that are below the parent type in the hierarchy
+          }
+          return (
+            <MenuItem
+              key={type}
+              onClick={(e) => {
+                e.preventDefault();
+                onNewFolder({
+                  id: newId(),
+                  name: 'Untitled',
+                  parentId: contextMenu?.node?.id || null,
+                  entryType: type as GlossaryEntryType,
+                });
+                closeContextMenu();
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'start',
+                gap: 4,
+              }}
+            >
+              {entryTypeIcons[type] || (
+                <FolderIcon sx={{ color: 'primary.main' }} />
+              )}
+              {capitalize(type)}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </Box>
   );

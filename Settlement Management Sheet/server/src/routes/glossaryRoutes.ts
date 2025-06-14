@@ -4,12 +4,9 @@ import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 import {
   getGlossaries,
-  getGlossaryById,
   getGlossaryNodes,
+  getGlossaryEntryById,
   createGlossary,
-  renameNode,
-  deleteNode,
-  createFolder,
   updateNode,
   updateNodeSortIndexes,
   updateNodeParentId,
@@ -23,15 +20,12 @@ import {
 const router = express.Router();
 
 router.get('/', getGlossaries);
-router.get('/:id', getGlossaryById);
 router.get('/nodes/:glossaryId', getGlossaryNodes);
+router.get('/entries/:entryType/:id', getGlossaryEntryById);
 router.post('/', createGlossary);
-router.post('/folder', createFolder);
 router.post('/entry', createEntryWithNode);
 router.post('/entry/update', updateEntryWithNode);
 router.post('/entry/delete', deleteEntryWithNode);
-router.post('/node/rename', renameNode);
-router.post('/node/delete', deleteNode);
 router.post('/node/update', updateNode);
 router.post('/node/sort', updateNodeSortIndexes);
 router.post('/node/parent', updateNodeParentId);

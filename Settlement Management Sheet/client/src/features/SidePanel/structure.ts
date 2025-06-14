@@ -19,7 +19,7 @@ import KitIcon from '@mui/icons-material/HomeRepairService';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import { v4 as newId } from 'uuid';
 
-const getTabInfo = (tool) => {
+export const getTabInfo = (tool) => {
   return {
     name: 'Untitled',
     id: newId(),

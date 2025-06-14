@@ -30,5 +30,5 @@ const checklistContent = [
     type: 'group',
   },
 ];
-
+export { checklistContent };
 export default checklistContent;

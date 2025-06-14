@@ -1,38 +1,26 @@
 import React from 'react';
-import { useTools } from 'hooks/useTool.tsx';
+import ToolInput, { ToolInputConfig } from '../DynamicForm/ToolInput.js';
 
-import DynamicForm from '../DynamicForm/DynamicForm.jsx';
-
-const EditNameDescription = ({ tool, fields, id, snakeCaseName = false }) => {
-  const { edit, errors, updateTool, validateToolField } = useTools(tool, id);
-  const handleUpdate = (updates, { keypath }) => {
-    updateTool(keypath, updates);
+interface EditNameDescriptionProps {
+  fields: {
+    name: ToolInputConfig;
+    description: ToolInputConfig;
   };
+}
 
-  const handleValidationUpdate = (error, { keypath }) => {
-    validateToolField(keypath, error);
-  };
-
+const EditNameDescription: React.FC<EditNameDescriptionProps> = ({
+  fields,
+}) => {
   return (
     <>
-      <DynamicForm
-        initialValues={{ name: edit?.name || '' }}
-        field={fields.name}
-        externalUpdate={handleUpdate}
-        shrink
-        parentError={errors?.name}
-        onError={handleValidationUpdate}
-        boxSx={{ gridColumn: 'span 3', px: 1 }}
-        snakeCase={snakeCaseName}
+      <ToolInput
+        inputConfig={fields.name}
+        style={{ gridColumn: 'span 3', px: 1 }}
       />
-      <DynamicForm
-        initialValues={{ description: edit?.description || '' }}
-        field={fields.description}
-        externalUpdate={handleUpdate}
-        shrink
-        parentError={errors?.description}
-        onError={handleValidationUpdate}
-        boxSx={{ gridColumn: 'span 3', px: 1 }}
+      <ToolInput
+        inputConfig={fields.description}
+        style={{ gridColumn: 'span 3', px: 1 }}
+        multiline
       />
     </>
   );
