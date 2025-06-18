@@ -1,26 +1,26 @@
-import React, { useCallback, useState, useEffect, lazy } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  lazy,
+  useContext,
+} from 'react';
 import { useTools } from '@/hooks/useTools.jsx';
 
 import { v4 as newId } from 'uuid';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';
 import EditDependency from '@/components/shared/Metadata/EditDependency.jsx';
-import { ToolName } from '@/app/types/ToolTypes.js';
-import { ModalContent } from '../TabbedContainer/TabbedContainer.js';
+import { ShellContext } from '@/context/ShellContext.js';
 
 interface ObjectDependenciesProps {
-  tool: ToolName;
-  setModalContent: (content: ModalContent) => void;
-  id: string;
   displayName: string;
 }
 
 const ObjectDependencies: React.FC<ObjectDependenciesProps> = ({
-  tool,
-  setModalContent,
-  id,
   displayName,
 }) => {
+  const { id, tool, showModal, closeModal } = useContext(ShellContext);
   const { edit } = useTools(tool, id);
 
   const outerUpdate = useCallback(() => {}, [tool, id]);
@@ -44,19 +44,7 @@ const ObjectDependencies: React.FC<ObjectDependenciesProps> = ({
         aria-label="Add dependency"
         sx={{ px: 4 }}
         onClick={() => {
-          setModalContent({
-            component: lazy(() => import('../LoadTool/LoadTool.jsx')),
-            props: {
-              tool,
-              displayName,
-              keypath: 'dependencies.order',
-              refKeypath: 'dependencies.refIds',
-              selectionMode: true,
-              outerUpdate,
-              outerTool: edit,
-              dependency: true,
-            },
-          });
+          console.log('Fix me! I need to be implemented!');
         }}
       >
         Add Dependency

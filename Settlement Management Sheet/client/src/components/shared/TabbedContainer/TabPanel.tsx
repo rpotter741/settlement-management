@@ -25,7 +25,7 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
 
     useEffect(() => {
       dispatch(setActiveTab({ tab }));
-    }, []);
+    }, [tab.side, tab.tabId, dispatch]);
 
     return (
       <Box
@@ -40,7 +40,6 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         }}
         onClick={() => {
           if (activeTab?.tabId !== tab.tabId) {
-            console.log('TabPanel focused:', tab.name);
             dispatch(setActiveTab({ tab }));
           }
         }}

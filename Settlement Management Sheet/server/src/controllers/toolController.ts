@@ -23,8 +23,9 @@ const getContent = async (req, res) => {
 
     if (!requireFields(['tool'], req.query, res)) return;
 
-    const model = prisma[tool];
-    if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
+    const model = (prisma as any)[tool];
+    if (!model || typeof model.findMany !== 'function')
+      return res.status(400).json({ message: 'Invalid tool type.' });
 
     const whereClause = {
       name: { contains: search, mode: 'insensitive' },
@@ -53,7 +54,9 @@ const getContent = async (req, res) => {
     }
   } catch (error) {
     console.error(`Error getting :`, error);
-    return res.status(500).json({ message: `Error getting ${scope} ${tool}.` });
+    return res
+      .status(500)
+      .json({ message: `Error getting content. Try again later.` });
   }
 };
 
@@ -64,8 +67,9 @@ const getContentByName = async (req, res) => {
 
     if (!requireFields(['tool'], req.query, res)) return;
 
-    const model = prisma[tool];
-    if (!model) return res.status(400).json({ message: 'Invalid tool type.' });
+    const model = (prisma as any)[tool];
+    if (!model || typeof model.findMany !== 'function')
+      return res.status(400).json({ message: 'Invalid tool type.' });
 
     const options = await model.findMany();
     const data = options
@@ -93,7 +97,7 @@ const saveContent = async (req, res) => {
 
     if (!requireFields(['tool', 'data'], req.body, res)) return;
 
-    const model = prisma[tool];
+    const model = (prisma as any)[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }
@@ -166,7 +170,7 @@ const getItem = async (req, res) => {
   try {
     const { tool, id, refId } = req.query;
     if (!requireFields(['tool', 'id', 'refId'], req.query, res)) return;
-    const model = prisma[tool];
+    const model = (prisma as any)[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }
@@ -182,7 +186,7 @@ const fetchByIds = async (req, res) => {
   try {
     const { tool, ids } = req.body;
     if (!requireFields(['tool', 'ids'], req.body, res)) return;
-    const model = prisma[tool];
+    const model = (prisma as any)[tool];
     if (!model) {
       return res.status(400).json({ message: 'Invalid tool type.' });
     }

@@ -60,6 +60,12 @@ export const saveToolFile = (tab: Tab) => {
         tool: tool as ToolName,
         data: { ...edit },
       });
+      dispatch(
+        toolSlice.saveTool({
+          tool: tool as ToolName,
+          id: tab.id,
+        })
+      );
       if (isDirty) {
         dispatch(
           sidePanelSlice.updateTab({

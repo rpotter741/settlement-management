@@ -49,7 +49,7 @@ const createGlossary = async ({
 }: {
   id: string;
   name: string;
-  description: string;
+  description: JSON;
 }) => {
   return api.post('/glossary', { id, name, description }).then((res: any) => {
     return res.data;
@@ -156,7 +156,7 @@ const updateGlossary = async ({
     });
 };
 
-const deleteGlossary = async ({ id }: { id: string }) => {
+export const deleteGlossary = async ({ id }: { id: string }) => {
   return api.post('/glossary/delete', { id }).then((res: any) => {
     return res.data;
   });

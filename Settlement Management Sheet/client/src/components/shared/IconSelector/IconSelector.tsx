@@ -1,26 +1,44 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 import { Box, Typography, Card, Button } from '@mui/material';
 import Icon from '../Icons/Icon.jsx';
-import iconList from './iconList';
+import iconList from './iconList.js';
 import IconColorPicker from './IconColorPicker.jsx';
 import { useTools } from 'hooks/useTools.jsx';
+import { ShellContext, useShellContext } from '@/context/ShellContext.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import { closeModal } from '@/app/slice/modalSlice.js';
+import { selectEditToolById } from '@/app/selectors/toolSelectors.js';
+import { useSelector } from 'react-redux';
+import { ToolName } from 'types/common.js';
+import { updateById } from '@/app/slice/toolSlice.js';
 
-const IconSelector = ({ tool, setModalContent, id }) => {
-  const { edit, updateTool } = useTools(tool, id);
+interface IconSelectorProps {
+  tool: ToolName;
+  id: string;
+}
+
+const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
+  const dispatch: AppDispatch = useDispatch();
+  const edit = useSelector(selectEditToolById(tool, id));
   const [selectedIcon, setSelectedIcon] = useState(edit.icon);
   const [iconColor, setIconColor] = useState(edit.icon.color);
   const [bg, setBg] = useState(edit.icon.backgroundColor || '#fbf7ef');
 
-  const handleIconChange = (event, newValue) => {
+  const handleIconChange = (event: any, newValue: any) => {
     setSelectedIcon(newValue);
   };
 
-  const handleBackgroundChange = (newBg) => {
+  const handleBackgroundChange = (newBg: string) => {
     setBg(newBg);
   };
 
-  const handleColorChange = (color) => {
+  const handleColorChange = (color: string) => {
     setIconColor(color);
+  };
+
+  const onClose = () => {
+    dispatch(closeModal({}));
   };
 
   const onConfirm = () => {
@@ -29,8 +47,8 @@ const IconSelector = ({ tool, setModalContent, id }) => {
       color: iconColor,
       backgroundColor: bg,
     };
-    updateTool('icon', completeIcon);
-    setModalContent(null);
+    dispatch(updateById({ id, tool, keypath: 'icon', updates: completeIcon }));
+    onClose();
   };
 
   const sortedList = useMemo(
@@ -131,7 +149,7 @@ const IconSelector = ({ tool, setModalContent, id }) => {
         <Button
           variant="outlined"
           sx={{ width: '50%', mt: 2 }}
-          onClick={() => setModalContent(null)}
+          onClick={onClose}
         >
           Cancel
         </Button>

@@ -5,6 +5,7 @@ import sidePanelReducer from './slice/sidePanelSlice.js';
 import glossaryReducer from './slice/glossarySlice.js';
 import selectionReducer from './slice/selectionSlice.js';
 import snackbarReducer from './slice/snackbarSlice.js';
+import modalReducer from './slice/modalSlice.js';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     glossary: glossaryReducer,
     selection: selectionReducer,
     snackbar: snackbarReducer,
+    modal: modalReducer,
   },
 });
 

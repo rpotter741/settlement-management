@@ -41,7 +41,7 @@ import structure from './structure.js';
 
 const maxTrail = 3;
 
-const SidePanel = ({ setModalContent }) => {
+const SidePanel = () => {
   const [active, setActive] = useState('');
   const [tool, setTool] = useState(null);
   const { themeKey, changeThemeTo } = useTheme();
@@ -312,9 +312,7 @@ const SidePanel = ({ setModalContent }) => {
                   </Collapse>
                 </>
               )}
-              {mode === 'glossary' && (
-                <GlossarySidePanel setModalContent={setModalContent} />
-              )}
+              {mode === 'glossary' && <GlossarySidePanel />}
             </Box>
           </Box>
         </Collapse>

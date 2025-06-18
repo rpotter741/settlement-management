@@ -38,13 +38,37 @@ export interface BaseEntry {
 }
 
 export type TerrainType =
-  | 'forest'
-  | 'mountain'
-  | 'desert'
-  | 'swamp'
+  | 'forests'
+  | 'mountains'
+  | 'deserts'
+  | 'swamps'
   | 'plains'
   | 'hills'
-  | 'tundra';
+  | 'valleys'
+  | 'plateaus'
+  | 'tundra'
+  | 'badlands'
+  | 'coastal'
+  | 'volcanic'
+  | 'glacial'
+  | 'taiga';
+
+export const TerrainTypeOptions: TerrainType[] = [
+  'forests',
+  'mountains',
+  'deserts',
+  'swamps',
+  'plains',
+  'hills',
+  'valleys',
+  'plateaus',
+  'tundra',
+  'badlands',
+  'coastal',
+  'volcanic',
+  'glacial',
+  'taiga',
+];
 
 export type GeographicEntryType =
   | 'forest'
@@ -64,7 +88,45 @@ export type GeographicEntryType =
   | 'peninsula'
   | 'bay'
   | 'gulf'
-  | 'fjord';
+  | 'fjord'
+  | 'volcano'
+  | 'glacier'
+  | 'canyon'
+  | 'steppe'
+  | 'marsh'
+  | 'wetland'
+  | 'reef'
+  | 'delta'
+  | 'atoll';
+
+export const geographicEntryTypeOptions: GeographicEntryType[] = [
+  'forest',
+  'mountain',
+  'river',
+  'lake',
+  'ocean',
+  'desert',
+  'swamp',
+  'cave',
+  'hill',
+  'plain',
+  'valley',
+  'glacier',
+  'volcano',
+  'canyon',
+  'island',
+  'archipelago',
+  'peninsula',
+  'bay',
+  'gulf',
+  'fjord',
+  'steppe',
+  'marsh',
+  'wetland',
+  'reef',
+  'delta',
+  'atoll',
+];
 
 export type ClimateType =
   | 'tropical'
@@ -72,18 +134,42 @@ export type ClimateType =
   | 'temperate'
   | 'polar'
   | 'subtropical'
-  | 'mountainous';
+  | 'continental'
+  | 'icecap';
 
-export interface RegionEntry extends BaseEntry {
-  climate: ClimateType;
-  terrain: TerrainType;
+export const ClimateTypeOptions: ClimateType[] = [
+  'tropical',
+  'arid',
+  'temperate',
+  'polar',
+  'subtropical',
+  'continental',
+  'icecap',
+];
+
+export interface TerritoryEntry extends BaseEntry {
+  climate: ClimateType[];
+  terrain: TerrainType[];
+  nations: UUID[];
   factions: UUID[];
   population: number | string;
-  notableLocations: UUID[];
+  locations: UUID[];
+  geographicFeatures: UUID[];
   resources?: string[];
 }
 
-export interface GeographicEntry extends BaseEntry {
+export interface ProvinceEntry extends BaseEntry {
+  nation: UUID[];
+  terrain: TerrainType[];
+  locations: UUID[];
+  geographicFeatures: UUID[];
+  people: UUID[];
+  notableEvents?: UUID[];
+  resources?: string[];
+  population: number | string;
+}
+
+export interface LandmarkEntry extends BaseEntry {
   type: GeographicEntryType;
   region: UUID[];
   climate: ClimateType;
@@ -120,8 +206,8 @@ export interface ContinentEntry extends BaseEntry {
   eventLog?: UUID[];
 }
 
-export interface NationEntry extends BaseEntry {
-  continent: UUID;
+export interface DomainEntry extends BaseEntry {
+  continent: UUID[];
   regions: UUID[];
   capital: UUID;
   population: number | string;
@@ -136,7 +222,7 @@ export interface NationEntry extends BaseEntry {
   history?: string; // A brief history of the nation
   relationships?: { id: UUID; type: string; relationship: string }[]; // Relationships with other nations or factions
   notableLocations?: UUID[]; // Significant locations within the nation
-  geography?: GeographicEntry[]; // Geographic features within the nation
+  geography?: LandmarkEntry[]; // Geographic features within the nation
 }
 
 export interface SettlementEntry extends BaseEntry {
@@ -159,6 +245,8 @@ export interface FactionEntry extends BaseEntry {
   members: UUID[];
   allies: UUID[];
   enemies: UUID[];
+  nations: UUID[];
+  regions: UUID[];
   homeBase: UUID;
   relationships: { id: UUID; type: string; relationship: string }[];
   influence: number;
@@ -299,9 +387,10 @@ export interface NoteEntry extends BaseEntry {
 
 export type GlossaryEntry =
   | ContinentEntry
-  | NationEntry
-  | RegionEntry
-  | GeographicEntry
+  | TerritoryEntry
+  | DomainEntry
+  | ProvinceEntry
+  | LandmarkEntry
   | FactionEntry
   | SettlementEntry
   | LocationEntry
@@ -311,9 +400,10 @@ export type GlossaryEntry =
 
 export type GlossaryEntryType =
   | 'continent'
-  | 'nation'
-  | 'region'
-  | 'geography'
+  | 'territory'
+  | 'domain'
+  | 'province'
+  | 'landmark'
   | 'settlement'
   | 'faction'
   | 'location'

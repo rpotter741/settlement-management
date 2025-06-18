@@ -7,16 +7,18 @@ import {
   selectNodeById,
 } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
+import { GlossaryNode } from 'types/index.js';
 
 const useNodeEditor = (glossaryId: string, entryId: string) => {
   const dispatch: AppDispatch = useDispatch();
 
-  const node = useSelector(selectNodeById(glossaryId, entryId));
+  const node: GlossaryNode = useSelector(selectNodeById(glossaryId, entryId));
 
-  const entry = useSelector(selectEntryById(glossaryId, entryId));
+  const entry: any = useSelector(selectEntryById(glossaryId, entryId));
 
   const updateGlossaryEntry = useCallback(
     (content: Record<string, any>) => {
+      console.log(content, 'content in useNodeEditor');
       dispatch(thunks.updateEntry({ glossaryId, node, content }));
     },
     [dispatch, glossaryId, node]

@@ -4,7 +4,6 @@ import { Tab } from '@/app/types/SidePanelTypes.js';
 
 type HotkeyAction = () => void;
 type HotkeyMap = Record<string, HotkeyAction>;
-type ToolHotkeyMap = Record<Partial<TabType>, HotkeyMap>;
 
 function parseKeyEvent(e: KeyboardEvent): string {
   const keys = [];
@@ -19,17 +18,13 @@ function parseKeyEvent(e: KeyboardEvent): string {
 
 export default function useToolHotkeys(
   activeTab: Tab | null,
-  toolHotkeys: ToolHotkeyMap
+  hotkeys: HotkeyMap
 ) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const keyCombo = parseKeyEvent(e);
-      const currentTool = activeTab?.tabType;
 
-      if (!currentTool || !activeTab) return;
-
-      const hotkeysForTool = toolHotkeys[currentTool];
-      const action = hotkeysForTool?.[keyCombo];
+      const action = hotkeys?.[keyCombo];
 
       if (action) {
         e.preventDefault();
@@ -39,5 +34,5 @@ export default function useToolHotkeys(
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, toolHotkeys]);
+  }, [activeTab, hotkeys]);
 }

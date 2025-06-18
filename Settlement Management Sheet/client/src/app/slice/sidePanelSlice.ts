@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { isEqual, set } from 'lodash';
 import {
   Tab,
@@ -87,24 +87,55 @@ const sidePanelSlice = createSlice({
       if (side === 'left' || state.preventSplit) {
         state.leftTabs = state.leftTabs.filter((tab) => tab.tabId !== tabId);
         if (state.currentLeftTab === tabId) {
-          state.currentLeftTab = state.leftTabs[0]?.tabId || null;
-          state.currentLeftTabIndex = state.leftTabs[0] ? 0 : null;
+          const leftTab = state.leftTabs[0];
+          if (leftTab) {
+            state.currentLeftTab = state.leftTabs[0].tabId;
+            state.currentLeftTabIndex = 0;
+            if (state.focusedTab?.tabId === tabId) {
+              state.focusedTab = leftTab;
+            }
+          }
         }
         if (state.leftTabs.length === 0 && state.rightTabs.length !== 0) {
           state.splitTabs = false;
           state.preventSplit = false;
-          state.leftTabs = [...state.rightTabs];
+          state.rightTabs.forEach((tab) => {
+            tab.side = 'left';
+            state.leftTabs.push(tab);
+            if (state.focusedTab?.tabId === tab.tabId) {
+              state.focusedTab = tab;
+            }
+          });
           state.currentLeftTab = state.currentRightTab;
           state.currentLeftTabIndex = state.currentRightTabIndex;
           state.rightTabs = [];
           state.currentRightTab = null;
           state.currentRightTabIndex = null;
+        } else if (
+          state.leftTabs.length === 0 &&
+          state.rightTabs.length === 0
+        ) {
+          state.splitTabs = false;
+          state.preventSplit = false;
+          state.currentLeftTab = null;
+          state.currentLeftTabIndex = null;
+          state.currentRightTab = null;
+          state.currentRightTabIndex = null;
+          state.focusedTab = null;
+          state.leftTabs = [];
+          state.rightTabs = [];
         }
       } else {
         state.rightTabs = state.rightTabs.filter((tab) => tab.tabId !== tabId);
         if (state.currentRightTab === tabId) {
-          state.currentRightTab = state.rightTabs[0]?.tabId || null;
-          state.currentRightTabIndex = state.rightTabs[0] ? 0 : null;
+          const rightTab = state.rightTabs[0];
+          if (rightTab) {
+            state.currentRightTab = rightTab.tabId;
+            state.currentRightTabIndex = 0;
+            if (state.focusedTab?.tabId === tabId) {
+              state.focusedTab = rightTab;
+            }
+          }
         }
         if (state.rightTabs.length === 0) {
           state.splitTabs = false;
@@ -112,6 +143,9 @@ const sidePanelSlice = createSlice({
           state.currentRightTab = null;
           state.currentRightTabIndex = null;
           state.rightTabs = [];
+        }
+        if (state.leftTabs.length > 0 && state.currentLeftTabIndex !== null) {
+          state.focusedTab = state.leftTabs[state.currentLeftTabIndex];
         }
       }
       if (preventSplit !== undefined) state.preventSplit = preventSplit;
@@ -147,6 +181,9 @@ const sidePanelSlice = createSlice({
         }
         set(state.rightTabs[index], keypath, updates);
       }
+      if (state.focusedTab?.tabId === tabId) {
+        set(state.focusedTab, keypath, updates);
+      }
     },
     moveRightToLeft: (state, action: PayloadAction<MoveTabPayload>) => {
       const { tabId, dropIndex } = action.payload;
@@ -161,6 +198,9 @@ const sidePanelSlice = createSlice({
           state.leftTabs.push(tab);
           state.currentLeftTab = tabId;
           state.currentLeftTabIndex = state.leftTabs.length - 1;
+          if (state.focusedTab?.tabId === tabId) {
+            state.focusedTab = tab;
+          }
         }
         const newTabs = state.rightTabs.filter((tab) => tab.tabId !== tabId);
         state.rightTabs = newTabs;
@@ -180,7 +220,7 @@ const sidePanelSlice = createSlice({
     },
     moveLeftToRight: (state, action: PayloadAction<MoveTabPayload>) => {
       const { tabId, dropIndex } = action.payload;
-      if (state.preventSplit) {
+      if (state.preventSplit || state.leftTabs.length <= 1) {
         return;
       }
       const tab = state.leftTabs.find((tab) => tab.tabId === tabId);
@@ -194,23 +234,16 @@ const sidePanelSlice = createSlice({
           state.rightTabs.push(tab);
           state.currentRightTab = tabId;
           state.currentRightTabIndex = state.rightTabs.length - 1;
+          if (state.focusedTab?.tabId === tabId) {
+            state.focusedTab = tab;
+          }
         }
         state.leftTabs = state.leftTabs.filter((tab) => tab.tabId !== tabId);
         state.splitTabs = true;
 
-        if (state.leftTabs.length === 0 && state.rightTabs.length !== 0) {
-          state.splitTabs = false;
-          state.preventSplit = false;
-          state.leftTabs = [...state.rightTabs];
-          state.currentLeftTab = state.currentRightTab;
-          state.currentLeftTabIndex = state.currentRightTabIndex;
-          state.rightTabs = [];
-          state.currentRightTab = null;
-          state.currentRightTabIndex = null;
-        }
         if (state.currentLeftTab === tabId) {
-          state.currentLeftTab = state.leftTabs[0]?.tabId || null;
-          state.currentLeftTabIndex = state.leftTabs[0] ? 0 : null;
+          state.currentLeftTab = state.leftTabs[0].tabId;
+          state.currentLeftTabIndex = 0;
         }
       }
     },
@@ -225,6 +258,19 @@ const sidePanelSlice = createSlice({
     setPrevent: (state, action) => {
       const { prevent } = action.payload;
       state.preventSplit = prevent;
+      if (prevent) {
+        state.rightTabs.forEach((tab) => {
+          tab.side = 'left';
+          state.leftTabs.push(tab);
+        });
+        state.rightTabs = [];
+        state.currentRightTab = null;
+        state.currentRightTabIndex = null;
+        state.splitTabs = false;
+        state.currentLeftTab = state.leftTabs[0]?.tabId || null;
+        state.currentLeftTabIndex = state.leftTabs[0] ? 0 : null;
+        state.focusedTab = state.leftTabs[0] || null;
+      }
     },
     setTabDirty: (state, action: PayloadAction<SetTabDirtyPayload>) => {
       const { id, isDirty } = action.payload;
@@ -236,12 +282,12 @@ const sidePanelSlice = createSlice({
       if (rightIndex !== -1) {
         set(state.rightTabs[rightIndex], 'isDirty', isDirty);
       }
+      if (state.focusedTab?.id === id) {
+        state.focusedTab.isDirty = isDirty;
+      }
     },
     setActiveTab: (state, action: PayloadAction<{ tab: Tab }>) => {
       const { tab } = action.payload;
-      if (state.focusedTab?.tabId === tab.tabId) {
-        return; // No change if the tab is already focused
-      }
       state.focusedTab = tab;
     },
   },

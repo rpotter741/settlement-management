@@ -4,9 +4,10 @@ import React, {
   useMemo,
   useState,
   Suspense,
+  act,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Divider, Modal } from '@mui/material';
+import { Box, Divider, Modal, useMediaQuery } from '@mui/material';
 
 import SidePanel from '@/features/SidePanel/SidePanel.jsx';
 import { useSidePanel } from '@/hooks/useSidePanel.jsx';
@@ -18,7 +19,6 @@ import TabDragBox from './TabDragBox.js';
 import RenderTabHeaders from './RenderTabHeaders.jsx';
 import RenderTabs from './RenderTabs.jsx';
 import {
-  activeTab,
   focusedTab,
   sidePanelSelectors as select,
   selectAllTabs,
@@ -30,11 +30,23 @@ import {
 } from '@/context/TabsContext/TabsContext.jsx';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
-import GeographyForm from '@/features/Glossary/forms/GeographyForm.js';
+import GeographyForm from '@/features/Glossary/LandmarkForm/CreateLandmarkGlossary.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import useToolHotkeys from '@/hooks/useGlobalHotkeys.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import {
+  currentModal,
+  currentModalKey,
+  isModalOpen,
+  modalPositionSx,
+  modalProps,
+  disableBackgroundClose,
+} from '@/app/selectors/modalSelectors.js';
+import { closeModal } from '@/app/slice/modalSlice.js';
+import { modalMap } from '@/maps/modalMap.js';
+import { useModalActions } from '@/hooks/useModal.js';
+import { saveToolFile } from '@/app/thunks/fileMenuThunks.js';
 
 export type ModalContent = {
   component: React.ElementType;
@@ -59,14 +71,33 @@ const TabbedContainer: React.FC = () => {
   } = useSidePanel();
   const dispatch: AppDispatch = useDispatch();
 
-  const [modalContent, setModalContent] = useState<ModalContent>(null);
   const [dragSide, setDragSide] = useState<'left' | 'right' | null>(null);
+
   const activeTab = useSelector(focusedTab);
+
+  const { showModal } = useModalActions();
+
+  const modalOpen = useSelector(isModalOpen);
+  const ModalComponent = useSelector(currentModal);
+  const modalKey = useSelector(currentModalKey);
+  const modalComponentProps = useSelector(modalProps);
+  const modalPosition = useSelector(modalPositionSx);
+  const disableClickaway = useSelector(disableBackgroundClose);
 
   const noSplit = useMemo(
     () => leftTabs.some((tab: Tab) => tab.tool === 'event'),
     [leftTabs]
   );
+
+  const canSplit = useMediaQuery('(min-width:1500px)');
+
+  useEffect(() => {
+    if (canSplit) {
+      setPreventSplit(false);
+    } else {
+      setPreventSplit(true);
+    }
+  }, [canSplit, setPreventSplit]);
 
   useEffect(() => {
     if (noSplit && preventSplit === false) {
@@ -123,53 +154,55 @@ const TabbedContainer: React.FC = () => {
   }, [isSplit, rightTabs, setSplit]);
 
   useToolHotkeys(activeTab, {
-    tool: {
-      'mod+shift+p': () =>
-        dispatch(
-          updateTab({
-            tabId: activeTab?.tabId || '',
-            side: activeTab?.side || 'left',
-            keypath: 'mode',
-            updates: 'preview',
-          })
-        ),
-      'mod+shift+e': () =>
-        dispatch(
-          updateTab({
-            tabId: activeTab?.tabId || '',
-            side: activeTab?.side || 'left',
-            keypath: 'mode',
-            updates: 'edit',
-          })
-        ),
-      'mod+w': () => {
-        if (!activeTab) return;
-        const freshTab = [...leftTabs, ...rightTabs].find(
-          (tab: Tab) => tab.tabId === activeTab.tabId
-        );
-        if (!freshTab) return;
-        if (freshTab.isDirty) {
-          setModalContent({
-            component: React.lazy(
-              () =>
-                import(
-                  '@/components/shared/TabbedContainer/ConfirmDirtyClose.jsx'
-                )
-            ),
-            props: {
-              onClose: () => removeById(freshTab.tabId, freshTab.side, false),
-              tab: freshTab,
-              side: freshTab.side,
-              setModalContent,
-            },
-          });
-        } else {
-          removeById(activeTab.tabId, activeTab.side, false);
-        }
-      },
+    'mod+shift+p': () => {
+      if (!activeTab) return;
+      dispatch(
+        updateTab({
+          tabId: activeTab?.tabId || '',
+          side: activeTab?.side || 'left',
+          keypath: 'mode',
+          updates: 'preview',
+        })
+      );
     },
-    glossary: {},
-    other: {},
+    'mod+shift+e': () => {
+      if (!activeTab) return;
+      dispatch(
+        updateTab({
+          tabId: activeTab?.tabId || '',
+          side: activeTab?.side || 'left',
+          keypath: 'mode',
+          updates: 'edit',
+        })
+      );
+    },
+    'mod+w': () => {
+      if (!activeTab) return;
+      if (activeTab.isDirty) {
+        const entry = {
+          componentKey: 'ConfirmDirtyClose',
+          props: {
+            tab: activeTab,
+          },
+          id: `confirm-dirty-close-${activeTab.tabId}`,
+        };
+        showModal({ entry });
+      } else {
+        removeById(activeTab.tabId, activeTab.side, false);
+      }
+    },
+    'mod+k': () => {
+      const entry = {
+        componentKey: 'QuickSearch',
+        props: {},
+        id: 'quick-search',
+      };
+      showModal({ entry });
+    },
+    'mod+s': () => {
+      if (!activeTab) return;
+      dispatch(saveToolFile(activeTab));
+    },
   });
 
   return (
@@ -196,7 +229,7 @@ const TabbedContainer: React.FC = () => {
         className="tabbed-container"
       >
         {/* Side Panel */}
-        <SidePanel setModalContent={setModalContent} />
+        <SidePanel />
         {/* Tabs Header */}
         <TabDragProvider>
           <Box
@@ -228,7 +261,6 @@ const TabbedContainer: React.FC = () => {
                   setActiveTab={setActiveTab}
                   removeById={removeById}
                   setDragSide={setDragSide}
-                  setModalContent={setModalContent}
                 />
               </LeftTabsProvider>
               {rightTabs.length > 0 && (
@@ -237,33 +269,30 @@ const TabbedContainer: React.FC = () => {
                     setActiveTab={setActiveTab}
                     removeById={removeById}
                     side="right"
-                    setModalContent={setModalContent}
                   />
                 </RightTabsProvider>
               )}
             </Box>
-            {modalContent && (
-              <Modal open={true} onClose={() => setModalContent(null)}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: [0, '50%', '50%', 'calc(50% + 174px)'],
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'background.default',
-                    border: '2px solid #000',
-                    borderColor: 'secondary.light',
-                    boxShadow: 24,
-                    p: 4,
-                    borderRadius: 4,
-                    boxSizing: 'border-box',
-                  }}
-                >
+            {modalOpen && (ModalComponent || modalKey) && (
+              <Modal
+                open={true}
+                onClose={
+                  disableClickaway
+                    ? undefined
+                    : () => dispatch(closeModal({ autoNext: false }))
+                }
+              >
+                <Box sx={{ ...modalPosition }}>
                   <Suspense fallback={<Box>Loading...</Box>}>
-                    {React.createElement(modalContent?.component, {
-                      ...modalContent?.props,
-                      setModalContent,
-                    })}
+                    {(() => {
+                      const LazyComponent = modalKey
+                        ? modalMap[modalKey]
+                        : ModalComponent;
+
+                      return LazyComponent ? (
+                        <LazyComponent {...modalComponentProps} />
+                      ) : null;
+                    })()}
                   </Suspense>
                 </Box>
               </Modal>
@@ -285,16 +314,13 @@ const TabbedContainer: React.FC = () => {
               )}
 
               <LeftTabsProvider>
-                <RenderTabs side="left" setModalContent={setModalContent} />
+                <RenderTabs side="left" />
               </LeftTabsProvider>
               {(useSelector(select.rightTabs) as Tab[]).length > 0 && (
                 <>
                   <Divider flexItem orientation="vertical" />
                   <RightTabsProvider>
-                    <RenderTabs
-                      side="right"
-                      setModalContent={setModalContent}
-                    />
+                    <RenderTabs side="right" />
                   </RightTabsProvider>
                 </>
               )}

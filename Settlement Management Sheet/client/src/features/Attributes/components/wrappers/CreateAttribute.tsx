@@ -20,16 +20,9 @@ export const validationFields = [
 
 interface CreateAttributeProps {
   tab: Tab;
-  setModalContent: (content: {
-    component: React.ComponentType;
-    props?: Record<string, any>;
-  }) => void;
 }
 
-const CreateAttribute: React.FC<CreateAttributeProps> = ({
-  tab,
-  setModalContent,
-}) => {
+const CreateAttribute: React.FC<CreateAttributeProps> = ({ tab }) => {
   return (
     <CreateShell
       tab={tab}
@@ -38,7 +31,6 @@ const CreateAttribute: React.FC<CreateAttributeProps> = ({
       editComponent={EditAttribute}
       previewComponent={PreviewAttribute}
       checklistContent={checklistContent}
-      setModalContent={setModalContent}
     />
   );
 };

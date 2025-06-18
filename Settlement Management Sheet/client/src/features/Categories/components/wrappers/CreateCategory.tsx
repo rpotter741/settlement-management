@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import initializeCategory from 'features/Categories/helpers/initializeCategory.js';
 // custom components
 import checklistContent from '../../helpers/checklistContent.js';
-import EditCategory from './EditCategory';
+import EditCategory from './EditCategory.jsx';
 import PreviewCategory from './PreviewCategory.jsx';
 import LoadTool from 'components/shared/LoadTool/LoadTool.jsx';
 import { useTools } from 'hooks/useTools.jsx';
@@ -13,7 +13,7 @@ import useFetchReferences from 'hooks/useFetchReferences.jsx';
 
 import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
 
-const CreateCategory = ({ tab, setModalContent }) => {
+const CreateCategory = ({ tab }) => {
   const { updateTool, edit } = useTools('category', tab.id);
   const [selected, setSelected] = useState([]);
 
@@ -42,7 +42,6 @@ const CreateCategory = ({ tab, setModalContent }) => {
       editComponent={EditCategory}
       previewComponent={PreviewCategory}
       checklistContent={checklistContent}
-      setModalContent={setModalContent}
     />
   );
 };

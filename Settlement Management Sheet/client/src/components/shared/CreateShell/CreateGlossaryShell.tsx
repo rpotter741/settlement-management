@@ -12,23 +12,28 @@ import { updateGlossaryEntry } from '@/app/slice/glossarySlice.js';
 import EditFieldWithButton from '../Layout/EditFieldWithButton.js';
 import { cloneDeep } from 'lodash';
 import { getGlossaryNodeById } from '@/app/thunks/glossaryThunks.js';
+import { useModalActions } from '@/hooks/useModal.js';
 
 interface CreateGlossaryShellProps {
   tab: Tab;
-  setModalContent: (content: {
-    component: React.ComponentType;
-    props?: Record<string, any>;
-  }) => void;
-  children: React.ReactNode;
+  editComponent?: React.ComponentType<any>;
+  editComponentProps?: Record<string, any>;
+  previewComponent?: React.ComponentType<any>;
+  previewComponentProps?: Record<string, any>;
+  pageVariant?: 'default' | 'fullWidth';
 }
 
 const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   tab,
-  setModalContent,
-  children,
+  editComponent,
+  editComponentProps,
+  previewComponent,
+  previewComponentProps,
+  pageVariant = 'default',
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { tool, id, mode, side, tabId, glossaryId } = tab;
+  const { showModal, closeModal } = useModalActions();
+  const { tool, id, mode, side, tabId, glossaryId, tabType } = tab;
 
   if (!glossaryId) return null;
 
@@ -38,64 +43,27 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
     entry,
   } = useNodeEditor(glossaryId, id);
 
-  if (!entry?.name) {
-    dispatch(
-      getGlossaryNodeById({
-        nodeId: id,
-        glossaryId,
-        entryType: node.entryType,
-      })
-    );
-  }
-  const [lastSaved, setLastSaved] = useState<Record<string, any>>({});
-  const [name, setName] = useState(node.name || '');
-  const justUpdatedRef = useRef(false);
-
-  useEffect(() => {
-    if (entry.name !== node.name) {
-      justUpdatedRef.current = true;
-      update({ name });
-      dispatch(updateTab({ tabId, side, keypath: 'name', updates: name }));
-    }
-  }, [name, dispatch, tabId, side]);
-
-  // When node.name changes externally, sync state—but skip if we just updated it ourselves
-  useEffect(() => {
-    if (justUpdatedRef.current) {
-      justUpdatedRef.current = false;
-      return;
-    }
-    if (name !== node.name) {
-      setName(node.name);
-      dispatch(updateTab({ tabId, side, keypath: 'name', updates: node.name }));
-    }
-  }, [node.name]);
-
-  const handleNameChange = (newName: string) => {
-    setName(newName);
-  };
-
-  const syncLocalAndRemote = ({
-    keypath,
-    value,
-  }: {
-    keypath: string;
-    value: any;
-  }) => {
-    // optimistic first, baby!
-    update({ [keypath]: value });
-    localStorage.setItem(
-      id,
-      JSON.stringify({
-        ...cloneDeep(entry),
-        lastSaved: new Date().toISOString(),
-      })
-    );
-    setLastSaved((prev) => ({
-      ...prev,
-      [keypath]: new Date().toISOString(),
-    }));
-  };
+  // const syncLocalAndRemote = ({
+  //   keypath,
+  //   value,
+  // }: {
+  //   keypath: string;
+  //   value: any;
+  // }) => {
+  //   // optimistic first, baby!
+  //   update({ [keypath]: value });
+  //   localStorage.setItem(
+  //     id,
+  //     JSON.stringify({
+  //       ...cloneDeep(entry),
+  //       lastSaved: new Date().toISOString(),
+  //     })
+  //   );
+  //   setLastSaved((prev) => ({
+  //     ...prev,
+  //     [keypath]: new Date().toISOString(),
+  //   }));
+  // };
 
   return (
     <ShellContext.Provider
@@ -104,25 +72,37 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
         id,
         mode,
         side,
-        lastSaved,
-        setLastSaved,
-        syncLocalAndRemote,
-        setModalContent,
+        tabId,
+        glossaryId,
+        update,
         entry,
+        showModal,
+        closeModal,
+        node,
       }}
     >
-      <PageBox>
-        <EditFieldWithButton
-          label="Entry Title"
-          value={name}
-          onSave={handleNameChange}
-          style={{
-            marginBottom: 2,
-            width: '100%',
-            mt: 4,
-          }}
-        />
-        {children}
+      <PageBox
+        variant={
+          pageVariant ? pageVariant : mode === 'edit' ? 'default' : 'fullWidth'
+        }
+      >
+        {mode === 'edit' && editComponent ? (
+          React.createElement(editComponent, {
+            ...editComponentProps,
+            update,
+            entry,
+            node,
+            tab,
+          })
+        ) : mode === 'preview' && previewComponent ? (
+          React.createElement(previewComponent, {
+            ...previewComponentProps,
+            entry,
+            tab,
+          })
+        ) : (
+          <div style={{ padding: '16px' }}>Yo shit is busted, bruh</div>
+        )}
       </PageBox>
     </ShellContext.Provider>
   );

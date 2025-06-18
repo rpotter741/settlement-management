@@ -40,12 +40,11 @@ import { setActiveGlossaryId } from '../../app/slice/glossarySlice.js';
 import { GlossaryDragProvider } from '@/context/DnD/GlossaryDragContext.js';
 import actions from '@/services/glossaryServices.js';
 import { useSidePanel } from '@/hooks/useSidePanel.js';
+import { useModalActions } from '@/hooks/useModal.js';
 
 const nameNewGlossary = lazy(() => import('./NameNewGlossary.js'));
 
-interface GlossarySidePanelProps {
-  setModalContent: (content: { component: any; props: any }) => void;
-}
+interface GlossarySidePanelProps {}
 
 interface Glossary {
   name: string;
@@ -53,14 +52,18 @@ interface Glossary {
   description: string;
 }
 
-const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
-  setModalContent,
-}) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [glossary, setGlossary] = useState<Glossary | null>(null);
-
+const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   const glossaryId = useSelector(selectActiveId());
   const glossaries = useSelector(selectAllGlossaries());
+  const activeGlossary = glossaries.find(
+    (glossary) => glossary.id === glossaryId
+  );
+  const dispatch = useDispatch<AppDispatch>();
+  const [glossary, setGlossary] = useState<Glossary | null>(
+    activeGlossary || null
+  );
+  const { showModal } = useModalActions();
+
   const nodes = useSelector(selectGlossaryStructure(glossaryId || ''));
   const structure = useRef<GlossaryNode[]>([]);
   const [nodeMap, setNodeMap] = useState<Record<string, GlossaryNode>>({});
@@ -76,10 +79,26 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
 
   useEffect(() => {
     if (glossaries.length > 0 && glossary === null) {
-      setGlossary(glossaries[0]);
       dispatch(setActiveGlossaryId({ glossaryId: glossaries[0].id }));
     }
   }, [glossaries, glossary]);
+
+  useEffect(() => {
+    if (glossaries.length === 0 && glossary !== null) {
+      setGlossary(null);
+    }
+  }, [glossaries, glossary]);
+
+  useEffect(() => {
+    if (glossary?.id !== glossaryId) {
+      const newGlossary = glossaries.find(
+        (glossary) => glossary.id === glossaryId
+      );
+      if (newGlossary) {
+        setGlossary(newGlossary);
+      }
+    }
+  }, [glossaryId, glossaries]);
 
   useEffect(() => {
     if (glossaryId !== null) {
@@ -128,12 +147,12 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
   };
 
   const handleCreateGlossary = () => {
-    setModalContent({
-      component: lazy(() => import('./NameNewGlossary.js')),
-      props: {
-        setGlossary,
-      },
-    });
+    const entry = {
+      componentKey: 'NameNewGlossary',
+      props: {},
+      id: 'name-new-glossary',
+    };
+    showModal({ entry });
   };
 
   const handleAddFolder = ({
@@ -162,23 +181,15 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
 
   const handleDelete = (node: any) => {
     if (node === null || glossaryId === null) return;
-    const modelDelete = () => {
-      dispatch(
-        thunks.deleteEntry({
-          id: node.id,
-          entryType: node.entryType,
-          glossaryId,
-        })
-      );
-    };
-    setModalContent({
-      component: lazy(() => import('./ConfirmDeleteEntry.js')),
+    const entry = {
+      componentKey: 'ConfirmDeleteEntry',
       props: {
-        setModalContent,
-        onDelete: modelDelete,
-        name: node.name,
+        node,
+        glossaryId,
       },
-    });
+      id: 'confirm-delete-entry',
+    };
+    showModal({ entry });
   };
 
   const handleRename = (node: GlossaryNode) => {
@@ -268,6 +279,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({
                 padding: 1,
               }}
               {...props}
+              key={option.id}
             >
               <Typography variant="body1" sx={{ marginLeft: 1 }}>
                 {option.name}

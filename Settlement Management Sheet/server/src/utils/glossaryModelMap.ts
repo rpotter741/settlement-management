@@ -6,11 +6,12 @@ const glossaryModelMap = {
   location: prisma.locationGlossary,
   note: prisma.noteGlossary,
   person: prisma.personGlossary,
-  region: prisma.regionGlossary,
-  nation: prisma.nationGlossary,
+  territory: prisma.territoryGlossary,
+  domain: prisma.domainGlossary,
   settlement: prisma.settlementGlossary,
   event: prisma.eventGlossary,
-  geography: prisma.geographyGlossary,
+  landmark: prisma.landmarkGlossary,
+  province: prisma.provinceGlossary,
 };
 
 export default glossaryModelMap;

@@ -36,6 +36,7 @@ model Attribute {
   status              Status
   contentType         ContentTypes // for separating official from custom content
   createdBy           String // Potential foreign key to User model in the future
+  collaborators String[]
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
@@ -60,12 +61,13 @@ model Category {
   status       Status
   contentType  ContentTypes
   createdBy    String
+  collaborators String[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
   @@index([contentType])
   @@index([tags])
-  @@index([refId, updatedAt(sort: Desc)])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 ////////////////// EVENT //////////////////////////
@@ -86,6 +88,7 @@ model Event {
   status          Status
   contentType     ContentTypes
   createdBy       String
+  collaborators String[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -116,6 +119,9 @@ model Event {
   //}
   //}
   //]
+
+    @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 ////////////////// LISTENER //////////////////////////
@@ -132,6 +138,7 @@ model Listener {
   status              Status
   contentType         ContentTypes
   createdBy           String
+  collaborators String[]
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
@@ -152,7 +159,10 @@ model Listener {
   // }
   // }
   // ]
+  @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
 }
+
 
 /////////////////// KITS //////////////////////////
 
@@ -163,6 +173,7 @@ model Kit {
   data        Json
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -177,9 +188,13 @@ model Key {
   description String?
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   backLinks   KeySettings[] // just want keySetting ids
+
+  @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 model KeySettings {
@@ -191,6 +206,7 @@ model KeySettings {
   severityOverTime Json
   contentType      ContentTypes
   createdBy        String
+  collaborators String[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   key              Key          @relation(fields: [refId], references: [refId], onDelete: Cascade)
@@ -221,8 +237,12 @@ model gameStatus {
   status      Status
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+    @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 ////////////////// BUILDING //////////////////////////
@@ -241,15 +261,19 @@ model Building {
   flavorText   String?
   dependencies String[]
   isValid      Boolean
-  status       Status
+  status       Status[]
   contentType  ContentTypes
   createdBy    String
+  collaborators String[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
   //upgrades:
   //upgrade_base_id
   //upgrade_ref_id
+
+    @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
 }
 
 ////////////////// UPGRADE //////////////////////////
@@ -271,14 +295,19 @@ model Upgrade {
   status      Status
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
+}
 
   //impact:
   //attribute_base_id: value
   //ability:
   //description of skill. eg, 'Adaptive Resources: If losing an attribute in one category, you can spend from another at a 1:1 settlement point cost ratio. E.g., if losing 3 food, you could lose 1 medical supply instead. Once per turn.'
-}
 
 ////////////////// TRADE HUB //////////////////////////
 
@@ -298,8 +327,13 @@ model TradeHub {
   status      Status
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 
   // region pulls from narrative data
   // location pulls from narrative data
@@ -323,8 +357,13 @@ model SettlementType {
   status      Status
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////////// SETTLEMENT //////////////////////////
@@ -343,8 +382,13 @@ model Settlement {
   isValid       Boolean
   contentType   ContentTypes
   createdBy     String
+  collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 
   //stats includes:
   // level
@@ -386,8 +430,13 @@ model APT {
   decay           Int
   contentType     ContentTypes
   createdBy       String
+  collaborators String[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Action ////////////
@@ -400,12 +449,17 @@ model Action {
   description String
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   effects     Json
   conditions  Json?
   cooldown    String?
   flavorText  String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// StoryThread ////////////
@@ -418,10 +472,15 @@ model StoryThread {
   description String
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   origin      Json
   primaryKey  Json
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Glossary /////////////
@@ -433,15 +492,16 @@ enum GlossShape {
 
 enum EntryTypes {
   continent
-  nation
+  territory
+  domain
+  province
+  landmark
   settlement
-  region
+  faction
   location
   person
-  faction
   note
   event
-  geography
 }
 
 enum ClimateTypes {
@@ -450,17 +510,25 @@ enum ClimateTypes {
   temperate
   polar
   subtropical
-  mountainous
+  continental
+  icecap
 }
 
 enum TerrainTypes {
-  forest
+  forests
   mountains
-  desert
-  swamp
+  deserts
+  swamps
   plains
   hills
+  valleys
+  plateaus
   tundra
+  badlands
+  coastal
+  volcanic
+  glacial
+  taiga
 }
 
 enum GeographicTypes {
@@ -482,18 +550,33 @@ enum GeographicTypes {
   bay
   gulf
   fjord
+  volcano
+  glacier
+  canyon
+  steppe
+  march
+  wetland
+  reef
+  delta
+  atoll
 }
 
 model Glossary {
   id          String         @id @default(uuid())
   name        String
-  description String?
+  description Json?
   createdBy   String
+  collaborators String[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  editors     String[]
   contentType ContentTypes
   nodes       GlossaryNode[]
   theme       String
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 model GlossaryTheme {
@@ -501,12 +584,17 @@ model GlossaryTheme {
   refId        String
   name         String
   createdBy    String
+  collaborators String[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   contentType  ContentTypes
   description  String
   palettes     Json
   glossaries   String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 model GlossaryNode {
@@ -521,27 +609,66 @@ model GlossaryNode {
   glossaryId String
   glossary   Glossary       @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
   sortIndex  Int            @default(0)
+
+  @@index([id])
+
 }
 
-////////////// Region ////////////
+////////////// Territory ////////////
 
-model RegionGlossary {
+model TerritoryGlossary {
   refId            String       @id @default(uuid())
   id               String       @unique
   version          Int
   name             String
-  description      String
+  description      Json
+  dataString  String
   contentType      ContentTypes
   createdBy        String
+  collaborators String[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   tags             String[]
-  climate          String
-  terrain          String
+  climate          String[]
+  terrain          TerrainTypes[]
+  nations          String[]
   factions         String[]
   population       Json
   locations        String[]
+  features         String[]
   resources        String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
+}
+
+//////////////////// Province //////////////
+
+model ProvinceGlossary {
+  refId            String       @id @default(uuid())
+  id               String       @unique
+  version          Int
+  name             String
+  description      Json
+  dataString  String
+  contentType      ContentTypes
+  createdBy        String
+  collaborators String[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  tags             String[]
+  nation           String?
+  terrain          TerrainTypes[]
+  locations        String[]
+  people           String[]
+  notableEvents    String[]
+  resources        String[]
+  population       Json
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Location ////////////
@@ -551,17 +678,23 @@ model LocationGlossary {
   id               String       @unique
   version          Int
   name             String
-  description      String
+  description      Json
+  dataString  String
   contentType      ContentTypes
   createdBy        String
+  collaborators String[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   tags             String[]
-  type             String
-  region           String
+  type             String?
+  region           String?
   currentOccupants String[]
-  nearbyFeatures   Json
+  nearbyFeatures   Json?
   eventLog         String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Person ////////////
@@ -571,19 +704,25 @@ model PersonGlossary {
   id            String       @unique
   version       Int
   name          String
-  description   String
+  description   Json
+  dataString  String
   contentType   ContentTypes
   createdBy     String
+  collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   tags          String[]
-  occupation    String
-  title         String
+  occupation    String[]
+  title         String[]
   traits        String[]
-  faction       String
-  location      String
+  faction       String[]
+  location      String[]
   relationships Json
   notoriety     String
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Faction ////////////
@@ -593,22 +732,28 @@ model FactionGlossary {
   id             String       @unique
   version        Int
   name           String
-  description    String
+  description    Json
+  dataString  String
   contentType    ContentTypes
   createdBy      String
+  collaborators String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   tags           String[]
-  leader         String
-  homeBase       String
+  leader         String[]
+  homeBase       String[]
   relationships  Json
   allies         String[]
   enemies        String[]
-  influence      Int
-  notoriety      Int
+  influence      Int?
+  notoriety      Int?
   cultureTags    String[]
   activeKeys     String[]
   passiveBonuses Json
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ////////////// Note ////////////
@@ -617,14 +762,16 @@ model NoteGlossary {
   id             String       @unique
   version        Int
   name           String
-  description    String
+  description    Json
+  dataString  String
   contentType    ContentTypes
   createdBy      String
+  collaborators String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  type           String
-  priority       String
-  dueDate        String
+  type           String?
+  priority       String?
+  dueDate        String?
   relatedEntries Json
   tags           String[]
   isArchived     Boolean
@@ -632,6 +779,10 @@ model NoteGlossary {
   isShared       Boolean
   sharedWith     String[]
   attachments    Json
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 /////////////////// continent //////////
@@ -640,9 +791,11 @@ model ContinentGlossary {
   id               String            @unique
   version          Int
   name             String
-  description      String
+  description      Json
+  dataString  String
   contentType      ContentTypes
   createdBy        String
+  collaborators String[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   nations          String[]
@@ -650,28 +803,34 @@ model ContinentGlossary {
   locations        String[]
   resources        String[]
   population       Json
-  climate          ClimateTypes
-  terrain          GeographicTypes[]
+  climate          ClimateTypes[]
+  terrain          TerrainTypes[]
   eventLog         String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
-/////////////////// nation ///////////////
-model NationGlossary {
+/////////////////// Domain ///////////////
+model DomainGlossary {
   refId         String       @id @default(uuid())
   id            String       @unique
   version       Int
   name          String
-  description   String
+  description   Json
+  dataString  String
   contentType   ContentTypes
   createdBy     String
+  collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  continent     String
+  continent     String[]
   regions       String[]
   capital       String[]
   population    Json
-  economy       String
-  culture       String
+  economy       Json
+  culture       Json
   languages     String[]
   persons       String[]
   eventLog      String[]
@@ -680,6 +839,10 @@ model NationGlossary {
   relationships Json
   locations     String[]
   geography     String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ///////////////////// settlementGlossary //////////////
@@ -688,18 +851,23 @@ model SettlementGlossary {
   id             String       @unique
   version        Int
   name           String
-  description    String
+  description    Json
   contentType    ContentTypes
   createdBy      String
+  collaborators String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  nation         String
-  region         String
+  nation         String?
+  region         String?
   persons        String[]
   eventLog       String[]
   locations      String[]
-  history        String
+  history        Json
   relationships  Json
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
 ///////////////////// eventGlossary //////////////
@@ -708,33 +876,45 @@ model EventGlossary {
   id             String       @unique
   version        Int
   name           String
-  description    String
+  description    Json
+  dataString  String
   contentType    ContentTypes
   createdBy      String
+  collaborators String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  significance   String
-  gameDate       String
-  frequency      String
-  location       String
+  significance   String?
+  gameDate       String?
+  frequency      String?
+  location       String[]
   relatedEntries String[]
   tags           String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }
 
-///////////////////// geographyGlossary //////////////
-model GeographyGlossary {
+///////////////////// landmarkGlossary //////////////
+model LandmarkGlossary {
   refId       String          @id @default(uuid())
   id          String          @unique
   version     Int
   name        String
-  description String
+  description Json
+  dataString  String
   contentType ContentTypes
   createdBy   String
+  collaborators String[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  type        GeographicTypes
   region      String[]
-  climate     ClimateTypes
-  terrain     TerrainTypes
+  climate     ClimateTypes?
+  terrain     TerrainTypes?
+  type        GeographicTypes
   eventLog    String[]
+
+      @@index([contentType])
+  @@index([id, updatedAt(sort: Desc)])
+
 }

@@ -64,7 +64,6 @@ const getGlossaryEntryById = async (req, res) => {
     if (!entry) {
       return res.status(404).json({ message: `Entry not found.` });
     }
-    console.log(`Found entry:`, entry);
     return res.json({ entry });
   } catch (error) {
     console.error(`Error getting glossary node by ID:`, error);

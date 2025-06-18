@@ -1,5 +1,5 @@
 const modelUpdateKeys = {
-  nation: ['name', 'description', 'version'],
+  domain: ['name', 'description', 'version'],
   continent: ['name', 'description', 'version'],
   settlement: ['name', 'description', 'version'],
   event: ['name', 'description', 'version'],
@@ -7,9 +7,9 @@ const modelUpdateKeys = {
   faction: ['name', 'description', 'version'],
   person: ['name', 'description', 'version'],
   location: ['name', 'description', 'version'],
-  poi: ['name', 'description', 'version'],
-  region: ['name', 'description', 'version'],
-  geography: ['name', 'description', 'version'],
+  territory: ['name', 'description', 'version'],
+  landmark: ['name', 'description', 'version'],
+  province: ['name', 'description', 'version'],
 };
 
 export default modelUpdateKeys;

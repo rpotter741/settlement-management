@@ -12,24 +12,19 @@ import { useSelector } from 'react-redux';
 
 import DragWrapper from '../DnD/DragWrapper.jsx';
 
-import { tabMap } from '@/utility/tabMap.js';
+import { tabMap } from '@/maps/tabMap.js';
 
 import truncateWithEllipsis from 'utility/truncateWithEllipses.js';
 import { useTabDrag } from 'context/DnD/TabDragContext.jsx';
-import { Tab as TabType } from '@/app/types/SidePanelTypes.js';
-import {
-  isToolDirty,
-  selectEditToolById,
-  selectToolById,
-} from '@/app/selectors/toolSelectors.js';
 import { AppDispatch, RootState } from '@/app/store.js';
-import { capitalize, isEqual } from 'lodash';
 import { useDispatch } from 'react-redux';
 import {
   useLeftTabs,
   useRightTabs,
 } from '@/context/TabsContext/TabsContext.js';
 import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
+import { useModalActions } from '@/hooks/useModal.js';
+import { setActiveTab as focusTab } from '@/app/slice/sidePanelSlice.js';
 
 interface RenderTabHeadersProps {
   setActiveTab: (index: number, tabId: string, side: 'left' | 'right') => void;
@@ -40,13 +35,6 @@ interface RenderTabHeadersProps {
   ) => void;
   side?: 'left' | 'right';
   setDragSide?: (side: 'left' | 'right' | null) => void;
-  setModalContent: ({
-    component,
-    props,
-  }: {
-    component: React.ElementType;
-    props?: Record<string, any>;
-  }) => void;
 }
 
 const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
@@ -54,11 +42,11 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
   removeById,
   side = 'left',
   setDragSide = (side: 'left' | 'right' | null) => {},
-  setModalContent,
 }) => {
   const { tabs, current } = side === 'left' ? useLeftTabs() : useRightTabs();
   const { startDrag, endDrag, draggedType } = useTabDrag();
   const dispatch: AppDispatch = useDispatch();
+  const { showModal } = useModalActions();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   useEffect(() => {
@@ -104,7 +92,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                   position: 'relative',
                   display: 'flex',
                   alignItems: 'center',
-                  borderBottom: '2px solid',
+                  borderBottom: '4px solid',
                   color:
                     current === tab.tabId
                       ? 'primary.contrastText'
@@ -113,7 +101,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                     activeTab?.tabId === tab.tabId
                       ? isDarkMode
                         ? 'honey.main'
-                        : 'success.main'
+                        : 'honey.main'
                       : current === tab.tabId
                         ? side === 'right'
                           ? 'secondary.main'
@@ -131,6 +119,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                 }}
                 onClick={() => {
                   setActiveTab(index, tab.tabId, side);
+                  dispatch(focusTab({ tab }));
                 }}
                 key={tab.tabId}
               >
@@ -183,20 +172,14 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     if (tab.isDirty) {
-                      setModalContent({
-                        component: React.lazy(
-                          () =>
-                            import(
-                              '@/components/shared/TabbedContainer/ConfirmDirtyClose.jsx'
-                            )
-                        ),
+                      const entry = {
+                        componentKey: 'ConfirmDirtyClose',
                         props: {
-                          onClose: () => removeById(tab.tabId, side, false),
                           tab,
-                          side,
-                          setModalContent,
                         },
-                      });
+                        id: `confirm-dirty-close-${tab.tabId}`,
+                      };
+                      showModal({ entry });
                     } else {
                       removeById(tab.tabId, side, false);
                     }

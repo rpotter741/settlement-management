@@ -1,16 +1,41 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { MuiStyledOptions, SxProps } from '@mui/system';
 
 interface PageBoxProps {
   children: React.ReactNode;
   outerStyle?: React.CSSProperties;
   innerStyle?: React.CSSProperties;
+  variant?: 'default' | 'fullWidth';
 }
+
+const variants: Record<'default' | 'fullWidth', React.CSSProperties> = {
+  default: {},
+  fullWidth: {
+    display: 'flex',
+    justifyContent: 'start',
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingLeft: 0,
+    paddingRight: 0,
+    marginBottom: 0,
+    boxShadow: 'none',
+    borderRadius: 0,
+    backgroundColor: 'background.default',
+    width: '100%',
+    maxWidth: '100%',
+    position: 'relative',
+    flexShrink: 1,
+    height: '100%',
+    overflowY: 'scroll',
+  },
+};
 
 const PageBox: React.FC<PageBoxProps> = ({
   children,
   outerStyle = {},
   innerStyle = {},
+  variant = 'default',
 }) => {
   return (
     <Box
@@ -43,6 +68,7 @@ const PageBox: React.FC<PageBoxProps> = ({
           flexShrink: 1,
           height: '100%',
           overflowY: 'scroll',
+          ...variants[variant as keyof typeof variants],
           ...innerStyle,
         }}
       >

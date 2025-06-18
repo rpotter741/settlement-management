@@ -1,0 +1,1 @@
+import{j as n}from"./main.js";import{T as i}from"./ToolInput.js";const s=({fields:t})=>n.jsxs(n.Fragment,{children:[n.jsx(i,{inputConfig:t.name,style:{gridColumn:"span 3",px:1}}),n.jsx(i,{inputConfig:t.description,style:{gridColumn:"span 3",px:1},multiline:!0})]});export{s as E};

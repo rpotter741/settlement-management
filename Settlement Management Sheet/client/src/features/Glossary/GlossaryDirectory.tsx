@@ -337,16 +337,25 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
   const dragAcceptMap = {
     continent: [
-      'nation',
-      'region',
-      'geography',
+      'territory',
+      'domain',
+      'province',
+      'landmark',
       'settlement',
       'faction',
       ...fileTypes,
     ],
-    nation: ['region', 'geography', 'settlement', 'faction', ...fileTypes],
-    region: ['geography', 'settlement', 'faction', ...fileTypes],
-    geography: ['settlement', 'faction', ...fileTypes],
+    region: [
+      'domain',
+      'province',
+      'landmark',
+      'settlement',
+      'faction',
+      ...fileTypes,
+    ],
+    nation: ['province', 'landmark', 'settlement', 'faction', ...fileTypes],
+    province: ['landmark', 'settlement', 'faction', ...fileTypes],
+    landmark: ['settlement', 'faction', ...fileTypes],
     settlement: ['faction', , ...fileTypes],
     faction: [...fileTypes],
   };

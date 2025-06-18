@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Button, Tooltip } from '@mui/material';
+import { useModalActions } from '@/hooks/useModal.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import { deleteEntry } from '@/app/thunks/glossaryThunks.js';
+import { GlossaryNode } from 'types/index.js';
 
 interface ConfirmDeleteProps {
-  setModalContent: (content: React.ReactNode | null) => void;
-  onDelete: () => void;
-  name: string;
+  node: GlossaryNode;
+  glossaryId: string;
 }
 
-const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({
-  setModalContent,
-  onDelete,
-  name = 'this entry',
-}) => {
+const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({ node, glossaryId }) => {
+  const { closeModal } = useModalActions();
+  const dispatch: AppDispatch = useDispatch();
   const [disabled, setDisabled] = useState(true);
+
+  const onDelete = () => {
+    dispatch(
+      deleteEntry({
+        id: node.id,
+        entryType: node.entryType,
+        glossaryId,
+      })
+    );
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,7 +40,7 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({
         Confirm Deletion
       </Typography>
       <Typography variant="body1" gutterBottom>
-        Are you sure you want to delete {name}? If this is a{' '}
+        Are you sure you want to delete {node.name}? If this is a{' '}
         <Tooltip
           title={
             <Typography>
@@ -60,11 +72,7 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({
         THIS ACTION CANNOT BE UNDONE.
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => setModalContent(null)}
-        >
+        <Button variant="outlined" color="primary" onClick={() => closeModal()}>
           Cancel
         </Button>
         <Button
@@ -72,7 +80,7 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({
           color="error"
           onClick={() => {
             onDelete();
-            setModalContent(null);
+            closeModal();
           }}
           disabled={disabled}
         >

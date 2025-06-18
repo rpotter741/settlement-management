@@ -73,7 +73,7 @@ const ViewSubMenu: React.FC<ViewSubMenuProps> = ({
                 <MenuItem
                   sx={menuSx(tab.side)}
                   onClick={handleModeToggle}
-                  disabled={tab.tabType !== 'tool' || tab.mode === 'edit'}
+                  disabled={tab.mode === 'edit'}
                 >
                   <Edit />
                   <Typography variant="body2" sx={{ flexGrow: 1 }}>
@@ -83,7 +83,7 @@ const ViewSubMenu: React.FC<ViewSubMenuProps> = ({
                 <MenuItem
                   sx={menuSx(tab.side)}
                   onClick={handleModeToggle}
-                  disabled={tab.tabType !== 'tool' || tab.mode === 'preview'}
+                  disabled={tab.mode === 'preview'}
                 >
                   <Preview />
                   <Typography variant="body2" sx={{ flexGrow: 1 }}>

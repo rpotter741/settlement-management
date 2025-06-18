@@ -10,22 +10,22 @@ import { ToolName } from 'types/common.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { cancelToolEdit } from '@/app/thunks/toolThunks.js';
 import { AppDispatch } from '@/app/store.js';
-import { tabMap } from '@/utility/tabMap.js';
+import { tabMap } from '@/maps/tabMap.js';
 import { set } from 'lodash';
+import { useSidePanel } from '@/hooks/useSidePanel.js';
+import { useModalActions } from '@/hooks/useModal.js';
 
 const ConfirmDirtyClose: React.FC<{
-  onClose: () => void;
   tab: Tab;
-  side: 'left' | 'right';
-  setModalContent: (
-    content: {
-      component: React.ComponentType;
-      props?: Record<string, any>;
-    } | null
-  ) => void;
-}> = ({ onClose, side, tab, setModalContent }) => {
+}> = ({ tab }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { tool, id, name, tabId } = tab;
+  const { removeById } = useSidePanel();
+  const { closeModal } = useModalActions();
+  const { tool, id, side, name, tabId } = tab;
+
+  const onClose = () => {
+    removeById(tab.tabId, tab.side, false);
+  };
 
   const { edit } =
     tool && toolList.includes(tool as ToolName)
@@ -38,10 +38,10 @@ const ConfirmDirtyClose: React.FC<{
       try {
         await toolServices.saveTool({ tool: tool as ToolName, data: edit });
         onClose();
-        setModalContent(null);
+        closeModal();
       } catch (error: any) {
         localStorage.setItem(`${tool}-${id}`, JSON.stringify(edit));
-        setModalContent(null);
+        closeModal();
         dispatch(
           showSnackbar({
             message: `Failed to save ${name} to database. Try again later.`,
@@ -54,7 +54,7 @@ const ConfirmDirtyClose: React.FC<{
   };
 
   const handleCancel = () => {
-    setModalContent(null);
+    closeModal();
   };
 
   const handleCloseNoSave = () => {
@@ -68,7 +68,7 @@ const ConfirmDirtyClose: React.FC<{
       })
     );
     console.log('before modal content');
-    setModalContent(null);
+    closeModal();
     console.log('after modal content');
     onClose();
   };

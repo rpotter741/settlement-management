@@ -14,37 +14,54 @@ import {
 
 const entryTypeColors: Record<string, string> = {
   continent: 'info.main',
-  nation: 'primary.main',
+  domain: 'primary.main',
+  territory: 'secondary.main',
   settlement: 'warning.main',
-  region: 'secondary.main',
+  province: 'warning.dark',
   location: 'honey.main',
   person: 'success.main',
   faction: 'error.main',
   note: 'text.primary',
   event: 'text.secondary',
-  geography: 'success.dark',
+  landmark: 'success.dark',
 };
 
 export const entryTypeIcons: Record<string, React.ReactNode> = {
-  continent: <PublicIcon sx={{ color: entryTypeColors.continents }} />,
-  nation: <AccountBalanceIcon sx={{ color: entryTypeColors.nation }} />,
+  continent: <PublicIcon sx={{ color: entryTypeColors.continent }} />,
+  domain: <AccountBalanceIcon sx={{ color: entryTypeColors.domain }} />,
   settlement: <WbShadeIcon sx={{ color: entryTypeColors.settlement }} />,
-  region: <FlagIcon sx={{ color: entryTypeColors.region }} />,
+  territory: <MapIcon sx={{ color: entryTypeColors.territory }} />,
+  province: <FlagIcon sx={{ color: entryTypeColors.province }} />,
   location: <RoomIcon sx={{ color: entryTypeColors.location }} />,
   person: <PersonIcon sx={{ color: entryTypeColors.person }} />,
   faction: <GroupsIcon sx={{ color: entryTypeColors.faction }} />,
   note: <DescriptionIcon sx={{ color: entryTypeColors.note }} />,
   event: <CalendarMonthIcon sx={{ color: entryTypeColors.event }} />,
-  geography: <TerrainIcon sx={{ color: entryTypeColors.geography }} />,
+  landmark: <TerrainIcon sx={{ color: entryTypeColors.landmark }} />,
 };
 
 export const entryTypes = ['location', 'person', 'note', 'event'];
 
 export const folderTypes = [
   'continent',
-  'nation',
-  'region',
-  'geography',
+  'territory',
+  'domain',
+  'province',
+  'landmark',
   'settlement',
   'faction',
+];
+
+export const backLinkOrder = [
+  'continent',
+  'territory',
+  'domain',
+  'province',
+  'landmark',
+  'settlement',
+  'faction',
+  'location',
+  'person',
+  'note',
+  'event',
 ];

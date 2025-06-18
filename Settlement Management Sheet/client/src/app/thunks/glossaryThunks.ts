@@ -11,6 +11,7 @@ import {
   updateGlossary,
   updateGlossaryEntry,
   addGlossaryEntry,
+  setActiveGlossaryId,
 } from '../slice/glossarySlice.js';
 import { rehydrateGlossaryTree } from '../../features/Glossary/helpers/rehydrateGlossary.js';
 import {
@@ -24,7 +25,6 @@ import {
   selectNodeById,
 } from '../selectors/glossarySelectors.js';
 import { cloneDeep, get } from 'lodash';
-import glossaryTypeMap from '../../../../server/src/utils/glossaryTypeMap.js';
 import { findAndDeleteTab } from './sidePanelThunks.js';
 import { showSnackbar } from '../slice/snackbarSlice.js';
 
@@ -99,7 +99,7 @@ export const getGlossaryNodes =
     }
   };
 
-export const getGlossaryNodeById =
+export const getGlossaryEntryById =
   ({
     nodeId,
     entryType,
@@ -116,7 +116,6 @@ export const getGlossaryNodeById =
         nodeId,
         entryType,
       });
-      console.log('Fetched entry:', entry);
       dispatch(
         addGlossaryEntry({
           glossaryId,
@@ -144,7 +143,7 @@ export const createGlossary =
   }: {
     id: string;
     name: string;
-    description: string;
+    description: JSON;
   }): AppThunk =>
   async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     try {
@@ -430,6 +429,27 @@ export const updateGlossaryThunk =
     }
   };
 
+export const addAndActivateGlossary =
+  ({
+    id,
+    name,
+    description,
+  }: {
+    id: string;
+    name: string;
+    description: string;
+  }): AppThunk =>
+  async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    dispatch(
+      initializeGlossary({
+        glossaryId: id,
+        name,
+        description,
+      })
+    );
+    dispatch(setActiveGlossaryId({ glossaryId: id }));
+  };
+
 const thunks = {
   getGlossaries,
   getGlossaryNodes,
@@ -440,6 +460,7 @@ const thunks = {
   deleteEntry,
   updateEntry,
   updateGlossaryThunk,
+  addAndActivateGlossary,
 };
 
 export default thunks;

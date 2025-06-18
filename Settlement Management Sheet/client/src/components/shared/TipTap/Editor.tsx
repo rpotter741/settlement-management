@@ -1,48 +1,34 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import EditorToolbarMenu from './Menu.jsx';
+import EditorToolbarMenu from './Menu.js';
 import { EditorProvider } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
 import { Box } from '@mui/material';
 import { format } from 'timeago.js';
 import { alpha, useTheme } from '@mui/material/styles';
-import { useShellContext } from '@/context/ShellContext.js';
 import { debounce, set } from 'lodash';
-
-const extensions = [
-  StarterKit,
-  TextAlign.configure({
-    types: ['heading', 'paragraph'],
-  }),
-  Underline,
-];
+import tipTapExtensions from './extensions/extensions.js';
 
 type EditorProps = {
-  keypath: string;
-  lastSaved: Date | null;
-  setLastSaved?: (value: Record<string, any>) => void;
+  html?: string;
   minHeight?: string;
   maxHeight?: string;
+  propUpdate?: (updates: Record<string, any>) => void;
 };
 
-const debouncedUpdate = debounce((callback, value, keypath) => {
-  callback({ keypath, value });
+const debouncedUpdate = debounce((callback, value, text) => {
+  callback({ description: value, dataString: text.trim() });
 }, 1000);
 
 const Editor: React.FC<EditorProps> = ({
-  keypath,
-  lastSaved,
-  setLastSaved = () => {},
+  html = '',
   minHeight = '300px',
   maxHeight = '1000px',
+  propUpdate = (updates: Record<string, any>) => {},
 }) => {
   const theme = useTheme();
-  const { syncLocalAndRemote: update, entry } = useShellContext();
-  const [content, setContent] = useState(entry[keypath] || '');
+  const [content, setContent] = useState(html || '');
 
-  const handleChange = (value: string) => {
-    debouncedUpdate(update, value, keypath);
+  const handleChange = (value: string, text: string) => {
+    debouncedUpdate(propUpdate, value, text);
   };
 
   return (
@@ -57,33 +43,21 @@ const Editor: React.FC<EditorProps> = ({
           maxHeight,
           overflowY: 'auto',
           borderRadius: 2,
+          minWidth: 300,
         }}
       >
         <EditorProvider
           slotBefore={<EditorToolbarMenu />}
-          extensions={extensions}
+          extensions={tipTapExtensions}
           content={content}
           onUpdate={(editor) => {
             const value = editor.editor.getHTML();
+            const text = editor.editor.getText();
             setContent(value);
-            handleChange(value);
+            handleChange(value, text);
           }}
         />
       </Box>
-      {lastSaved && (
-        <Box
-          sx={{
-            fontSize: '0.75rem',
-            textAlign: 'left',
-            pl: 2,
-            position: 'relative',
-            bottom: 0,
-            right: 0,
-          }}
-        >
-          Last Saved: {format(lastSaved)}
-        </Box>
-      )}
     </Box>
   );
 };

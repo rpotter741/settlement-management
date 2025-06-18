@@ -10,7 +10,7 @@ import checklistContent from '../../helpers/statusChecklist.js';
 
 import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
 
-const CreateStatus = ({ tab, setModalContent }) => {
+const CreateStatus = ({ tab }) => {
   return (
     <CreateShell
       tab={tab}
@@ -19,7 +19,6 @@ const CreateStatus = ({ tab, setModalContent }) => {
       editComponent={EditStatus}
       previewComponent={PreviewStatus}
       checklistContent={checklistContent}
-      setModalContent={setModalContent}
     />
   );
 };

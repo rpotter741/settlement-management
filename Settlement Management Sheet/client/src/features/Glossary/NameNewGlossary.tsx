@@ -3,19 +3,31 @@ import { Box, Button, TextField } from '@mui/material';
 import { v4 as newId } from 'uuid';
 
 import actions from '../../services/glossaryServices.js';
-import thunks from '../../app/thunks/glossaryThunks.js';
+import thunks, {
+  addAndActivateGlossary,
+} from '../../app/thunks/glossaryThunks.js';
+import { useModalActions } from '@/hooks/useModal.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import {
+  initializeGlossary,
+  setActiveGlossaryId,
+} from '@/app/slice/glossarySlice.js';
+import { initial } from 'lodash';
+import Editor from '@/components/shared/TipTap/Editor.js';
 
-interface NameNewGlossaryProps {
-  setModalContent: (content: React.ReactNode | null) => void;
-  setGlossary: (name: string) => void;
-}
+interface NameNewGlossaryProps {}
 
-const NameNewGlossary: React.FC<NameNewGlossaryProps> = ({
-  setModalContent,
-  setGlossary,
-}) => {
+const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
+  const dispatch: AppDispatch = useDispatch();
   const [glossaryName, setGlossaryName] = useState('');
   const [description, setDescription] = useState('');
+  const [jsonDesc, setJsonDesc] = useState('');
+  const { closeModal } = useModalActions();
+
+  const processEditor = (updates: Record<string, any>) => {
+    setDescription(updates.description);
+  };
 
   return (
     <Box>
@@ -27,16 +39,7 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = ({
         fullWidth
         margin="normal"
       />
-      <TextField
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        label="Description"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        multiline
-        rows={4}
-      />
+      <Editor propUpdate={processEditor} html={description} />
       <Button
         variant="contained"
         color="primary"
@@ -46,15 +49,15 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = ({
           const newGloss = await actions
             .createGlossary({
               id,
-              name: glossaryName,
+              name: glossaryName.trim(),
               description,
             })
             .then((response) => {
               console.log('Glossary created:', response.glossary);
               return response.glossary;
             });
-          setModalContent(null);
-          setGlossary(newGloss);
+          closeModal();
+          dispatch(addAndActivateGlossary({ ...newGloss }));
         }}
       >
         Create Glossary
@@ -62,7 +65,7 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = ({
       <Button
         variant="outlined"
         color="secondary"
-        onClick={() => setModalContent(null)}
+        onClick={() => closeModal()}
         style={{ marginLeft: '8px' }}
       >
         Cancel

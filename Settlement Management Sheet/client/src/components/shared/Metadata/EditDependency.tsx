@@ -6,13 +6,13 @@ import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx'
 import Dependency, {
   DependencyThreshold,
 } from 'components/shared/Metadata/Dependency.jsx';
-import { ShellContext } from '@/context/ShellContext.js';
+import { useShellContext } from '@/context/ShellContext.js';
 
 const EditDependency = () => {
-  const { tool, id } = useContext(ShellContext);
-  const { selectValue, updateTool, validateToolField } = useTools(tool, id);
-  const data = selectValue('dependencies.data');
-  const order = selectValue('dependencies.order');
+  const { tool, id } = useShellContext();
+  const { selectEditValue, updateTool, validateToolField } = useTools(tool, id);
+  const data = selectEditValue('dependencies.data');
+  const order = selectEditValue('dependencies.order');
   const [open, setOpen] = useState(new Array(order.length).fill(false));
 
   const handleRemove = useCallback(

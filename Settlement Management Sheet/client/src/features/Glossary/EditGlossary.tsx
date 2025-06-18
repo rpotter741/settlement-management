@@ -20,10 +20,11 @@ import {
   Chip,
 } from '@mui/material';
 import { Delete, Public, Settings, Circle, Palette } from '@mui/icons-material';
-import { isTabDirty } from '@/app/selectors/sidePanelSelectors.js';
+import { focusedTab, isTabDirty } from '@/app/selectors/sidePanelSelectors.js';
 import { setTabDirty } from '@/app/slice/sidePanelSlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { TitledCollapse } from '@/components/index.js';
+import { useModalActions } from '@/hooks/useModal.js';
 
 const EditGlossary: React.FC = () => {
   const activeId = useSelector(selectActiveId());
@@ -38,8 +39,10 @@ const EditGlossary: React.FC = () => {
   const [isDescriptionDirty, setIsDescriptionDirty] = useState(false);
 
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const { showModal } = useModalActions();
 
   const tabDirty = useSelector(isTabDirty(activeId));
+  const activeTab = useSelector(focusedTab);
 
   useEffect(() => {
     if ((isNameDirty || isDescriptionDirty) && !tabDirty) {
@@ -173,6 +176,21 @@ const EditGlossary: React.FC = () => {
           />
         </Divider>
       </Box>
+      <Button
+        onClick={() => {
+          const entry = {
+            componentKey: 'ConfirmDeleteGlossary',
+            props: {
+              tab: activeTab,
+              glossary,
+            },
+            id: `delete-glossary-${glossary.id}`,
+          };
+          showModal({ entry });
+        }}
+      >
+        Delete Glossary
+      </Button>
     </PageBox>
   );
 };

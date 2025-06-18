@@ -1,20 +1,46 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Button, Tooltip, TextField } from '@mui/material';
+import { useModalActions } from '@/hooks/useModal.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import { deleteGlossary } from '@/services/glossaryServices.js';
+import { removeTab } from '@/app/slice/sidePanelSlice.js';
+import { Tab } from '@/app/types/SidePanelTypes.js';
+import {
+  removeGlossary,
+  setActiveGlossaryId,
+} from '@/app/slice/glossarySlice.js';
 
 interface ConfirmDeleteGlossaryProps {
-  glossaryName: string;
-  setModalContent: (content: React.ReactNode | null) => void;
-  onDelete: () => void;
+  glossary: {
+    name: string;
+    id: string;
+    description: string;
+  };
+  tab: Tab;
 }
 
 const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
-  glossaryName,
-  setModalContent,
-  onDelete,
+  glossary,
+  tab,
 }) => {
+  const dispatch: AppDispatch = useDispatch();
+  const { closeModal } = useModalActions();
   const [disabled, setDisabled] = useState(true);
   const [confirm, setConfirm] = useState<string>('');
+
+  const onDelete = () => {
+    deleteGlossary({ id: glossary.id });
+    dispatch(
+      removeTab({
+        tabId: tab.tabId,
+        side: tab.side,
+        preventSplit: false,
+      })
+    );
+    dispatch(removeGlossary({ glossaryId: glossary.id }));
+  };
 
   const setTimer = () => {
     const timer = setTimeout(() => {
@@ -41,7 +67,7 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
       </Typography>
       <Typography variant="body1" gutterBottom>
         To confirm, type the name of the glossary:{' '}
-        <strong>{glossaryName}</strong>
+        <strong>{glossary.name}</strong>
       </Typography>
       <TextField
         value={confirm}
@@ -53,11 +79,7 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
         autoFocus
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => setModalContent(null)}
-        >
+        <Button variant="outlined" color="primary" onClick={() => closeModal()}>
           Cancel
         </Button>
         <Button
@@ -65,9 +87,9 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
           color="error"
           onClick={() => {
             onDelete();
-            setModalContent(null);
+            closeModal();
           }}
-          disabled={confirm !== glossaryName && disabled}
+          disabled={confirm !== glossary.name && disabled}
         >
           Delete
         </Button>

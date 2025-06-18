@@ -44,6 +44,17 @@ const glossarySlice = createSlice({
       const { glossaryId, loading } = action.payload;
       state.glossaries[glossaryId].loading = loading;
     },
+    removeGlossary: (state, action: PayloadAction<{ glossaryId: string }>) => {
+      const { glossaryId } = action.payload;
+      if (state.glossaries[glossaryId]) {
+        delete state.glossaries[glossaryId];
+      } else {
+        console.warn(`Glossary with id ${glossaryId} not found for removal.`);
+      }
+      if (state.activeGlossaryId === glossaryId) {
+        state.activeGlossaryId = null;
+      }
+    },
     setGlossaryError: (
       state,
       action: PayloadAction<{ glossaryId: string; error: string | null }>
@@ -295,6 +306,7 @@ export const {
   toggleExpandAll,
   toggleNameEdit,
   addGlossaryEntry,
+  removeGlossary,
 } = glossarySlice.actions;
 
 export default glossarySlice.reducer;

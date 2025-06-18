@@ -12,19 +12,11 @@ import TagTable from '../forms/TagTable.jsx';
 import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import GeographyForm from '@/features/Glossary/forms/GeographyForm.jsx';
+import GeographyForm from '@/features/Glossary/LandmarkForm/CreateLandmarkGlossary.js';
 
-interface EditAttributeProps {
-  setModalContent: ({
-    component,
-    props,
-  }: {
-    component: LazyExoticComponent<any>;
-    props: any;
-  }) => void;
-}
+interface EditAttributeProps {}
 
-const EditAttribute: React.FC<EditAttributeProps> = ({ setModalContent }) => {
+const EditAttribute: React.FC<EditAttributeProps> = () => {
   const { isSplit } = useSidePanel();
   const { id } = useShellContext();
   const { edit: attr } = useTools('attribute', id);
@@ -53,7 +45,7 @@ const EditAttribute: React.FC<EditAttributeProps> = ({ setModalContent }) => {
         maxHeight: 'calc(100vh - 125px)',
       }}
     >
-      <AttrMetaData setModalContent={setModalContent} />
+      <AttrMetaData />
       <Divider sx={{ gridColumn: 'span 3' }} />
       <TitledCollapse
         title="Values"

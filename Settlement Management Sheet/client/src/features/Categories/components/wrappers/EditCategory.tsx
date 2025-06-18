@@ -12,7 +12,7 @@ import ObjectDependencies from 'components/shared/Metadata/Dependencies.jsx';
 import categoryFields from '../../helpers/categoryFormData.js';
 import CategoryAttributes from '../forms/CategoryAttributes.jsx';
 
-const EditCategory = ({ setModalContent }) => {
+const EditCategory = () => {
   const { tool, id } = useShellContext();
   const { edit: category } = useTools(tool, id);
   const [attributes, setAttributes] = useState(false);
@@ -48,7 +48,7 @@ const EditCategory = ({ setModalContent }) => {
         boxSx={{ gridColumn: 'span 3' }}
         toggleOpen={() => setAttributes(!attributes)}
       >
-        <CategoryAttributes setModalContent={setModalContent} id={id} />
+        <CategoryAttributes id={id} />
       </TitledCollapse>
       <TitledCollapse
         title="Thresholds"
@@ -68,12 +68,7 @@ const EditCategory = ({ setModalContent }) => {
         boxSx={{ gridColumn: 'span 3' }}
         toggleOpen={() => setDependencies(!dependencies)}
       >
-        <ObjectDependencies
-          tool="category"
-          setModalContent={setModalContent}
-          id={id}
-          displayName="Categories"
-        />
+        <ObjectDependencies tool="category" id={id} displayName="Categories" />
       </TitledCollapse>
       <TitledCollapse
         title="Tags"

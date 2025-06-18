@@ -23,6 +23,11 @@ import { cancelToolEdit } from '@/app/thunks/toolThunks.js';
 import { AppDispatch } from '@/app/store.js';
 import PageBox from '../Layout/PageBox.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
+import { useModalActions } from '@/hooks/useModal.js';
+import { useMediaQuery } from '@mui/system';
+import { size, split } from 'lodash';
+import { useSelector } from 'react-redux';
+import { isSplit } from '@/app/selectors/sidePanelSelectors.js';
 
 interface CreateShellProps {
   tab: Tab;
@@ -33,10 +38,6 @@ interface CreateShellProps {
   checklistContent: any;
   editComponentProps?: Record<string, any>;
   previewComponentProps?: Record<string, any>;
-  setModalContent: (content: {
-    component: React.ComponentType;
-    props?: Record<string, any>;
-  }) => void;
   innerStyle?: React.CSSProperties;
 }
 
@@ -49,16 +50,14 @@ const CreateShell: React.FC<CreateShellProps> = ({
   checklistContent,
   editComponentProps = {},
   previewComponentProps = {},
-  setModalContent,
   innerStyle = {},
 }) => {
+  const { showModal, closeModal } = useModalActions();
   const { tool, side, id, mode, tabId } = tab;
   const { current, edit, allIds, saveToolEdit, errors } = useTools(
     tool as ToolName,
     id
   );
-
-  console.log(mode);
 
   const { errorCount } = useInitializeTool({
     tool: tool as ToolName,
@@ -70,29 +69,11 @@ const CreateShell: React.FC<CreateShellProps> = ({
     initializeFn: () => initializeTool(tool as ToolName),
     validationFields,
   });
-  const dispatch: AppDispatch = useDispatch();
 
-  const [expanded, setExpanded] = useState(false);
-  const debouncedEdit = useDebounce(edit, 1000);
-
-  useDebouncedEffect(
-    () => {
-      if (!edit) return;
-      const name = edit?.name ? edit.name.trim() : `Untitled`;
-      if (edit.name !== current.name) {
-        dispatch(
-          updateTab({
-            tabId,
-            side,
-            keypath: 'name',
-            updates: name,
-          })
-        );
-      }
-    },
-    300,
-    [debouncedEdit?.name, dispatch, tabId, side]
-  );
+  const splitSize = useMediaQuery('(min-width: 1750px)');
+  const soloSize = useMediaQuery('(min-width: 1200px)');
+  const splitContainer = useSelector(isSplit);
+  const sizeCheck = !size && !splitContainer;
 
   // const handleCancel = () => {
   //   setEditMode(false);
@@ -166,12 +147,12 @@ const CreateShell: React.FC<CreateShellProps> = ({
   //   loadHover: () => {},
   //   load: () => {
   //     toolServices.prefetchToolContent(tool);
-  //     setModalContent({
+  //     showModal({
   //       component: LoadTool as React.FC,
   //       props: {
   //         tool,
   //         displayName: loadDisplayName,
-  //         setShowModal: setModalContent,
+  //         closeModal: closeModal,
   //       },
   //     });
   //   },
@@ -183,8 +164,22 @@ const CreateShell: React.FC<CreateShellProps> = ({
 
   if (current !== null) {
     return (
-      <ShellContext.Provider value={{ tool, id, mode, side }}>
-        <PageBox innerStyle={innerStyle}>
+      <ShellContext.Provider
+        value={{ tool, id, mode, side, showModal, closeModal }}
+      >
+        <PageBox
+          variant={
+            tool === 'event'
+              ? 'fullWidth'
+              : !splitContainer
+                ? !soloSize
+                  ? 'fullWidth'
+                  : 'default'
+                : !splitSize
+                  ? 'fullWidth'
+                  : 'default'
+          }
+        >
           {errorCount !== undefined && errors && current && (
             <Box
               sx={{
@@ -215,11 +210,9 @@ const CreateShell: React.FC<CreateShellProps> = ({
           {mode === 'edit'
             ? React.createElement(editComponent, {
                 ...editComponentProps,
-                setModalContent,
               })
             : React.createElement(previewComponent, {
                 ...previewComponentProps,
-                setModalContent,
               })}
         </PageBox>
       </ShellContext.Provider>

@@ -5,8 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { useDispatch } from 'react-redux';
 
 import { Box, Button, Tooltip, Typography } from '@mui/material';
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { ArrowLeft, ArrowRight } from '@mui/icons-material';
 
 import { getErrorCount } from '@/app/slice/validationSlice.js';
 
@@ -16,7 +15,16 @@ import calculateProgressColor from './calculateProgressColor.js';
 import { AppDispatch } from '@/app/store.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
 
-const ValidationChecklist = ({
+interface ValidationChecklistProps {
+  defaultExpand?: boolean;
+  checklistContent: any[];
+  errors: any;
+  tool: string;
+  side: 'left' | 'right';
+  [key: string]: any; // Allow additional props
+}
+
+const ValidationChecklist: React.FC<ValidationChecklistProps> = ({
   defaultExpand,
   checklistContent,
   errors,
@@ -27,7 +35,7 @@ const ValidationChecklist = ({
   const dispatch: AppDispatch = useDispatch();
   const theme = useTheme();
   const [expanded, setExpanded] = useState(defaultExpand || false);
-  const [errorStates, setErrorStates] = useState([]);
+  const [errorStates, setErrorStates] = useState<string[]>([]);
   const [errorCount, setErrorCount] = useState(0);
   // progress bar stuff
   const [progress, setProgress] = useState(0);
@@ -141,13 +149,9 @@ const ValidationChecklist = ({
           }}
         >
           {expanded ? (
-            <ArrowRightIcon
-              sx={{ color: 'primary.contrastText', fontSize: 36 }}
-            />
+            <ArrowRight sx={{ color: 'primary.contrastText', fontSize: 36 }} />
           ) : (
-            <ArrowLeftIcon
-              sx={{ color: 'primary.contrastText', fontSize: 36 }}
-            />
+            <ArrowLeft sx={{ color: 'primary.contrastText', fontSize: 36 }} />
           )}
         </Button>
       </Tooltip>
@@ -168,7 +172,7 @@ const ValidationChecklist = ({
             ? 'Please address the following issues:'
             : "No errors found. You're good to go!"}
         </Typography>
-        {errorStates.map((item, index) => (
+        {errorStates.map((item: any, index) => (
           <ChecklistItem
             key={index}
             label={
