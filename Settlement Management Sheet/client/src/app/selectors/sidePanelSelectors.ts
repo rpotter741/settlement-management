@@ -1,11 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { get } from 'lodash';
+import { create, get } from 'lodash';
 import { RootState } from '../store.js';
 
 const base = (state: RootState) => state.sidePanel;
 
 export const leftTabs = createSelector([base], (state) => state.leftTabs);
 export const rightTabs = createSelector([base], (state) => state.rightTabs);
+
+export const sidePanelOpen = createSelector(
+  [base],
+  (state) => state.sidePanelOpen
+);
 
 export const currentLeftTab = createSelector(
   [base],

@@ -17,8 +17,8 @@ const RenderTabs: React.FC<RenderTabsProps> = memo(({ side }) => {
 
   return tabs.map((tab) => {
     if (!tab.tool) return null;
-    const Component = tabMap.hasOwnProperty(tab.tool)
-      ? tabMap[tab.tool as keyof typeof tabMap]?.component
+    const Component = tabMap[tab.tabType].hasOwnProperty(tab.tool)
+      ? tabMap[tab.tabType][tab.tool]?.component
       : undefined;
     const props = {
       tab,

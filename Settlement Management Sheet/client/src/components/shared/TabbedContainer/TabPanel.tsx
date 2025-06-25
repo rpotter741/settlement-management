@@ -8,6 +8,7 @@ import { setActiveTab } from '@/app/slice/sidePanelSlice.js';
 import { set } from 'lodash';
 import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
 import { useSelector } from 'react-redux';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
 
 interface TabPanelProps {
   children: React.ReactNode;
@@ -23,6 +24,8 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
 
     const activeTab = useSelector(focusedTab);
 
+    const { both, soloSize } = useTabSplit();
+
     useEffect(() => {
       dispatch(setActiveTab({ tab }));
     }, [tab.side, tab.tabId, dispatch]);
@@ -35,8 +38,9 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         sx={{
           height: '100%',
           width: '100%',
-          flexGrow: 1,
           pt: tab.disableMenu ? 4 : 0,
+          backgroundColor:
+            tab.mode !== 'edit' ? 'background.paper' : 'background.default',
         }}
         onClick={() => {
           if (activeTab?.tabId !== tab.tabId) {
@@ -45,7 +49,7 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         }}
       >
         {!tab.disableMenu && <FileMenu tab={tab} />}
-        {children}
+        <Box sx={{ display: 'flex', height: '100%' }}>{children}</Box>
       </Box>
     );
   }

@@ -66,6 +66,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
       <Box
         sx={{
           display: 'flex',
+          flexGrow: 1,
           flexDirection: 'row',
           justifyContent: 'start',
           alignItems: 'center',
@@ -73,6 +74,8 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
           boxSizing: 'border-box',
           overflowX: 'auto',
           scrollbarWidth: 'none',
+          borderBottom: '2px solid',
+          borderColor: 'divider',
         }}
       >
         {tabs.map((tab, index) => {
@@ -127,9 +130,8 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                   title={
                     <Typography>
                       {tab.name}{' '}
-                      {tab.tool &&
-                      tabMap[tab.tool as keyof typeof tabMap]?.headerName
-                        ? `(${tabMap[tab.tool as keyof typeof tabMap]?.headerName})`
+                      {tab.tool && tabMap[tab.tabType][tab.tool]?.headerName
+                        ? `(${tabMap[tab.tabType][tab.tool]?.headerName})`
                         : ''}
                     </Typography>
                   }
@@ -142,9 +144,9 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                     value={tab.tabId}
                     iconPosition="start"
                     icon={
-                      tabMap[tab.tool as keyof typeof tabMap].icon
+                      tabMap[tab.tabType][tab.tool].icon
                         ? React.createElement(
-                            tabMap[tab.tool as keyof typeof tabMap]
+                            tabMap[tab.tabType][tab.tool]
                               .icon as unknown as React.ElementType,
                             {}
                           )

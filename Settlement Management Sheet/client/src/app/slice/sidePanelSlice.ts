@@ -17,6 +17,7 @@ import {
 const initialState: TabState = {
   leftTabs: [],
   rightTabs: [],
+  sidePanelOpen: true,
   splitTabs: false,
   preventSplit: false,
   currentLeftTab: null,
@@ -81,6 +82,9 @@ const sidePanelSlice = createSlice({
       if (preventSplit) {
         state.preventSplit = preventSplit;
       }
+    },
+    toggleSidePanel: (state) => {
+      state.sidePanelOpen = !state.sidePanelOpen;
     },
     removeTab: (state, action: PayloadAction<RemoveTabPayload>) => {
       const { tabId, side, preventSplit } = action.payload;
@@ -295,6 +299,7 @@ const sidePanelSlice = createSlice({
 
 export const {
   addTab,
+  toggleSidePanel,
   removeTab,
   setCurrentTab,
   setBreadcrumbs,

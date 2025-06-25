@@ -1,5 +1,7 @@
 import { GlossaryEntryType } from 'types/index.js';
-import { TabType, ToolName } from './ToolTypes.js';
+import { ToolName } from './ToolTypes.js';
+
+export type TabType = 'tool' | 'glossary' | 'other';
 
 export type TabTools = ToolName | GlossaryEntryType | 'editGlossary';
 
@@ -23,6 +25,7 @@ export interface Tab {
 export interface TabState {
   leftTabs: Tab[];
   rightTabs: Tab[];
+  sidePanelOpen: boolean;
   splitTabs: boolean;
   preventSplit: boolean;
   currentLeftTab: string | null;

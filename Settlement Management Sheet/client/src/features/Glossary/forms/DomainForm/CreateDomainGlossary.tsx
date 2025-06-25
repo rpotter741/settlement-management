@@ -5,6 +5,7 @@ import CreateGlossaryShell from '@/components/shared/CreateShell/CreateGlossaryS
 import { selectEntryById } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
 import EditDomainForm from './EditDomainForm.js';
+import EditGlossaryEntryForm from '../EditGlossaryWithShell.js';
 import PreviewGlossaryWithShell from '../PreviewGlossaryWithShell.js';
 
 interface DomainFormProps {
@@ -26,7 +27,7 @@ const DomainForm: React.FC<DomainFormProps> = ({ tab }) => {
   return (
     <CreateGlossaryShell
       tab={tab}
-      editComponent={EditDomainForm}
+      editComponent={EditGlossaryEntryForm}
       editComponentProps={{ lastSaved, setLastSaved }}
       previewComponent={PreviewGlossaryWithShell}
       previewComponentProps={{}}

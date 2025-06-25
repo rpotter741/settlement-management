@@ -28,6 +28,7 @@ import { useMediaQuery } from '@mui/system';
 import { size, split } from 'lodash';
 import { useSelector } from 'react-redux';
 import { isSplit } from '@/app/selectors/sidePanelSelectors.js';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
 
 interface CreateShellProps {
   tab: Tab;
@@ -70,93 +71,7 @@ const CreateShell: React.FC<CreateShellProps> = ({
     validationFields,
   });
 
-  const splitSize = useMediaQuery('(min-width: 1750px)');
-  const soloSize = useMediaQuery('(min-width: 1200px)');
-  const splitContainer = useSelector(isSplit);
-  const sizeCheck = !size && !splitContainer;
-
-  // const handleCancel = () => {
-  //   setEditMode(false);
-  //   dispatch(
-  //     cancelToolEdit({
-  //       tool: tab.tool as ToolName,
-  //       id: tab.id,
-  //       tabId: tab.tabId,
-  //       side: tab.side,
-  //       validationFields,
-  //     })
-  //   );
-  //   setShowModal(null);
-  // };
-
-  // const handleSave = async () => {
-  //   try {
-  //     await toolServices.saveTool({
-  //       tool: tab.tool as ToolName,
-  //       data: { ...edit },
-  //     });
-  //     saveToolEdit(true);
-  //     setEditMode(false);
-  //     dispatch(setTabDirty({ id: tab.id, isDirty: false }));
-  //     dispatch(updateTab({ tabId: tab.tabId, side: tab.side, keypath: 'mode', updates: 'preview' }));
-  //     dispatch(
-  //       showSnackbar({ message: `${toolName} saved!`, type: 'success' })
-  //     );
-  //   } catch (error: any) {
-  //     dispatch(showSnackbar({ message: error.message, type: 'error' }));
-  //   }
-  // };
-
-  // const handlePublish = async () => {
-  //   try {
-  //     if (!current || !current.refId) {
-  //       dispatch(
-  //         showSnackbar({ message: 'No tool data to publish', type: 'error' })
-  //       );
-  //       return;
-  //     }
-  //     await toolServices.publishTool({
-  //       tool,
-  //       id,
-  //       refId: current.refId,
-  //     });
-  //     dispatch(
-  //       showSnackbar({ message: `${current.name} published!`, type: 'success' })
-  //     );
-  //   } catch (error: any) {
-  //     dispatch(showSnackbar({ message: error.message, type: 'error' }));
-  //   }
-  // };
-
-  // const handleAdd = async () => {
-  //   const newTool = initializeTool(tool);
-  //   dispatch(initialize({ tool, data: newTool }));
-  // };
-
-  // const handleEdit = () => {
-  //   setEditMode(true);
-  //   dispatch(updateTab({ tabId, side, keypath: 'mode', updates: 'edit' }));
-  // };
-
-  // const buttonActions = {
-  //   add: () => handleAdd(),
-  //   edit: () => handleEdit(),
-  //   save: () => handleSave(),
-  //   cancel: () => handleCancel(),
-  //   publish: () => handlePublish(),
-  //   loadHover: () => {},
-  //   load: () => {
-  //     toolServices.prefetchToolContent(tool);
-  //     showModal({
-  //       component: LoadTool as React.FC,
-  //       props: {
-  //         tool,
-  //         displayName: loadDisplayName,
-  //         closeModal: closeModal,
-  //       },
-  //     });
-  //   },
-  // };
+  const { splitSize, soloSize, splitTabs } = useTabSplit();
 
   if (!current) {
     return <Box>Loading...</Box>;
@@ -171,14 +86,15 @@ const CreateShell: React.FC<CreateShellProps> = ({
           variant={
             tool === 'event'
               ? 'fullWidth'
-              : !splitContainer
-                ? !soloSize
-                  ? 'fullWidth'
+              : !splitTabs
+                ? soloSize
+                  ? 'blend'
                   : 'default'
-                : !splitSize
-                  ? 'fullWidth'
-                  : 'default'
+                : splitSize
+                  ? 'default'
+                  : 'blend'
           }
+          tabType="tool"
         >
           {errorCount !== undefined && errors && current && (
             <Box

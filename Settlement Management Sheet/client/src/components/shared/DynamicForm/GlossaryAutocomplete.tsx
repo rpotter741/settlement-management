@@ -11,11 +11,14 @@ import { useShellContext } from '@/context/ShellContext.js';
 import useNodeEditor from '@/hooks/useNodeEditor.js';
 import { alphabetize } from '@/utility/alphabetizeStringArray.js';
 import { alpha, Box } from '@mui/system';
+import { useSelector } from 'react-redux';
+import { selectKeypathOptions } from '@/app/selectors/glossarySelectors.js';
+import { GlossaryEntry } from 'types/index.js';
 
 interface GlossaryAutocompleteProps {
   multiple?: boolean;
   label: string;
-  keypath: string;
+  keypath: keyof GlossaryEntry;
   options: string[];
   alphabetizeOptions?: boolean;
   hasPrimary?: boolean;

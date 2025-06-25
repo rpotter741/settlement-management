@@ -89,15 +89,15 @@ const TabbedContainer: React.FC = () => {
     [leftTabs]
   );
 
-  const canSplit = useMediaQuery('(min-width:1500px)');
+  const canSplit = useMediaQuery('(min-width:1536px)');
 
   useEffect(() => {
-    if (canSplit) {
+    if (canSplit && !noSplit) {
       setPreventSplit(false);
     } else {
       setPreventSplit(true);
     }
-  }, [canSplit, setPreventSplit]);
+  }, [canSplit, noSplit, setPreventSplit]);
 
   useEffect(() => {
     if (noSplit && preventSplit === false) {

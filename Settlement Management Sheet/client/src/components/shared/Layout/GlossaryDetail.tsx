@@ -5,9 +5,10 @@ import { useShellContext } from '@/context/ShellContext.js';
 
 interface GlossaryDetailProps {
   keypath: string;
+  header: string;
 }
 
-const GlossaryDetail: React.FC<GlossaryDetailProps> = ({ keypath }) => {
+const GlossaryDetail: React.FC<GlossaryDetailProps> = ({ keypath, header }) => {
   const { entry } = useShellContext();
   return (
     <Box
@@ -30,7 +31,7 @@ const GlossaryDetail: React.FC<GlossaryDetailProps> = ({ keypath }) => {
           fontWeight: 600,
         }}
       >
-        {capitalize(keypath)}
+        {header}
       </Typography>
       <Typography
         sx={{

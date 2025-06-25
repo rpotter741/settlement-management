@@ -1,16 +1,36 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { MuiStyledOptions, SxProps } from '@mui/system';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
+import { TabType } from '@/app/types/SidePanelTypes.js';
+
+type PageBoxVariant = 'default' | 'blend' | 'fullWidth';
 
 interface PageBoxProps {
   children: React.ReactNode;
   outerStyle?: React.CSSProperties;
   innerStyle?: React.CSSProperties;
-  variant?: 'default' | 'fullWidth';
+  variant?: PageBoxVariant;
+  tabType?: TabType;
+  mode: 'edit' | 'preview';
 }
 
-const variants: Record<'default' | 'fullWidth', React.CSSProperties> = {
+const variants: Record<PageBoxVariant, React.CSSProperties> = {
   default: {},
+  blend: {
+    display: 'flex',
+    justifyContent: 'start',
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingLeft: 2,
+    paddingRight: 2,
+    marginBottom: 0,
+    boxShadow: 'none',
+    borderRadius: 0,
+    backgroundColor: 'inherit',
+    boxSizing: 'border-box',
+    height: '100%',
+    overflowY: 'scroll',
+  },
   fullWidth: {
     display: 'flex',
     justifyContent: 'start',
@@ -21,14 +41,25 @@ const variants: Record<'default' | 'fullWidth', React.CSSProperties> = {
     marginBottom: 0,
     boxShadow: 'none',
     borderRadius: 0,
-    backgroundColor: 'background.default',
-    width: '100%',
-    maxWidth: '100%',
-    position: 'relative',
-    flexShrink: 1,
+    backgroundColor: 'inherit',
+    boxSizing: 'border-box',
     height: '100%',
     overflowY: 'scroll',
   },
+};
+
+const getWidths = (variant: PageBoxVariant, tabType: TabType) => {
+  if (variant === 'fullWidth') return '100%';
+  switch (tabType) {
+    case 'tool':
+      return variant === 'blend' ? '100%' : { sx: '100%', md: '741px' };
+    case 'glossary':
+      return variant === 'blend' ? '100%' : { sx: '100%', md: '741px' };
+    case 'other':
+      return {};
+    default:
+      return { sx: '100%', md: '80%', lg: '70%', xl: '40%', xxl: '30%' };
+  }
 };
 
 const PageBox: React.FC<PageBoxProps> = ({
@@ -36,24 +67,32 @@ const PageBox: React.FC<PageBoxProps> = ({
   outerStyle = {},
   innerStyle = {},
   variant = 'default',
+  tabType = 'tool',
+  mode,
 }) => {
+  const { either, both, soloSize } = useTabSplit();
+  const override = soloSize ? 'fullWidth' : variant;
+
+  console.log(override, 'override', soloSize, 'soloSize', tabType, 'tabType');
+
   return (
     <Box
+      className="page-box-outside"
       sx={{
         display: 'flex',
         justifyContent: 'start',
         flexDirection: 'column',
         alignItems: 'center',
         position: 'relative',
+        flex: '1 0 0',
         height: '100%',
-        flexShrink: 0,
-        flexGrow: 2,
         overflowY: 'scroll',
         overflowX: 'hidden',
         ...outerStyle,
       }}
     >
       <Box
+        className="page-box-inside"
         sx={{
           display: 'flex',
           justifyContent: 'start',
@@ -62,14 +101,15 @@ const PageBox: React.FC<PageBoxProps> = ({
           mb: 9,
           boxShadow: 4,
           borderRadius: 4,
-          backgroundColor: 'background.paper',
-          width: ['100%', '90%', '80%'],
-          maxWidth: ['100%', '100%', 800],
-          flexShrink: 1,
+          maxHeight: 'calc(100vh - 112.5px)',
           height: '100%',
           overflowY: 'scroll',
-          ...variants[variant as keyof typeof variants],
+          ...variants[override as keyof typeof variants],
           ...innerStyle,
+          width: getWidths(override, tabType),
+          minWidth: 450,
+          backgroundColor:
+            mode === 'edit' ? 'background.paper' : 'background.default',
         }}
       >
         {children}

@@ -5,6 +5,7 @@ import CreateGlossaryShell from '@/components/shared/CreateShell/CreateGlossaryS
 import { selectEntryById } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
 import EditLandmarkForm from './EditLandmarkForm.js';
+import EditGlossaryEntryForm from '../EditGlossaryWithShell.js';
 import PreviewGlossaryWithShell from '../PreviewGlossaryWithShell.js';
 
 interface LandmarkFormProps {
@@ -12,25 +13,13 @@ interface LandmarkFormProps {
 }
 
 const LandmarkForm: React.FC<LandmarkFormProps> = ({ tab }) => {
-  const [lastSaved, setLastSaved] = useState<Record<string, any>>({});
-  if (!tab.glossaryId || tab.tool !== 'landmark') return null;
-  const entry: any = useSelector(selectEntryById(tab.glossaryId, tab.id));
-  console.log(entry, 'entry in LandmarkForm');
-
-  const theme = useTheme();
-
-  useEffect(() => {
-    console.log(lastSaved, 'lastSaved in LandmarkForm');
-  });
-
   return (
     <CreateGlossaryShell
       tab={tab}
-      editComponent={EditLandmarkForm}
-      editComponentProps={{ lastSaved, setLastSaved }}
+      editComponent={EditGlossaryEntryForm}
+      editComponentProps={{}}
       previewComponent={PreviewGlossaryWithShell}
       previewComponentProps={{}}
-      pageVariant="fullWidth"
     />
   );
 };

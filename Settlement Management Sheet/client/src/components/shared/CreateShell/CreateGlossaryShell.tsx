@@ -11,8 +11,9 @@ import useNodeEditor from '@/hooks/useNodeEditor.js';
 import { updateGlossaryEntry } from '@/app/slice/glossarySlice.js';
 import EditFieldWithButton from '../Layout/EditFieldWithButton.js';
 import { cloneDeep } from 'lodash';
-import { getGlossaryNodeById } from '@/app/thunks/glossaryThunks.js';
 import { useModalActions } from '@/hooks/useModal.js';
+import { getGlossaryEntryById } from '@/app/thunks/glossaryThunks.js';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
 
 interface CreateGlossaryShellProps {
   tab: Tab;
@@ -41,29 +42,17 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
     updateGlossaryEntry: update,
     node,
     entry,
+    getLocalStorage,
+    setLocalStorage,
+    clearLocalStorage,
+    localIsNewer,
   } = useNodeEditor(glossaryId, id);
 
-  // const syncLocalAndRemote = ({
-  //   keypath,
-  //   value,
-  // }: {
-  //   keypath: string;
-  //   value: any;
-  // }) => {
-  //   // optimistic first, baby!
-  //   update({ [keypath]: value });
-  //   localStorage.setItem(
-  //     id,
-  //     JSON.stringify({
-  //       ...cloneDeep(entry),
-  //       lastSaved: new Date().toISOString(),
-  //     })
-  //   );
-  //   setLastSaved((prev) => ({
-  //     ...prev,
-  //     [keypath]: new Date().toISOString(),
-  //   }));
-  // };
+  const { splitSize, soloSize, splitTabs } = useTabSplit();
+
+  if (!entry) {
+    return <PageBox variant="default">Loading...</PageBox>;
+  }
 
   return (
     <ShellContext.Provider
@@ -76,6 +65,10 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
         glossaryId,
         update,
         entry,
+        getLocalStorage,
+        setLocalStorage,
+        clearLocalStorage,
+        localIsNewer,
         showModal,
         closeModal,
         node,
@@ -83,22 +76,24 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
     >
       <PageBox
         variant={
-          pageVariant ? pageVariant : mode === 'edit' ? 'default' : 'fullWidth'
+          !splitTabs
+            ? soloSize
+              ? 'blend'
+              : 'default'
+            : splitSize
+              ? 'default'
+              : 'blend'
         }
+        tabType="glossary"
+        mode={mode}
       >
         {mode === 'edit' && editComponent ? (
           React.createElement(editComponent, {
             ...editComponentProps,
-            update,
-            entry,
-            node,
-            tab,
           })
         ) : mode === 'preview' && previewComponent ? (
           React.createElement(previewComponent, {
             ...previewComponentProps,
-            entry,
-            tab,
           })
         ) : (
           <div style={{ padding: '16px' }}>Yo shit is busted, bruh</div>

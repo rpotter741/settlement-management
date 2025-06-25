@@ -9,10 +9,23 @@ import {
   ThemeProvider as MuiThemeProvider,
   createTheme,
 } from '@mui/material/styles';
+import { BreakpointOverrides } from '@mui/system';
 
 import commonStyles from '../themes/commonStyles.js';
 
 import themeOptions from '../themes/themeOptions.js';
+
+declare module '@mui/material/styles' {
+  interface BreakpointOverrides {
+    xs: true; // Add xs breakpoint if needed
+    sm: true; // Add sm breakpoint if needed
+    md: true; // Add md breakpoint if needed
+    lg: true; // Add lg breakpoint if needed
+    xl: true; // Add xl breakpoint if needed
+    xxl: true; // Add xxl breakpoint if needed
+    xxxl: true; // Add 4xl breakpoint if needed
+  }
+}
 
 // Add this type assertion or define the type in themeOptions.js for better safety
 const themeOptionsTyped: { [key: string]: typeof themeOptions.default } =
@@ -47,10 +60,24 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const selectedTheme = themeOptionsTyped[themeKey] || themeOptions.default;
     return createTheme({
       ...selectedTheme,
-      //@ts-ignore
+      palette: {
+        ...selectedTheme.palette,
+        mode: selectedTheme.palette?.mode as 'light' | 'dark' | undefined,
+      },
       components: {
         ...commonStyles,
         ...(selectedTheme.components || {}),
+      },
+      breakpoints: {
+        values: {
+          xs: 0,
+          sm: 600,
+          md: 900,
+          lg: 1200,
+          xl: 1536,
+          xxl: 1920, // Add xxl breakpoint if needed
+          xxxl: 3840, // Add 4xl breakpoint if needed
+        },
       },
     });
   }, [themeKey]);

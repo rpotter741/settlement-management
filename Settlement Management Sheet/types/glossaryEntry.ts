@@ -4,7 +4,7 @@ export interface GlossaryNode {
   id: string;
   name: string;
   type: 'folder' | 'file';
-  entryType: GlossaryEntryType | null;
+  entryType: GlossaryEntryType;
   parentId: string | null;
   children?: GlossaryNode[];
   parent?: GlossaryNode | null;
@@ -148,32 +148,32 @@ export const ClimateTypeOptions: ClimateType[] = [
 ];
 
 export interface TerritoryEntry extends BaseEntry {
-  climate: ClimateType[];
+  climates: ClimateType[];
   terrain: TerrainType[];
   nations: UUID[];
   factions: UUID[];
   population: number | string;
   locations: UUID[];
-  geographicFeatures: UUID[];
+  landmarks: UUID[];
   resources?: string[];
 }
 
 export interface ProvinceEntry extends BaseEntry {
-  nation: UUID[];
+  nations: UUID[];
   terrain: TerrainType[];
   locations: UUID[];
-  geographicFeatures: UUID[];
+  landmarks: UUID[];
   people: UUID[];
-  notableEvents?: UUID[];
+  eventLog?: UUID[];
   resources?: string[];
   population: number | string;
 }
 
 export interface LandmarkEntry extends BaseEntry {
-  type: GeographicEntryType;
-  region: UUID[];
-  climate: ClimateType;
+  regions: UUID[];
+  climates: ClimateType;
   terrain: TerrainType;
+  type: GeographicEntryType;
   eventLog: UUID[];
 }
 
@@ -409,8 +409,7 @@ export type GlossaryEntryType =
   | 'location'
   | 'person'
   | 'event'
-  | 'note'
-  | null;
+  | 'note';
 
 export interface Glossary {
   id: UUID;

@@ -17,28 +17,27 @@ import ShellEditor from '@/components/shared/TipTap/ShellEditor.js';
 import { Box, useMediaQuery } from '@mui/system';
 import { useSelector } from 'react-redux';
 import { isSplit } from '@/app/selectors/sidePanelSelectors.js';
+import GlossaryPropEditor from '@/components/shared/Layout/GlossaryPropEditor.js';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
+import propertyArrayMap from '../../helpers/entryTypePropertyArray.js';
 
-interface EditLandmarkFormProps {}
+interface EditLandmarkFormProps {
+  height: string;
+}
 
-const EditLandmarkForm: React.FC<EditLandmarkFormProps> = ({}) => {
-  const { glossaryId, id, tabId, side } = useShellContext();
+const EditLandmarkForm: React.FC<EditLandmarkFormProps> = ({
+  height = '100%',
+}) => {
+  const { glossaryId, id, tabId, side, mode } = useShellContext();
   const {
     updateGlossaryEntry: update,
     node,
     entry,
   } = useNodeEditor(glossaryId, id);
 
-  const dispatch: AppDispatch = useDispatch();
+  console.log(height);
 
-  if (!entry?.name) {
-    dispatch(
-      getGlossaryEntryById({
-        nodeId: id,
-        glossaryId,
-        entryType: node.entryType,
-      })
-    );
-  }
+  const dispatch: AppDispatch = useDispatch();
 
   const [lastSaved, setLastSaved] = useState<Record<string, any>>({});
   const [name, setName] = useState(node.name || '');
@@ -64,10 +63,7 @@ const EditLandmarkForm: React.FC<EditLandmarkFormProps> = ({}) => {
     }
   }, [node.name]);
 
-  const splitTabs = useSelector(isSplit);
-  const breakpoint = useMediaQuery('(min-width: 900px)');
-  const either = splitTabs || !breakpoint;
-  const both = splitTabs && breakpoint;
+  const { either, both } = useTabSplit();
 
   const handleNameChange = (newName: string) => {
     setName(newName);
@@ -76,47 +72,59 @@ const EditLandmarkForm: React.FC<EditLandmarkFormProps> = ({}) => {
   return (
     <Box
       sx={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        height: '100%',
-        py: 0.5,
-        px: both ? 1 : either ? 2 : 4,
-        mt: 4,
-        gap: both ? 0 : either ? 2 : 4,
-        // width: both ? '100%' : either ? '80%' : '80%',
+        display: 'flex',
+        height,
+        py: 4,
+        px: both ? 1 : either ? 0 : 2,
+        mt: 2,
+        alignContent: 'start',
+        gap: 2,
+        borderRadius: mode === 'edit' ? 2 : 0,
+        boxSizing: 'border-box',
+        flexWrap: 'wrap',
+        overflowY: 'scroll',
       }}
     >
-      <Box sx={{ height: '100%' }}>
-        <EditFieldWithButton
-          label="Entry Title"
-          value={name}
-          onSave={handleNameChange}
-          style={{
-            marginBottom: 2,
-            width: '100%',
-          }}
-        />
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid size={{ xs: 12, md: 6 }}></Grid>
-        </Grid>
+      <EditFieldWithButton
+        label="Entry Title"
+        value={name}
+        onSave={handleNameChange}
+        style={{
+          width: '100%',
+        }}
+      />
+      <Box
+        sx={{ flex: '2 0 0', boxSizing: 'border-box' }}
+        className="shell-editor-container"
+      >
         <ShellEditor
           keypath="description"
           lastSaved={lastSaved?.description || null}
           setLastSaved={setLastSaved}
         />
       </Box>
-      <Box sx={{ width: '100%' }}>
+      <Box
+        sx={{
+          flex: '1 0 0',
+          px: 1,
+          boxSizing: 'border-box',
+          backgroundColor: 'background.default',
+          py: 2,
+          borderRadius: 2,
+        }}
+      >
         <GlossaryAutocomplete
           multiple={false}
-          keypath="climate"
+          keypath="climates"
           options={ClimateTypeOptions}
           label="Climate"
         />
-        <GlossaryAutocomplete
+        <GlossaryPropEditor
           multiple={true}
-          keypath="region"
+          keypath="regions"
           options={['Marka', 'Dhacha', 'Xtera', 'Khal', 'Nivasa', 'Aymaq']}
           label="Region"
+          hasPrimary={true}
         />
         <GlossaryAutocomplete
           multiple={false}

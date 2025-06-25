@@ -629,13 +629,13 @@ model TerritoryGlossary {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   tags             String[]
-  climate          String[]
+  climates          String[]
   terrain          TerrainTypes[]
   nations          String[]
   factions         String[]
   population       Json
   locations        String[]
-  features         String[]
+  landmarks         String[]
   resources        String[]
 
       @@index([contentType])
@@ -661,6 +661,7 @@ model ProvinceGlossary {
   nation           String?
   terrain          TerrainTypes[]
   locations        String[]
+  landmarks        String[]
   people           String[]
   notableEvents    String[]
   resources        String[]
@@ -686,7 +687,7 @@ model LocationGlossary {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   tags             String[]
-  type             String?
+  locationType             String?
   region           String?
   currentOccupants String[]
   nearbyFeatures   Json?
@@ -712,11 +713,11 @@ model PersonGlossary {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   tags          String[]
-  occupation    String[]
-  title         String[]
+  occupations    String[]
+  titles         String[]
   traits        String[]
-  faction       String[]
-  location      String[]
+  factions       String[]
+  locations      String[]
   relationships Json
   notoriety     String
 
@@ -740,8 +741,8 @@ model FactionGlossary {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   tags           String[]
-  leader         String[]
-  homeBase       String[]
+  leaders         String[]
+  homeBases       String[]
   relationships  Json
   allies         String[]
   enemies        String[]
@@ -802,8 +803,9 @@ model ContinentGlossary {
   regions          String[]
   locations        String[]
   resources        String[]
+  landmarks        String[]
   population       Json
-  climate          ClimateTypes[]
+  climates          ClimateTypes[]
   terrain          TerrainTypes[]
   eventLog         String[]
 
@@ -825,12 +827,12 @@ model DomainGlossary {
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  continent     String[]
+  continents     String[]
   regions       String[]
-  capital       String[]
+  capitals       String[]
   population    Json
   economy       Json
-  culture       Json
+  cultures       Json
   languages     String[]
   persons       String[]
   eventLog      String[]
@@ -838,7 +840,7 @@ model DomainGlossary {
   history       String[]
   relationships Json
   locations     String[]
-  geography     String[]
+  landmarks     String[]
 
       @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])
@@ -857,8 +859,8 @@ model SettlementGlossary {
   collaborators String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  nation         String?
-  region         String?
+  nations         String?
+  regions         String?
   persons        String[]
   eventLog       String[]
   locations      String[]
@@ -886,7 +888,7 @@ model EventGlossary {
   significance   String?
   gameDate       String?
   frequency      String?
-  location       String[]
+  locations       String[]     //includes more than just the location model
   relatedEntries String[]
   tags           String[]
 
@@ -908,8 +910,8 @@ model LandmarkGlossary {
   collaborators String[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  region      String[]
-  climate     ClimateTypes?
+  regions      String[]
+  climates     ClimateTypes?
   terrain     TerrainTypes?
   type        GeographicTypes
   eventLog    String[]

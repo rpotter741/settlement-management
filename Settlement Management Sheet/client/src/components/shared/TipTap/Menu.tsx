@@ -25,6 +25,7 @@ import {
   Abc,
 } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
 
 const EditorToolbarMenu = () => {
   const theme = useTheme();
@@ -46,12 +47,14 @@ const EditorToolbarMenu = () => {
     editor.chain().focus().toggleMark(type).run();
   };
 
+  const { either, both } = useTabSplit();
+
   return (
     <Box
       sx={{
         display: 'flex',
         justifyContent: 'center',
-        marginBottom: '1rem',
+        // marginBottom: '1rem',
         // boxShadow: 2,
         borderBottom: '1px solid',
         backgroundColor:
@@ -61,15 +64,20 @@ const EditorToolbarMenu = () => {
         position: 'sticky',
         top: 0,
         zIndex: 10,
-        borderRadius: '8px 8px 0 0',
+        // borderRadius: '8px 8px 0 0',
       }}
     >
       <Box
         sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 1,
-          alignItems: 'center',
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(4, 1fr)',
+            sm: 'repeat(6, 1fr)',
+            xl: 'repeat(12, 1fr)',
+          },
+          gridTemplateRows: 'auto',
+          alignItems: 'start',
+          gap: 0.5,
           justifyContent: 'start',
           width: '100%',
           px: 2,

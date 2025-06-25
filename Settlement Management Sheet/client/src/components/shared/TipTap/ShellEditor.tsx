@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import EditorToolbarMenu from './Menu.jsx';
 import { EditorProvider } from '@tiptap/react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { format } from 'timeago.js';
 import { alpha, useTheme } from '@mui/material/styles';
 import { useShellContext } from '@/context/ShellContext.js';
@@ -14,6 +14,7 @@ type EditorProps = {
   setLastSaved?: (value: Record<string, any>) => void;
   minHeight?: string;
   maxHeight?: string;
+  style?: React.CSSProperties;
 };
 
 const debouncedUpdate = debounce((callback, value, text) => {
@@ -29,7 +30,8 @@ const ShellEditor: React.FC<EditorProps> = ({
   lastSaved = null,
   setLastSaved = () => {},
   minHeight = '300px',
-  maxHeight = '100%',
+  maxHeight = '1015px',
+  style = {},
 }) => {
   const theme = useTheme();
   const { update, entry } = useShellContext();
@@ -40,47 +42,34 @@ const ShellEditor: React.FC<EditorProps> = ({
     debouncedSetLastSaved(lastSaved, setLastSaved, keypath);
   };
 
+  console.log('ShellEditor content:', content);
+
   return (
-    <Box>
-      <Box
-        sx={{
-          boxShadow: 2,
-          border: `2px solid ${alpha(theme.palette.divider, 0.05)}`,
-          boxSizing: 'border-box',
-          position: 'relative',
-          minHeight,
-          maxHeight,
-          overflowY: 'auto',
-          borderRadius: 2,
-          minWidth: 300,
+    <Box
+      className="shell-editor"
+      sx={{
+        boxSizing: 'border-box',
+        position: 'relative',
+        minHeight,
+        maxHeight,
+        overflowY: 'scroll',
+        // borderRadius: 2,
+        height: '100%',
+        // minWidth: 300,
+        ...style,
+      }}
+    >
+      <EditorProvider
+        slotBefore={<EditorToolbarMenu />}
+        extensions={tipTapExtensions}
+        content={content}
+        onUpdate={(editor) => {
+          const value = editor.editor.getHTML();
+          const text = editor.editor.getText();
+          setContent(value);
+          handleChange(value, text);
         }}
-      >
-        <EditorProvider
-          slotBefore={<EditorToolbarMenu />}
-          extensions={tipTapExtensions}
-          content={content}
-          onUpdate={(editor) => {
-            const value = editor.editor.getHTML();
-            const text = editor.editor.getText();
-            setContent(value);
-            handleChange(value, text);
-          }}
-        />
-      </Box>
-      {lastSaved && (
-        <Box
-          sx={{
-            fontSize: '0.75rem',
-            textAlign: 'left',
-            pl: 2,
-            position: 'relative',
-            pt: 2,
-            mb: -2,
-          }}
-        >
-          Last Saved: {format(lastSaved)}
-        </Box>
-      )}
+      />
     </Box>
   );
 };

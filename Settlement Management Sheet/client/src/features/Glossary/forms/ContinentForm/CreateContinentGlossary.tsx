@@ -5,6 +5,7 @@ import CreateGlossaryShell from '@/components/shared/CreateShell/CreateGlossaryS
 import { selectEntryById } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
 import EditContinentForm from './EditContinentForm.js';
+import EditGlossaryEntryForm from '../EditGlossaryWithShell.js';
 import PreviewGlossaryWithShell from '../PreviewGlossaryWithShell.js';
 
 interface GeographyFormProps {
@@ -14,19 +15,11 @@ interface GeographyFormProps {
 const ContinentForm: React.FC<GeographyFormProps> = ({ tab }) => {
   const [lastSaved, setLastSaved] = useState<Record<string, any>>({});
   if (!tab.glossaryId || tab.tool !== 'continent') return null;
-  const entry: any = useSelector(selectEntryById(tab.glossaryId, tab.id));
-  console.log(entry, 'entry in GeographyForm');
-
-  const theme = useTheme();
-
-  useEffect(() => {
-    console.log(lastSaved, 'lastSaved in GeographyForm');
-  });
 
   return (
     <CreateGlossaryShell
       tab={tab}
-      editComponent={EditContinentForm}
+      editComponent={EditGlossaryEntryForm}
       editComponentProps={{ lastSaved, setLastSaved }}
       previewComponent={PreviewGlossaryWithShell}
       previewComponentProps={{}}

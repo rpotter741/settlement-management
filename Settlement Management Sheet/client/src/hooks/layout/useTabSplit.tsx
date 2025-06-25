@@ -1,0 +1,25 @@
+import {
+  isSplit,
+  preventSplit,
+  sidePanelOpen,
+} from '@/app/selectors/sidePanelSelectors.js';
+import { useMediaQuery } from '@mui/system';
+import { useSelector } from 'react-redux';
+
+const useTabSplit = () => {
+  const splitTabs = useSelector(isSplit);
+  const noSplit = useSelector(preventSplit);
+  const sidePanelStatus = useSelector(sidePanelOpen);
+  const splitSizePx = sidePanelStatus ? '1750px' : '1450px';
+  const splitSize = useMediaQuery(`(min-width: ${splitSizePx})`);
+  const soloSizePx = sidePanelStatus ? '1200px' : '900px';
+  const soloSize = useMediaQuery(`(max-width: ${soloSizePx})`);
+  const either = splitTabs || soloSize;
+  const both = splitTabs && soloSize;
+
+  console.log(soloSize, 'noSplit in the hook');
+
+  return { splitTabs, noSplit, soloSize, splitSize, either, both };
+};
+
+export default useTabSplit;

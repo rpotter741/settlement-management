@@ -4,6 +4,8 @@ import {
   GlossaryNode,
 } from '../../../../types/index.js';
 
+export type GlossaryEntryArrayKeys = 'regions' | 'climate' | 'type';
+
 export interface GlossaryStateEntry {
   name: string;
   description: string;
@@ -21,6 +23,7 @@ export interface GlossaryStateEntry {
     }
   >;
   entries: Record<string, GlossaryEntry>;
+  options: Record<string, Partial<GlossaryEntry>>;
 }
 
 export interface GlossaryState {

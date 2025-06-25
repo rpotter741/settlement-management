@@ -6,6 +6,7 @@ import {
   IconButton,
   Divider,
   Button,
+  Tooltip,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -23,6 +24,9 @@ interface TitledCollapseProps {
   color?: string;
   styles?: React.CSSProperties;
   boxSx?: Record<string, any>;
+  titleSx?: Record<string, any>;
+  childContainerSx?: Record<string, any>;
+  iconButtonSx?: Record<string, any>;
   [key: string]: any; // Allow additional props
 }
 
@@ -37,22 +41,25 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
   color,
   styles,
   boxSx,
+  titleSx,
+  childContainerSx,
+  iconButtonSx,
   ...props
 }) => {
   return (
-    <Box sx={{ width: '100%', borderRadius: 4, ...boxSx }}>
+    <Box sx={{ width: '100%', borderRadius: 4, ...boxSx, overflowY: 'hidden' }}>
       {/* Title Bar */}
       <Box
-        onClick={toggleOpen}
         sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 11,
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          cursor: 'pointer',
           py: 1,
-          backgroundColor: open ? 'background.default' : 'background.paper',
-          '&:hover': { backgroundColor: 'action.hover' },
+          backgroundColor: 'inherit',
           mt: 2,
           gridColumn: 'span 3',
           ...styles,
@@ -65,22 +72,24 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
           sx={{
             fontWeight: 'bold',
             color: color || 'inherit',
-            ...props.titleSx,
+            ...titleSx,
           }}
         >
           {title}
         </Typography>
-        <IconButton
-          onClick={toggleOpen}
-          size="small"
-          sx={{
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.3s ease',
-            ...props.iconButtonSx,
-          }}
-        >
-          <ExpandMoreIcon />
-        </IconButton>
+        <Tooltip title={open ? 'Collapse' : 'Expand'}>
+          <IconButton
+            onClick={toggleOpen}
+            size="small"
+            sx={{
+              transform: open ? 'rotate(360deg)' : 'rotate(270deg)',
+              transition: 'transform 0.3s ease',
+              ...iconButtonSx,
+            }}
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Divider sx={{ gridColumn: 'span 3' }} />
       {/* Collapsible Content */}
@@ -90,7 +99,16 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
             Delete
           </Button>
         )}
-        <Box sx={{ height: '100%' }}>{children}</Box>
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            ...childContainerSx,
+          }}
+        >
+          {children}
+        </Box>
       </Collapse>
     </Box>
   );

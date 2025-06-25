@@ -43,7 +43,7 @@ const Editor: React.FC<EditorProps> = ({
           maxHeight,
           overflowY: 'auto',
           borderRadius: 2,
-          minWidth: 300,
+          // minWidth: 300,
         }}
       >
         <EditorProvider

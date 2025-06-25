@@ -35,6 +35,7 @@ const glossarySlice = createSlice({
         structure: [],
         renderState: {},
         entries: {},
+        options: {},
       };
     },
     setGlossaryLoading: (
@@ -285,6 +286,23 @@ const glossarySlice = createSlice({
             }
           });
         }
+      }
+    },
+    addOptionsForEntry: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        entryId: string;
+        options: Partial<GlossaryEntry>;
+      }>
+    ) => {
+      const { glossaryId, entryId, options } = action.payload;
+      const glossary = state.glossaries[glossaryId];
+      if (glossary) {
+        if (!glossary.options[entryId]) {
+          glossary.options[entryId] = {};
+        }
+        Object.assign(glossary.options[entryId], options);
       }
     },
   },

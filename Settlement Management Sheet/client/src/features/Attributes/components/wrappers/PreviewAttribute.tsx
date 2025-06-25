@@ -24,7 +24,6 @@ const PreviewAttribute = () => {
         justifyContent: 'center',
         mt: 2,
         gap: 2,
-        backgroundColor: 'background.paper',
         width: '100%',
         position: 'relative',
         // height: '100%',

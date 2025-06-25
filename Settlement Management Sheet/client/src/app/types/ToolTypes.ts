@@ -1,5 +1,5 @@
 import { GlossaryEntryType } from 'types/glossaryEntry.js';
-import { TabTools } from './SidePanelTypes.js';
+import { TabTools, TabType } from './SidePanelTypes.js';
 
 // types.ts
 export interface ToolData {
@@ -78,8 +78,6 @@ export interface DeleteByIdPayload {
   tool: ToolName;
   id: string;
 }
-
-export type TabType = 'tool' | 'glossary' | 'other';
 
 export interface TabDataPayload {
   name: string;

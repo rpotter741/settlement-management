@@ -461,6 +461,7 @@ const thunks = {
   updateEntry,
   updateGlossaryThunk,
   addAndActivateGlossary,
+  getGlossaryEntryById,
 };
 
 export default thunks;

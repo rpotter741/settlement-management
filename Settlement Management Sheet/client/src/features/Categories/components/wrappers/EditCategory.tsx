@@ -30,7 +30,6 @@ const EditCategory = () => {
         justifyContent: 'center',
         my: 2,
         gap: 2,
-        backgroundColor: 'background.paper',
         width: '100%',
         position: 'relative',
         pb: 2,

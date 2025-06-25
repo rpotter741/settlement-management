@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
-import { GlossaryNode } from '../../../../types/index.js';
+import { GlossaryEntry, GlossaryNode } from '../../../../types/index.js';
 
 const base = (state: RootState): GlossaryState => state.glossary;
 
@@ -36,7 +36,7 @@ export const selectEntryById = (glossaryId: string, entryId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId]?.entries[entryId] || {}
+      glossaryState.glossaries[glossaryId]?.entries[entryId] || null
   );
 
 export const glossaryRenderState = (glossaryId: string | null) =>
@@ -81,6 +81,19 @@ export const selectSnackbar = () =>
     (glossaryState: GlossaryState) => glossaryState.snackbar || null
   );
 
+export const selectKeypathOptions = (
+  glossaryId: string,
+  entryId: string,
+  keypath: keyof GlossaryEntry
+) =>
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const glossary = glossaryState.glossaries[glossaryId];
+    if (!glossary) return null;
+    const options = glossary.options[entryId];
+    if (!options) return null;
+    return options[keypath] || null;
+  });
+
 export const selectors = {
   selectAllGlossaries,
   selectGlossaryById,
@@ -92,4 +105,5 @@ export const selectors = {
   selectGlossaryNodes,
   selectActiveId,
   selectSnackbar,
+  selectKeypathOptions,
 };

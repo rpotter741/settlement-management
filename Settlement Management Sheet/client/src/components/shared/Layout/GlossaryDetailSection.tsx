@@ -12,6 +12,29 @@ interface GlossaryDetailSectionProps {
   keypathArray: string[];
 }
 
+const keypathToHeader: Record<string, string> = {
+  nations: 'Nations',
+  regions: 'Regions',
+  locations: 'Locations',
+  resources: 'Resources',
+  population: 'Population',
+  climate: 'Climate',
+  terrain: 'Terrain',
+  capital: 'Capital',
+  languages: 'Languages',
+  persons: 'Persons',
+  eventLog: 'Event Log',
+  geography: 'Geography',
+  type: 'Type',
+  region: 'Regions',
+  landmark: 'Landmark',
+  settlement: 'Settlement',
+  faction: 'Faction',
+  person: 'Person',
+  event: 'Event',
+  note: 'Note',
+};
+
 const GlossaryDetailSection: React.FC<GlossaryDetailSectionProps> = ({
   keypathArray,
 }) => {
@@ -63,7 +86,11 @@ const GlossaryDetailSection: React.FC<GlossaryDetailSectionProps> = ({
         })}
       </Box>
       {keypathArray.map((keypath) => (
-        <GlossaryDetail key={keypath} keypath={keypath} />
+        <GlossaryDetail
+          key={keypath}
+          keypath={keypath}
+          header={keypathToHeader[keypath]}
+        />
       ))}
     </Box>
   );

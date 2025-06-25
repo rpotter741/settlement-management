@@ -15,9 +15,23 @@ import CategoryIcon from '@mui/icons-material/Category';
 import KitIcon from '@mui/icons-material/HomeRepairService';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import TerrainIcon from '@mui/icons-material/Terrain';
-import { AccountBalance, Book, MenuBook, Public } from '@mui/icons-material';
+import {
+  AccountBalance,
+  Book,
+  CalendarMonth,
+  Description,
+  Flag,
+  Groups,
+  Map,
+  MenuBook,
+  Person,
+  Public,
+  Room,
+  WbShade,
+} from '@mui/icons-material';
+import { TabTools, TabType } from '@/app/types/SidePanelTypes.js';
 
-export const tabMap = {
+const toolTabMap = {
   apt: {
     component: null,
     icon: ProgressIcon,
@@ -118,17 +132,9 @@ export const tabMap = {
     headerName: 'Upgrade',
     validationFields: ['name', 'description', 'icon'],
   },
-  landmark: {
-    component: lazy(
-      () =>
-        import(
-          '../features/Glossary/forms/LandmarkForm/CreateLandmarkGlossary.js'
-        )
-    ),
-    icon: TerrainIcon,
-    headerName: 'Landmark',
-    validationFields: [],
-  },
+};
+
+const glossaryTabMap = {
   continent: {
     component: lazy(
       () =>
@@ -140,6 +146,17 @@ export const tabMap = {
     headerName: 'Continent',
     validationFields: [],
   },
+  territory: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/TerritoryForm/CreateTerritoryGlossary.js'
+        )
+    ),
+    icon: Map,
+    headerName: 'Territory',
+    validationFields: [],
+  },
   domain: {
     component: lazy(
       () =>
@@ -149,6 +166,87 @@ export const tabMap = {
     headerName: 'Domain',
     validationFields: [],
   },
+  province: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/ProvinceForm/CreateProvinceGlossary.js'
+        )
+    ),
+    icon: Flag,
+    headerName: 'Province',
+    validationFields: [],
+  },
+  landmark: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/LandmarkForm/CreateLandmarkGlossary.js'
+        )
+    ),
+    icon: TerrainIcon,
+    headerName: 'Landmark',
+    validationFields: [],
+  },
+  settlement: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/SettlementForm/CreateSettlementGlossary.js'
+        )
+    ),
+    icon: WbShade,
+    headerName: 'Settlement',
+    validationFields: [],
+  },
+  faction: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/FactionForm/CreateFactionGlossary.js'
+        )
+    ),
+    icon: Groups,
+    headerName: 'Faction',
+    validationFields: [],
+  },
+  person: {
+    component: lazy(
+      () =>
+        import('../features/Glossary/forms/PersonForm/CreatePersonGlossary.js')
+    ),
+    icon: Person,
+    headerName: 'Person',
+    validationFields: [],
+  },
+  note: {
+    component: lazy(
+      () => import('../features/Glossary/forms/NoteForm/CreateNoteGlossary.js')
+    ),
+    icon: Description,
+    headerName: 'Note',
+    validationFields: [],
+  },
+  event: {
+    component: lazy(
+      () =>
+        import('../features/Glossary/forms/EventForm/CreateEventGlossary.js')
+    ),
+    icon: CalendarMonth,
+    headerName: 'Event',
+    validationFields: [],
+  },
+  location: {
+    component: lazy(
+      () =>
+        import(
+          '../features/Glossary/forms/LocationForm/CreateLocationGlossary.js'
+        )
+    ),
+    icon: Room,
+    headerName: 'Location',
+    validationFields: [],
+  },
   editGlossary: {
     component: lazy(() => import('../features/Glossary/EditGlossary.js')),
     icon: MenuBook,
@@ -156,3 +254,11 @@ export const tabMap = {
     validationFields: [],
   },
 };
+
+export const tabMap: Record<TabType, Partial<Record<TabTools, any>>> = {
+  tool: toolTabMap,
+  glossary: glossaryTabMap,
+  other: {},
+};
+
+export default tabMap;

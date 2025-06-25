@@ -207,7 +207,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
       e.preventDefault();
       clickTimeout.current = setTimeout(() => {
         singleClick(e, data.id, idToIndex[data.id]);
-      }, 150);
+      }, 200);
     };
 
     const handleDoubleClick = (e: MouseEvent) => {

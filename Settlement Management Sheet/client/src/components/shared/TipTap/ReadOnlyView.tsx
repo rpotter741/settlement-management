@@ -15,7 +15,6 @@ const ReadOnlyView = ({ content }: { content: JSON }) => {
         maxHeight: 'calc(100vh - 200px)',
         overflowY: 'auto',
         borderRadius: 2,
-        boxShadow: 2,
       }}
     >
       <EditorContent editor={editor} />
