@@ -103,6 +103,7 @@ const ValidationChecklist: React.FC<ValidationChecklistProps> = ({
 
   return (
     <Box
+      id={`validation-checklist-${tool}-${props.id}`}
       sx={{
         position: 'absolute',
         top: 0,

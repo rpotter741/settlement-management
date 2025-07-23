@@ -5,7 +5,6 @@ import { Tab } from '@/app/types/SidePanelTypes.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import { setActiveTab } from '@/app/slice/sidePanelSlice.js';
-import { set } from 'lodash';
 import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
 import { useSelector } from 'react-redux';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
@@ -24,8 +23,6 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
 
     const activeTab = useSelector(focusedTab);
 
-    const { both, soloSize } = useTabSplit();
-
     useEffect(() => {
       dispatch(setActiveTab({ tab }));
     }, [tab.side, tab.tabId, dispatch]);
@@ -37,10 +34,12 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         aria-labelledby={`tab-${tab.tabId}`}
         sx={{
           height: '100%',
+          maxHeight: 'calc(100vh - 48px)',
           width: '100%',
           pt: tab.disableMenu ? 4 : 0,
           backgroundColor:
-            tab.mode !== 'edit' ? 'background.paper' : 'background.default',
+            tab.mode !== 'edit' ? 'background.default' : 'background.paper',
+          transition: 'background-color 0.3s ease',
         }}
         onClick={() => {
           if (activeTab?.tabId !== tab.tabId) {
@@ -49,7 +48,12 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         }}
       >
         {!tab.disableMenu && <FileMenu tab={tab} />}
-        <Box sx={{ display: 'flex', height: '100%' }}>{children}</Box>
+        <Box
+          id={`tab-panel-child-box-${tab.tabId}`}
+          sx={{ display: 'flex', height: '100%' }}
+        >
+          {children}
+        </Box>
       </Box>
     );
   }

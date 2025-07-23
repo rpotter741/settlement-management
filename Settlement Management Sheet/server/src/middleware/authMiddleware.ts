@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 
 export const verifyAuth = (req, res, next) => {
+  const publicPaths = ['/login', '/signup', '/health'];
+  if (publicPaths.includes(req.path)) return next();
   if (process.env.NODE_ENV === 'development') {
     // Skip authentication in development
-    req.user = { id: 'dev-user', role: 'admin' }; // Mock user object
+    console.log('Skipping authentication in development mode');
+    req.user = { id: 'robbiepottsdm', role: 'admin' }; // Mock user object
     return next();
   }
   // Get token from the request headers

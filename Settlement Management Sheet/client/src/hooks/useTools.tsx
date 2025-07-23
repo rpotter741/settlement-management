@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { validateField, validateTool } from '../app/slice/validationSlice.js';
 import api from '../services/interceptor.js';
-import { updateById, saveTool } from '@/app/slice/toolSlice.js';
+import { saveTool } from '@/app/slice/toolSlice.js';
 import { toolSelectors as select } from '@/app/selectors/toolSelectors.js';
 import { loadTool, updateDirtyTool } from '../app/thunks/toolThunks.js';
 import { AppDispatch } from '../app/store.js';
@@ -136,7 +136,7 @@ export const useServer = (tool: ToolName) => {
       }
     },
     delete: async (data: Tool) => {
-      const { refId, id } = data;
+      const { refId } = data;
       try {
         return await api.post('/tools/${tool}/delete', { refId, tool });
       } catch (error: any) {

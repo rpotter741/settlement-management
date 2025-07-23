@@ -23,12 +23,14 @@ import {
   Info as InfoIcon,
   AutoStories,
   Delete,
+  SolarPower,
 } from '@mui/icons-material';
 
-import toSnakeCase from 'utility/snakeCase.js';
+import toSnakeCase from '@/utility/inputs/snakeCase.js';
+import limitXDecimals from '@/utility/style/limitXDecimals.js';
 
-const debouncedUpdate = debounce((callback, value, meta) => {
-  callback(value, meta);
+const debouncedUpdate = debounce((callback, value, error, keypath) => {
+  callback(value, error, keypath);
 }, 500);
 
 interface ToolInputProps {
@@ -44,10 +46,14 @@ interface ToolInputProps {
     validateFn?: (value: any) => string | null;
     keypath: string;
   };
+  dynamicLabel?: string;
   shrink?: boolean;
+  disabled?: boolean;
   onBlur?: () => void;
   onMoreDetails?: () => void;
   onRemove?: () => void;
+  decimals?: number;
+  allowZero?: boolean;
 }
 
 export interface ToolInputConfig {
@@ -65,10 +71,14 @@ const ToolInput: React.FC<ToolInputProps> = ({
   debounced = false,
   multiline = false,
   inputConfig,
+  disabled = false,
   shrink = true,
   onBlur = () => {},
   onMoreDetails,
   onRemove,
+  dynamicLabel,
+  decimals = 2,
+  allowZero = true,
 }) => {
   const { tool, id } = useContext(ShellContext);
   const { selectEditValue, updateTool, validateToolField, selectErrorValue } =
@@ -82,7 +92,7 @@ const ToolInput: React.FC<ToolInputProps> = ({
   const [value, setValue] = useState<string | number>(val ?? '');
 
   useEffect(() => {
-    if (touched && !error) {
+    if (touched && !!!error) {
       setInvalid(false);
     } else if (touched && error) {
       setInvalid(true);
@@ -91,38 +101,50 @@ const ToolInput: React.FC<ToolInputProps> = ({
 
   const processChange = useCallback(
     (e: any) => {
+      console.log(e.target.value);
       if (type === 'number') {
-        const value = Number(e.target.value);
-        updateTool(keypath, value);
+        const normalizedValue = limitXDecimals(e.target.value, decimals);
+        let value = allowZero ? normalizedValue : Math.max(1, normalizedValue);
+        e.target.value = value; // Update the input value to the normalized one
         setValue(value);
         const error = validateFn?.(value) || null;
-        validateToolField(keypath, error);
+        return { value: Number(value), error };
       } else {
         const value = snakeCase ? toSnakeCase(e.target.value) : e.target.value;
         e.target.value = value;
-        updateTool(keypath, value);
         setValue(value);
         const error = validateFn?.(value) || null;
-        validateToolField(keypath, error);
+        return { value, error };
       }
     },
     [keypath, type, snakeCase, updateTool, validateFn, validateToolField]
   );
 
-  const handleChange = useMemo(() => {
-    return debounced
-      ? (e: any) => {
-          debouncedUpdate(processChange, e, { keypath });
-        }
-      : (e: any) => {
-          processChange(e);
-        };
-  }, [debounced, processChange, keypath]);
+  const sendChangeUpstream = useCallback(
+    (value: any, newError: any) => {
+      updateTool(keypath, value);
+      validateToolField(keypath, newError);
+    },
+    [keypath]
+  );
+
+  const handleChange = useCallback(
+    (e: any) => {
+      const { value, error } = processChange(e);
+      if (debounced) {
+        debouncedUpdate(sendChangeUpstream, value, error, { keypath });
+      } else {
+        sendChangeUpstream(value, error);
+      }
+    },
+    [debounced, processChange, keypath]
+  );
 
   return (
     <Box sx={{ ...style }}>
       <TextField
-        label={label}
+        disabled={disabled}
+        label={dynamicLabel || label}
         multiline={multiline}
         type={type}
         value={value}
@@ -148,21 +170,21 @@ const ToolInput: React.FC<ToolInputProps> = ({
               borderColor: !error
                 ? 'success.main'
                 : invalid
-                  ? 'error.main'
+                  ? 'warning.main'
                   : 'secondary.main',
             },
             '&:hover fieldset': {
               borderColor: !error
                 ? 'success.main'
                 : invalid || error
-                  ? 'error.main'
+                  ? 'warning.main'
                   : '',
             },
             '&.Mui-focused fieldset': {
               borderColor: !error
                 ? 'success.main'
                 : invalid || error
-                  ? 'error.main'
+                  ? 'warning.main'
                   : '',
             },
           },
@@ -177,9 +199,9 @@ const ToolInput: React.FC<ToolInputProps> = ({
                 ? 'success.main'
                 : !invalid
                   ? 'success.main'
-                  : 'error.main',
+                  : 'warning.main',
               '&.Mui-focused': {
-                color: !invalid ? 'success.main' : 'error.main',
+                color: !invalid ? 'success.main' : 'warning.main',
               },
             },
           },
@@ -204,14 +226,12 @@ const ToolInput: React.FC<ToolInputProps> = ({
                     <IconButton>
                       <WarningIcon
                         fontSize="small"
-                        sx={{ color: 'error.main' }}
+                        sx={{ color: 'warning.main' }}
                       />
                     </IconButton>
                   </Tooltip>
-                ) : (
-                  <Box sx={{ width: '36px' }} />
-                )}
-                {tooltip && (
+                ) : null}
+                {tooltip && !disabled && (
                   <Tooltip
                     title={
                       <>
@@ -244,7 +264,10 @@ const ToolInput: React.FC<ToolInputProps> = ({
                 )}
                 {onRemove && (
                   <Tooltip title={`Remove ${label}`} arrow>
-                    <IconButton onClick={onRemove} sx={{ color: 'error.main' }}>
+                    <IconButton
+                      onClick={onRemove}
+                      sx={{ color: 'warning.main' }}
+                    >
                       <Delete fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -256,8 +279,8 @@ const ToolInput: React.FC<ToolInputProps> = ({
             sx: {
               position: 'absolute',
               bottom: '-20px',
-              fontSize: '12px', // Optional: Adjust font size
-              color: invalid ? 'error.main' : 'transparent',
+              fontSize: '10px', // Optional: Adjust font size
+              color: invalid ? 'warning.main' : 'transparent',
               display: {
                 xs: 'none',
                 xl: 'block',

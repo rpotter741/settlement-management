@@ -15,7 +15,7 @@ import { useDebounce } from 'hooks/useDebounce.jsx';
 import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import api from 'services/interceptor.js';
-import toSnakeCase from 'utility/snakeCase.js';
+import toSnakeCase from '@/utility/inputs/snakeCase.js';
 
 import { loadTool } from 'app/toolThunks.js';
 

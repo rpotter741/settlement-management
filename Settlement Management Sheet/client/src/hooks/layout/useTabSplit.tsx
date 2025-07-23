@@ -17,8 +17,6 @@ const useTabSplit = () => {
   const either = splitTabs || soloSize;
   const both = splitTabs && soloSize;
 
-  console.log(soloSize, 'noSplit in the hook');
-
   return { splitTabs, noSplit, soloSize, splitSize, either, both };
 };
 

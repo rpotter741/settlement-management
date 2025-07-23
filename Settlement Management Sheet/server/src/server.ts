@@ -8,6 +8,7 @@ import requestLogger from './middleware/requestLogger.ts';
 import toolRouter from './routes/toolRoutes.ts';
 import glossaryRouter from './routes/glossaryRoutes.ts';
 import prisma from './db/db.ts';
+import { verifyAuth } from './middleware/authMiddleware.ts';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(cors());
 app.use(express.json()); // Parse JSON payloads
 app.use(cookieParser()); // Parse cookies g
 app.use(requestLogger); // Log requests
+app.use(verifyAuth);
 // serve static files
 app.use(express.static(path.resolve(__dirname, '../public')));
 

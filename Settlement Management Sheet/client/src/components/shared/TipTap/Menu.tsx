@@ -73,7 +73,7 @@ const EditorToolbarMenu = () => {
           gridTemplateColumns: {
             xs: 'repeat(4, 1fr)',
             sm: 'repeat(6, 1fr)',
-            xl: 'repeat(12, 1fr)',
+            md: 'repeat(12, 1fr)',
           },
           gridTemplateRows: 'auto',
           alignItems: 'start',

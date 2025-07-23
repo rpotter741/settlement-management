@@ -1,16 +1,11 @@
 import React, { useEffect, useState, lazy, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { v4 as newId } from 'uuid';
 import {
   Box,
   Typography,
   TextField,
   Autocomplete,
-  InputAdornment,
   IconButton,
-  Button,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import {
   Settings as SettingsIcon,
@@ -27,22 +22,16 @@ import {
   selectActiveId,
   selectAllGlossaries,
   selectGlossaryStructure,
-  selectGlossaryNodes,
   selectSnackbar,
 } from '../../app/selectors/glossarySelectors.js';
 import { SnackbarType } from '@/app/types/SnackbarTypes.js';
-import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import thunks from '../../app/thunks/glossaryThunks.js';
-import { thunk } from 'redux-thunk';
 import { AppDispatch } from '@/app/store.js';
-import { set } from 'lodash';
 import { setActiveGlossaryId } from '../../app/slice/glossarySlice.js';
 import { GlossaryDragProvider } from '@/context/DnD/GlossaryDragContext.js';
-import actions from '@/services/glossaryServices.js';
 import { useSidePanel } from '@/hooks/useSidePanel.js';
 import { useModalActions } from '@/hooks/useModal.js';
-
-const nameNewGlossary = lazy(() => import('./NameNewGlossary.js'));
+import useSharedHooks from '@/hooks/useSharedHooks.js';
 
 interface GlossarySidePanelProps {}
 
@@ -70,8 +59,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   const { addNewTab } = useSidePanel();
 
   const snackbarMessage = useSelector(selectSnackbar());
-
-  const [options, setOptions] = useState<any[]>([]);
+  const { utils } = useSharedHooks();
 
   useEffect(() => {
     dispatch(thunks.getGlossaries());
@@ -102,7 +90,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
 
   useEffect(() => {
     if (glossaryId !== null) {
-      dispatch(thunks.getGlossaryNodes({ glossaryId }));
+      dispatch(thunks.getNodes({ glossaryId }));
     }
   }, [glossaryId]);
 
@@ -135,7 +123,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
         rollback?: any;
         rollbackFn?: ((rollback: any) => void) | (() => void);
       } = snackbarMessage;
-      dispatch(showSnackbar({ message, type, duration }));
+      utils.snackbar({ message, type, duration });
     }
   }, [snackbarMessage]);
 
@@ -146,20 +134,11 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
     setGlossary(gloss);
   };
 
-  const handleCreateGlossary = () => {
-    const entry = {
-      componentKey: 'NameNewGlossary',
-      props: {},
-      id: 'name-new-glossary',
-    };
-    showModal({ entry });
-  };
-
   const handleAddFolder = ({
     id,
     name,
     parentId,
-    entryType = null,
+    entryType,
   }: {
     id: string;
     name: string;
@@ -170,7 +149,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
     const node: GlossaryNode = {
       id,
       name,
-      type: 'folder',
+      fileType: 'section',
       parentId,
       glossaryId,
       entryType: entryType,
@@ -196,7 +175,9 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
     if (node === null) return;
     if (glossaryId === null) return;
     dispatch(
-      thunks.updateEntry({ node, glossaryId, content: { name: node.name } })
+      thunks.renameNodeAndEntry({
+        node,
+      })
     );
   };
 
@@ -215,7 +196,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
       id,
       name: 'Untitled',
       entryType,
-      type: 'file',
+      fileType: 'detail',
       parentId,
       glossaryId,
     };
@@ -226,11 +207,11 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
     if (glossary === null || glossaryId === null) return;
     addNewTab({
       name: glossary?.name,
+      glossaryId,
       id: glossaryId,
       mode: 'edit',
+      tabType: 'glossary',
       tool: 'editGlossary',
-      tabId: newId(),
-      scroll: 0,
       preventSplit: false,
       activate: true,
       side: 'left',
@@ -306,7 +287,6 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
           onDelete={handleDelete}
           onNewFile={handleAddEntry}
           onNewFolder={handleAddFolder}
-          handleCreateGlossary={handleCreateGlossary}
         />
       </GlossaryDragProvider>
     </Box>

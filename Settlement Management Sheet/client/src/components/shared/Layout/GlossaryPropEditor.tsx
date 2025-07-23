@@ -55,7 +55,7 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
           (v: string) => v.toLowerCase() === option.toLowerCase()
         );
       }
-      return entry[keypath].toLowerCase() !== option.toLowerCase();
+      return (entry[keypath] as string).toLowerCase() !== option.toLowerCase();
     });
     if (!alphabetizeOptions) {
       return freshOptions.map((option: string) => capitalize(option));
@@ -65,18 +65,26 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
 
   const displayList = useMemo(() => {
     if (!entry[keypath]) return [];
+    const items = Array.isArray(entry[keypath])
+      ? (entry[keypath] as string[])
+      : [entry[keypath] as string];
     return [
       primary,
-      ...entry[keypath].filter(
-        (item: string) => item.toLowerCase() !== primary
-      ),
+      ...items.filter((item: string) => item.toLowerCase() !== primary),
     ];
   }, [entry, keypath, primary]);
 
   const handleChange = (newValue: string | string[]) => {
     if (multiple) {
       const content = {
-        [keypath]: [...entry[keypath], newValue].flat(),
+        [keypath]: [
+          ...(Array.isArray(entry[keypath])
+            ? entry[keypath]
+            : entry[keypath]
+              ? [entry[keypath]]
+              : []),
+          newValue,
+        ].flat(),
       };
       updateGlossaryEntry(content);
       multiple && inputRef.current?.focus();
@@ -90,7 +98,13 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
   };
 
   const handleRemove = (option: string) => {
-    const updatedOptions = entry[keypath].filter(
+    let values: string[] = [];
+    if (Array.isArray(entry[keypath])) {
+      values = entry[keypath] as string[];
+    } else if (typeof entry[keypath] === 'string') {
+      values = [entry[keypath] as string];
+    }
+    const updatedOptions = values.filter(
       (item: string) => item.toLowerCase() !== option.toLowerCase()
     );
     updateGlossaryEntry({ [keypath]: updatedOptions });
@@ -214,7 +228,7 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
             }}
           >
             {entry[keypath]
-              ? `Selected: ${capitalize(entry[keypath])}`
+              ? `Selected: ${capitalize(entry[keypath] as string)}`
               : `No ${keypath} selected`}
           </Box>
         )}

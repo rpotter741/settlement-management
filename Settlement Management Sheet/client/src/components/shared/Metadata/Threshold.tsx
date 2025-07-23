@@ -53,6 +53,7 @@ const Threshold: React.FC<ThresholdProps> = ({
           keypath: `thresholds.data.${id}.name`,
         }}
         style={{ width: '100%' }}
+        debounced={true}
       />
       <ToolInput
         inputConfig={{
@@ -61,6 +62,7 @@ const Threshold: React.FC<ThresholdProps> = ({
         }}
         style={{ width: '66%' }}
         onBlur={handleBlur}
+        debounced={true}
       />
       {handleRemove !== null && (
         <Tooltip title="Remove threshold">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { Box, Typography } from '@mui/material';
 import ValidationChecklist from '@/components/shared/ValidationChecklist/ValidationChecklist.jsx';
@@ -21,7 +21,7 @@ import { ToolName } from '@/app/types/ToolTypes.js';
 import { validateTool } from '@/app/slice/validationSlice.js';
 import { cancelToolEdit } from '@/app/thunks/toolThunks.js';
 import { AppDispatch } from '@/app/store.js';
-import PageBox from '../Layout/PageBox.js';
+import PageBox from '../Layout/PageBox/PageBox.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
 import { useModalActions } from '@/hooks/useModal.js';
 import { useMediaQuery } from '@mui/system';
@@ -29,6 +29,7 @@ import { size, split } from 'lodash';
 import { useSelector } from 'react-redux';
 import { isSplit } from '@/app/selectors/sidePanelSelectors.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
+import useSharedHooks from '@/hooks/useSharedHooks.js';
 
 interface CreateShellProps {
   tab: Tab;
@@ -42,6 +43,8 @@ interface CreateShellProps {
   innerStyle?: React.CSSProperties;
 }
 
+const fullWidthTools = ['event', 'apt', 'storyThread'];
+
 const CreateShell: React.FC<CreateShellProps> = ({
   tab,
   initializeTool,
@@ -51,14 +54,10 @@ const CreateShell: React.FC<CreateShellProps> = ({
   checklistContent,
   editComponentProps = {},
   previewComponentProps = {},
-  innerStyle = {},
 }) => {
   const { showModal, closeModal } = useModalActions();
   const { tool, side, id, mode, tabId } = tab;
-  const { current, edit, allIds, saveToolEdit, errors } = useTools(
-    tool as ToolName,
-    id
-  );
+  const { current, edit, errors } = useTools(tool as ToolName, id);
 
   const { errorCount } = useInitializeTool({
     tool: tool as ToolName,
@@ -80,11 +79,21 @@ const CreateShell: React.FC<CreateShellProps> = ({
   if (current !== null) {
     return (
       <ShellContext.Provider
-        value={{ tool, id, mode, side, showModal, closeModal }}
+        value={{
+          tool,
+          id,
+          tabId,
+          mode,
+          side,
+          showModal,
+          closeModal,
+          tab,
+        }}
       >
         <PageBox
+          mode={mode}
           variant={
-            tool === 'event'
+            fullWidthTools.includes(tool)
               ? 'fullWidth'
               : !splitTabs
                 ? soloSize
@@ -95,34 +104,8 @@ const CreateShell: React.FC<CreateShellProps> = ({
                   : 'blend'
           }
           tabType="tool"
+          minWidth={300}
         >
-          {errorCount !== undefined && errors && current && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                right: 20,
-                height: 'auto',
-                backgroundColor: 'background.paper',
-                boxShadow: 4,
-                borderRadius: 4,
-                transition: 'transform 0.4s ease-in-out',
-                zIndex: 1000,
-              }}
-            >
-              <ValidationChecklist
-                errorCount={errorCount}
-                defaultExpand={
-                  tab.tabExpansionState?.validationChecklist ?? false
-                }
-                checklistContent={checklistContent}
-                errors={errors}
-                tool={tool}
-                side={side}
-                tabId={tabId}
-              />
-            </Box>
-          )}
           {mode === 'edit'
             ? React.createElement(editComponent, {
                 ...editComponentProps,

@@ -4,7 +4,7 @@ import { Box, Typography, Button, Tooltip, TextField } from '@mui/material';
 import { useModalActions } from '@/hooks/useModal.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { deleteGlossary } from '@/services/glossaryServices.js';
+import actions from '@/services/glossaryServices.js';
 import { removeTab } from '@/app/slice/sidePanelSlice.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
 import {
@@ -31,7 +31,6 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
   const [confirm, setConfirm] = useState<string>('');
 
   const onDelete = () => {
-    deleteGlossary({ id: glossary.id });
     dispatch(
       removeTab({
         tabId: tab.tabId,
@@ -39,6 +38,7 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
         preventSplit: false,
       })
     );
+    actions.deleteGlossary({ id: glossary.id });
     dispatch(removeGlossary({ glossaryId: glossary.id }));
   };
 

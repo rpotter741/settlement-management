@@ -52,7 +52,7 @@ import {
 } from '../../app/selectors/glossarySelectors.js';
 import { toggleExpand, toggleNameEdit } from '../../app/slice/glossarySlice.js';
 import { AppDispatch } from '@/app/store.js';
-import capitalize from '../../utility/capitalize.js';
+import capitalize from '../../utility/inputs/capitalize.js';
 import flattenVisibleNodes from '../Selection/helpers/flattenVisibleNodes.js';
 import {
   entryTypeIcons,
@@ -65,6 +65,7 @@ import { GlossaryDirectoryProps } from '@/app/types/GlossaryTypes.js';
 import { find, set } from 'lodash';
 import { removeTab } from '@/app/slice/sidePanelSlice.js';
 import { findAndDeleteTab } from '@/app/thunks/sidePanelThunks.js';
+import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
@@ -73,7 +74,6 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   onDelete,
   onNewFile,
   onNewFolder,
-  handleCreateGlossary,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -249,6 +249,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
     return (
       <Box
+        className="glossary-node-item"
         sx={{
           pl: 2,
           ml: offset * 2,
@@ -256,7 +257,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           cursor: 'pointer',
           gridTemplateColumns: '24px 24px auto',
           alignItems: 'center',
-          minHeight: '32px',
+          minHeight: '36px',
           '&:hover': {
             backgroundColor: softHighlight,
           },
@@ -272,13 +273,13 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           handleContextMenu(e, data);
         }}
       >
-        {data.type === 'folder' && (
+        {data.fileType === 'section' && (
           <IconButton onClick={toggle} size="small" sx={{ zIndex: 3 }}>
             {open ? <ExpandMoreIcon /> : <ChevronRightIcon />}
           </IconButton>
         )}
-        {data.type === 'file' && <Box sx={{ width: '24px' }} />}
-        {data.type === 'folder' &&
+        {data.fileType === 'detail' && <Box sx={{ width: '24px' }} />}
+        {data.fileType === 'section' &&
         !folderTypes.includes(data.entryType as string) ? (
           <FolderIcon sx={{ color: 'primary.main' }} />
         ) : data.entryType !== null ? (
@@ -345,7 +346,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
       'faction',
       ...fileTypes,
     ],
-    region: [
+    territory: [
       'domain',
       'province',
       'landmark',
@@ -362,17 +363,13 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
   return (
     <Box>
-      <ButtonGroup variant="text">
-        <Tooltip title={<Typography>Create New Glossary</Typography>}>
-          <IconButton onClick={handleCreateGlossary}>
-            <AddToPhotos />
-          </IconButton>
-        </Tooltip>
+      <ButtonGroup variant="text" sx={{ mb: 0.33 }}>
         <Tooltip title={<Typography>Add New Section</Typography>}>
           <span>
             <IconButton
               disabled={!glossaryId}
               onClick={(e) => setFolderAnchor(e.currentTarget)}
+              size="small"
             >
               <CreateNewFolder />
             </IconButton>
@@ -383,13 +380,14 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
             <IconButton
               disabled={!glossaryId}
               onClick={(e) => setSubmenuAnchor(e.currentTarget)}
+              size="small"
             >
               <NoteAdd />
             </IconButton>
           </span>
         </Tooltip>
         <Tooltip title={<Typography>Sort</Typography>}>
-          <IconButton>
+          <IconButton size="small">
             <Sort />
           </IconButton>
         </Tooltip>
@@ -400,7 +398,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           <DropZone
             key={entry.id}
             type={
-              node.entryType && node.entryType in dragAcceptMap
+              node?.entryType && node?.entryType in dragAcceptMap
                 ? dragAcceptMap[node.entryType as keyof typeof dragAcceptMap]
                     .filter((t): t is string => typeof t === 'string')
                     .filter((t): t is string => t !== undefined)
@@ -489,7 +487,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               <Delete />
               Delete
             </MenuItem>
-            {contextMenu.node.type === 'folder' && (
+            {contextMenu.node.fileType === 'section' && (
               <>
                 <MenuItem
                   onClick={(e) => {
@@ -515,6 +513,21 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
                 )}
               </>
             )}
+            <MenuItem
+              onClick={(e) => {
+                e.preventDefault();
+                if (contextMenu.node) {
+                  console.log(
+                    getOptionsContextMaps({
+                      node: contextMenu.node,
+                      nodeStructure: nodeMap,
+                    })
+                  );
+                }
+              }}
+            >
+              Print Lineage Names
+            </MenuItem>
           </>
         )}
       </Menu>
@@ -564,7 +577,8 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           if (contextMenu !== null) {
             if (
               parentIndex === -1 ||
-              (contextMenu?.node?.type && contextMenu.node.type !== 'folder')
+              (contextMenu?.node?.fileType &&
+                contextMenu.node.fileType !== 'section')
             )
               return null; // Only show folder types if parent is a folder
             if (n <= parentIndex) return null; // Only show folder types that are below the parent type in the hierarchy

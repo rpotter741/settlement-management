@@ -3,7 +3,7 @@ import { UUID, Timestamp, ContentType, EventSeverity } from './index';
 export interface GlossaryNode {
   id: string;
   name: string;
-  type: 'folder' | 'file';
+  fileType: 'section' | 'detail';
   entryType: GlossaryEntryType;
   parentId: string | null;
   children?: GlossaryNode[];

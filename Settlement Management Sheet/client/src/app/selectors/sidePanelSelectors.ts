@@ -77,7 +77,7 @@ export const isTabDirty = (id: string) =>
   createSelector([leftTabs, rightTabs], (leftTabs, rightTabs) => {
     const allTabs = [...leftTabs, ...rightTabs];
     const tab = allTabs.find((tab) => tab.id === id);
-    return tab ? tab.isDirty : false;
+    return tab ? tab.viewState.isDirty : false;
   });
 
 export const sidePanelSelectors = {

@@ -5,7 +5,10 @@ import { v4 as newId } from 'uuid';
 
 const RenderHeader = ({ entry, index, setActive, active, setTool }) => {
   return (
-    <Box key={entry.title} sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box
+      key={entry.title}
+      sx={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}
+    >
       <Box
         sx={{
           minHeight: 36,
@@ -13,6 +16,7 @@ const RenderHeader = ({ entry, index, setActive, active, setTool }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxSizing: 'border-box',
         }}
       >
         <Divider

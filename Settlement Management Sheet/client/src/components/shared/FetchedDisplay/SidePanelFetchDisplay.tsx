@@ -4,10 +4,12 @@ import services from '@/services/toolServices.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
 import { useTools } from 'hooks/useTools.jsx';
 
-import capitalize from 'utility/capitalize.js';
+import capitalize from '@/utility/inputs/capitalize.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/SmallTableList.jsx';
+import { Box } from '@mui/system';
+import { Typography } from '@mui/material';
 
 const SidePanelFetchedDisplay = ({
   onActionClick,
@@ -64,20 +66,10 @@ const SidePanelFetchedDisplay = ({
   };
 
   return (
-    <TitledCollapse
-      title={
-        type === 'personal' ? `My ${displayName}` : `Community ${displayName}`
-      }
-      titleType="body2"
-      open={myTools}
-      styles={{ width: '100%', mb: 2, px: 2 }}
-      titleSx={{
-        color: 'secondary.light',
-        textAlign: 'center',
-        fontSize: '1rem',
-      }}
-      toggleOpen={() => setMyTools(!myTools)}
-    >
+    <Box sx={{ minWidth: ['100%'] }}>
+      <Typography variant="h6" sx={{ my: 2 }}>
+        {type === 'personal' ? `My ${displayName}` : `Community ${displayName}`}
+      </Typography>
       <TableList
         options={options}
         rows={myData}
@@ -94,7 +86,7 @@ const SidePanelFetchedDisplay = ({
         maxSelections={maxSelections}
         onConfirm={onConfirm}
       />
-    </TitledCollapse>
+    </Box>
   );
 };
 

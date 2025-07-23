@@ -82,6 +82,7 @@ const DropZone: React.FC<DropZoneProps> = ({
       boxSizing: 'border-box',
     },
     glossary: {
+      maxHeight: '36px',
       position: 'relative',
       borderTop: '2px solid',
       borderColor: isOver
@@ -96,7 +97,6 @@ const DropZone: React.FC<DropZoneProps> = ({
           : 'inherit',
 
       pt: 0,
-      height: '100%',
       borderRadius: 0,
       zIndex: 1000,
       boxSizing: 'border-box',

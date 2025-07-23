@@ -13,249 +13,344 @@ import {
   TerritoryEntry,
 } from 'types/index.js';
 
-interface PropertyArrayDescriptors<T extends string> {
+type SectionTypes =
+  | 'Geography'
+  | 'Political'
+  | 'Geopolitical'
+  | 'Government'
+  | 'Economy'
+  | 'Culture'
+  | 'History'
+  | 'Relationships'
+  | 'Roster'
+  | 'Profession'
+  | 'Background'
+  | 'Details'
+  | 'Related'
+  | 'Notes';
+
+export interface PropertyArrayDescriptors<T extends string> {
   multiple: boolean;
   keypath: T;
   label: string;
   hasPrimary?: boolean;
+  section?: SectionTypes;
+  component?: React.ComponentType<any>;
+}
+
+export interface PropertySectionDescriptors<T extends string> {
+  name: SectionTypes;
+  children: PropertyArrayDescriptors<T>[];
 }
 
 const definePropertyArrayMap = <T extends string>(
-  arr: PropertyArrayDescriptors<T>[]
-): PropertyArrayDescriptors<T>[] => arr;
+  arr: PropertySectionDescriptors<T>[]
+): PropertySectionDescriptors<T>[] => arr;
 
 const continentPropertyArrayMap = definePropertyArrayMap<keyof ContinentEntry>([
   {
-    multiple: true,
-    keypath: 'nations',
-    label: 'Nations',
+    name: 'Geography',
+    children: [
+      {
+        multiple: false,
+        keypath: 'climates',
+        label: 'Climate',
+      },
+      {
+        multiple: true,
+        keypath: 'terrain',
+        label: 'Terrain',
+      },
+      {
+        multiple: true,
+        keypath: 'locations',
+        label: 'Locations',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'regions',
-    label: 'Regions',
+    name: 'Political',
+    children: [
+      {
+        multiple: true,
+        keypath: 'nations',
+        label: 'Nations',
+      },
+      {
+        multiple: true,
+        keypath: 'regions',
+        label: 'Regions',
+      },
+      {
+        multiple: false,
+        keypath: 'population',
+        label: 'Population',
+      },
+      {
+        multiple: true,
+        keypath: 'resources',
+        label: 'Resources',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'notableLocations',
-    label: 'Notable Locations',
-  },
-  {
-    multiple: true,
-    keypath: 'resources',
-    label: 'Resources',
-  },
-  {
-    multiple: false,
-    keypath: 'population',
-    label: 'Population',
-  },
-  {
-    multiple: true,
-    keypath: 'climate',
-    label: 'Climate',
-  },
-  {
-    multiple: true,
-    keypath: 'terrain',
-    label: 'Terrain',
-  },
-  {
-    multiple: true,
-    keypath: 'eventLog',
-    label: 'Event Log',
+    name: 'History',
+    children: [
+      {
+        multiple: true,
+        keypath: 'eventLog',
+        label: 'Event Log',
+      },
+    ],
   },
 ]);
 
 const territoryPropertyArrayMap = definePropertyArrayMap<keyof TerritoryEntry>([
   {
-    multiple: true,
-    keypath: 'climates',
-    label: 'Climates',
-    hasPrimary: true,
+    name: 'Geography',
+    children: [
+      {
+        multiple: false,
+        keypath: 'climates',
+        label: 'Climates',
+        hasPrimary: true,
+      },
+      {
+        multiple: true,
+        keypath: 'terrain',
+        label: 'Terrain',
+      },
+      {
+        multiple: true,
+        keypath: 'locations',
+        label: 'Locations',
+      },
+      {
+        multiple: true,
+        keypath: 'landmarks',
+        label: 'Landmarks',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'terrain',
-    label: 'Terrain',
-    hasPrimary: false,
-  },
-  {
-    multiple: true,
-    keypath: 'nations',
-    label: 'Nations',
-    hasPrimary: true,
-  },
-  {
-    multiple: true,
-    keypath: 'factions',
-    label: 'Factions',
-    hasPrimary: false,
-  },
-  {
-    multiple: false,
-    keypath: 'population',
-    label: 'Population',
-  },
-  {
-    multiple: true,
-    keypath: 'locations',
-    label: 'Locations',
-  },
-  {
-    multiple: true,
-    keypath: 'landmarks',
-    label: 'Landmarks',
-  },
-  {
-    multiple: true,
-    keypath: 'resources',
-    label: 'Resources',
+    name: 'Political',
+    children: [
+      {
+        multiple: true,
+        keypath: 'nations',
+        label: 'Nations',
+        hasPrimary: true,
+      },
+      {
+        multiple: true,
+        keypath: 'factions',
+        label: 'Factions',
+        hasPrimary: false,
+      },
+      {
+        multiple: false,
+        keypath: 'population',
+        label: 'Population',
+      },
+      {
+        multiple: true,
+        keypath: 'resources',
+        label: 'Resources',
+      },
+    ],
   },
 ]);
 
 const domainPropertyArrayMap = definePropertyArrayMap<keyof DomainEntry>([
   {
-    multiple: true,
-    keypath: 'continent',
-    label: 'Continents',
+    name: 'Government',
+    children: [
+      {
+        multiple: true,
+        keypath: 'capital',
+        label: 'Capital',
+      },
+      {
+        multiple: false,
+        keypath: 'governmentType',
+        label: 'Government Type',
+      },
+      {
+        multiple: false,
+        keypath: 'population',
+        label: 'Population',
+      },
+      {
+        multiple: true,
+        keypath: 'notableFigures',
+        label: 'Notable Figures',
+      },
+      {
+        multiple: false,
+        keypath: 'culture',
+        label: 'Culture',
+      },
+      {
+        multiple: true,
+        keypath: 'locations',
+        label: 'Locations',
+      },
+      {
+        multiple: true,
+        keypath: 'languages',
+        label: 'Languages',
+      },
+      {
+        multiple: false,
+        keypath: 'economy',
+        label: 'Economy',
+      },
+      {
+        multiple: true,
+        keypath: 'resources',
+        label: 'Resources',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'regions',
-    label: 'Regions',
+    name: 'Geography',
+    children: [
+      {
+        multiple: true,
+        keypath: 'continent',
+        label: 'Continents',
+      },
+      {
+        multiple: true,
+        keypath: 'regions',
+        label: 'Regions',
+      },
+      {
+        multiple: true,
+        keypath: 'geography',
+        label: 'Landmarks',
+      },
+    ],
   },
+
   {
-    multiple: true,
-    keypath: 'capital',
-    label: 'Capital',
+    name: 'History',
+    children: [
+      {
+        multiple: false,
+        keypath: 'history',
+        label: 'History',
+      },
+
+      {
+        multiple: true,
+        keypath: 'notableEvents',
+        label: 'Notable Events',
+      },
+      {
+        multiple: true,
+        keypath: 'flags',
+        label: 'Flags',
+      },
+    ],
   },
-  {
-    multiple: false,
-    keypath: 'population',
-    label: 'Population',
-  },
-  {
-    multiple: false,
-    keypath: 'governmentType',
-    label: 'Government Type',
-  },
-  {
-    multiple: false,
-    keypath: 'economy',
-    label: 'Economy',
-  },
-  {
-    multiple: false,
-    keypath: 'culture',
-    label: 'Culture',
-  },
-  {
-    multiple: true,
-    keypath: 'languages',
-    label: 'Languages',
-  },
-  {
-    multiple: true,
-    keypath: 'notableFigures',
-    label: 'Notable Figures',
-  },
-  {
-    multiple: true,
-    keypath: 'notableEvents',
-    label: 'Notable Events',
-  },
-  {
-    multiple: true,
-    keypath: 'resources',
-    label: 'Resources',
-  },
-  {
-    multiple: true,
-    keypath: 'flags',
-    label: 'Flags',
-  },
-  {
-    multiple: false,
-    keypath: 'history',
-    label: 'History',
-  },
+
   // {
   //   multiple: true,
   //   keypath: 'relationships',
   //   label: 'Relationships',
   // },
-  {
-    multiple: true,
-    keypath: 'notableLocations',
-    label: 'Notable Locations',
-  },
-  {
-    multiple: true,
-    keypath: 'geography',
-    label: 'Geography (Landmarks)',
-  },
 ]);
 
 const provincePropertyArrayMap = definePropertyArrayMap<keyof ProvinceEntry>([
   {
-    multiple: true,
-    keypath: 'nations',
-    label: 'Nations',
+    name: 'Geography',
+    children: [
+      {
+        multiple: true,
+        keypath: 'terrain',
+        label: 'Terrain',
+      },
+      {
+        multiple: true,
+        keypath: 'locations',
+        label: 'Locations',
+      },
+      {
+        multiple: true,
+        keypath: 'landmarks',
+        label: 'Landmarks',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'terrain',
-    label: 'Terrain',
+    name: 'Political',
+    children: [
+      {
+        multiple: true,
+        keypath: 'nations',
+        label: 'Nations',
+      },
+      {
+        multiple: true,
+        keypath: 'resources',
+        label: 'Resources',
+      },
+      {
+        multiple: false,
+        keypath: 'population',
+        label: 'Population',
+      },
+      {
+        multiple: true,
+        keypath: 'people',
+        label: 'People',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'locations',
-    label: 'Locations',
-  },
-  {
-    multiple: true,
-    keypath: 'landmarks',
-    label: 'Landmarks',
-  },
-  {
-    multiple: true,
-    keypath: 'people',
-    label: 'People',
-  },
-  {
-    multiple: true,
-    keypath: 'eventLog',
-    label: 'Event Log',
-  },
-  {
-    multiple: true,
-    keypath: 'resources',
-    label: 'Resources',
-  },
-  {
-    multiple: false,
-    keypath: 'population',
-    label: 'Population',
+    name: 'History',
+    children: [
+      {
+        multiple: true,
+        keypath: 'eventLog',
+        label: 'Event Log',
+      },
+    ],
   },
 ]);
 
 const landmarkPropertyArrayMap = definePropertyArrayMap<keyof LandmarkEntry>([
   {
-    multiple: false,
-    keypath: 'climates',
-    label: 'Climate',
+    name: 'Geography',
+    children: [
+      {
+        multiple: false,
+        keypath: 'climates',
+        label: 'Climate',
+      },
+      {
+        multiple: true,
+        keypath: 'regions',
+        label: 'Region',
+        hasPrimary: true,
+      },
+      {
+        multiple: false,
+        keypath: 'geographicType',
+        label: 'Type',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'regions',
-    label: 'Region',
-    hasPrimary: true,
-  },
-  {
-    multiple: false,
-    keypath: 'type',
-    label: 'Type',
+    name: 'Notes',
+    children: [
+      {
+        multiple: false,
+        keypath: 'notes',
+        label: 'Notes',
+      },
+    ],
   },
 ]);
 
@@ -263,102 +358,74 @@ const settlementPropertyArrayMap = definePropertyArrayMap<
   keyof SettlementEntry
 >([
   {
-    multiple: true,
-    keypath: 'nation',
-    label: 'Nation',
+    name: 'Geopolitical',
+    children: [
+      {
+        multiple: true,
+        keypath: 'nation',
+        label: 'Nation',
+      },
+      {
+        multiple: true,
+        keypath: 'region',
+        label: 'Region',
+      },
+      {
+        multiple: false,
+        keypath: 'population',
+        label: 'Population',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'region',
-    label: 'Region',
+    name: 'Government',
+    children: [
+      {
+        multiple: false,
+        keypath: 'government',
+        label: 'Government',
+      },
+      {
+        multiple: false,
+        keypath: 'type',
+        label: 'Settlement Type',
+      },
+      {
+        multiple: false,
+        keypath: 'economy',
+        label: 'Economy',
+      },
+      {
+        multiple: false,
+        keypath: 'culture',
+        label: 'Culture',
+      },
+      {
+        multiple: true,
+        keypath: 'people',
+        label: 'Notable Figures',
+      },
+    ],
   },
   {
-    multiple: false,
-    keypath: 'population',
-    label: 'Population',
-  },
-  {
-    multiple: false,
-    keypath: 'type',
-    label: 'Type',
-  },
-  {
-    multiple: false,
-    keypath: 'economy',
-    label: 'Economy',
-  },
-  {
-    multiple: false,
-    keypath: 'government',
-    label: 'Government',
-  },
-  {
-    multiple: false,
-    keypath: 'culture',
-    label: 'Culture',
-  },
-  {
-    multiple: true,
-    keypath: 'notableFigures',
-    label: 'Notable Figures',
-  },
-  {
-    multiple: true,
-    keypath: 'notableEvents',
-    label: 'Notable Events',
-  },
-  {
-    multiple: true,
-    keypath: 'notableLocations',
-    label: 'Notable Locations',
-  },
-  {
-    multiple: false,
-    keypath: 'history',
-    label: 'History',
-  },
-  {
-    multiple: true,
-    keypath: 'relationships',
-    label: 'Relationships',
-  },
-]);
-
-const factionPropertyArrayMap = definePropertyArrayMap<keyof FactionEntry>([
-  {
-    multiple: true,
-    keypath: 'leader',
-    label: 'Leader',
-  },
-  // {
-  //   multiple: true,
-  //   keypath: 'members',
-  //   label: 'Members',
-  // },
-  {
-    multiple: true,
-    keypath: 'allies',
-    label: 'Allies',
-  },
-  {
-    multiple: true,
-    keypath: 'enemies',
-    label: 'Enemies',
-  },
-  // {
-  //   multiple: true,
-  //   keypath: 'nations',
-  //   label: 'Nations',
-  // },
-  // {
-  //   multiple: true,
-  //   keypath: 'regions',
-  //   label: 'Regions',
-  // },
-  {
-    multiple: true,
-    keypath: 'homeBase',
-    label: 'Home Base',
+    name: 'History',
+    children: [
+      {
+        multiple: true,
+        keypath: 'events',
+        label: 'Notable Events',
+      },
+      {
+        multiple: true,
+        keypath: 'locations',
+        label: 'Notable Locations',
+      },
+      {
+        multiple: false,
+        keypath: 'history',
+        label: 'History',
+      },
+    ],
   },
   // {
   //   multiple: true,
@@ -367,32 +434,122 @@ const factionPropertyArrayMap = definePropertyArrayMap<keyof FactionEntry>([
   // },
 ]);
 
+const factionPropertyArrayMap = definePropertyArrayMap<keyof FactionEntry>([
+  {
+    name: 'Roster',
+    children: [
+      {
+        multiple: true,
+        keypath: 'leader',
+        label: 'Leader',
+      },
+      {
+        multiple: true,
+        keypath: 'homeBase',
+        label: 'Home Base',
+      },
+      {
+        multiple: true,
+        keypath: 'members',
+        label: 'Members',
+      },
+    ],
+  },
+  {
+    name: 'Geopolitical',
+    children: [
+      {
+        multiple: true,
+        keypath: 'nations',
+        label: 'Nations',
+      },
+      {
+        multiple: true,
+        keypath: 'regions',
+        label: 'Regions',
+      },
+    ],
+  },
+  {
+    name: 'Relationships',
+    children: [
+      {
+        multiple: true,
+        keypath: 'allies',
+        label: 'Allies',
+      },
+      {
+        multiple: true,
+        keypath: 'enemies',
+        label: 'Enemies',
+      },
+      // {
+      //   multiple: true,
+      //   keypath: 'relationships',
+      //   label: 'Relationships',
+      // },
+    ],
+  },
+]);
+
 const personPropertyArrayMap = definePropertyArrayMap<keyof PersonEntry>([
   {
-    multiple: false,
-    keypath: 'occupation',
-    label: 'Occupation',
+    name: 'Profession',
+    children: [
+      {
+        multiple: false,
+        keypath: 'occupation',
+        label: 'Occupation',
+      },
+      {
+        multiple: false,
+        keypath: 'title',
+        label: 'Title',
+      },
+    ],
   },
   {
-    multiple: false,
-    keypath: 'title',
-    label: 'Title',
+    name: 'Background',
+    children: [
+      {
+        multiple: true,
+        keypath: 'traits',
+        label: 'Traits',
+      },
+      {
+        multiple: true,
+        keypath: 'faction',
+        label: 'Faction',
+      },
+      {
+        multiple: false,
+        keypath: 'history',
+        label: 'History',
+      },
+    ],
   },
   {
-    multiple: true,
-    keypath: 'traits',
-    label: 'Traits',
+    name: 'Details',
+    children: [
+      {
+        multiple: true,
+        keypath: 'location',
+        label: 'Location',
+      },
+      {
+        multiple: false,
+        keypath: 'appearance',
+        label: 'Appearance',
+      },
+
+      {
+        multiple: false,
+        keypath: 'events',
+        label: 'Events',
+      },
+    ],
   },
-  {
-    multiple: true,
-    keypath: 'faction',
-    label: 'Faction',
-  },
-  {
-    multiple: true,
-    keypath: 'location',
-    label: 'Location',
-  },
+
   // {
   //   multiple: true,
   //   keypath: 'relationships',
@@ -407,20 +564,24 @@ const personPropertyArrayMap = definePropertyArrayMap<keyof PersonEntry>([
 
 const locationPropertyArrayMap = definePropertyArrayMap<keyof LocationEntry>([
   {
-    multiple: false,
-    keypath: 'type',
-    label: 'Type',
-  },
-  {
-    multiple: false,
-    keypath: 'region',
-    label: 'Region',
-    hasPrimary: true,
-  },
-  {
-    multiple: true,
-    keypath: 'currentOccupants',
-    label: 'Current Occupants',
+    name: 'Details',
+    children: [
+      {
+        multiple: false,
+        keypath: 'locationType',
+        label: 'Type',
+      },
+      {
+        multiple: true,
+        keypath: 'currentOccupants',
+        label: 'Current Occupants',
+      },
+      {
+        multiple: true,
+        keypath: 'resources',
+        label: 'Resources',
+      },
+    ],
   },
   // {
   //   multiple: true,
@@ -428,43 +589,48 @@ const locationPropertyArrayMap = definePropertyArrayMap<keyof LocationEntry>([
   //   label: 'Nearby Features',
   // },
   {
-    multiple: true,
-    keypath: 'resources',
-    label: 'Resources',
-  },
-  {
-    multiple: true,
-    keypath: 'eventLog',
-    label: 'Event Log',
+    name: 'History',
+    children: [
+      {
+        multiple: true,
+        keypath: 'eventLog',
+        label: 'Event Log',
+      },
+    ],
   },
 ]);
 
 const notePropertyArrayMap = definePropertyArrayMap<keyof NoteEntry>([
   {
-    multiple: false,
-    keypath: 'type',
-    label: 'Type',
-  },
-  {
-    multiple: false,
-    keypath: 'priority',
-    label: 'Priority',
-  },
-  {
-    multiple: false,
-    keypath: 'dueDate',
-    label: 'Due Date',
+    name: 'Details',
+    children: [
+      {
+        multiple: false,
+        keypath: 'type',
+        label: 'Type',
+      },
+      {
+        multiple: false,
+        keypath: 'priority',
+        label: 'Priority',
+      },
+      {
+        multiple: false,
+        keypath: 'dueDate',
+        label: 'Due Date',
+      },
+      {
+        multiple: true,
+        keypath: 'sharedWith',
+        label: 'Shared With',
+      },
+    ],
   },
   // {
   //   multiple: true,
   //   keypath: 'relatedEntries',
   //   label: 'Related Entries',
   // },
-  {
-    multiple: true,
-    keypath: 'tags',
-    label: 'Tags',
-  },
   // {
   //   multiple: false,
   //   keypath: 'isArchived',
@@ -480,11 +646,7 @@ const notePropertyArrayMap = definePropertyArrayMap<keyof NoteEntry>([
   //   keypath: 'isShared',
   //   label: 'Is Shared',
   // },
-  {
-    multiple: true,
-    keypath: 'sharedWith',
-    label: 'Shared With',
-  },
+
   // {
   //   multiple: true,
   //   keypath: 'attachments',
@@ -494,34 +656,39 @@ const notePropertyArrayMap = definePropertyArrayMap<keyof NoteEntry>([
 
 const eventPropertyArrayMap = definePropertyArrayMap<keyof EventEntry>([
   {
-    multiple: false,
-    keypath: 'significance',
-    label: 'Significance',
+    name: 'Details',
+    children: [
+      {
+        multiple: false,
+        keypath: 'significance',
+        label: 'Significance',
+      },
+      {
+        multiple: false,
+        keypath: 'gameDate',
+        label: 'Game Date',
+      },
+      {
+        multiple: true,
+        keypath: 'location',
+        label: 'Location',
+      },
+      {
+        multiple: false,
+        keypath: 'frequency',
+        label: 'Frequency',
+      },
+    ],
   },
   {
-    multiple: false,
-    keypath: 'gameDate',
-    label: 'Game Date',
-  },
-  {
-    multiple: false,
-    keypath: 'frequency',
-    label: 'Frequency',
-  },
-  {
-    multiple: true,
-    keypath: 'location',
-    label: 'Location',
-  },
-  {
-    multiple: true,
-    keypath: 'relatedEntries',
-    label: 'Related Entries',
-  },
-  {
-    multiple: true,
-    keypath: 'tags',
-    label: 'Tags',
+    name: 'Related',
+    children: [
+      {
+        multiple: true,
+        keypath: 'relatedEntries',
+        label: 'Related Entries',
+      },
+    ],
   },
 ]);
 
@@ -540,7 +707,7 @@ type GlossaryEntryMap = {
 };
 
 type PropertyArrayMap = {
-  [K in keyof GlossaryEntryMap]: PropertyArrayDescriptors<
+  [K in keyof GlossaryEntryMap]: PropertySectionDescriptors<
     Extract<keyof GlossaryEntryMap[K], string>
   >[];
 };

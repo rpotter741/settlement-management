@@ -91,6 +91,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
             size={48}
             color={iconColor}
             backgroundColor={bg}
+            mode="preview"
           />
         </Box>
         <IconColorPicker
@@ -121,6 +122,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
                   path={icon.d}
                   size={48}
                   color={iconColor}
+                  mode="preview"
                 />
                 <Typography
                   variant="caption"
@@ -131,6 +133,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
                       xs: 'none',
                       md: 'block',
                     },
+                    fontSize: '0.75rem',
                   }}
                 >
                   {icon.name}

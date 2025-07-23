@@ -3,18 +3,14 @@ import { Box, Button, TextField } from '@mui/material';
 import { v4 as newId } from 'uuid';
 
 import actions from '../../services/glossaryServices.js';
-import thunks, {
-  addAndActivateGlossary,
-} from '../../app/thunks/glossaryThunks.js';
+import { addAndActivateGlossary } from '../../app/thunks/glossaryThunks.js';
 import { useModalActions } from '@/hooks/useModal.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import {
-  initializeGlossary,
-  setActiveGlossaryId,
-} from '@/app/slice/glossarySlice.js';
-import { initial } from 'lodash';
 import Editor from '@/components/shared/TipTap/Editor.js';
+import GenreSelect, {
+  Genre,
+} from '@/components/shared/Metadata/GenreSelect.js';
 
 interface NameNewGlossaryProps {}
 
@@ -22,15 +18,19 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
   const dispatch: AppDispatch = useDispatch();
   const [glossaryName, setGlossaryName] = useState('');
   const [description, setDescription] = useState('');
+  const [descString, setDescString] = useState('');
+  const [genre, setGenre] = useState<Genre>('Fantasy');
+  const [subGenre, setSubGenre] = useState('');
   const [jsonDesc, setJsonDesc] = useState('');
   const { closeModal } = useModalActions();
 
   const processEditor = (updates: Record<string, any>) => {
     setDescription(updates.description);
+    setDescString(updates.dataString);
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '50vw' }}>
       <TextField
         value={glossaryName}
         onChange={(e) => setGlossaryName(e.target.value)}
@@ -38,6 +38,17 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
         variant="outlined"
         fullWidth
         margin="normal"
+      />
+      <GenreSelect
+        defaultGenre={genre}
+        defaultSubGenre={subGenre}
+        updateFn={(field, value) => {
+          if (field === 'genre') {
+            setGenre(value as Genre);
+          } else if (field === 'subGenre') {
+            setSubGenre(value);
+          }
+        }}
       />
       <Editor propUpdate={processEditor} html={description} />
       <Button
@@ -50,7 +61,12 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
             .createGlossary({
               id,
               name: glossaryName.trim(),
-              description,
+              description: {
+                markdown: description,
+                string: descString,
+              },
+              genre,
+              subGenre,
             })
             .then((response) => {
               console.log('Glossary created:', response.glossary);

@@ -4,11 +4,13 @@ import thunks from '@/app/thunks/glossaryThunks.js';
 import { AppDispatch } from '@/app/store.js';
 import {
   selectEntryById,
+  selectKeypathOptions,
   selectNodeById,
 } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
 import { GlossaryEntry, GlossaryNode } from 'types/index.js';
 import createScopedStorage from '@/utility/localStorageActions.js';
+import { InheritanceMap } from '@/utility/hasParentProperty.js';
 
 const useNodeEditor = (glossaryId: string, entryId: string) => {
   const dispatch: AppDispatch = useDispatch();
@@ -19,12 +21,29 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     selectEntryById(glossaryId, entryId)
   );
 
+  const buildOptionsByKeypath = useCallback(
+    (property: keyof GlossaryEntry, inheritanceMap: InheritanceMap) => {
+      return dispatch(
+        thunks.getOptionsByProperty({
+          glossaryId,
+          entryId,
+          property,
+          inheritanceMap,
+        })
+      );
+    },
+    [glossaryId, entryId]
+  );
+
+  const getOptionsByKeypath = (keypath: keyof GlossaryEntry) =>
+    useSelector(selectKeypathOptions(glossaryId, entryId, keypath));
+
   const storage = createScopedStorage(`${glossaryId}-${entryId}`);
 
   const updateGlossaryEntry = useCallback(
     (content: Record<string, any>) => {
-      console.log(content, 'content in useNodeEditor');
-      dispatch(thunks.updateEntry({ glossaryId, node, content }));
+      console.log('updating node ', node, ' with content: ', content);
+      // dispatch(thunks.updateEntry({ node, content }));
     },
     [dispatch, glossaryId, node]
   );
@@ -57,7 +76,7 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
   useEffect(() => {
     if (!entry && node?.entryType) {
       dispatch(
-        thunks.getGlossaryEntryById({
+        thunks.getEntryById({
           nodeId: entryId,
           glossaryId,
           entryType: node.entryType,
@@ -69,6 +88,8 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
   return {
     node,
     entry,
+    buildOptionsByKeypath,
+    getOptionsByKeypath,
     updateGlossaryEntry,
     getLocalStorage,
     setLocalStorage,

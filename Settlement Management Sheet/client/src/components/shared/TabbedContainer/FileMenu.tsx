@@ -21,8 +21,6 @@ interface FileMenuProps {
 }
 
 const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
-  console.log(tab.side);
-
   const [open, setOpen] = useState<any>({
     file: null,
     edit: null,
@@ -140,20 +138,18 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
 
   return (
     <Box
+      id={`file-menu-${tab.tabId}`}
       sx={{
         width: '100%',
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
-        mb: 1,
-        mt: -0.5,
       }}
     >
       <Box
         color="divider"
         sx={{
           // borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          pt: 1,
           borderRadius: 0,
         }}
       >

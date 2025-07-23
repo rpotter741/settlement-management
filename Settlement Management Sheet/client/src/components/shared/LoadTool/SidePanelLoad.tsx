@@ -7,7 +7,7 @@ import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import { get } from 'lodash';
 
-import { Box, Typography } from '@mui/material';
+import { Box, MenuItem, Select, Typography } from '@mui/material';
 
 import HeartIcon from '@mui/icons-material/Favorite';
 import PencilIcon from '@mui/icons-material/Edit';
@@ -26,12 +26,12 @@ const options = [
 
 import FetchedDisplay from 'components/shared/FetchedDisplay/SidePanelFetchDisplay.jsx';
 import { AppDispatch } from '@/app/store.js';
+import { loadTool } from '@/app/thunks/toolThunks.js';
+import { ToolName } from 'types/common.js';
 
 const LoadTool = ({
-  tool,
   keypath = '',
   refKeypath = '',
-  displayName,
   selectionMode = false,
   maxSelections = 6,
   outerUpdate = () => {},
@@ -39,7 +39,22 @@ const LoadTool = ({
   dependency = false,
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { loadNewTool } = useTools(tool);
+  const [tool, setTool] = useState<ToolName>('attribute');
+  const displayNameMap = {
+    apt: 'Abstract Progress Trackers',
+    action: 'Actions',
+    attribute: 'Attributes',
+    building: 'Buildings',
+    event: 'Events',
+    kit: 'Kits',
+    listener: 'Listeners',
+    settlementType: 'Settlement Types',
+    settlement: 'Settlements',
+    gameStatus: 'Statuses',
+    storyThread: 'Story Threads',
+    tradeHub: 'Trade Hubs',
+    upgrade: 'Upgrades',
+  };
   const [selected, setSelected] = useState({
     ids: get(outerTool, keypath) || [],
     refIds: get(outerTool, refKeypath) || [],
@@ -54,7 +69,7 @@ const LoadTool = ({
     switch (action) {
       case 'Edit':
         return () => {
-          loadNewTool({ refId, id, currentTool: tool });
+          dispatch(loadTool({ refId, id, tool, currentTool: tool }));
         };
       case 'Delete':
         return async () => {
@@ -89,7 +104,7 @@ const LoadTool = ({
           }
         };
       default:
-        return;
+        return () => {};
     }
   };
 
@@ -100,12 +115,23 @@ const LoadTool = ({
 
   return (
     <Box sx={{ minWidth: ['100%'] }}>
+      <Select
+        value={tool}
+        onChange={(e) => setTool(e.target.value)}
+        sx={{ width: '100%' }}
+      >
+        {Object.entries(displayNameMap).map(([key, value]) => (
+          <MenuItem key={key} value={key}>
+            {value}
+          </MenuItem>
+        ))}
+      </Select>
       <FetchedDisplay
         onActionClick={handleActionClick}
         options={options}
         type="personal"
         tool={tool}
-        displayName={displayName}
+        displayName={displayNameMap[tool]}
         selectionMode={selectionMode}
         selected={selected}
         setSelected={setSelected}
@@ -119,7 +145,7 @@ const LoadTool = ({
         options={options}
         type="community"
         tool={tool}
-        displayName={displayName}
+        displayName={displayNameMap[tool]}
         selectionMode={selectionMode}
         selected={selected}
         setSelected={setSelected}

@@ -231,7 +231,7 @@ const TableList = ({
           position: 'sticky',
           top: 0,
           flexWrap: 'wrap',
-          backgroundColor: 'background.paper',
+          backgroundColor: 'background.default',
           zIndex: 5,
           my: 1,
         }}
@@ -249,9 +249,7 @@ const TableList = ({
         />
         {type === 'community' && (
           <FormControl size="small" sx={{ width: '50%' }}>
-            <InputLabel sx={{ backgroundColor: 'background.paper' }}>
-              Content Type
-            </InputLabel>
+            <InputLabel>Content Type</InputLabel>
             <Select
               value={contentTypeFilter}
               onChange={(e) => setContentTypeFilter(e.target.value)}
@@ -271,12 +269,13 @@ const TableList = ({
 
         {type === 'personal' && (
           <FormControl size="small" sx={{ width: '50%' }}>
-            <InputLabel sx={{ backgroundColor: 'background.paper' }}>
+            <InputLabel sx={{ mt: 2, backgroundColor: 'background.default' }}>
               Status
             </InputLabel>
             <Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              sx={{ my: 2 }}
             >
               <MenuItem value="" key="all">
                 All
@@ -293,12 +292,13 @@ const TableList = ({
 
         {type === 'community' && (
           <FormControl size="small" sx={{ width: '50%' }}>
-            <InputLabel sx={{ backgroundColor: 'background.paper' }}>
+            <InputLabel sx={{ mt: 2, backgroundColor: 'background.default' }}>
               Created By
             </InputLabel>
             <Select
               value={createdByFilter}
               onChange={(e) => setCreatedByFilter(e.target.value)}
+              sx={{ mt: 2 }}
             >
               <MenuItem value="" key="all">
                 All
@@ -314,7 +314,7 @@ const TableList = ({
           </FormControl>
         )}
         <FormControl size="small" sx={{ width: '50%' }}>
-          <InputLabel sx={{ backgroundColor: 'background.paper' }}>
+          <InputLabel sx={{ mt: 2, backgroundColor: 'background.default' }}>
             Tags
           </InputLabel>
           <Select
@@ -322,6 +322,7 @@ const TableList = ({
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
             renderValue={(selected) => selected.join(', ')}
+            sx={{ my: 2 }}
           >
             {Array.from(new Set(rows.flatMap((row) => row?.tags))).map(
               (tag, n) => (

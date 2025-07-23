@@ -59,6 +59,7 @@ const DragWrapper: React.FC<DragWrapperProps> = ({
 
   return (
     <Box
+      className="drag-wrapper"
       ref={drag}
       style={{
         opacity: isDragging ? 0.5 : 1,

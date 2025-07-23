@@ -402,87 +402,10 @@ const AttributeTagsTable = () => {
         boxShadow: 4,
         borderRadius: 4,
         backgroundColor: 'background.default',
+        mt: 3,
       }}
     >
-      <TableContainer
-        component={Paper}
-        sx={{
-          maxHeight: '340px',
-          overflow: 'auto',
-          boxShadow: 0,
-        }}
-      >
-        <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ backgroundColor: 'background.default' }}>
-                <Typography variant="h6">Category</Typography>
-              </TableCell>
-              <TableCell sx={{ backgroundColor: 'background.default' }}>
-                <Typography variant="h6">Tag</Typography>
-              </TableCell>
-              <TableCell
-                align="center"
-                sx={{ backgroundColor: 'background.paper' }}
-              >
-                <Typography variant="h6">Enabled</Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(sections).map(([section, keys]) => (
-              <React.Fragment key={section}>
-                {/* Section Header */}
-                <TableRow>
-                  <TableCell
-                    colSpan={3}
-                    sx={{
-                      position: 'sticky',
-                      top: 40, // Adjust based on header height
-                      zIndex: 1,
-                      fontWeight: 'bold',
-                      backgroundColor: 'secondary.main',
-                      color: 'common.white',
-                    }}
-                  >
-                    <Typography variant="h6">{section}</Typography>
-                  </TableCell>
-                </TableRow>
-                {/* Section Tags */}
-                {keys.map((key, index) => (
-                  <TableRow
-                    key={key}
-                    sx={{
-                      backgroundColor: (theme) =>
-                        index % 2 === 0
-                          ? theme.palette.divider
-                          : theme.palette.background.default,
-                    }}
-                  >
-                    <TableCell></TableCell>
-                    <TableCell>
-                      <Tooltip title={tags[key].tooltip} arrow>
-                        <span>
-                          <strong>
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                          </strong>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Switch
-                        checked={tags[key].enabled}
-                        onChange={() => toggleTag(key)}
-                        color="secondary"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      I'll be tags one day!
     </Box>
   );
 };

@@ -19,6 +19,9 @@ import { ArrowForward, Delete } from '@mui/icons-material';
 import sPCFormData from '../../helpers/sPCFormData.js';
 import ToolInput from '@/components/shared/DynamicForm/ToolInput.js';
 import { set } from 'lodash';
+import TextWithTooltipLink, {
+  ContentChunk,
+} from '@/components/shared/Layout/TextWithTooltipLink.js';
 
 const settlementTypes = [
   {
@@ -38,6 +41,27 @@ const settlementTypes = [
     description:
       'Survivalists focus on gathering food, supplies, medical items, and constructing durable shelters.',
     id: '123',
+  },
+];
+
+const content: ContentChunk[] = [
+  { type: 'text', value: 'Define the ' },
+  {
+    type: 'tooltip',
+    title:
+      'Settlements earn 1 settlement point per level per turn, barring other boons or banes. Click for more information.',
+    value: 'Settlement Point Cost',
+    onClick: () => console.log('open SPC help panel'),
+  },
+  {
+    type: 'text',
+    value: ' of this attribute per Settlement Type. A value of ',
+  },
+  { type: 'strong', value: '0' },
+  {
+    type: 'text',
+    value:
+      ' means this cannot be purchased with settlement points for that settlement type.',
   },
 ];
 
@@ -94,29 +118,7 @@ const SettlementPointsCost = () => {
       }}
     >
       <Box sx={{ gridColumn: 'span 3', p: 2 }}>
-        Define the{' '}
-        <Tooltip
-          title={
-            <Typography>
-              Settlements earn 1 settlement point per level per turn, barring
-              other boons or banes. Click for for more information.
-            </Typography>
-          }
-        >
-          <Typography
-            component="span"
-            sx={{
-              textDecoration: 'underline',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}
-          >
-            Settlement Point Cost{' '}
-          </Typography>
-        </Tooltip>
-        of this attribute per Settlement Type. A value of <strong>0</strong>{' '}
-        means this cannot be purchased with settlement points for that
-        settlement type.
+        <TextWithTooltipLink content={content} />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'start', width: '100%' }}>
         <Autocomplete

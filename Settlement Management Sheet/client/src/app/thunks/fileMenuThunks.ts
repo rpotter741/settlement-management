@@ -12,6 +12,11 @@ import { Tab } from '../types/SidePanelTypes.js';
 import { showSnackbar } from '../slice/snackbarSlice.js';
 import { cloneDeep, isEqual } from 'lodash';
 
+const editStringTrimFields: Partial<Record<ToolName, string[]>> = {
+  attribute: ['name', 'description'],
+  category: ['name', 'description'],
+};
+
 export const createNewToolFile = (
   toolString: string,
   side: 'left' | 'right'
@@ -40,7 +45,7 @@ export const saveToolFile = (tab: Tab) => {
     dispatch: ThunkDispatch<RootState, unknown, any>,
     getState: () => RootState
   ) => {
-    const { tool, id, isDirty } = tab;
+    const { tool, id, viewState } = tab;
     if (!tool || !id) return;
     const state = getState();
     const edit = state.tools[tool]?.edit.byId[id];
@@ -56,9 +61,16 @@ export const saveToolFile = (tab: Tab) => {
     }
     if (!edit) return;
     try {
+      const editFields = editStringTrimFields[tool as ToolName] || [];
+      const trimmedEdit = cloneDeep(edit);
+      editFields.forEach((field) => {
+        if (trimmedEdit[field]) {
+          trimmedEdit[field] = trimmedEdit[field].trim();
+        }
+      });
       await toolServerActions.saveTool({
         tool: tool as ToolName,
-        data: { ...edit },
+        data: { ...trimmedEdit },
       });
       dispatch(
         toolSlice.saveTool({
@@ -66,12 +78,12 @@ export const saveToolFile = (tab: Tab) => {
           id: tab.id,
         })
       );
-      if (isDirty) {
+      if (viewState.isDirty) {
         dispatch(
           sidePanelSlice.updateTab({
             tabId: tab.tabId,
             side: tab.side,
-            keypath: 'isDirty',
+            keypath: 'viewState.isDirty',
             updates: false,
           })
         );

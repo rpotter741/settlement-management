@@ -5,11 +5,12 @@ import { ShellContext } from '@/context/ShellContext.js';
 import { useTools } from 'hooks/useTools.jsx';
 
 interface ToolSelectProps {
-  options: string[];
+  options: { name: string; value: string }[];
   label: string;
   keypath: string;
   disabled?: boolean;
   width?: string;
+  small?: boolean;
 }
 
 const ToolSelect: React.FC<ToolSelectProps> = ({
@@ -18,10 +19,12 @@ const ToolSelect: React.FC<ToolSelectProps> = ({
   keypath,
   disabled = false,
   width = '100%',
+  small = true,
 }) => {
   const { tool, id } = useContext(ShellContext);
-  const { edit, updateTool } = useTools(tool, id);
-  const [value, setValue] = useState(edit ? edit[keypath] : '');
+  const { edit, updateTool, selectEditValue } = useTools(tool, id);
+  const [value, setValue] = useState(selectEditValue(keypath));
+  console.log(value, 'value in ToolSelect');
   return (
     <Box sx={{ width: '100%' }}>
       <FormControl fullWidth>
@@ -39,14 +42,16 @@ const ToolSelect: React.FC<ToolSelectProps> = ({
           sx={{
             width,
             backgroundColor: 'background.paper',
-            '& .MuiSelect-select': {
-              padding: '8px 16px',
-            },
+            '& .MuiSelect-select': small
+              ? {
+                  padding: '8px 16px',
+                }
+              : {},
           }}
         >
           {options.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
+            <MenuItem key={option.value} value={option.value}>
+              {option.name}
             </MenuItem>
           ))}
         </Select>

@@ -20,9 +20,7 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({ node, glossaryId }) => {
   const onDelete = () => {
     dispatch(
       deleteEntry({
-        id: node.id,
-        entryType: node.entryType,
-        glossaryId,
+        node,
       })
     );
   };

@@ -1,6 +1,17 @@
 import { SPCs, Thresholds } from 'types/common.js';
 import iconList from '../../../components/shared/IconSelector/iconList.js';
 import { v4 as newId } from 'uuid';
+import { scale } from 'framer-motion';
+
+const defaultThresholds: Array<string> = [
+  'Critical',
+  'Strained',
+  'Unstable',
+  'Stable',
+  'Improving',
+  'Strong',
+  'Thriving',
+];
 
 function initializeAttribute() {
   // Generate thresholds
@@ -9,9 +20,9 @@ function initializeAttribute() {
     data: {},
     order: [],
   };
-  thresholds.order = maxThresholds.map((max) => {
+  thresholds.order = maxThresholds.map((max, n) => {
     const id = newId();
-    thresholds.data[id] = { name: '', max };
+    thresholds.data[id] = { name: defaultThresholds[n], max };
     return id;
   });
 
@@ -32,13 +43,36 @@ function initializeAttribute() {
     id: newId(),
     refId: newId(),
     version: 1,
-    positive: true,
     name: '',
     description: '',
     balance: {
-      maxPerLevel: 0,
-      healthPerLevel: 0,
-      costPerLevel: 0,
+      cost: {
+        base: 0,
+        perLevel: true,
+        valuePerLevel: 1,
+        interval: 1,
+        scaleToggle: false,
+        scaleCurve: 'linear',
+        valuesPerInterval: [],
+      },
+      max: {
+        base: 1,
+        perLevel: true,
+        valuePerLevel: 1,
+        interval: 1,
+        scaleToggle: false,
+        scaleCurve: 'linear',
+        valuesPerInterval: [],
+      },
+      health: {
+        base: 0,
+        perLevel: false,
+        valuePerLevel: 0,
+        interval: 1,
+        scaleToggle: false,
+        scaleCurve: 'linear',
+        valuesPerInterval: [],
+      },
     },
     thresholds,
     settlementPointCost,
@@ -47,6 +81,23 @@ function initializeAttribute() {
       color: 'black',
       backgroundColor: '#fbf7ef',
     }, // Default icon with black color
+    isPositive: true,
+    canHurt: true,
+    isTradeable: true,
+    hasThresholds: true,
+    hasSPC: true,
+    genre: '',
+    subGenre: '',
+    properties: {
+      data: {
+        canOverflow: true,
+        isCurrency: false,
+        requiresUpkeep: false,
+        canGather: false,
+      },
+      config: {},
+      order: ['canOverflow', 'isCurrency', 'requiresUpkeep'],
+    },
     tags: [],
     isValid: false,
     status: 'DRAFT',

@@ -4,7 +4,6 @@ import React, {
   useMemo,
   useState,
   Suspense,
-  act,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { Box, Divider, Modal, useMediaQuery } from '@mui/material';
@@ -21,7 +20,6 @@ import RenderTabs from './RenderTabs.jsx';
 import {
   focusedTab,
   sidePanelSelectors as select,
-  selectAllTabs,
 } from '@/app/selectors/sidePanelSelectors.js';
 
 import {
@@ -30,7 +28,6 @@ import {
 } from '@/context/TabsContext/TabsContext.jsx';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
-import GeographyForm from '@/features/Glossary/LandmarkForm/CreateLandmarkGlossary.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import useToolHotkeys from '@/hooks/useGlobalHotkeys.js';
@@ -57,8 +54,6 @@ const TabbedContainer: React.FC = () => {
   const {
     leftTabs,
     rightTabs,
-    currentLeftTab,
-    currentRightTab,
     addNewTab,
     removeById,
     setActiveTab,
@@ -178,7 +173,7 @@ const TabbedContainer: React.FC = () => {
     },
     'mod+w': () => {
       if (!activeTab) return;
-      if (activeTab.isDirty) {
+      if (activeTab.viewState.isDirty) {
         const entry = {
           componentKey: 'ConfirmDirtyClose',
           props: {
@@ -208,126 +203,112 @@ const TabbedContainer: React.FC = () => {
   return (
     <Box
       sx={{
-        position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
         height: '100%',
         width: '100%',
         overflowY: 'hidden',
         overflowX: 'hidden',
-        px: 2,
       }}
+      className="tabbed-container"
     >
-      <Box
-        sx={{
-          display: 'flex',
-          height: '100%',
-          width: '100%',
-          overflowY: 'hidden',
-          overflowX: 'hidden',
-        }}
-        className="tabbed-container"
-      >
-        {/* Side Panel */}
-        <SidePanel />
-        {/* Tabs Header */}
-        <TabDragProvider>
+      {/* Side Panel */}
+      <SidePanel />
+      {/* Tabs Header */}
+      <TabDragProvider>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            width: '100%',
+            overflowY: 'hidden',
+            overflowX: 'hidden',
+            backgroundColor: 'background.default',
+          }}
+        >
           <Box
             sx={{
+              borderColor: 'divider',
               display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
+              justifyContent: 'start',
+              alignItems: 'center',
               width: '100%',
-              overflowY: 'hidden',
-              overflowX: 'hidden',
-              backgroundColor: 'background.default',
+              boxSizing: 'border-box',
+              backgroundColor: 'background.paper',
+              height: 48,
+              maxHeight: 48,
             }}
+            className="tab-header"
           >
-            <Box
-              sx={{
-                borderColor: 'divider',
-                display: 'flex',
-                justifyContent: 'start',
-                alignItems: 'center',
-                width: '100%',
-                boxSizing: 'border-box',
-                backgroundColor: 'background.paper',
-                maxHeight: 40,
-              }}
-              className="tab-header"
-            >
-              <LeftTabsProvider>
+            <LeftTabsProvider>
+              <RenderTabHeaders
+                setActiveTab={setActiveTab}
+                removeById={removeById}
+                setDragSide={setDragSide}
+              />
+            </LeftTabsProvider>
+            {rightTabs.length > 0 && (
+              <RightTabsProvider>
                 <RenderTabHeaders
                   setActiveTab={setActiveTab}
                   removeById={removeById}
-                  setDragSide={setDragSide}
+                  side="right"
                 />
-              </LeftTabsProvider>
-              {rightTabs.length > 0 && (
-                <RightTabsProvider>
-                  <RenderTabHeaders
-                    setActiveTab={setActiveTab}
-                    removeById={removeById}
-                    side="right"
-                  />
-                </RightTabsProvider>
-              )}
-            </Box>
-            {modalOpen && (ModalComponent || modalKey) && (
-              <Modal
-                open={true}
-                onClose={
-                  disableClickaway
-                    ? undefined
-                    : () => dispatch(closeModal({ autoNext: false }))
-                }
-              >
-                <Box sx={{ ...modalPosition }}>
-                  <Suspense fallback={<Box>Loading...</Box>}>
-                    {(() => {
-                      const LazyComponent = modalKey
-                        ? modalMap[modalKey]
-                        : ModalComponent;
-
-                      return LazyComponent ? (
-                        <LazyComponent {...modalComponentProps} />
-                      ) : null;
-                    })()}
-                  </Suspense>
-                </Box>
-              </Modal>
+              </RightTabsProvider>
             )}
-            {/* Tabs Content */}
-            <Box
-              sx={{
-                display: 'flex',
-                flexGrow: 1,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {dragSide === 'left' && (
-                <TabDragBox side="left" moveFn={moveRTL} />
-              )}
-              {dragSide === 'right' && (
-                <TabDragBox side="right" moveFn={moveLTR} />
-              )}
-
-              <LeftTabsProvider>
-                <RenderTabs side="left" />
-              </LeftTabsProvider>
-              {(useSelector(select.rightTabs) as Tab[]).length > 0 && (
-                <>
-                  <Divider flexItem orientation="vertical" />
-                  <RightTabsProvider>
-                    <RenderTabs side="right" />
-                  </RightTabsProvider>
-                </>
-              )}
-            </Box>
           </Box>
-        </TabDragProvider>
-      </Box>
+          {modalOpen && (ModalComponent || modalKey) && (
+            <Modal
+              open={true}
+              onClose={
+                disableClickaway
+                  ? undefined
+                  : () => dispatch(closeModal({ autoNext: false }))
+              }
+            >
+              <Box sx={{ ...modalPosition }}>
+                <Suspense fallback={<Box>Loading...</Box>}>
+                  {(() => {
+                    const LazyComponent = modalKey
+                      ? modalMap[modalKey]
+                      : ModalComponent;
+
+                    return LazyComponent ? (
+                      <LazyComponent {...modalComponentProps} />
+                    ) : null;
+                  })()}
+                </Suspense>
+              </Box>
+            </Modal>
+          )}
+          {/* Tabs Content */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexGrow: 1,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {dragSide === 'left' && <TabDragBox side="left" moveFn={moveRTL} />}
+            {dragSide === 'right' && (
+              <TabDragBox side="right" moveFn={moveLTR} />
+            )}
+
+            <LeftTabsProvider>
+              <RenderTabs side="left" />
+            </LeftTabsProvider>
+            {(useSelector(select.rightTabs) as Tab[]).length > 0 && (
+              <>
+                <Divider flexItem orientation="vertical" />
+                <RightTabsProvider>
+                  <RenderTabs side="right" />
+                </RightTabsProvider>
+              </>
+            )}
+          </Box>
+        </Box>
+      </TabDragProvider>
     </Box>
   );
 };

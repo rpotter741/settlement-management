@@ -1,6 +1,6 @@
-import React, { LazyExoticComponent, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 
-import { Box, Divider } from '@mui/material';
+import { Box, Divider, Tab, Tabs } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
 import AttrMetaData from '../forms/AttrMetaData.jsx';
@@ -11,83 +11,99 @@ import TagTable from '../forms/TagTable.jsx';
 
 import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import GeographyForm from '@/features/Glossary/LandmarkForm/CreateLandmarkGlossary.js';
+import AttrProperties from '../forms/AttrProperties.js';
+import useTabSplit from '@/hooks/layout/useTabSplit.js';
+import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import {
+  AttrPropertyTypes,
+  editAttrReducer,
+  editAttrState as defaultViewState,
+  setActiveTab,
+} from '../../state/editReducer.js';
+import TabbedContent, {
+  TabbedContentTabs,
+} from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
+import { usePageBoxContext } from '@/context/PageBox.js';
 
 interface EditAttributeProps {}
 
-const EditAttribute: React.FC<EditAttributeProps> = () => {
-  const { isSplit } = useSidePanel();
-  const { id } = useShellContext();
-  const { edit: attr } = useTools('attribute', id);
-  const [values, setValues] = useState(false);
-  const [thresholds, setThresholds] = useState(false);
-  const [tags, setTags] = useState(false);
-  const [spCosts, setSpCosts] = useState(false);
+const editAttrComponentMap: Record<string, React.ComponentType<any>> = {
+  Properties: AttrProperties,
+  Values: AttrValues,
+  SPC: SettlementPointsCost,
+  Thresholds: ObjectThresholds,
+  Currency: () => <Box>Currency Component</Box>,
+  Gather: () => <Box>Gather Component</Box>,
+  Upkeep: () => <Box>Upkeep Component</Box>,
+};
 
-  const columns = isSplit ? 1 : 3;
+const EditAttribute: React.FC<EditAttributeProps> = () => {
+  const { side, tab } = useShellContext();
+  const { both } = useTabSplit();
+  const dispatch: AppDispatch = useDispatch();
+  const [localState, localDispatch] = useReducer(
+    editAttrReducer,
+    tab.viewState.editAttr || defaultViewState
+  );
+
+  const { activeTab, editTabs, lastIndex } = localState;
+
+  useEffect(() => {
+    if (tab.lastTab && tab.lastIndex) {
+      localDispatch(setActiveTab(tab.lastTab, tab.lastIndex));
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(
+        updateTab({
+          tabId: tab.tabId,
+          side,
+          keypath: 'viewState.editAttr',
+          updates: { ...localState },
+        })
+      );
+    };
+  }, [localState]);
+
+  const columns = both ? 1 : 2;
+
+  const handleTabClick = (name: string, index: number) => {
+    localDispatch(setActiveTab(name as AttrPropertyTypes, index));
+  };
+
+  const { ref, height } = usePageBoxContext();
 
   return (
     <Box
+      id={`edit-attribute-${tab.id}`}
+      ref={ref}
       sx={{
-        display: 'grid',
-        gridTemplateColumns: ['1fr', '1fr', `repeat(${columns}, 1fr)`],
-        gridTemplateRows: 'auto',
-        alignItems: 'start',
-        justifyContent: 'start',
-        my: 2,
-        gap: 2,
+        height: '100%',
+        transition: 'height 0.4s ease-in-out',
+        overflow: typeof height === 'number' ? 'hidden' : 'auto',
         width: '100%',
-        position: 'relative',
-        // pb: 4,
-        overflowY: 'auto',
-        maxHeight: 'calc(100vh - 125px)',
+        px: 2,
+        boxSizing: 'border-box',
       }}
     >
-      <AttrMetaData />
-      <Divider sx={{ gridColumn: 'span 3' }} />
-      <TitledCollapse
-        title="Values"
-        titleType="h6"
-        open={values}
-        styles={{ width: '100%', marginBottom: 2 }}
-        boxSx={{
-          gridColumn: `span 3`,
-        }}
-        toggleOpen={() => setValues(!values)}
-      >
-        <AttrValues columns={columns} />
-      </TitledCollapse>
-      <TitledCollapse
-        title="Settlement Point Costs"
-        titleType="h6"
-        open={spCosts}
-        styles={{ width: '100%', marginBottom: 2 }}
-        boxSx={{ gridColumn: 'span 3' }}
-        toggleOpen={() => setSpCosts(!spCosts)}
-      >
-        <SettlementPointsCost />
-      </TitledCollapse>
-      <TitledCollapse
-        title="Thresholds"
-        titleType="h6"
-        open={thresholds}
-        styles={{ width: '100%', marginBottom: 2 }}
-        boxSx={{ gridColumn: 'span 3' }}
-        toggleOpen={() => setThresholds(!thresholds)}
-      >
-        <ObjectThresholds />
-      </TitledCollapse>
-      <TitledCollapse
-        title={`Tags (${attr?.tags?.length} / 5)`}
-        titleType="h6"
-        open={tags}
-        styles={{ width: '100%', marginBottom: 2 }}
-        boxSx={{ gridColumn: 'span 3' }}
-        toggleOpen={() => setTags(!tags)}
-      >
-        <TagTable />
-      </TitledCollapse>
+      <TabbedContent
+        tabs={Object.values(editTabs).map((tab: TabbedContentTabs) => ({
+          ...tab,
+          disabled: tab.disabled || false,
+          props: {
+            localDispatch,
+          },
+        }))}
+        componentMap={editAttrComponentMap}
+        activeTab={activeTab}
+        handleTabClick={handleTabClick}
+        columns={columns}
+        lastIndex={lastIndex}
+      />
     </Box>
   );
 };

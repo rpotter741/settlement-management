@@ -14,8 +14,9 @@ import {
 } from '@/app/slice/sidePanelSlice.js';
 import { sidePanelSelectors as select } from '../app/selectors/sidePanelSelectors.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
-import { OptionObject } from '@/app/types/SidePanelTypes.js';
+import { OptionObject, TabTools } from '@/app/types/SidePanelTypes.js';
 import { set } from 'lodash';
+import { v4 as newId } from 'uuid';
 
 export type SidePanelSide = 'left' | 'right';
 
@@ -28,21 +29,21 @@ export const useSidePanelActions = () => {
       id,
       mode,
       tool,
-      tabId,
-      scroll,
+      tabId = newId(),
+      scroll = 0,
       activate = false,
       side,
       preventSplit = false,
       tabType = 'tool',
       disableMenu = false,
       glossaryId = undefined,
-    }: TabDataPayload) => {
+    }: Partial<TabDataPayload>) => {
       dispatch(
         addTab({
           name,
-          id,
-          mode,
-          tool,
+          id: id as string,
+          mode: mode as 'preview' | 'edit',
+          tool: tool as TabTools,
           tabId,
           scroll,
           activate,

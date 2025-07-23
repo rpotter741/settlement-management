@@ -1,1 +1,0 @@
-import{r as e}from"./main.js";const o=e.createContext(void 0),n=()=>{const t=e.useContext(o);if(!t)throw new Error("useShellContext must be used within a ToolProvider");return t};export{o as S,n as u};

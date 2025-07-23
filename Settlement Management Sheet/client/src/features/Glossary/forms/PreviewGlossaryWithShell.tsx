@@ -43,14 +43,20 @@ const PreviewGlossaryWithShell: React.FC = () => {
   const { entryType }: { entryType: string } = node;
 
   return (
-    <Box sx={{ display: 'flex', height: '100%', width: '100%' }}>
+    <Box
+      sx={{
+        display: 'grid',
+        height: '100%',
+        width: '100%',
+        gridTemplateColumns: '2fr 1fr',
+      }}
+    >
       <Box
         sx={{
-          width: '66.6667%',
+          width: '100%',
           py: 2,
-          border: '1px solid',
+          // borderLeft: '1px solid',
           borderColor: 'divider',
-          borderRight: 0,
           display: 'flex',
           flexDirection: 'column',
         }}

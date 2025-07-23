@@ -8,8 +8,13 @@ export type GlossaryEntryArrayKeys = 'regions' | 'climate' | 'type';
 
 export interface GlossaryStateEntry {
   name: string;
-  description: string;
+  description: {
+    markdown: string;
+    string: string;
+  };
   id: string;
+  genre: string;
+  subGenre: string;
   hydrated: boolean;
   loading: boolean;
   error: string | null;
@@ -23,7 +28,18 @@ export interface GlossaryStateEntry {
     }
   >;
   entries: Record<string, GlossaryEntry>;
-  options: Record<string, Partial<GlossaryEntry>>;
+  options: Record<
+    string,
+    Partial<
+      Record<
+        keyof GlossaryEntry,
+        Record<
+          'inherited' | 'local' | 'other',
+          Array<{ id: string; name: string; [key: string]: any }>
+        >
+      >
+    >
+  >;
 }
 
 export interface GlossaryState {
@@ -33,8 +49,6 @@ export interface GlossaryState {
     message: string;
     type: 'error' | 'success' | 'info' | 'warning';
     duration: number;
-    rollback?: any;
-    rollbackFn?: (rollback: any) => void;
   } | null;
 }
 
@@ -71,5 +85,4 @@ export interface GlossaryDirectoryProps {
     parentId: string | null;
     entryType: GlossaryEntryType;
   }) => void;
-  handleCreateGlossary: () => void;
 }

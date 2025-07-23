@@ -64,12 +64,11 @@ const ConfirmDirtyClose: React.FC<{
         id,
         tabId,
         side,
-        validationFields: tabMap[tool as ToolName].validationFields,
+        validationFields:
+          tabMap[tab.tabType][tool as ToolName].validationFields || [],
       })
     );
-    console.log('before modal content');
     closeModal();
-    console.log('after modal content');
     onClose();
   };
 

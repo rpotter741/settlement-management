@@ -12,14 +12,17 @@ export interface Tab {
   tool: TabTools; // the tool or glossary entry type associated with this tab
   id: string; // unique identifier for the tool or glossary entry
   tabId: string; // unique identifier for the tab
-  scroll: number; // scroll position of the tab content
   preventSplit: boolean; // whether this tab should prevent splitting
-  isDirty: boolean; // whether the tab has unsaved changes
   tabType: TabType; // the type of tab, e.g., 'glossary', 'tool', 'editGlossary'
   disableMenu?: boolean; // whether to disable the file menu for this tab
   glossaryId?: string; // the Id of the glossary this tab may belong to
-  tabExpansionState?: Record<string, boolean>; // state of tab expansion for each section
-  lastFocusedElement?: string; // the last focused element in the tab
+  viewState: {
+    isDirty: boolean;
+    scroll: number;
+    lastUpdated?: Record<string, number>; // timestamps for when the tab was last updated
+    lastFocusedElement?: string; // the last focused element in the tab
+    [key: string]: any; // additional properties can be added as needed
+  }; // state specific to this tab, such as last updated time or active index
 }
 
 export interface TabState {

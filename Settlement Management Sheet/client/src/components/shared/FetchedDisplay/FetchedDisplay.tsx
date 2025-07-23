@@ -4,7 +4,7 @@ import services from '@/services/toolServices.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
 import { useTools } from 'hooks/useTools.jsx';
 
-import capitalize from 'utility/capitalize.js';
+import capitalize from '@/utility/inputs/capitalize.js';
 
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/TableList.jsx';

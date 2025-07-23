@@ -4,6 +4,7 @@ import { GlossaryEntry, GlossaryNode } from '../../../../types/index.js';
 import { GlossaryState } from '../types/GlossaryTypes.js';
 import { rehydrateGlossaryTree } from '../../features/Glossary/helpers/rehydrateGlossary.js';
 import sortByIndex from '../../features/Glossary/helpers/sortByIndex.js';
+import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
 
 const defaultGlossaryState: GlossaryState = {
   glossaries: {},
@@ -20,14 +21,21 @@ const glossarySlice = createSlice({
       action: PayloadAction<{
         glossaryId: string;
         name: string;
-        description: string;
+        description: {
+          markdown: string;
+          string: string;
+        };
+        genre: Genre;
+        subGenre: string;
       }>
     ) => {
-      const { glossaryId, name, description } = action.payload;
+      const { glossaryId, name, description, genre, subGenre } = action.payload;
       state.glossaries[glossaryId] = {
         name,
         description,
         id: glossaryId,
+        genre,
+        subGenre,
         hydrated: false,
         loading: true,
         error: null,
@@ -67,15 +75,13 @@ const glossarySlice = createSlice({
       state,
       action: PayloadAction<{
         id: string;
-        name: string;
-        description: string;
+        updates: Record<string, any>;
       }>
     ) => {
-      const { id, name, description } = action.payload;
+      const { id, updates } = action.payload;
       const glossary = state.glossaries[id];
       if (glossary) {
-        glossary.name = name;
-        glossary.description = description;
+        Object.assign(glossary, updates);
       } else {
         console.warn(`Glossary with id ${id} not found for update.`);
       }
@@ -293,16 +299,20 @@ const glossarySlice = createSlice({
       action: PayloadAction<{
         glossaryId: string;
         entryId: string;
-        options: Partial<GlossaryEntry>;
+        property: keyof GlossaryEntry;
+        options: Record<'inherited' | 'local' | 'other', string[]>;
       }>
     ) => {
-      const { glossaryId, entryId, options } = action.payload;
+      const { glossaryId, entryId, property, options } = action.payload;
       const glossary = state.glossaries[glossaryId];
       if (glossary) {
         if (!glossary.options[entryId]) {
+          console.warn(
+            `Entry ${entryId} not found in glossary ${glossaryId}. Creating...`
+          );
           glossary.options[entryId] = {};
         }
-        Object.assign(glossary.options[entryId], options);
+        glossary.options[entryId][property] = options;
       }
     },
   },
@@ -325,6 +335,7 @@ export const {
   toggleNameEdit,
   addGlossaryEntry,
   removeGlossary,
+  addOptionsForEntry,
 } = glossarySlice.actions;
 
 export default glossarySlice.reducer;

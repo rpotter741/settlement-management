@@ -1,5 +1,3 @@
-import ConfirmDelete from '@/features/Glossary/ConfirmDeleteEntry.js';
-import NameNewGlossary from '@/features/Glossary/NameNewGlossary.js';
 import React from 'react';
 
 export const modalMap: Record<

@@ -109,7 +109,7 @@ const PreviewAttribute = () => {
             Type:
           </Typography>
           <Typography variant="body1">
-            {attr?.positive ? 'Positive' : 'Negative'}
+            {attr?.isPositive ? 'Positive' : 'Negative'}
           </Typography>
         </Box>
       </Box>
@@ -131,19 +131,15 @@ const PreviewAttribute = () => {
           columnGap: 2,
         }}
       >
-        <RowDisplay
-          name="Max"
-          value={attr?.balance?.maxPerLevel}
-          even={false}
-        />
+        <RowDisplay name="Max" value={attr?.balance?.max?.base} even={false} />
         <RowDisplay
           name="Health"
-          value={attr?.balance?.healthPerLevel}
+          value={attr?.balance?.health?.base}
           even={true}
         />
         <RowDisplay
           name="Cost"
-          value={attr?.balance?.costPerLevel}
+          value={attr?.balance?.cost?.base}
           even={false}
         />
       </Box>

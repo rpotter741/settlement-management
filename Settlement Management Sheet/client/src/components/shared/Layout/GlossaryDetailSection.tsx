@@ -41,9 +41,9 @@ const GlossaryDetailSection: React.FC<GlossaryDetailSectionProps> = ({
   return (
     <Box
       sx={{
-        width: '33.3333%',
+        width: '100%',
         p: 2,
-        border: '1px solid',
+        borderLeft: '1px solid',
         borderColor: 'divider',
       }}
     >

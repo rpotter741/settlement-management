@@ -5,7 +5,6 @@ import {
   Attribute,
   Category,
   BuildingTool,
-  FactionEntry,
   KeyTool,
   KitTool,
   ListenerPack,
@@ -103,10 +102,14 @@ export interface Icon {
   backgroundColor?: string;
 }
 
+export interface BasePerLevel {
+  base: number;
+  perLevel: number;
+}
 export interface Balance {
-  maxPerLevel: number;
-  costPerLevel: number;
-  healthPerLevel: number;
+  max: BasePerLevel;
+  cost: BasePerLevel;
+  health: BasePerLevel;
 }
 
 export interface Threshold {

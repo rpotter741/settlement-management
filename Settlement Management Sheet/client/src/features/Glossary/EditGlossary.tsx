@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/app/store.js';
-import PageBox from '@/components/shared/Layout/PageBox.js';
+import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
 import thunks from '@/app/thunks/glossaryThunks.js';
 import {
   selectActiveId,
@@ -25,6 +25,9 @@ import { setTabDirty } from '@/app/slice/sidePanelSlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { TitledCollapse } from '@/components/index.js';
 import { useModalActions } from '@/hooks/useModal.js';
+import { useShellContext } from '@/context/ShellContext.js';
+import CustomizePalette from './forms/CustomizePalette.js';
+import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
 
 const EditGlossary: React.FC = () => {
   const activeId = useSelector(selectActiveId());
@@ -42,7 +45,7 @@ const EditGlossary: React.FC = () => {
   const { showModal } = useModalActions();
 
   const tabDirty = useSelector(isTabDirty(activeId));
-  const activeTab = useSelector(focusedTab);
+  const focus = useSelector(focusedTab);
 
   useEffect(() => {
     if ((isNameDirty || isDescriptionDirty) && !tabDirty) {
@@ -85,15 +88,23 @@ const EditGlossary: React.FC = () => {
     }
   };
 
-  return (
-    <PageBox
-      innerStyle={{
-        border: '1px solid',
-        borderColor: 'primary.main',
-      }}
-    >
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5">Configure {glossary.name}</Typography>
+  const [activeTab, setActiveTab] = useState('Overview');
+  const [lastIndex, setLastIndex] = useState(0);
+  const handleTabClick = (tabKey: string, index: number) => {
+    setActiveTab(tabKey);
+    setLastIndex(index);
+  };
+
+  const editGlossaryTabs = [
+    { name: 'Overview', props: {} },
+    { name: 'Terms', props: {} },
+    { name: 'Settings', props: {} },
+    { name: 'Palette', props: {} },
+  ];
+
+  const editGlossaryComponentMap = {
+    Overview: () => (
+      <Box sx={{ p: 2 }}>
         <TextField
           label="Glossary Name"
           variant="outlined"
@@ -113,7 +124,6 @@ const EditGlossary: React.FC = () => {
               ),
             },
           }}
-          sx={{ width: '100%' }}
         />
         <TextField
           label="Description"
@@ -169,13 +179,29 @@ const EditGlossary: React.FC = () => {
             Reset
           </Button>
         </Box>
-        <Divider flexItem>
-          <Chip
-            label={<Typography variant="h6">Palette Settings</Typography>}
-            icon={<Palette />}
-          />
-        </Divider>
       </Box>
+    ),
+    Terms: () => <div>Terms Component</div>,
+    Settings: () => <div>Settings Component</div>,
+    Palette: () => <CustomizePalette column={false} />,
+  };
+
+  return (
+    <PageBox
+      innerStyle={{
+        border: '1px solid',
+        borderColor: 'primary.main',
+      }}
+      mode={'edit'}
+    >
+      <TabbedContent
+        tabs={editGlossaryTabs}
+        componentMap={editGlossaryComponentMap}
+        activeTab={activeTab}
+        handleTabClick={handleTabClick}
+        lastIndex={lastIndex}
+        isTool={false}
+      />
       <Button
         onClick={() => {
           const entry = {
@@ -196,3 +222,89 @@ const EditGlossary: React.FC = () => {
 };
 
 export default EditGlossary;
+
+// <Box sx={{ mt: 4 }}>
+//   <Typography variant="h5">Configure {glossary.name}</Typography>
+//   <TextField
+//     label="Glossary Name"
+//     variant="outlined"
+//     fullWidth
+//     margin="normal"
+//     value={name}
+//     onChange={(e) => setName(e.target.value)}
+//     slotProps={{
+//       input: {
+//         endAdornment: (
+//           <Circle
+//             sx={{
+//               color: !isNameDirty ? 'transparent' : 'error.main',
+//               fontSize: '.75rem',
+//             }}
+//           />
+//         ),
+//       },
+//     }}
+//     sx={{ width: '100%' }}
+//   />
+//   <TextField
+//     label="Description"
+//     variant="outlined"
+//     fullWidth
+//     margin="normal"
+//     value={description}
+//     onChange={(e) => setDescription(e.target.value)}
+//     multiline
+//     minRows={6}
+//     slotProps={{
+//       input: {
+//         endAdornment: (
+//           <Circle
+//             sx={{
+//               color: !isDescriptionDirty ? 'transparent' : 'error.main',
+//               fontSize: '.75rem',
+//             }}
+//           />
+//         ),
+//       },
+//     }}
+//   />
+//   <Box
+//     sx={{
+//       display: 'flex',
+//       alignItems: 'center',
+//       justifyContent: 'space-between',
+//       my: 2,
+//     }}
+//   >
+//     <Button
+//       disabled={!tabDirty}
+//       variant="contained"
+//       color={'success'}
+//       onClick={handleSave}
+//       sx={{ opacity: tabDirty ? 1 : 0 }}
+//     >
+//       Save Changes
+//     </Button>
+//     <Button
+//       variant="outlined"
+//       disabled={!tabDirty}
+//       onClick={() => {
+//         setName(glossary.name);
+//         setDescription(glossary.description);
+//         setIsNameDirty(false);
+//         setIsDescriptionDirty(false);
+//         dispatch(setTabDirty({ id: activeId, isDirty: false }));
+//       }}
+//       sx={{ opacity: tabDirty ? 1 : 0 }}
+//     >
+//       Reset
+//     </Button>
+//   </Box>
+//   <Divider flexItem>
+//     <Chip
+//       label={<Typography variant="h6">Palette Settings</Typography>}
+//       icon={<Palette />}
+//     />
+//   </Divider>
+//   <CustomizePalette column={false} />
+// </Box>;

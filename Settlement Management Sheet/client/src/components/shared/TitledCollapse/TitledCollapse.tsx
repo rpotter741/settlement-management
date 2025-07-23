@@ -12,6 +12,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Delete as TrashIcon,
 } from '@mui/icons-material';
+import FramerCollapse from './FramerCollapse.js';
 
 interface TitledCollapseProps {
   title: string;
@@ -27,6 +28,7 @@ interface TitledCollapseProps {
   titleSx?: Record<string, any>;
   childContainerSx?: Record<string, any>;
   iconButtonSx?: Record<string, any>;
+  noDividerOnOpen?: boolean;
   [key: string]: any; // Allow additional props
 }
 
@@ -44,10 +46,12 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
   titleSx,
   childContainerSx,
   iconButtonSx,
+  noDividerOnOpen = false,
   ...props
 }) => {
+  const [closing, setClosing] = useState(false);
   return (
-    <Box sx={{ width: '100%', borderRadius: 4, ...boxSx, overflowY: 'hidden' }}>
+    <Box sx={{ width: '100%', ...boxSx, overflowY: 'hidden' }}>
       {/* Title Bar */}
       <Box
         sx={{
@@ -67,19 +71,19 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
       >
         {props?.icon && React.createElement(props.icon, { ...props.iconProps })}
         {/* Title */}
-        <Typography
-          variant={titleType}
-          sx={{
-            fontWeight: 'bold',
-            color: color || 'inherit',
-            ...titleSx,
-          }}
-        >
-          {title}
-        </Typography>
         <Tooltip title={open ? 'Collapse' : 'Expand'}>
           <IconButton
-            onClick={toggleOpen}
+            onClick={() => {
+              if (open) {
+                setClosing(true);
+                setTimeout(() => {
+                  setClosing(false);
+                }, 266); // Delay to allow collapse animation
+              } else {
+                setClosing(false);
+              }
+              toggleOpen();
+            }}
             size="small"
             sx={{
               transform: open ? 'rotate(360deg)' : 'rotate(270deg)',
@@ -90,8 +94,18 @@ const TitledCollapse: React.FC<TitledCollapseProps> = ({
             <ExpandMoreIcon />
           </IconButton>
         </Tooltip>
+        <Typography
+          variant={titleType}
+          sx={{
+            fontWeight: 'bold',
+            color: color || 'inherit',
+            ...titleSx,
+          }}
+        >
+          {title}
+        </Typography>
       </Box>
-      <Divider sx={{ gridColumn: 'span 3' }} />
+      {!noDividerOnOpen ? <Divider sx={{ gridColumn: 'span 3' }} /> : null}
       {/* Collapsible Content */}
       <Collapse in={open} timeout="auto" unmountOnExit>
         {onRemove && (

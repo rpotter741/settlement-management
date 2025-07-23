@@ -52,6 +52,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <ListItemButton

@@ -25,9 +25,9 @@ const themeOptions = {
         contrastText: '#FFFFFF',
       },
       warning: {
-        main: '#f2be22',
-        light: '#f8d469',
-        dark: '#b68d00',
+        main: '#f28c28',
+        light: '#f7b36b',
+        dark: '#c56a1a',
         contrastText: '#242424',
       },
       info: {
@@ -44,8 +44,8 @@ const themeOptions = {
       },
 
       background: {
-        default: '#f5f0e6', // General background color
-        paper: '#fbf7ef', // Used for cards, modals, etc.
+        default: '#fbf7ef', // General background color
+        paper: '#f5f0e6', // Used for cards, modals, etc.
       },
       text: {
         primary: '#242424', // Main text color
@@ -112,9 +112,9 @@ const themeOptions = {
         contrastText: '#ffffff',
       },
       warning: {
-        main: '#f2be22',
-        light: '#f8d469',
-        dark: '#b68d00',
+        main: '#ff9f1c',
+        light: '#ffc266',
+        dark: '#cc7a00',
         contrastText: '#000000',
       },
       info: {

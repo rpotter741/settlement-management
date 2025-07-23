@@ -40,7 +40,6 @@ const sidePanelSlice = createSlice({
         id,
         tool,
         tabId,
-        scroll,
         activate,
         side = 'left',
         preventSplit = false,
@@ -55,9 +54,12 @@ const sidePanelSlice = createSlice({
         side,
         tool,
         tabId,
-        scroll,
+        viewState: {
+          scroll: 0,
+          isDirty: false,
+          lastUpdated: {},
+        },
         preventSplit,
-        isDirty: false,
         tabType,
         disableMenu,
         glossaryId,
@@ -281,13 +283,13 @@ const sidePanelSlice = createSlice({
       const leftIndex = state.leftTabs.findIndex((tab) => tab.id === id);
       const rightIndex = state.rightTabs.findIndex((tab) => tab.id === id);
       if (leftIndex !== -1) {
-        set(state.leftTabs[leftIndex], 'isDirty', isDirty);
+        set(state.leftTabs[leftIndex], 'viewState.isDirty', isDirty);
       }
       if (rightIndex !== -1) {
-        set(state.rightTabs[rightIndex], 'isDirty', isDirty);
+        set(state.rightTabs[rightIndex], 'viewState.isDirty', isDirty);
       }
       if (state.focusedTab?.id === id) {
-        state.focusedTab.isDirty = isDirty;
+        state.focusedTab.viewState.isDirty = isDirty;
       }
     },
     setActiveTab: (state, action: PayloadAction<{ tab: Tab }>) => {

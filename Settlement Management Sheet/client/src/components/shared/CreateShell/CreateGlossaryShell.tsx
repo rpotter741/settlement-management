@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { ShellContext } from '@/context/ShellContext.js';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
-import PageBox from '../Layout/PageBox.js';
-import { selectActiveId } from '@/app/selectors/glossarySelectors.js';
+import PageBox from '../Layout/PageBox/PageBox.js';
+import {
+  selectActiveId,
+  selectGlossaryNodes,
+} from '@/app/selectors/glossarySelectors.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
 import useNodeEditor from '@/hooks/useNodeEditor.js';
-import { updateGlossaryEntry } from '@/app/slice/glossarySlice.js';
-import EditFieldWithButton from '../Layout/EditFieldWithButton.js';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { useModalActions } from '@/hooks/useModal.js';
-import { getGlossaryEntryById } from '@/app/thunks/glossaryThunks.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
+import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 
 interface CreateGlossaryShellProps {
   tab: Tab;
@@ -30,50 +31,83 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   editComponentProps,
   previewComponent,
   previewComponentProps,
-  pageVariant = 'default',
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { showModal, closeModal } = useModalActions();
   const { tool, id, mode, side, tabId, glossaryId, tabType } = tab;
 
+  const updateLastSaved = (keypath: string) => {
+    const lastSaved = cloneDeep(tab.viewState.lastSaved || {});
+    lastSaved[keypath] = new Date().toISOString();
+    dispatch(
+      updateTab({
+        tabId,
+        side,
+        keypath: 'viewState.lastUpdated',
+        updates: lastSaved,
+      })
+    );
+  };
+
   if (!glossaryId) return null;
 
-  const {
-    updateGlossaryEntry: update,
-    node,
-    entry,
-    getLocalStorage,
-    setLocalStorage,
-    clearLocalStorage,
-    localIsNewer,
-  } = useNodeEditor(glossaryId, id);
+  const { node, entry } = useNodeEditor(glossaryId, id);
+
+  const nodeStructure = useSelector(selectGlossaryNodes(glossaryId));
+
+  const inheritanceMap = useMemo(() => {
+    return getOptionsContextMaps({ node, nodeStructure });
+  }, [node, nodeStructure]);
 
   const { splitSize, soloSize, splitTabs } = useTabSplit();
 
+  const shellContextValue = useMemo(
+    () => ({
+      tab,
+      tool,
+      id,
+      mode,
+      side,
+      tabId,
+      glossaryId,
+      entry,
+      node,
+      inheritanceMap,
+      updateLastSaved,
+      showModal,
+      closeModal,
+    }),
+    [
+      tab,
+      tool,
+      id,
+      mode,
+      side,
+      tabId,
+      glossaryId,
+      entry,
+      updateLastSaved,
+      showModal,
+      closeModal,
+      node,
+      inheritanceMap,
+    ]
+  );
+
+  // const getVariant = () => {
+  //   if (mode === 'preview' && splitTabs) return 'fullWidth';
+  // };
+
   if (!entry) {
-    return <PageBox variant="default">Loading...</PageBox>;
+    return (
+      <PageBox mode={mode} variant="default">
+        Loading...
+      </PageBox>
+    );
   }
 
   return (
-    <ShellContext.Provider
-      value={{
-        tool,
-        id,
-        mode,
-        side,
-        tabId,
-        glossaryId,
-        update,
-        entry,
-        getLocalStorage,
-        setLocalStorage,
-        clearLocalStorage,
-        localIsNewer,
-        showModal,
-        closeModal,
-        node,
-      }}
-    >
+    <ShellContext.Provider value={shellContextValue}>
       <PageBox
         variant={
           !splitTabs
