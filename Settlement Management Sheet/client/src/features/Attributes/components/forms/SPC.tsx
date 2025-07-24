@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
 import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
-import useOrderedData from '@/hooks/useOrderedData.js';
+import useOrderedData from '@/hooks/utility/useOrderedData.js';
 
 import {
   Box,

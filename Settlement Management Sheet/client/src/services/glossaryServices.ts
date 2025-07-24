@@ -5,6 +5,7 @@ import getGlossaries from './glossary/getGlossaries.js';
 import getGlossaryById from './glossary/getGlossaryById.js';
 import updateGlossary from './glossary/updateGlossary.js';
 // node services
+import createNodeAndDetail from './glossary/nodes/createNodeAndDetail.js';
 import createNodeAndSection from './glossary/nodes/createNodeAndSection.js';
 import getNodes from './glossary/nodes/getNodes.js';
 import renameNodeAndEntry from './glossary/nodes/renameNodeAndEntry.js';
@@ -23,6 +24,7 @@ const actions = {
   getGlossaryById,
   updateGlossary,
   // node actions
+  createNodeAndDetail,
   createNodeAndSection,
   getNodes,
   renameNodeAndEntry,

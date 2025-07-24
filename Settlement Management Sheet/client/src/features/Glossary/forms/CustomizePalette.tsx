@@ -200,6 +200,7 @@ const CustomizePaletteKey: React.FC<CustomizePaletteKeyProps> = ({
         <ColorPicker
           key={variant}
           feature={capitalize(variant)}
+          //@ts-ignore
           sourceColor={theme.palette[themeKey][variant]}
           onChange={handleColorChange(variant)}
         />
@@ -275,6 +276,7 @@ const CustomizePalette = ({ column }: { column: boolean }) => {
     setThemeState((prev) => ({
       ...prev,
       [key]: {
+        // @ts-ignore
         ...prev[key],
         [shade]: color,
       },

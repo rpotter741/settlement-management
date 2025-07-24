@@ -4,12 +4,12 @@ import {
 } from '@/app/slice/glossarySlice.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
 import { AppDispatch } from '@/app/store.js';
-import { renameNodeAndEntry } from '@/app/thunks/glossaryThunks.js';
+import thunks from '@/app/thunks/glossaryThunks.js';
 import EditFieldWithButton from '@/components/shared/Layout/EditFieldWithButton.js';
 import ShellEditor from '@/components/shared/TipTap/ShellEditor.js';
 import { useShellContext } from '@/context/ShellContext.js';
 import AttributeTagsTable from '@/features/Attributes/components/forms/TagTable.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -50,7 +50,7 @@ const OverviewTab = () => {
     setName(newName);
     dispatch(updateTab({ tabId, side, keypath: 'name', updates: newName }));
     dispatch(
-      renameNodeAndEntry({
+      thunks.renameNodeAndEntry({
         node,
       })
     );

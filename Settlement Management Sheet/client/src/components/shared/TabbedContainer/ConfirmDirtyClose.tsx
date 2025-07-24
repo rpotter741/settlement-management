@@ -13,7 +13,7 @@ import { AppDispatch } from '@/app/store.js';
 import { tabMap } from '@/maps/tabMap.js';
 import { set } from 'lodash';
 import { useSidePanel } from '@/hooks/useSidePanel.js';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 
 const ConfirmDirtyClose: React.FC<{
   tab: Tab;

@@ -1,15 +1,11 @@
-import React, { useEffect, useState, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 
-import { Box, Divider, Tab, Tabs } from '@mui/material';
-import { TitledCollapse } from '../../../../components/index.js';
+import { Box } from '@mui/material';
 
-import AttrMetaData from '../forms/AttrMetaData.jsx';
 import AttrValues from '../forms/AttrValues.jsx';
 import SettlementPointsCost from '../forms/SPC.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
-import TagTable from '../forms/TagTable.jsx';
 
-import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import AttrProperties from '../forms/AttrProperties.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';

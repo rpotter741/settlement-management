@@ -1,3 +1,4 @@
+import { Genre } from '../client/src/components/shared/Metadata/GenreSelect.js';
 import { UUID, Timestamp, ContentType, EventSeverity } from './index';
 
 export interface GlossaryNode {
@@ -414,7 +415,12 @@ export type GlossaryEntryType =
 export interface Glossary {
   id: UUID;
   name: string;
-  description: string;
+  description: {
+    markdown: string;
+    string: string;
+  };
+  genre: Genre;
+  subGenre: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   createdBy: UUID;

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { useDispatch } from 'react-redux';
 import toolServices from '@/services/toolServices.js';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
 
 import { get } from 'lodash';
 

@@ -1,6 +1,6 @@
 import { Tab } from '@/app/types/SidePanelTypes.js';
 import CreateGlossaryShell from '@/components/shared/CreateShell/CreateGlossaryShell.js';
-import EditGlossaryEntryForm from './EditGlossaryWithShell.js';
+import EditGlossaryEntryForm from './EditGlossaryEntryWithShell.js';
 import PreviewGlossaryWithShell from './PreviewGlossaryWithShell.js';
 
 interface LandmarkFormProps {

@@ -5,7 +5,7 @@ import { Box, Typography, Button } from '@mui/material';
 
 import AttributeCard from 'components/shared/AttributeCard/AttributeCard.tsx';
 
-import useFetchReferences from 'hooks/useFetchReferences.jsx';
+import useFetchReferences from '@/hooks/utility/useFetchReferences.js';
 
 const CategoryAttributes = ({ setShowModal, id }) => {
   const { current, edit, updateTool, validateToolField } = useTools(

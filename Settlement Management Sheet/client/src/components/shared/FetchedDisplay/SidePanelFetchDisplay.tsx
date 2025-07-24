@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import queryClient from 'context/QueryClient.js';
 import services from '@/services/toolServices.js';
-import usePaginatedTool from 'services/usePaginatedTool.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 
 import capitalize from '@/utility/inputs/capitalize.js';
 
-import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';
 import TableList from 'components/shared/TableList/SmallTableList.jsx';
 import { Box } from '@mui/system';
 import { Typography } from '@mui/material';

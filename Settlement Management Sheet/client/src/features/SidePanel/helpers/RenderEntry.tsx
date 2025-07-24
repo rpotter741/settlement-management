@@ -6,7 +6,7 @@ import {
   ListItemIcon,
   Typography,
 } from '@mui/material';
-import { useSidePanel } from '@/hooks/useSidePanel.js';
+import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import getTrail from '@/features/SidePanel/getTrail.js';
 import { v4 as newId } from 'uuid';
 import structure from '../structure.js';

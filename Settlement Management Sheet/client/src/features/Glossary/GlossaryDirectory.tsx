@@ -43,7 +43,7 @@ import {
 } from '../../../../types/glossaryEntry.js';
 import { useTheme } from '@/context/ThemeContext.js';
 import { useSelector, useDispatch } from 'react-redux';
-import { useSidePanel } from '@/hooks/useSidePanel.js';
+import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import {
   nodeRenderState,
   selectActiveId,

@@ -1,39 +1,68 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import EditorToolbarMenu from './Menu.js';
 import { EditorProvider } from '@tiptap/react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { format } from 'timeago.js';
 import { alpha, useTheme } from '@mui/material/styles';
 import { debounce, set } from 'lodash';
 import tipTapExtensions from './extensions/extensions.js';
+import useTimeout from '@/hooks/utility/useTimeout.js';
+import useInterval from '@/hooks/utility/useInterval.js';
 
 type EditorProps = {
   html?: string;
   minHeight?: string;
   maxHeight?: string;
-  propUpdate?: (updates: Record<string, any>) => void;
+  propUpdate?: ({
+    description,
+    dataString,
+  }: {
+    description: string;
+    dataString: string;
+  }) => void;
+  immediateOnChange?: () => void;
 };
 
 const debouncedUpdate = debounce((callback, value, text) => {
   callback({ description: value, dataString: text.trim() });
 }, 1000);
 
+const debouncedSetLastSaved = debounce((updateLastSaved) => {
+  updateLastSaved(new Date());
+}, 1000);
+
 const Editor: React.FC<EditorProps> = ({
   html = '',
   minHeight = '300px',
   maxHeight = '1000px',
-  propUpdate = (updates: Record<string, any>) => {},
+  propUpdate = () => {},
+  immediateOnChange = () => {},
 }) => {
   const theme = useTheme();
   const [content, setContent] = useState(html || '');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [formattedTime, setFormattedTime] = useState<string>('');
 
   const handleChange = (value: string, text: string) => {
+    immediateOnChange();
     debouncedUpdate(propUpdate, value, text);
+    debouncedSetLastSaved(setLastSaved);
   };
+
+  useEffect(() => {
+    setFormattedTime(format(lastSaved || new Date()));
+  }, [lastSaved]);
+
+  useInterval(() => {
+    if (lastSaved) {
+      setFormattedTime(format(lastSaved));
+    }
+  }, 10000);
 
   return (
     <Box>
       <Box
+        className="non-shell-editor"
         sx={{
           boxShadow: 2,
           border: `2px solid ${alpha(theme.palette.divider, 0.05)}`,
@@ -42,7 +71,8 @@ const Editor: React.FC<EditorProps> = ({
           minHeight,
           maxHeight,
           overflowY: 'auto',
-          borderRadius: 2,
+          borderRadius: '4px 4px 0 0',
+          borderBottom: 0,
           // minWidth: 300,
         }}
       >
@@ -57,6 +87,24 @@ const Editor: React.FC<EditorProps> = ({
             handleChange(value, text);
           }}
         />
+      </Box>
+      <Box sx={{ width: '100%', display: 'flex' }}>
+        {lastSaved && (
+          <Typography
+            variant="caption"
+            sx={{
+              width: '100%',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'secondary.main'
+                  : 'background.default',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            Last Saved: {formattedTime}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

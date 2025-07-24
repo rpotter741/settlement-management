@@ -29,6 +29,7 @@ const glossarySlice = createSlice({
         subGenre: string;
       }>
     ) => {
+      console.log('Initializing glossary:', action.payload);
       const { glossaryId, name, description, genre, subGenre } = action.payload;
       state.glossaries[glossaryId] = {
         name,

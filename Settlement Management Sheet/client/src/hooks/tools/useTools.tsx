@@ -1,12 +1,12 @@
-import { ToolName, Tool } from '../../../types/index.js';
+import { ToolName, Tool } from 'types/index.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
-import { validateField, validateTool } from '../app/slice/validationSlice.js';
-import api from '../services/interceptor.js';
+import { validateField, validateTool } from '@/app/slice/validationSlice.js';
+import api from '@/services/interceptor.js';
 import { saveTool } from '@/app/slice/toolSlice.js';
 import { toolSelectors as select } from '@/app/selectors/toolSelectors.js';
-import { loadTool, updateDirtyTool } from '../app/thunks/toolThunks.js';
-import { AppDispatch } from '../app/store.js';
+import { loadTool, updateDirtyTool } from '@/app/thunks/toolThunks.js';
+import { AppDispatch } from '@/app/store.js';
 
 export const useToolActions = (tool: ToolName, id: string) => {
   const dispatch: AppDispatch = useDispatch();

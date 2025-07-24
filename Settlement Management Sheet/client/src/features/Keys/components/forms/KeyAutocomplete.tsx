@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useDebounce } from 'hooks/useDebounce.jsx';
+import { useDebounce } from '@/hooks/utility/useDebounce.js';
 import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import api from 'services/interceptor.js';

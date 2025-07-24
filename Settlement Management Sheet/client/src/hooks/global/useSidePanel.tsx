@@ -12,7 +12,7 @@ import {
   setSplit,
   setPrevent,
 } from '@/app/slice/sidePanelSlice.js';
-import { sidePanelSelectors as select } from '../app/selectors/sidePanelSelectors.js';
+import { sidePanelSelectors as select } from '@/app/selectors/sidePanelSelectors.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { OptionObject, TabTools } from '@/app/types/SidePanelTypes.js';
 import { set } from 'lodash';

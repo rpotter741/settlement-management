@@ -69,7 +69,7 @@ import { TabTools } from '@/app/types/SidePanelTypes.js';
 import { returnTool } from '@/app/thunks/toolThunks.js';
 import CustomizePalette from '../Glossary/forms/CustomizePalette.js';
 import contextKeyComponentMap from '@/maps/contextKeyComponentMap.js';
-import { openEditGlossary } from '@/app/thunks/glossaryThunks.js';
+import glossaryThunks from '@/app/thunks/glossaryThunks.js';
 import { showModal } from '@/app/slice/modalSlice.js';
 
 interface ContextButton {
@@ -148,7 +148,7 @@ const modeContextButtons: Record<Mode, Array<ContextButton>> = {
     {
       modeTarget: 'Create New Glossary',
       icon: AddToPhotos,
-      onClick: openEditGlossary,
+      onClick: glossaryThunks.openEditGlossary,
       modalComponent: {
         componentKey: 'NameNewGlossary',
         props: {},
@@ -188,7 +188,7 @@ const SidePanel = () => {
     }
   }, [activeTab, contextKey]);
 
-  const borderColor = !activeContext ? 'primary.light' : 'secondary.main';
+  const borderColor = !activeContext ? 'primary.dark' : 'secondary.main';
 
   return (
     <Box
@@ -416,7 +416,10 @@ const SidePanel = () => {
                         .props,
                     };
 
-                    return <Component key={activeContext} {...props} />;
+                    // Ensure required 'column' prop is always passed
+                    return (
+                      <Component key={activeContext} column={true} {...props} />
+                    );
                   })()}
                 </Suspense>
               ) : (

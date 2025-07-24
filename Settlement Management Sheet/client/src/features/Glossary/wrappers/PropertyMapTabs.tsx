@@ -3,7 +3,7 @@ import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedConten
 import { PropertySectionDescriptors } from '../helpers/entryTypePropertyArray.js';
 import { GlossaryEntryType } from 'types/index.js';
 import { useShellContext } from '@/context/ShellContext.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import RenderPropertyMapTabs from './RenderPropertyMapTabs.js';
 import ShellEditor from '@/components/shared/TipTap/ShellEditor.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';

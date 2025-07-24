@@ -14,7 +14,7 @@ export default async function createNodeAndSection(req, res) {
     const entryModel = prisma.glossarySection;
     const contentType = 'OFFICIAL';
     const createdBy = req?.user?.id || 'robbiepottsdm';
-    const newVersion = version ? version : baseEntry?.version || 1;
+    const newVersion = version ?? 1;
 
     const geography = await prisma.glossaryGeography.create({
       data: { id, version: 1 },
@@ -42,7 +42,6 @@ export default async function createNodeAndSection(req, res) {
       id,
       name,
       entryType,
-      ...baseEntry,
       contentType,
       createdBy,
       geographyId: geography.id,
@@ -55,6 +54,7 @@ export default async function createNodeAndSection(req, res) {
 
     const [node, entry] = await prisma.$transaction([
       prisma.glossaryNode.create({ data: nodeData }),
+      // @ts-ignore
       entryModel.create({ data: entryInsert }),
     ]);
 

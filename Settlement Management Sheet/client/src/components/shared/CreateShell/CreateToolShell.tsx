@@ -1,35 +1,13 @@
-import React, { useMemo } from 'react';
-import { showSnackbar } from '@/app/slice/snackbarSlice.js';
-import { Box, Typography } from '@mui/material';
-import ValidationChecklist from '@/components/shared/ValidationChecklist/ValidationChecklist.jsx';
-import DesktopMenu from '@/components/shared/ToolMenu/DesktopMenu.jsx';
-import MobileMenu from '@/components/shared/ToolMenu/MobileMenu.jsx';
-import LoadTool from '@/components/shared/LoadTool/LoadTool.jsx';
-import toolServices from '@/services/toolServices.js';
-import { useTools } from '@/hooks/useTools.js';
-import { useInitializeTool } from '@/hooks/useInitializeTool.jsx';
-import {
-  initializeTool as initialize,
-  revertToStatic,
-} from '@/app/slice/toolSlice.js';
+import React from 'react';
+import { Box } from '@mui/material';
+import { useTools } from '@/hooks/tools/useTools.js';
+import { useInitializeTool } from '@/hooks/tools/useInitializeTool.jsx';
 import { ShellContext } from '@/context/ShellContext.js';
-import { useDispatch } from 'react-redux';
-import { setTabDirty, updateTab } from '@/app/slice/sidePanelSlice.js';
-import { useDebounce } from '@/hooks/useDebounce.jsx';
-import useDebouncedEffect from '@/hooks/useDebouncedEffect.jsx';
 import { ToolName } from '@/app/types/ToolTypes.js';
-import { validateTool } from '@/app/slice/validationSlice.js';
-import { cancelToolEdit } from '@/app/thunks/toolThunks.js';
-import { AppDispatch } from '@/app/store.js';
 import PageBox from '../Layout/PageBox/PageBox.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
-import { useModalActions } from '@/hooks/useModal.js';
-import { useMediaQuery } from '@mui/system';
-import { size, split } from 'lodash';
-import { useSelector } from 'react-redux';
-import { isSplit } from '@/app/selectors/sidePanelSelectors.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
-import useSharedHooks from '@/hooks/useSharedHooks.js';
 
 interface CreateShellProps {
   tab: Tab;

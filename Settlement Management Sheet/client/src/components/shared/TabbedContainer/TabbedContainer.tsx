@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { Box, Divider, Modal, useMediaQuery } from '@mui/material';
 
 import SidePanel from '@/features/SidePanel/SidePanel.jsx';
-import { useSidePanel } from '@/hooks/useSidePanel.jsx';
+import { useSidePanel } from '@/hooks/global/useSidePanel.jsx';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 
 import { TabDragProvider } from '@/context/DnD/TabDragContext.jsx';
@@ -30,7 +30,7 @@ import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import useToolHotkeys from '@/hooks/useGlobalHotkeys.js';
+import useToolHotkeys from '@/hooks/global/useGlobalHotkeys.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
 import {
   currentModal,
@@ -42,7 +42,7 @@ import {
 } from '@/app/selectors/modalSelectors.js';
 import { closeModal } from '@/app/slice/modalSlice.js';
 import { modalMap } from '@/maps/modalMap.js';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import { saveToolFile } from '@/app/thunks/fileMenuThunks.js';
 
 export type ModalContent = {

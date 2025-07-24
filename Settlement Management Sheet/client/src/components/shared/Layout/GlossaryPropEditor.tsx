@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { capitalize } from 'lodash';
 import { useShellContext } from '@/context/ShellContext.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { alphabetize } from '@/utility/alphabetizeStringArray.js';
 import { alpha, Box } from '@mui/system';
 import { Close, Delete } from '@mui/icons-material';

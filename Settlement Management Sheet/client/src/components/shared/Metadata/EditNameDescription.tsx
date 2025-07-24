@@ -4,8 +4,8 @@ import { useShellContext } from '@/context/ShellContext.js';
 import { useTools } from '@/hooks/useTools.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { useDebounce } from '@/hooks/useDebounce.js';
-import useDebouncedEffect from '@/hooks/useDebouncedEffect.js';
+import { useDebounce } from '@/hooks/utility/useDebounce.js';
+import useDebouncedEffect from '@/hooks/utility/useDebouncedEffect.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
 
 interface EditNameDescriptionProps {

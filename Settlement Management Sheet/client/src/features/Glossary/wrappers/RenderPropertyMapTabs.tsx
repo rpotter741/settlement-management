@@ -1,7 +1,7 @@
 import GlossaryAutocomplete from '@/components/shared/DynamicForm/GlossaryAutocomplete.js';
 import GlossaryPropEditor from '@/components/shared/Layout/GlossaryPropEditor.js';
 import { useShellContext } from '@/context/ShellContext.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 
 const RenderPropertyMapTabs = ({
   propertyMap,

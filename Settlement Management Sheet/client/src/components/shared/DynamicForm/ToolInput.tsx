@@ -1,13 +1,6 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  memo,
-  useContext,
-} from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { ShellContext } from '@/context/ShellContext.js';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 
 import { debounce } from 'lodash';
 import {
@@ -23,7 +16,6 @@ import {
   Info as InfoIcon,
   AutoStories,
   Delete,
-  SolarPower,
 } from '@mui/icons-material';
 
 import toSnakeCase from '@/utility/inputs/snakeCase.js';

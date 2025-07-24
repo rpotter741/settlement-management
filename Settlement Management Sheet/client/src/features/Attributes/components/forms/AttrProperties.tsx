@@ -7,10 +7,10 @@ import {
   Divider,
   IconButton,
 } from '@mui/material';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 import { useShellContext } from '@/context/ShellContext.js';
 import ToolSwitch from '@/components/shared/DynamicForm/ToolSwitch.js';
-import useSnackbar from '@/hooks/useSnackbar.js';
+import useSnackbar from '@/hooks/global/useSnackbar.js';
 import { Help } from '@mui/icons-material';
 import {
   AttrPropertyTypes,

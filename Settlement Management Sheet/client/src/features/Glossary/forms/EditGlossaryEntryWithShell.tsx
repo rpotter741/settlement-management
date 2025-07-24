@@ -1,5 +1,5 @@
 import { useShellContext } from '@/context/ShellContext.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { Box } from '@mui/system';
 import propertyArrayMap from '../helpers/entryTypePropertyArray.js';
 import PropertyMapTabs from '../wrappers/PropertyMapTabs.js';
@@ -29,6 +29,7 @@ const EditGlossaryEntryForm: React.FC<EditGlossaryEntryFormProps> = ({
         boxSizing: 'border-box',
         overflowY: 'scroll',
         width: '100%',
+        px: 2,
       }}
     >
       <PropertyMapTabs propertyMap={propertyArrayMap[node.entryType]} />

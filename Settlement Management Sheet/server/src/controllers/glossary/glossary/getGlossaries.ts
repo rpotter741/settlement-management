@@ -3,6 +3,7 @@ import prisma from '../../../db/db.ts';
 export default async function getGlossaries(req, res) {
   try {
     const userId = req?.user?.id || 'robbiepottsdm';
+    console.log(userId);
 
     const glossaries = await prisma.glossary.findMany({
       where: { createdBy: userId },

@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { v4 as newId } from 'uuid';
 
 import { loadTool } from '@/app/thunks/toolThunks.js';
-import { useSidePanel } from '@/hooks/useSidePanel.jsx';
+import { useSidePanel } from '@/hooks/global/useSidePanel.jsx';
 
 import {
   Box,

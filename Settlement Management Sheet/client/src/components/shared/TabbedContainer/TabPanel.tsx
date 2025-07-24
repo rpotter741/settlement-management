@@ -36,7 +36,7 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
           height: '100%',
           maxHeight: 'calc(100vh - 48px)',
           width: '100%',
-          pt: tab.disableMenu ? 4 : 0,
+          pt: tab.disableMenu ? 5 : 0,
           backgroundColor:
             tab.mode !== 'edit' ? 'background.default' : 'background.paper',
           transition: 'background-color 0.3s ease',

@@ -6,11 +6,11 @@ import { setGlossaryNodes } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { rehydrateGlossaryTree } from '@/features/Glossary/helpers/rehydrateGlossary.js';
 
-export default async function getNodesThunk({
+export default function getNodesThunk({
   glossaryId,
 }: {
   glossaryId: string;
-}): Promise<AppThunk> {
+}): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const glossary = getState().glossary.glossaries[glossaryId];

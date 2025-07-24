@@ -14,7 +14,7 @@ import resolveDuplicates from '@/features/Attributes/helpers/resolveDuplicates.j
 import { Box, Typography, Tooltip, Button } from '@mui/material';
 import Threshold from './Threshold.jsx';
 import { Thresholds } from 'types/common.js';
-import useOrderedData from 'hooks/useOrderedData.js';
+import useOrderedData from '@/hooks/utility/useOrderedData.js';
 import { AppDispatch } from '@/app/store.js';
 
 const ObjectThresholds = ({ max = 21 }) => {

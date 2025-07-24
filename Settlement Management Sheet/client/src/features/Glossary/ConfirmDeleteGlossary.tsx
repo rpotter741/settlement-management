@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Button, Tooltip, TextField } from '@mui/material';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import actions from '@/services/glossaryServices.js';
+import glossaryThunks from '@/app/thunks/glossaryThunks.js';
 import { removeTab } from '@/app/slice/sidePanelSlice.js';
 import { Tab } from '@/app/types/SidePanelTypes.js';
 import {
@@ -31,15 +31,7 @@ const ConfirmDeleteGlossary: React.FC<ConfirmDeleteGlossaryProps> = ({
   const [confirm, setConfirm] = useState<string>('');
 
   const onDelete = () => {
-    dispatch(
-      removeTab({
-        tabId: tab.tabId,
-        side: tab.side,
-        preventSplit: false,
-      })
-    );
-    actions.deleteGlossary({ id: glossary.id });
-    dispatch(removeGlossary({ glossaryId: glossary.id }));
+    dispatch(glossaryThunks.deleteGlossary({ glossaryId: glossary.id }));
   };
 
   const setTimer = () => {

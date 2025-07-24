@@ -11,7 +11,6 @@ import {
   Settings as SettingsIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-
 import GlossaryDirectory from './GlossaryDirectory.js';
 import { rehydrateGlossaryTree } from './helpers/rehydrateGlossary.js';
 import {
@@ -22,23 +21,23 @@ import {
   selectActiveId,
   selectAllGlossaries,
   selectGlossaryStructure,
-  selectSnackbar,
 } from '../../app/selectors/glossarySelectors.js';
-import { SnackbarType } from '@/app/types/SnackbarTypes.js';
 import thunks from '../../app/thunks/glossaryThunks.js';
 import { AppDispatch } from '@/app/store.js';
 import { setActiveGlossaryId } from '../../app/slice/glossarySlice.js';
 import { GlossaryDragProvider } from '@/context/DnD/GlossaryDragContext.js';
-import { useSidePanel } from '@/hooks/useSidePanel.js';
-import { useModalActions } from '@/hooks/useModal.js';
-import useSharedHooks from '@/hooks/useSharedHooks.js';
+import { useSidePanel } from '@/hooks/global/useSidePanel.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 
 interface GlossarySidePanelProps {}
 
-interface Glossary {
+export interface Glossary {
   name: string;
   id: string | null;
-  description: string;
+  description: {
+    markdown: string;
+    string: string;
+  };
 }
 
 const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
@@ -58,31 +57,22 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   const [nodeMap, setNodeMap] = useState<Record<string, GlossaryNode>>({});
   const { addNewTab } = useSidePanel();
 
-  const snackbarMessage = useSelector(selectSnackbar());
-  const { utils } = useSharedHooks();
-
   useEffect(() => {
     dispatch(thunks.getGlossaries());
   }, []);
 
   useEffect(() => {
-    if (glossaries.length > 0 && glossary === null) {
+    if (glossaries.length > 0 && glossaryId === null) {
       dispatch(setActiveGlossaryId({ glossaryId: glossaries[0].id }));
     }
-  }, [glossaries, glossary]);
+  }, [glossaries, glossaryId]);
 
   useEffect(() => {
     if (glossaries.length === 0 && glossary !== null) {
       setGlossary(null);
-    }
-  }, [glossaries, glossary]);
-
-  useEffect(() => {
-    if (glossary?.id !== glossaryId) {
-      const newGlossary = glossaries.find(
-        (glossary) => glossary.id === glossaryId
-      );
-      if (newGlossary) {
+    } else if (glossaryId !== null) {
+      const newGlossary = glossaries.find((g) => g.id === glossaryId);
+      if (newGlossary && glossary?.id !== newGlossary.id) {
         setGlossary(newGlossary);
       }
     }
@@ -103,33 +93,21 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (glossaryId !== null) {
+    if (glossaryId !== null && nodes) {
       rehydrate();
     }
-  }, [nodes, structure.current.length]);
-
-  useEffect(() => {
-    if (snackbarMessage !== null) {
-      const {
-        message,
-        type,
-        duration,
-        rollback,
-        rollbackFn,
-      }: {
-        message: string;
-        type: SnackbarType;
-        duration: number;
-        rollback?: any;
-        rollbackFn?: ((rollback: any) => void) | (() => void);
-      } = snackbarMessage;
-      utils.snackbar({ message, type, duration });
-    }
-  }, [snackbarMessage]);
+  }, [nodes]);
 
   const handleSelect = (gloss: any) => {
     if (gloss.id === 'createNew') {
-      setGlossary({ name: '', id: '', description: '' });
+      setGlossary({
+        name: '',
+        id: '',
+        description: {
+          markdown: '',
+          string: '',
+        },
+      });
     }
     setGlossary(gloss);
   };
@@ -155,7 +133,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
       entryType: entryType,
       children: [],
     };
-    dispatch(thunks.addEntry({ node }));
+    dispatch(thunks.createNodeAndSection({ node }));
   };
 
   const handleDelete = (node: any) => {
@@ -174,6 +152,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   const handleRename = (node: GlossaryNode) => {
     if (node === null) return;
     if (glossaryId === null) return;
+
     dispatch(
       thunks.renameNodeAndEntry({
         node,
@@ -200,7 +179,7 @@ const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
       parentId,
       glossaryId,
     };
-    dispatch(thunks.addEntry({ node }));
+    dispatch(thunks.createNodeAndDetail({ node }));
   };
 
   const handleSettingsClick = () => {

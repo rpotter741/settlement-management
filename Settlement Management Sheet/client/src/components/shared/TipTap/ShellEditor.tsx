@@ -7,6 +7,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useShellContext } from '@/context/ShellContext.js';
 import { debounce, set } from 'lodash';
 import tipTapExtensions from './extensions/extensions.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 
 type EditorProps = {
   keypath: string;
@@ -30,13 +31,13 @@ const ShellEditor: React.FC<EditorProps> = ({
   style = {},
 }) => {
   const theme = useTheme();
-  const { update, entry, tab, updateLastSaved } = useShellContext();
+  const { entry, tab, updateLastSaved } = useShellContext();
+  const { updateGlossaryEntry } = useNodeEditor(tab.glossaryId, tab.id);
   const lastSaved = tab?.viewState?.lastUpdated?.[keypath] || null;
-  console.log(tab?.viewState);
   const [content, setContent] = useState(entry[keypath] || '');
 
   const handleChange = (value: string, text: string) => {
-    debouncedUpdate(update, value, text);
+    debouncedUpdate(updateGlossaryEntry, value, text);
     debouncedSetLastSaved(updateLastSaved, keypath);
   };
 
@@ -87,9 +88,13 @@ const ShellEditor: React.FC<EditorProps> = ({
             backgroundColor: (theme) =>
               theme.palette.mode === 'dark'
                 ? 'secondary.main'
-                : 'background.default',
+                : 'secondary.light',
             borderTop: '1px solid',
             borderColor: 'divider',
+            color: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'text.primary'
+                : 'secondary.contrastText',
           }}
         >
           Last Saved: {format(lastSaved)}

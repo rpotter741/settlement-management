@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Button, Tooltip } from '@mui/material';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { deleteEntry } from '@/app/thunks/glossaryThunks.js';
+import thunks from '@/app/thunks/glossaryThunks.js';
 import { GlossaryNode } from 'types/index.js';
 
 interface ConfirmDeleteProps {
@@ -19,7 +19,7 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({ node, glossaryId }) => {
 
   const onDelete = () => {
     dispatch(
-      deleteEntry({
+      thunks.deleteEntry({
         node,
       })
     );

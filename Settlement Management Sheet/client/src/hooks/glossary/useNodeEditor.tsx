@@ -77,9 +77,7 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     if (!entry && node?.entryType) {
       dispatch(
         thunks.getEntryById({
-          nodeId: entryId,
-          glossaryId,
-          entryType: node.entryType,
+          node,
         })
       );
     }

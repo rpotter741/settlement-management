@@ -6,11 +6,11 @@ import { addGlossaryEntry } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { GlossaryEntry, GlossaryNode } from 'types/index.js';
 
-export default async function getEntryById({
+export default function getEntryById({
   node,
 }: {
   node: GlossaryNode;
-}): Promise<AppThunk> {
+}): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     try {
       const existingNode = node;

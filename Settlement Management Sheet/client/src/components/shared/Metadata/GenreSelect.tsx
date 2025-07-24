@@ -9,12 +9,7 @@ import {
   InputLabel,
 } from '@mui/material';
 
-import { ShellContext } from '@/context/ShellContext.js';
-import { useTools } from '@/hooks/useTools.js';
-import { useContext } from 'react';
-import { boxSizing } from '@mui/system';
-import useSharedHooks from '@/hooks/useSharedHooks.js';
-import { set } from 'lodash';
+import useSharedHooks from '@/hooks/utility/useSharedHooks.js';
 
 export const genreOptions = [
   'Agnostic',

@@ -23,7 +23,7 @@ import {
   useRightTabs,
 } from '@/context/TabsContext/TabsContext.js';
 import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import { setActiveTab as focusTab } from '@/app/slice/sidePanelSlice.js';
 
 interface RenderTabHeadersProps {
@@ -76,7 +76,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
         overflowX: 'auto',
         scrollbarWidth: 'none',
         borderBottom: '1px solid',
-        borderColor: !!tabs.length ? 'primary.light' : 'transparent',
+        borderColor: !!tabs.length ? 'divider' : 'transparent',
         bgcolor: !!tabs.length ? 'background.paper' : 'background.default',
         height: 48,
       }}
@@ -111,13 +111,13 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                     : current === tab.tabId
                       ? side === 'right'
                         ? 'secondary.main'
-                        : 'primary.main'
+                        : 'primary.dark'
                       : 'transparent',
                 backgroundColor:
                   current === tab.tabId
                     ? side === 'right'
                       ? 'secondary.main'
-                      : 'primary.main'
+                      : 'primary.dark'
                     : 'divider',
                 boxSizing: 'border-box',
                 height: 48,

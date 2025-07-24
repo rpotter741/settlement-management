@@ -6,7 +6,7 @@ import { useTools } from 'hooks/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';
-import useFetchReferences from 'hooks/useFetchReferences.jsx';
+import useFetchReferences from '@/hooks/utility/useFetchReferences.js';
 import AttributeCard from 'components/shared/AttributeCard/AttributeCard.tsx';
 import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 import PreviewDependencies from 'components/shared/Metadata/PreviewDependencies.jsx';

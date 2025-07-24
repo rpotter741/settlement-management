@@ -51,10 +51,11 @@ const PageBox: React.FC<PageBoxProps> = ({
           position: 'relative',
           maxHeight:
             variant === 'fullWidth'
-              ? 'calc(100vh - 84.5px)'
-              : 'calc(100vh - 104.5px)',
+              ? 'calc(100vh - 100.5px)'
+              : 'calc(100vh - 120.5px)',
           height: '100%',
           width: '100%',
+          pt: 2,
           pb: variant === 'fullWidth' ? 0 : 4,
           overflowY: 'hidden',
           overflowX: 'hidden',
@@ -69,7 +70,10 @@ const PageBox: React.FC<PageBoxProps> = ({
             justifyContent: 'start',
             flexDirection: 'column',
             px: 4,
-            boxShadow: 4,
+            boxShadow: (theme) =>
+              theme.palette.mode === 'light'
+                ? 4
+                : '0px 2px 8px rgba(255, 255, 255, 0.2)',
             borderRadius: variant === 'fullWidth' ? 0 : 4,
             height: '100%',
             overflowY: 'scroll',

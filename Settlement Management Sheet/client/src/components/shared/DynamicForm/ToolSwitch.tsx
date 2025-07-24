@@ -10,7 +10,7 @@ import {
   alpha,
   Button,
 } from '@mui/material';
-import useSharedHooks from '@/hooks/useSharedHooks.js';
+import useSharedHooks from '@/hooks/utility/useSharedHooks.js';
 import { usePageBoxContext } from '@/context/PageBox.js';
 
 interface ToolSwitchProps {

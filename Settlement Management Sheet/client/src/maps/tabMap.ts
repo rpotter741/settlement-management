@@ -224,7 +224,9 @@ const glossaryTabMap = {
     validationFields: [],
   },
   editGlossary: {
-    component: lazy(() => import('../features/Glossary/EditGlossary.js')),
+    component: lazy(
+      () => import('../features/Glossary/EditGlossary/EditGlossary.js')
+    ),
     icon: MenuBook,
     headerName: 'Glossary Settings',
     validationFields: [],

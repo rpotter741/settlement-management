@@ -10,9 +10,9 @@ import {
   selectGlossaryNodes,
 } from '@/app/selectors/glossarySelectors.js';
 import { updateTab } from '@/app/slice/sidePanelSlice.js';
-import useNodeEditor from '@/hooks/useNodeEditor.js';
+import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { cloneDeep, get } from 'lodash';
-import { useModalActions } from '@/hooks/useModal.js';
+import { useModalActions } from '@/hooks/global/useModal.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
 import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 
