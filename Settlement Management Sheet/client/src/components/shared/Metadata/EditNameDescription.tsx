@@ -1,12 +1,12 @@
 import React from 'react';
 import ToolInput, { ToolInputConfig } from '../DynamicForm/ToolInput.js';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import { useDebounce } from '@/hooks/utility/useDebounce.js';
 import useDebouncedEffect from '@/hooks/utility/useDebouncedEffect.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 interface EditNameDescriptionProps {
   fields: {
@@ -36,6 +36,14 @@ const EditNameDescription: React.FC<EditNameDescriptionProps> = ({
             side,
             keypath: 'name',
             updates: name,
+          })
+        );
+        dispatch(
+          updateTab({
+            tabId,
+            side,
+            keypath: 'viewState.isDirty',
+            updates: true,
           })
         );
       }

@@ -5,7 +5,7 @@ import { useInitializeTool } from '@/hooks/tools/useInitializeTool.jsx';
 import { ShellContext } from '@/context/ShellContext.js';
 import { ToolName } from '@/app/types/ToolTypes.js';
 import PageBox from '../Layout/PageBox/PageBox.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
 

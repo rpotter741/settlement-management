@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { remove, set } from 'lodash';
-import { GlossaryEntry, GlossaryNode } from '../../../../types/index.js';
+import { GlossaryEntry, GlossaryNode } from 'types/index.js';
 import { GlossaryState } from '../types/GlossaryTypes.js';
-import { rehydrateGlossaryTree } from '../../features/Glossary/helpers/rehydrateGlossary.js';
-import sortByIndex from '../../features/Glossary/helpers/sortByIndex.js';
+import { rehydrateGlossaryTree } from '../../features/Glossary/utils/rehydrateGlossary.js';
+import sortByIndex from '../../features/Glossary/utils/sortByIndex.js';
 import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
 
 const defaultGlossaryState: GlossaryState = {
@@ -27,10 +27,17 @@ const glossarySlice = createSlice({
         };
         genre: Genre;
         subGenre: string;
+        integrationState: any;
       }>
     ) => {
-      console.log('Initializing glossary:', action.payload);
-      const { glossaryId, name, description, genre, subGenre } = action.payload;
+      const {
+        glossaryId,
+        name,
+        description,
+        genre,
+        subGenre,
+        integrationState,
+      } = action.payload;
       state.glossaries[glossaryId] = {
         name,
         description,
@@ -45,6 +52,7 @@ const glossarySlice = createSlice({
         renderState: {},
         entries: {},
         options: {},
+        integrationState,
       };
     },
     setGlossaryLoading: (
@@ -85,6 +93,29 @@ const glossarySlice = createSlice({
         Object.assign(glossary, updates);
       } else {
         console.warn(`Glossary with id ${id} not found for update.`);
+      }
+    },
+    updateGlossaryTerm: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        key: string;
+        value: string | null;
+      }>
+    ) => {
+      const { id, key, value } = action.payload;
+      const glossary = state.glossaries[id];
+      if (glossary) {
+        if (!glossary.integrationState.terms) {
+          glossary.integrationState.terms = {};
+        }
+        if (value === null || value === undefined) {
+          delete glossary.integrationState.terms[key];
+        } else {
+          glossary.integrationState.terms[key] = value;
+        }
+      } else {
+        console.warn(`Glossary with id ${id} not found for term update.`);
       }
     },
     setGlossaryNodes: (
@@ -313,7 +344,11 @@ const glossarySlice = createSlice({
           );
           glossary.options[entryId] = {};
         }
-        glossary.options[entryId][property] = options;
+        glossary.options[entryId][property] = {
+          inherited: options.inherited.map((str) => ({ id: str, name: str })),
+          local: options.local.map((str) => ({ id: str, name: str })),
+          other: options.other.map((str) => ({ id: str, name: str })),
+        };
       }
     },
   },
@@ -328,6 +363,7 @@ export const {
   updateGlossaryNode,
   updateGlossaryNodes,
   updateGlossaryEntry,
+  updateGlossaryTerm,
   addGlossaryNode,
   removeGlossaryNode,
   setActiveGlossaryId,

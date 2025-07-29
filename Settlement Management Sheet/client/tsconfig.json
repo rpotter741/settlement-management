@@ -19,8 +19,7 @@
       "components/*": ["src/components/*"],
       "hooks/*": ["src/hooks/*"],
       "utility/*": ["src/utility/*"],
-      "types/*": ["../types/*"],
-      "types": ["../types/index.ts"],
+      "types/*": ["src/../../shared/types/*"],
       "context/*": ["src/context/*"]
     }
   },

@@ -7,7 +7,7 @@ import EditEvent from './EditEvent.jsx';
 import checklistContent from '../../helpers/checklistContent.js';
 
 import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
 
 const CreateEvent = ({ tab }) => {
   const { preventSplit, setPreventSplit } = useSidePanel();

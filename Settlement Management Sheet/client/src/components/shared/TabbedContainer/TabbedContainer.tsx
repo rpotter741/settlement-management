@@ -19,19 +19,19 @@ import RenderTabHeaders from './RenderTabHeaders.jsx';
 import RenderTabs from './RenderTabs.jsx';
 import {
   focusedTab,
-  sidePanelSelectors as select,
-} from '@/app/selectors/sidePanelSelectors.js';
+  tabSelectors as select,
+} from '@/app/selectors/tabSelectors.js';
 
 import {
   LeftTabsProvider,
   RightTabsProvider,
 } from '@/context/TabsContext/TabsContext.jsx';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import useToolHotkeys from '@/hooks/global/useGlobalHotkeys.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 import {
   currentModal,
   currentModalKey,
@@ -79,10 +79,9 @@ const TabbedContainer: React.FC = () => {
   const modalPosition = useSelector(modalPositionSx);
   const disableClickaway = useSelector(disableBackgroundClose);
 
-  const noSplit = useMemo(
-    () => leftTabs.some((tab: Tab) => tab.tool === 'event'),
-    [leftTabs]
-  );
+  const noSplit = useMemo(() => {
+    return leftTabs.some((tab: Tab) => tab.tool === 'event');
+  }, [leftTabs]);
 
   const canSplit = useMediaQuery('(min-width:1536px)');
 

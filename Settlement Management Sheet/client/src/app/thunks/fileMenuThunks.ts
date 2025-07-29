@@ -4,11 +4,11 @@ import glossaryServerAction from '../../services/glossaryServices.js';
 import toolServerActions from '../../services/toolServices.js';
 import * as glossarySlice from '../slice/glossarySlice.js';
 import * as toolSlice from '../slice/toolSlice.js';
-import * as sidePanelSlice from '../slice/sidePanelSlice.js';
+import * as tabSlice from '../slice/tabSlice.js';
 import { AppDispatch, RootState } from '../store.js';
 import structure, { getTabInfo } from '@/features/SidePanel/structure.js';
 import { ToolName } from '../types/ToolTypes.js';
-import { Tab } from '../types/SidePanelTypes.js';
+import { Tab } from '../types/TabTypes.js';
 import { showSnackbar } from '../slice/snackbarSlice.js';
 import { cloneDeep, isEqual } from 'lodash';
 
@@ -25,7 +25,7 @@ export const createNewToolFile = (
     const { name, id, tool, tabId, scroll, preventSplit } =
       getTabInfo(toolString);
     dispatch(
-      sidePanelSlice.addTab({
+      tabSlice.addTab({
         name,
         id,
         mode: 'edit',
@@ -53,8 +53,8 @@ export const saveToolFile = (tab: Tab) => {
     if (isEqual(edit, current)) {
       dispatch(
         showSnackbar({
-          message: `${tab.name} has no changes to save.`,
-          type: 'info',
+          message: `${tab.name} saved successfully!`,
+          type: 'success',
         })
       );
       return;
@@ -80,7 +80,7 @@ export const saveToolFile = (tab: Tab) => {
       );
       if (viewState.isDirty) {
         dispatch(
-          sidePanelSlice.updateTab({
+          tabSlice.updateTab({
             tabId: tab.tabId,
             side: tab.side,
             keypath: 'viewState.isDirty',
@@ -89,7 +89,7 @@ export const saveToolFile = (tab: Tab) => {
         );
       }
       dispatch(
-        sidePanelSlice.updateTab({
+        tabSlice.updateTab({
           tabId: tab.tabId,
           side: tab.side,
           keypath: 'mode',

@@ -6,7 +6,7 @@ import { Icon as CustomIcon } from '../../../../components/index.js';
 
 import PreviewThresholds from 'components/shared/Metadata/ThresholdPreview.jsx';
 
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import RowDisplay from '@/components/shared/Layout/RowDisplay.js';
 

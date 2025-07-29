@@ -1,13 +1,13 @@
 import React, { createContext, useContext } from 'react';
-import { sidePanelSelectors as select } from '@/app/selectors/sidePanelSelectors.js';
+import { tabSelectors as select } from '@/app/selectors/tabSelectors.js';
 import { useSelector } from 'react-redux';
-import { AddTabPayload, Tab } from '@/app/types/SidePanelTypes.js';
+import { AddTabPayload, Tab } from '@/app/types/TabTypes.js';
 import {
   addTab,
   removeTab,
   setCurrentTab,
   updateTab,
-} from '@/app/slice/sidePanelSlice.js';
+} from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 

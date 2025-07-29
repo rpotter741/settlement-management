@@ -17,7 +17,7 @@ function flattenVisibleNodes({
   const traverse = (node: SelectionObject, depth: number) => {
     visible.push({ id: node.id, depth });
     if (
-      node.type === 'folder' &&
+      node.fileType === 'section' &&
       renderState[node.id]?.expanded &&
       node.children
     ) {

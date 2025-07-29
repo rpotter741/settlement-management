@@ -1,4 +1,4 @@
-import { TabType } from '@/app/types/SidePanelTypes.js';
+import { TabType } from '@/app/types/TabTypes.js';
 import { PageBoxVariant } from '../PageBox.js';
 
 const getWidths = (variant: PageBoxVariant, tabType: TabType) => {

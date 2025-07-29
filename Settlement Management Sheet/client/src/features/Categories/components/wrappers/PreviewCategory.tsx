@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Button, Typography, Divider } from '@mui/material';
 
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 
 import DataDisplay from 'components/shared/Metadata/NameDisplay.jsx';

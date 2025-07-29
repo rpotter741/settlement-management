@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useContext } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 
 import { Box, Button } from '@mui/material';
 import TitledCollapse from 'components/shared/TitledCollapse/TitledCollapse.jsx';

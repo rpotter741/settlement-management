@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Select, MenuItem } from '@mui/material';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useTools } from 'hooks/useTools.jsx';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
 
 import { KeyTool, EventSeverity, KeySettings } from '../../../../../../types';
 

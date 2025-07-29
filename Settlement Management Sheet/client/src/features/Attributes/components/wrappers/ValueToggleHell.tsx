@@ -4,7 +4,7 @@ import ToolSelect from '@/components/shared/DynamicForm/ToolSelect.js';
 import ToolSwitch from '@/components/shared/DynamicForm/ToolSwitch.js';
 import CollapseOnRemoval from '@/components/shared/Layout/Motion/CollapseOnRemoval.js';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 
 interface ValueToggleHellProps {
   disabled: boolean;

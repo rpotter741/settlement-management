@@ -1,5 +1,5 @@
 import { GlossaryEntryType } from 'types/glossaryEntry.js';
-import { TabTools, TabType } from './SidePanelTypes.js';
+import { TabTools, TabType } from './TabTypes.js';
 
 // types.ts
 export interface ToolData {
@@ -24,6 +24,7 @@ export interface ToolState {
     byId: Record<string, ToolData>;
     allIds: string[];
   };
+  isDirty: Record<string, Record<string, boolean>>;
 }
 
 export type ToolName =

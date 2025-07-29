@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 import { Box, Typography, Divider, Chip } from '@mui/material';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { get } from 'lodash';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
 
 import KeyAutocomplete from '../forms/KeyAutocomplete.tsx';
 import KeySettingsComp from '../forms/KeySettings.tsx';

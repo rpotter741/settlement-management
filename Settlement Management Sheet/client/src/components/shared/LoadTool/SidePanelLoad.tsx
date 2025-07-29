@@ -67,7 +67,9 @@ const LoadTool = ({
     switch (action) {
       case 'Edit':
         return () => {
-          dispatch(loadTool({ refId, id, tool, currentTool: tool }));
+          dispatch(
+            loadTool({ refId, id, tool, currentTool: tool, mode: 'edit' })
+          );
         };
       case 'Delete':
         return async () => {

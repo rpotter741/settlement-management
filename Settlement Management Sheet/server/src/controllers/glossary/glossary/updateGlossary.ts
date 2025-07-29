@@ -1,7 +1,7 @@
 import prisma from '../../../db/db.ts';
 import requireFields from '../../../utils/requireFields.ts';
 
-export default async function updateGlossary(req, res) {
+export default async function updateGlossary(req: any, res: any) {
   try {
     const { id, updates } = req.body;
     if (!requireFields(['id', 'updates'], req.body, res)) return;
@@ -9,6 +9,7 @@ export default async function updateGlossary(req, res) {
       where: { id },
       data: { ...updates },
     });
+    console.log(`Updated glossary:`, updatedGlossary);
     return res.json({ glossary: updatedGlossary });
   } catch (error) {
     console.error(`Error updating glossary:`, error);

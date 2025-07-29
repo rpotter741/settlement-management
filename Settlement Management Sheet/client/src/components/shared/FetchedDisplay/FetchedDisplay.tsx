@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import queryClient from 'context/QueryClient.js';
 import services from '@/services/toolServices.js';
 import usePaginatedTool from 'services/usePaginatedTool.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 
 import capitalize from '@/utility/inputs/capitalize.js';
 

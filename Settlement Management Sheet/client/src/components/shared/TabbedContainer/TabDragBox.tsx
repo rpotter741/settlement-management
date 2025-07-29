@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { useTabDrag } from '@/context/DnD/TabDragContext.jsx';
 import DropZone from '../DnD/DropZone.jsx';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 
 interface TabDropBoxProps {

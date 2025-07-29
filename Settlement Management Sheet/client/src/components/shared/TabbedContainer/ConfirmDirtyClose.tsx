@@ -2,17 +2,17 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { ModalContent } from './TabbedContainer.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import toolList from '@/utility/toolList.js';
 import toolServices from '@/services/toolServices.js';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 import { ToolName } from 'types/common.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { cancelToolEdit } from '@/app/thunks/toolThunks.js';
 import { AppDispatch } from '@/app/store.js';
 import { tabMap } from '@/maps/tabMap.js';
 import { set } from 'lodash';
-import { useSidePanel } from '@/hooks/useSidePanel.js';
+import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
 
 const ConfirmDirtyClose: React.FC<{

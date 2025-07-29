@@ -1,4 +1,4 @@
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import {
   Popper,
   Grow,

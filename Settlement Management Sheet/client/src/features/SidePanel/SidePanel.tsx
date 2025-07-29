@@ -44,19 +44,17 @@ import AvatarWithMenu from 'components/shared/Layout/AvatarWithMenu.jsx';
 
 import LoadTool from 'components/shared/LoadTool/SidePanelLoad.jsx';
 
-import GlossarySidePanel from '../Glossary/GlossarySidePanel.js';
+import GlossarySidePanel from '../Glossary/Directory/GlossarySidePanel.js';
 
 import RenderEntry from './helpers/RenderEntry.js';
 import RenderHeader from './helpers/RenderHeader.js';
 import structure from './structure.js';
 import { useSelector } from 'react-redux';
-import {
-  focusedTab,
-  sidePanelOpen,
-} from '@/app/selectors/sidePanelSelectors.js';
+import { focusedTab } from '@/app/selectors/tabSelectors.js';
+import { panelOpen } from '@/app/selectors/panelSelectors.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { toggleSidePanel } from '@/app/slice/sidePanelSlice.js';
+import { togglePanel } from '@/app/slice/panelSlice.js';
 import ModeButtonWithTooltip from '@/components/shared/Layout/SidePanel/ModeButtonWithTooltip.js';
 import getRippleBorder from '@/utility/style/getRippleBorder.js';
 import ToolSelection from './Panels/ToolSelection.js';
@@ -65,9 +63,9 @@ import BookPanel from '@/components/shared/Layout/BookPanel.js';
 import { ToolName } from 'types/common.js';
 import { SidebarContextProvider } from '@/context/SidePanel/SidePanelContext.js';
 import { GlossaryEntryType } from 'types/index.js';
-import { TabTools } from '@/app/types/SidePanelTypes.js';
+import { TabTools } from '@/app/types/TabTypes.js';
 import { returnTool } from '@/app/thunks/toolThunks.js';
-import CustomizePalette from '../Glossary/forms/CustomizePalette.js';
+import CustomizePalette from '../Glossary/EditGlossary/CustomizePalette.js';
 import contextKeyComponentMap from '@/maps/contextKeyComponentMap.js';
 import glossaryThunks from '@/app/thunks/glossaryThunks.js';
 import { showModal } from '@/app/slice/modalSlice.js';
@@ -158,8 +156,11 @@ const modeContextButtons: Record<Mode, Array<ContextButton>> = {
   ],
 };
 
-export type Mode = 'Tools' | 'Kits' | 'Glossary' | ToolName | any;
 const iconButtonList: Array<Mode> = ['Tools', 'Kits', 'Glossary'];
+
+const colorsByIndex = ['primary.main', 'secondary.main', 'info.main'];
+
+export type Mode = 'Tools' | 'Kits' | 'Glossary' | ToolName | any;
 const modeIconMap: Partial<Record<Mode, React.ElementType>> = {
   Tools: Construction,
   Kits: Widgets,
@@ -170,7 +171,7 @@ const SidePanel = () => {
   const theme = useTheme();
   const dispatch: AppDispatch = useDispatch();
 
-  const open = useSelector(sidePanelOpen);
+  const open = useSelector(panelOpen);
   const [active, setActive] = useState('');
   const [tool, setTool] = useState<ToolName | null>(null);
   const [mode, setMode] = useState<Mode>('Tools');
@@ -219,29 +220,31 @@ const SidePanel = () => {
       >
         <Tooltip title={!open ? 'Expand' : 'Collapse'} arrow placement="right">
           <IconButton
-            onClick={() => dispatch(toggleSidePanel())}
+            onClick={() => dispatch(togglePanel())}
             sx={{
               border: 0,
               borderRadius: 0,
-              height: 48,
-              maxHeight: 48,
+              height: 65.5,
+              maxHeight: 65.5,
               boxSizing: 'border-box',
             }}
           >
             {!open ? <MoreVert /> : <Menu />}
           </IconButton>
         </Tooltip>
-        <Divider flexItem />
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: 'calc(33vh - 32px)',
-          }}
-        >
-          {iconButtonList.map((modeTarget) => (
+        <Divider flexItem sx={{ mb: 2 }} />
+        {iconButtonList.map((modeTarget, index) => (
+          <Box
+            key={modeTarget}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              borderBottom: 1,
+              boxSizing: 'border-box',
+              borderColor: 'dividerDark',
+            }}
+          >
             <ModeButtonWithTooltip
-              key={newId()}
               mode={mode}
               modeTarget={modeTarget}
               setMode={() => {
@@ -250,56 +253,35 @@ const SidePanel = () => {
                 setActiveContext(null);
               }}
               icon={modeIconMap[modeTarget] ?? Widgets}
-              height={54}
+              height={72}
               active={activeContext === null && mode === modeTarget}
+              inactiveColor="accent.main"
             />
-          ))}
-        </Box>
-        <Divider flexItem />
-        {/* Here's where our contextual buttons are gonna go! */}
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            // backgroundColor: (theme) =>
-            //   themeMode === 'light'
-            //     ? darken(theme.palette.background.paper, 0.15)
-            //     : lighten(theme.palette.background.paper, 0.15),
-            height: 'calc(33vh - 32px)',
-          }}
-        >
-          {modeContextButtons[mode].length > 0 && (
-            <>
-              {modeContextButtons[mode].map((button: ContextButton) => (
-                <ModeButtonWithTooltip
-                  key={newId()}
-                  mode={mode}
-                  modeTarget={button.modeTarget as Mode}
-                  setMode={() => {
-                    if (button.modalComponent) {
-                      return dispatch(showModal(button.modalComponent));
-                    }
-                    if (button.onClick) {
-                      dispatch(button.onClick());
-                      return;
-                    } else {
-                      console.log(
-                        'setting active context to',
-                        button.modeTarget
-                      );
-                      return setActiveContext(button.modeTarget as string);
-                    }
-                  }}
-                  icon={button.icon}
-                  height={54}
-                  active={activeContext === (button.modeTarget as Mode)}
-                  inactiveColor="primary.light"
-                />
-              ))}
-            </>
-          )}
-        </Box>
+            {(modeContextButtons[modeTarget] || []).map((button) => (
+              <ModeButtonWithTooltip
+                key={`${modeTarget}-${button.modeTarget}`}
+                mode={mode}
+                modeTarget={button.modeTarget as Mode}
+                setMode={() => {
+                  if (button.modalComponent) {
+                    return dispatch(showModal(button.modalComponent));
+                  }
+                  if (button.onClick) {
+                    dispatch(button.onClick());
+                    return;
+                  } else {
+                    return setActiveContext(button.modeTarget as string);
+                  }
+                }}
+                icon={button.icon}
+                height={72}
+                active={activeContext === (button.modeTarget as Mode)}
+                inactiveColor="accent.main"
+              />
+            ))}
+          </Box>
+        ))}
         <Divider flexItem />
         <Box
           sx={{

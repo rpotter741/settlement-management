@@ -1,6 +1,6 @@
 import { createContext, useState, useContext } from 'react';
 
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { DragContextType, useDragProvider } from './GenericDrag.js';
 
 type TabTypes = 'leftTab' | 'rightTab';

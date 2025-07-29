@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { ShellContext } from '@/context/ShellContext.js';
-import { useTools } from '@/hooks/useTools.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 import useAlphaColor from '@/hooks/layout/useAlphaColor.js';
 import {
   Typography,

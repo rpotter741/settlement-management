@@ -12,7 +12,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useDebounce } from '@/hooks/utility/useDebounce.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import api from 'services/interceptor.js';
 import toSnakeCase from '@/utility/inputs/snakeCase.js';

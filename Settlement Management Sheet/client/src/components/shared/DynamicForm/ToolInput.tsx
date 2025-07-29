@@ -20,10 +20,13 @@ import {
 
 import toSnakeCase from '@/utility/inputs/snakeCase.js';
 import limitXDecimals from '@/utility/style/limitXDecimals.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 const debouncedUpdate = debounce((callback, value, error, keypath) => {
   callback(value, error, keypath);
-}, 500);
+}, 250);
 
 interface ToolInputProps {
   placeholder?: string;
@@ -60,7 +63,7 @@ const ToolInput: React.FC<ToolInputProps> = ({
   placeholder = '',
   style = {},
   snakeCase = false,
-  debounced = false,
+  debounced = true,
   multiline = false,
   inputConfig,
   disabled = false,
@@ -72,12 +75,19 @@ const ToolInput: React.FC<ToolInputProps> = ({
   decimals = 2,
   allowZero = true,
 }) => {
-  const { tool, id } = useContext(ShellContext);
-  const { selectEditValue, updateTool, validateToolField, selectErrorValue } =
-    useTools(tool, id);
+  const dispatch: AppDispatch = useDispatch();
+  const { tool, id, tab } = useContext(ShellContext);
+  const {
+    selectStaticValue,
+    selectEditValue,
+    updateTool,
+    validateToolField,
+    selectErrorValue,
+  } = useTools(tool, id);
   const { label, type = 'text', tooltip, validateFn, keypath } = inputConfig;
   const error = selectErrorValue(keypath);
   const val = selectEditValue(keypath);
+  const staticVal = selectStaticValue(keypath);
 
   const [touched, setTouched] = useState<boolean>(false);
   const [invalid, setInvalid] = useState<boolean>(true);
@@ -93,7 +103,6 @@ const ToolInput: React.FC<ToolInputProps> = ({
 
   const processChange = useCallback(
     (e: any) => {
-      console.log(e.target.value);
       if (type === 'number') {
         const normalizedValue = limitXDecimals(e.target.value, decimals);
         let value = allowZero ? normalizedValue : Math.max(1, normalizedValue);
@@ -114,10 +123,20 @@ const ToolInput: React.FC<ToolInputProps> = ({
 
   const sendChangeUpstream = useCallback(
     (value: any, newError: any) => {
-      updateTool(keypath, value);
+      updateTool(keypath, value || ' ');
       validateToolField(keypath, newError);
+      if (value !== staticVal) {
+        dispatch(
+          updateTab({
+            tabId: tab.tabId,
+            side: tab.side,
+            keypath: 'viewState.isDirty',
+            updates: true,
+          })
+        );
+      }
     },
-    [keypath]
+    [keypath, staticVal]
   );
 
   const handleChange = useCallback(

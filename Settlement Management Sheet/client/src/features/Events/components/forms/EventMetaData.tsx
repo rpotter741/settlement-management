@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
 
 import EditNameDescription from 'components/shared/MetaData/EditNameDescription.jsx';
 import eventFormData from '../../helpers/eventFormData.js';

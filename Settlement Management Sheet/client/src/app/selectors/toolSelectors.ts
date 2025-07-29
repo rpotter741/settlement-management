@@ -57,6 +57,11 @@ export const isToolDirty = (tool: ToolName, id: string) =>
     }
   );
 
+export const isFieldDirty = (tool: ToolName, id: string, keypath: string) =>
+  createSelector([base], (state) =>
+    get(state[tool].isDirty[id], keypath, false)
+  );
+
 // Validation
 export const selectToolErrors = (tool: ToolName, id: string) =>
   createSelector([validationBase], (validation) => validation[tool].byId[id]);
@@ -83,5 +88,6 @@ export const toolSelectors = {
   selectEditValue: selectEditToolValue,
   errors: selectToolErrors,
   keypathError: selectKeypathErrors,
+  keypathDirty: isFieldDirty,
   changes: isToolDirty,
 };

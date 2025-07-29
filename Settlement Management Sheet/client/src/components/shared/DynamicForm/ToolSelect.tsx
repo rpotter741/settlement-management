@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 
 import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ShellContext } from '@/context/ShellContext.js';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 
 interface ToolSelectProps {
   options: { name: string; value: string }[];

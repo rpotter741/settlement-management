@@ -1,6 +1,6 @@
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { Edit, Preview } from '@mui/icons-material';
 import {
   Popper,

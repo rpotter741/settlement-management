@@ -34,7 +34,12 @@ const pathToTool = {
   people: 'person',
 };
 
-const RenderLeads = ({ obj, keypath }) => {
+interface RenderLeadsProps {
+  obj: any;
+  keypath: string;
+}
+
+const RenderLeads = ({ obj, keypath }: RenderLeadsProps) => {
   const dispatch = useDispatch();
 
   if (!obj) return null;

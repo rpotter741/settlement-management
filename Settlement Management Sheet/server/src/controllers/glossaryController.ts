@@ -4,6 +4,7 @@ import createGlossary from './glossary/glossary/createGlossary.ts';
 import updateGlossary from './glossary/glossary/updateGlossary.ts';
 import deleteGlossary from './glossary/glossary/deleteGlossary.ts';
 import getGlossaryById from './glossary/glossary/getGlossaryById.ts';
+import updateGlossaryTerm from './glossary/glossary/updateGlossaryTerm.ts';
 
 // node actions
 import updateNodeSortIndices from './glossary/nodes/updateNodeSortIndices.ts';
@@ -26,6 +27,7 @@ export {
   updateGlossary,
   deleteGlossary,
   getGlossaryById,
+  updateGlossaryTerm,
   // node actions
   updateNodeSortIndices,
   updateNodeParentId,

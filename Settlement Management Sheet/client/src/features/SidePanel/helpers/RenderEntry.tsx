@@ -10,32 +10,68 @@ import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import getTrail from '@/features/SidePanel/getTrail.js';
 import { v4 as newId } from 'uuid';
 import structure from '../structure.js';
+import { ToolName } from '@/app/types/ToolTypes.js';
 
 const maxTrail = 3;
 
-const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
-  const { tabs, addNewTab, updateBreadcrumbs, setActiveTab } = useSidePanel();
+interface RenderEntryProps {
+  entry: {
+    title: string;
+    icon?: React.ElementType;
+    children?: Array<{
+      title: string;
+      icon?: React.ElementType;
+      onClick?: () => void;
+    }>;
+    tool?: string;
+  };
+  index: number;
+  active: string | null;
+  setActive: (title: string | null) => void;
+  clickFn?: () => {
+    name: string;
+    id: string;
+    mode?: string;
+    tool?: string;
+    tabId?: string;
+    scroll?: boolean;
+    preventSplit?: boolean;
+  };
+  setTool?: (tool: string) => void;
+}
 
-  const handleClick = (title) => {
+const RenderEntry: React.FC<RenderEntryProps> = ({
+  entry,
+  index,
+  active,
+  setActive,
+  clickFn,
+  setTool,
+}) => {
+  const { addNewTab, setActiveTab } = useSidePanel();
+
+  const handleClick = (title: string) => {
     if (clickFn === undefined) {
       const trail = getTrail(structure, title);
-      updateBreadcrumbs(trail.slice(0, maxTrail));
+      // updateBreadcrumbs(trail.slice(0, maxTrail));
       if (active === title) {
         setActive(null);
       } else {
         setActive(title);
       }
-      setTool(entry.tool);
+      if (setTool) {
+        setTool((entry.tool as string) || '');
+      }
     } else {
       const { name, id, mode, tool, tabId, scroll, preventSplit } = clickFn();
 
       addNewTab({
         name,
         id,
-        mode,
-        tool,
+        mode: 'preview',
+        tool: tool as ToolName,
         tabId,
-        scroll,
+        scroll: 0,
         activate: true,
         preventSplit,
         side: 'left',
@@ -115,6 +151,7 @@ const RenderEntry = ({ entry, index, active, setActive, clickFn, setTool }) => {
               index={childIndex}
               active={active}
               setActive={setActive}
+              //@ts-ignore
               clickFn={child.onClick}
             />
           ))}

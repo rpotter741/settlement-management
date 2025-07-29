@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Box } from '@mui/material';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
-import { TabType } from '@/app/types/SidePanelTypes.js';
+import { TabType } from '@/app/types/TabTypes.js';
 import { PageBoxContext } from '@/context/PageBox.js';
 import lockHeightDuringTransition from './utils/lockHeightOnTransition.js';
 import getWidths from './utils/getWidths.js';

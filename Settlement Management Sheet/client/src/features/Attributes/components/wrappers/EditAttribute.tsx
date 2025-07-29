@@ -9,7 +9,7 @@ import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import AttrProperties from '../forms/AttrProperties.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import {
@@ -22,6 +22,9 @@ import TabbedContent, {
   TabbedContentTabs,
 } from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
 import { usePageBoxContext } from '@/context/PageBox.js';
+import { useAutosave } from '@/hooks/utility/useAutosave/useAutosave.js';
+import attributeAutosaveConfig from '@/hooks/utility/useAutosave/configs/toolConfig.js';
+import toolAutosaveConfig from '@/hooks/utility/useAutosave/configs/toolConfig.js';
 
 interface EditAttributeProps {}
 
@@ -36,7 +39,7 @@ const editAttrComponentMap: Record<string, React.ComponentType<any>> = {
 };
 
 const EditAttribute: React.FC<EditAttributeProps> = () => {
-  const { side, tab } = useShellContext();
+  const { tab, id } = useShellContext();
   const { both } = useTabSplit();
   const dispatch: AppDispatch = useDispatch();
   const [localState, localDispatch] = useReducer(
@@ -45,6 +48,16 @@ const EditAttribute: React.FC<EditAttributeProps> = () => {
   );
 
   const { activeTab, editTabs, lastIndex } = localState;
+
+  useAutosave(
+    toolAutosaveConfig({
+      name: tab.name,
+      tool: 'attribute',
+      id,
+      tabId: tab.tabId,
+      side: tab.side,
+    })
+  );
 
   useEffect(() => {
     if (tab.lastTab && tab.lastIndex) {
@@ -57,7 +70,7 @@ const EditAttribute: React.FC<EditAttributeProps> = () => {
       dispatch(
         updateTab({
           tabId: tab.tabId,
-          side,
+          side: tab.side,
           keypath: 'viewState.editAttr',
           updates: { ...localState },
         })

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { TabType } from '@/app/types/ToolTypes.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 
 type HotkeyAction = () => void;
 type HotkeyMap = Record<string, HotkeyAction>;

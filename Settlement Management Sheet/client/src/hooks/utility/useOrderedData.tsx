@@ -1,6 +1,6 @@
 import React from 'react';
 import doa from '@/utility/dataOrderActions.js';
-import { useTools } from 'hooks/useTools.js';
+import { useTools } from 'hooks/tools/useTools.js';
 import { ToolName } from 'types/common.js';
 import { cloneDeep } from 'lodash';
 

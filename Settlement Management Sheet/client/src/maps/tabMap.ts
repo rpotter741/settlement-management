@@ -29,7 +29,7 @@ import {
   Room,
   WbShade,
 } from '@mui/icons-material';
-import { TabTools, TabType } from '@/app/types/SidePanelTypes.js';
+import { TabTools, TabType } from '@/app/types/TabTypes.js';
 
 const toolTabMap = {
   apt: {
@@ -137,7 +137,7 @@ const toolTabMap = {
 const glossaryTabMap = {
   continent: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Public,
     headerName: 'Continent',
@@ -145,7 +145,7 @@ const glossaryTabMap = {
   },
   territory: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Map,
     headerName: 'Territory',
@@ -153,7 +153,7 @@ const glossaryTabMap = {
   },
   domain: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: AccountBalance,
     headerName: 'Domain',
@@ -161,7 +161,7 @@ const glossaryTabMap = {
   },
   province: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Flag,
     headerName: 'Province',
@@ -169,7 +169,7 @@ const glossaryTabMap = {
   },
   landmark: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: TerrainIcon,
     headerName: 'Landmark',
@@ -177,7 +177,7 @@ const glossaryTabMap = {
   },
   settlement: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: WbShade,
     headerName: 'Settlement',
@@ -185,7 +185,7 @@ const glossaryTabMap = {
   },
   faction: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Groups,
     headerName: 'Faction',
@@ -193,7 +193,7 @@ const glossaryTabMap = {
   },
   person: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Person,
     headerName: 'Person',
@@ -201,7 +201,7 @@ const glossaryTabMap = {
   },
   note: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Description,
     headerName: 'Note',
@@ -209,7 +209,7 @@ const glossaryTabMap = {
   },
   event: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: CalendarMonth,
     headerName: 'Event',
@@ -217,7 +217,7 @@ const glossaryTabMap = {
   },
   location: {
     component: lazy(
-      () => import('../features/Glossary/forms/CreateGlossaryForm.js')
+      () => import('../features/Glossary/Entries/CreateEntry.js')
     ),
     icon: Room,
     headerName: 'Location',

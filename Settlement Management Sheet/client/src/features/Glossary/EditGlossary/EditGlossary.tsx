@@ -7,35 +7,59 @@ import {
 } from '@/app/selectors/glossarySelectors.js';
 import { Box, Button } from '@mui/material';
 import { useModalActions } from '@/hooks/global/useModal.js';
-import CustomizePalette from '../forms/CustomizePalette.js';
+import CustomizePalette from './CustomizePalette.js';
 import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
-import EditGlossaryOverviewTab from './OverviewTab.js';
+import EditGlossaryOverviewTab from './GlossaryOverviewTab.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
+import GlossaryTerms from '../Shared/tabs/GlossaryTerms.js';
+import { AppDispatch } from '@/app/store.js';
+import { useDispatch } from 'react-redux';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
-  const activeId = useSelector(selectActiveId());
-  console.log('activeId', activeId, tab);
-  if (!activeId) return null;
-  const glossary = useSelector(selectGlossaryById(activeId));
+  if (!tab.glossaryId) return null;
+  const dispatch: AppDispatch = useDispatch();
+  const glossary = useSelector(selectGlossaryById(tab.glossaryId));
   const { showModal } = useModalActions();
-  const [activeTab, setActiveTab] = useState('Overview');
-  const [lastIndex, setLastIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState(
+    tab.viewState?.tabData?.activeTab || 'Overview'
+  );
+  const [lastIndex, setLastIndex] = useState(
+    tab.viewState?.tabData?.activeIndex || 0
+  );
   const handleTabClick = (tabKey: string, index: number) => {
     setActiveTab(tabKey);
     setLastIndex(index);
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(
+        updateTab({
+          tabId: tab.tabId,
+          side: tab.side,
+          keypath: 'viewState.tabData',
+          updates: {
+            activeTab,
+            activeIndex: lastIndex,
+          },
+        })
+      );
+    };
+  }, [activeTab, lastIndex, dispatch]);
+
   const editGlossaryTabs = [
-    { name: 'Overview', props: {} },
-    { name: 'Terms', props: {} },
-    { name: 'Settings', props: {} },
-    { name: 'Palette', props: {} },
+    { name: 'Overview', props: { tab } },
+    { name: 'Terms', props: { tab } },
+    { name: 'Settings', props: { tab } },
+    { name: 'Palette', props: { tab } },
   ];
 
   const editGlossaryComponentMap = useMemo(
     () => ({
-      Overview: () => <EditGlossaryOverviewTab />,
-      Terms: () => <div>Terms Component</div>,
+      Overview: () => <EditGlossaryOverviewTab glossary={glossary} />,
+      Terms: () => <GlossaryTerms tab={tab} />,
       Settings: () => <div>Settings Component</div>,
       Palette: () => <CustomizePalette column={false} />,
     }),

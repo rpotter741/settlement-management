@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useContext } from 'react';
 import { debounce } from 'lodash';
 import confetti from 'canvas-confetti';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { ShellContext } from '@/context/ShellContext.js';
 import { SnackbarType } from '@/app/types/SnackbarTypes.js';
 

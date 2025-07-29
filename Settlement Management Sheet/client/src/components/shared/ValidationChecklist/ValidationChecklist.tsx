@@ -13,7 +13,7 @@ import ChecklistItem from './ChecklistItem.jsx';
 import countValidEntries from './countValidEntries.js';
 import calculateProgressColor from './calculateProgressColor.js';
 import { AppDispatch } from '@/app/store.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 interface ValidationChecklistProps {
   defaultExpand?: boolean;

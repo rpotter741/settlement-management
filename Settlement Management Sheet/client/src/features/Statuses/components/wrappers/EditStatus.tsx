@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 
 import { Box, Divider, Button, Typography } from '@mui/material';

@@ -1,31 +1,29 @@
+//@ts-ignore
 import express from 'express';
 
-import { verifyAuth } from '../middleware/authMiddleware.ts';
+// import { verifyAuth } from '../middleware/authMiddleware.js';
 
 import {
-  getContent,
-  saveContent,
-  deleteContent,
-  getItem,
+  getTools,
+  saveTool,
+  deleteTool,
+  getToolById,
   fetchByIds,
-  checkKey,
-  getContentByName,
+  getToolsByName,
 } from '../controllers/toolController.ts';
 
 const router = express.Router();
 
-router.get('/content', getContent);
+router.get('/content', getTools);
 
-router.get('/contentByName', getContentByName);
+router.get('/toolsByName', getToolsByName);
 
-router.get('/getItem', getItem);
+router.get('/byId', getToolById);
 
 router.post('/fetchByIds', fetchByIds);
 
-router.post('/:tool/save', saveContent);
+router.post('/save', saveTool);
 
-router.post('/:tool/delete', deleteContent);
-
-router.get('/keys/check', checkKey);
+router.post('/delete', deleteTool);
 
 export default router;

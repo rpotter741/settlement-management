@@ -3,13 +3,13 @@ import { useSelector } from 'react-redux';
 import { ShellContext } from '@/context/ShellContext.js';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import PageBox from '../Layout/PageBox/PageBox.js';
 import {
   selectActiveId,
   selectGlossaryNodes,
 } from '@/app/selectors/glossarySelectors.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { cloneDeep, get } from 'lodash';
 import { useModalActions } from '@/hooks/global/useModal.js';

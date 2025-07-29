@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import { Box, Divider } from '@mui/material';
 import ToolSelect from 'components/shared/DynamicForm/ToolSelect.jsx';

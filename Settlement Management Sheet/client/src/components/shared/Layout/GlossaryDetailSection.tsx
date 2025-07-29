@@ -3,9 +3,9 @@ import { Box, Typography, Tooltip } from '@mui/material';
 import { capitalize } from 'lodash';
 import GlossaryDetail from '@/components/shared/Layout/GlossaryDetail.js';
 import {
-  backLinkOrder,
+  entryTypeRenderOrder,
   entryTypeIcons,
-} from '@/features/Glossary/helpers/glossaryTypeIcon.js';
+} from '@/features/Glossary/utils/glossaryConstants.js';
 import { useShellContext } from '@/context/ShellContext.js';
 
 interface GlossaryDetailSectionProps {
@@ -58,7 +58,7 @@ const GlossaryDetailSection: React.FC<GlossaryDetailSectionProps> = ({
           flexWrap: 'wrap',
         }}
       >
-        {backLinkOrder.map((type) => {
+        {entryTypeRenderOrder.map((type) => {
           const number = (Math.random() * (10 * Math.random())).toFixed(0);
           const plurality = number === '1' ? 'Backlink' : 'Backlinks';
           if (Number(number) < 1) return null;

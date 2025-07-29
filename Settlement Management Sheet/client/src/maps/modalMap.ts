@@ -11,16 +11,16 @@ export const modalMap: Record<
     () => import('../components/shared/LoadTool/QuickSearch.jsx')
   ),
   NameNewGlossary: React.lazy(
-    () => import('../features/Glossary/NameNewGlossary.jsx')
+    () => import('../features/Glossary/Modals/NameNewGlossary.jsx')
   ),
   IconSelector: React.lazy(
     () => import('../components/shared/IconSelector/IconSelector.jsx')
   ),
   ConfirmDeleteEntry: React.lazy(
-    () => import('../features/Glossary/ConfirmDeleteEntry.jsx')
+    () => import('../features/Glossary/Modals/ConfirmDeleteEntry.js')
   ),
   ConfirmDeleteGlossary: React.lazy(
-    () => import('../features/Glossary/ConfirmDeleteGlossary.jsx')
+    () => import('../features/Glossary/Modals/ConfirmDeleteGlossary.js')
   ),
 };
 

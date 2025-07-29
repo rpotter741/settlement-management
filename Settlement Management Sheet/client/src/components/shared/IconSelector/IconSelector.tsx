@@ -3,7 +3,7 @@ import { Box, Typography, Card, Button } from '@mui/material';
 import Icon from '../Icons/Icon.jsx';
 import iconList from './iconList.js';
 import IconColorPicker from './IconColorPicker.jsx';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { ShellContext, useShellContext } from '@/context/ShellContext.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
@@ -12,13 +12,21 @@ import { selectEditToolById } from '@/app/selectors/toolSelectors.js';
 import { useSelector } from 'react-redux';
 import { ToolName } from 'types/common.js';
 import { updateById } from '@/app/slice/toolSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 interface IconSelectorProps {
   tool: ToolName;
   id: string;
+  tabId: string;
+  side: 'left' | 'right';
 }
 
-const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
+const IconSelector: React.FC<IconSelectorProps> = ({
+  tool,
+  id,
+  tabId,
+  side,
+}) => {
   const dispatch: AppDispatch = useDispatch();
   const edit = useSelector(selectEditToolById(tool, id));
   const [selectedIcon, setSelectedIcon] = useState(edit.icon);
@@ -48,6 +56,14 @@ const IconSelector: React.FC<IconSelectorProps> = ({ tool, id }) => {
       backgroundColor: bg,
     };
     dispatch(updateById({ id, tool, keypath: 'icon', updates: completeIcon }));
+    dispatch(
+      updateTab({
+        tabId,
+        side,
+        keypath: 'viewState.isDirty',
+        updates: true,
+      })
+    );
     onClose();
   };
 

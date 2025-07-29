@@ -1,59 +1,44 @@
-import React, { lazy } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import React, { useEffect } from 'react';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 
 import { attributeFields } from '../../helpers/attributeFormData.js';
 import { Icon as CustomIcon } from '@/components/index.js';
 import ToolInput from 'components/shared/DynamicForm/ToolInput.jsx';
 
-import {
-  Box,
-  Typography,
-  Button,
-  Tooltip,
-  Switch,
-  IconButton,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { useDebounce } from '@/hooks/utility/useDebounce.js';
-import useDebouncedEffect from '@/hooks/utility/useDebouncedEffect.js';
-import { updateTab } from '@/app/slice/sidePanelSlice.js';
+import { updateTab } from '@/app/slice/tabSlice.js';
 
 interface AttrMetaDataProps {
   columns: number;
 }
 
 const AttrMetaData: React.FC<AttrMetaDataProps> = ({ columns }) => {
-  const { tool, id, showModal, tabId, side, tab } = useShellContext();
-  const { edit: attr, updateTool: updateAttribute } = useTools(tool, id);
-
   const dispatch: AppDispatch = useDispatch();
+  const { tool, id, showModal, tabId, side } = useShellContext();
+  const { edit } = useTools(tool, id);
 
-  const { edit, current } = useTools(tool, id);
-
-  const debouncedEdit = useDebounce(edit, 1000);
-
-  useDebouncedEffect(
-    () => {
-      if (!edit) return;
-      const name = edit?.name ? edit.name.trim() : `Untitled`;
-      if (name !== current.name) {
-        dispatch(
-          updateTab({
-            tabId,
-            side,
-            keypath: 'name',
-            updates: name.length > 0 ? name : `Untitled`,
-          })
-        );
-      }
-    },
-    300,
-    [debouncedEdit?.name, dispatch, tabId, side]
-  );
+  useEffect(() => {
+    if (!edit?.name) return;
+    dispatch(
+      updateTab({
+        tabId,
+        side,
+        keypath: 'name',
+        updates: edit?.name.trim().length > 0 ? edit?.name.trim() : `Untitled`,
+      })
+    );
+    dispatch(
+      updateTab({
+        tabId,
+        side,
+        keypath: 'viewState.isDirty',
+        updates: true,
+      })
+    );
+  }, [edit?.name, dispatch, tabId, side]);
 
   return (
     <>
@@ -75,15 +60,15 @@ const AttrMetaData: React.FC<AttrMetaDataProps> = ({ columns }) => {
         >
           <Typography variant="h6">Icon:</Typography>
           <CustomIcon
-            viewBox={attr?.icon?.viewBox || '0 0 664 512'}
-            path={attr?.icon?.d || ''}
+            viewBox={edit?.icon?.viewBox || '0 0 664 512'}
+            path={edit?.icon?.d || ''}
             size={24}
-            color={attr?.icon?.color || 'primary'}
-            backgroundColor={attr?.icon?.backgroundColor || 'background.paper'}
+            color={edit?.icon?.color || 'primary'}
+            backgroundColor={edit?.icon?.backgroundColor || 'background.paper'}
             onClick={() => {
               const entry = {
                 componentKey: 'IconSelector',
-                props: { tool, id },
+                props: { tool, id, tabId, side },
                 id: 'icon-selector',
               };
               showModal({ entry });

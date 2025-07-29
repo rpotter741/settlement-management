@@ -9,6 +9,7 @@ import {
   getGlossaries,
   getGlossaryById,
   updateGlossary,
+  updateGlossaryTerm,
   // node actions
   createNodeAndSection,
   createNodeAndDetail,
@@ -31,6 +32,7 @@ router.post('/delete', deleteGlossary);
 router.get('/', getGlossaries);
 router.get('/:id', getGlossaryById);
 router.post('/update', updateGlossary);
+router.post('/term/update', updateGlossaryTerm);
 
 // node routes
 router.post('/section', createNodeAndSection);

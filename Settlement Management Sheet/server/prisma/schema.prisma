@@ -585,13 +585,15 @@ model Glossary {
   description      Json?
   createdBy        String
   collaborators    String[]
+  forkedBy         String?
+  editors          String[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  editors          String[]
   contentType      ContentTypes
   nodes            GlossaryNode[]
   theme            Json?
   integrationState Json?
+  templates        Json?
 
   @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])
@@ -611,6 +613,7 @@ model GlossaryNode {
   sortIndex  Int            @default(0)
 
 
+
   @@index([id])
 }
 
@@ -619,26 +622,25 @@ model GlossarySection {
   id               String                 @unique
   version          Int
   contentType      ContentTypes
-  createdBy        String
-  collaborators    String[]
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   entryType        String
+  createdBy        String
+  forkedBy         String?
+  collaborators    String[]
+  editors          String[]
   subType          String?
   name             String?
   description      Json?
   dataString       String?
   tags             String[]
-  geographyId      String
-  geography        GlossaryGeography?     @relation(fields: [geographyId], references: [id], onDelete: Cascade)
-  politicalId      String
-  political        GlossaryPolitical?     @relation(fields: [politicalId], references: [id], onDelete: Cascade)
-  relationshipsId  String
-  relationships    GlossaryRelationships? @relation(fields: [relationshipsId], references: [id], onDelete: Cascade)
-  historyId        String
-  history          GlossaryHistory?       @relation(fields: [historyId], references: [id], onDelete: Cascade)
-  customTabs       Json?
-  integrationState Json
+  subSections      String[]
+  geography        GlossaryGeography?   @relation("SectionToGeography")
+  political        GlossaryPolitical?   @relation("SectionToPolitical")
+  relationships    GlossaryRelationships? @relation("SectionToRelationships")
+  history          GlossaryHistory?     @relation("SectionToHistory")
+  customTabs       GlossaryCustom?      @relation("SectionToCustom")
+  integrationState Json?
   backlinksFrom    BacklinkIndex[]        @relation("SourceSection")
   backlinksTo      BacklinkIndex[]        @relation("TargetSection")
 
@@ -647,6 +649,17 @@ model GlossarySection {
   @@index([subType])
   @@index([entryType, subType])
   @@index([createdBy])
+}
+
+model GlossaryCustom {
+  refId             String            @id @default(uuid())
+  id                String            @unique
+  version           Int
+  updatedAt         DateTime          @updatedAt
+  groups            String[]
+  customFields      Json?
+  entryId           String?
+  GlossarySection   GlossarySection @relation("SectionToCustom", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model GlossaryGeography {
@@ -660,7 +673,7 @@ model GlossaryGeography {
   landmarks       String[]
   customFields    Json?
   entryId         String?
-  GlossarySection GlossarySection[]
+  GlossarySection GlossarySection @relation("SectionToGeography", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model GlossaryPolitical {
@@ -677,7 +690,7 @@ model GlossaryPolitical {
   cultures        Json?
   customFields    Json?
   entryId         String?
-  GlossarySection GlossarySection[]
+  GlossarySection GlossarySection @relation("SectionToPolitical", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model GlossaryRelationships {
@@ -692,7 +705,7 @@ model GlossaryRelationships {
   influence       Json?
   customFields    Json?
   entryId         String?
-  GlossarySection GlossarySection[]
+  GlossarySection GlossarySection @relation("SectionToRelationships", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model GlossaryHistory {
@@ -706,7 +719,7 @@ model GlossaryHistory {
   customFields      Json?
   historyDataString String?
   entryId           String?
-  GlossarySection   GlossarySection[]
+  GlossarySection   GlossarySection @relation("SectionToHistory", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model BacklinkIndex {
@@ -743,6 +756,7 @@ model LocationGlossary {
   occupants      String[]
   nearbyFeatures Json? // split by landmark and location
   events         String[]
+  integrationState Json?
 
   @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])
@@ -769,6 +783,8 @@ model PersonGlossary {
   locations      String[]
   relationships  Json
   notoriety      String
+    integrationState Json?
+
 
   @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])
@@ -797,6 +813,8 @@ model NoteGlossary {
   isShared       Boolean
   sharedWith     String[]
   attachments    Json
+    integrationState Json?
+
 
   @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])
@@ -821,6 +839,8 @@ model EventGlossary {
   locations      String[] //includes more than just the location model
   relatedEntries String[]
   tags           String[]
+    integrationState Json?
+
 
   @@index([contentType])
   @@index([id, updatedAt(sort: Desc)])

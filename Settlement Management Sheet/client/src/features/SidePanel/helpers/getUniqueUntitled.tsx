@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useEffect, useRef } from 'react';
-import { selectAllTabNames } from 'features/SidePanel/sidePanelSelectors.js';
+import { selectAllTabNames } from 'features/SidePanel/tabSelectors.js';
 
 const getUniqueUntitledName = () => {
   const tabNames = useSelector(selectAllTabNames);

@@ -3,17 +3,18 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { validateField, validateTool } from '@/app/slice/validationSlice.js';
 import api from '@/services/interceptor.js';
-import { saveTool } from '@/app/slice/toolSlice.js';
+import { batchUpdateById, saveTool } from '@/app/slice/toolSlice.js';
 import { toolSelectors as select } from '@/app/selectors/toolSelectors.js';
-import { loadTool, updateDirtyTool } from '@/app/thunks/toolThunks.js';
+import { loadTool } from '@/app/thunks/toolThunks.js';
 import { AppDispatch } from '@/app/store.js';
+import updateEditAndTabDirty from '@/app/thunks/tool/updateEditAndTabDirty.js';
 
 export const useToolActions = (tool: ToolName, id: string) => {
   const dispatch: AppDispatch = useDispatch();
 
   const updateTool = useCallback(
     (keypath: string, updates: any) => {
-      dispatch(updateDirtyTool({ id, tool, keypath, updates }));
+      dispatch(updateEditAndTabDirty({ id, tool, keypath, updates }));
     },
     [dispatch]
   );
@@ -61,8 +62,17 @@ export const useToolActions = (tool: ToolName, id: string) => {
     [dispatch]
   );
 
+  const batchUpdate = useCallback(
+    (updates: Record<string, any>) => {
+      console.log('Batch updating tool:', tool, 'with updates:', updates);
+      dispatch(batchUpdateById({ tool, id, updates }));
+    },
+    [dispatch]
+  );
+
   return {
     updateTool,
+    batchUpdate,
     validateToolField,
     validateAll,
     saveToolEdit,
@@ -78,7 +88,6 @@ export const useToolSelectors = (tool: ToolName, id: string) => {
   const allTools = useSelector(select.allTools(tool));
   const allEditTools = useSelector(select.allEditTools(tool));
   const errors = useSelector(select.errors(tool, id));
-  const dirty = useSelector(select.changes(tool, id));
 
   const selectStaticValue = (keypath: string) =>
     useSelector(select.selectValue(tool, id, keypath));
@@ -88,6 +97,9 @@ export const useToolSelectors = (tool: ToolName, id: string) => {
 
   const selectErrorValue = (keypath: string) =>
     useSelector(select.keypathError(tool, id, keypath));
+
+  const fieldIsDirty = (keypath: string) =>
+    useSelector(select.keypathDirty(tool, id, keypath));
 
   return {
     current,
@@ -99,8 +111,8 @@ export const useToolSelectors = (tool: ToolName, id: string) => {
     errors,
     selectStaticValue,
     selectEditValue,
-    dirty,
     selectErrorValue,
+    fieldIsDirty,
   };
 };
 

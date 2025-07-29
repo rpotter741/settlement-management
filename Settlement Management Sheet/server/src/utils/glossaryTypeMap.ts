@@ -27,7 +27,7 @@ const glossaryTypeMap = {
   person: {
     version: 1,
     description: '',
-    dataString: '',
+    descDataString: '',
     tags: [],
     occupations: [],
     titles: [],
@@ -56,7 +56,7 @@ const glossaryTypeMap = {
   note: {
     version: 1,
     description: '',
-    dataString: '',
+    descDataString: '',
     noteType: '',
     priority: 'low',
     dueDate: '',
@@ -119,7 +119,7 @@ const glossaryTypeMap = {
   event: {
     version: 1,
     description: '',
-    dataString: '',
+    descDataString: '',
     tags: [],
     significance: 'trivial',
     gameDate: '',

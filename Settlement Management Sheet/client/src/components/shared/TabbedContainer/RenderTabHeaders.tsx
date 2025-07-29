@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Box,
   Tab,
@@ -22,9 +22,9 @@ import {
   useLeftTabs,
   useRightTabs,
 } from '@/context/TabsContext/TabsContext.js';
-import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
+import { focusedTab } from '@/app/selectors/tabSelectors.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
-import { setActiveTab as focusTab } from '@/app/slice/sidePanelSlice.js';
+import { setActiveTab as focusTab } from '@/app/slice/tabSlice.js';
 
 interface RenderTabHeadersProps {
   setActiveTab: (index: number, tabId: string, side: 'left' | 'right') => void;
@@ -60,7 +60,6 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
   }, [draggedType, setDragSide]);
 
   const activeTab = useSelector(focusedTab);
-
   if (!Array.isArray(tabs)) return null;
 
   return (
@@ -82,6 +81,8 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
       }}
     >
       {tabs.map((tab, index) => {
+        const isDirty =
+          Object.keys(tab.viewState.dirtyKeypaths || {}).length > 0;
         return (
           <DragWrapper
             type={side === 'left' ? 'leftTab' : 'rightTab'}
@@ -164,7 +165,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                   }}
                 />
               </Tooltip>
-              {tab?.viewState.isDirty && (
+              {isDirty && (
                 <Circle
                   sx={{
                     color:
@@ -177,7 +178,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (tab.viewState.isDirty) {
+                  if (isDirty) {
                     const entry = {
                       componentKey: 'ConfirmDirtyClose',
                       props: {

@@ -1,6 +1,6 @@
 import prisma from '../../../db/db.ts';
 
-export default async function getGlossaries(req, res) {
+export default async function getGlossaries(req: any, res: any) {
   try {
     const userId = req?.user?.id || 'robbiepottsdm';
     console.log(userId);
@@ -14,6 +14,7 @@ export default async function getGlossaries(req, res) {
         description: true,
         genre: true,
         subGenre: true,
+        integrationState: true,
       },
     });
     return res.json(glossaries);

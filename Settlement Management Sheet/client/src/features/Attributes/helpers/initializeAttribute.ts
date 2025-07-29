@@ -42,9 +42,14 @@ function initializeAttribute() {
   return {
     id: newId(),
     refId: newId(),
-    version: 1,
+    version: 0,
     name: '',
     description: '',
+    icon: {
+      ...iconList[0],
+      color: 'black',
+      backgroundColor: '#fbf7ef',
+    }, // Default icon with black color
     balance: {
       cost: {
         base: 0,
@@ -76,11 +81,6 @@ function initializeAttribute() {
     },
     thresholds,
     settlementPointCost,
-    icon: {
-      ...iconList[0],
-      color: 'black',
-      backgroundColor: '#fbf7ef',
-    }, // Default icon with black color
     isPositive: true,
     canHurt: true,
     isTradeable: true,

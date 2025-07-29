@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useDispatch } from 'react-redux';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 
@@ -57,7 +57,7 @@ const LoadTool = ({
     switch (action) {
       case 'Edit':
         return () => {
-          loadNewTool({ refId, id, setNew: true });
+          dispatch(loadNewTool({ refId, id, setNew: true });
           setShowModal(null);
         };
       case 'Delete':

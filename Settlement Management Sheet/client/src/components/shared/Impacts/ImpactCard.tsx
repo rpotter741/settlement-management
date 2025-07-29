@@ -9,8 +9,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import RightArrowIcon from '@mui/icons-material/ArrowRight';
 import LeftArrowIcon from '@mui/icons-material/ArrowLeft';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
-import { useTools } from 'hooks/useTools.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
 import { get } from 'lodash';
 

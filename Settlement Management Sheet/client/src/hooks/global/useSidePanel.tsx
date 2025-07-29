@@ -4,17 +4,15 @@ import {
   addTab,
   removeTab,
   setCurrentTab,
-  setBreadcrumbs,
   updateTab,
   moveLeftToRight,
   moveRightToLeft,
-  setToolOptions,
   setSplit,
   setPrevent,
-} from '@/app/slice/sidePanelSlice.js';
-import { sidePanelSelectors as select } from '@/app/selectors/sidePanelSelectors.js';
+} from '@/app/slice/tabSlice.js';
+import { tabSelectors as select } from '@/app/selectors/tabSelectors.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
-import { OptionObject, TabTools } from '@/app/types/SidePanelTypes.js';
+import { OptionObject, TabTools } from '@/app/types/TabTypes.js';
 import { set } from 'lodash';
 import { v4 as newId } from 'uuid';
 
@@ -72,13 +70,6 @@ export const useSidePanelActions = () => {
     [dispatch]
   );
 
-  const updateBreadcrumbs = useCallback(
-    (breadcrumbs: string[]) => {
-      dispatch(setBreadcrumbs({ breadcrumbs }));
-    },
-    [dispatch]
-  );
-
   const updateCurrentTab = useCallback(
     (tabId: string, keypath: string, updates: any, side: SidePanelSide) => {
       dispatch(updateTab({ tabId, keypath, updates, side }));
@@ -96,13 +87,6 @@ export const useSidePanelActions = () => {
   const moveRight = useCallback(
     (tabId: string, dropIndex: number) => {
       dispatch(moveLeftToRight({ tabId, dropIndex }));
-    },
-    [dispatch]
-  );
-
-  const setOptions = useCallback(
-    (options: Record<string, OptionObject[]>) => {
-      dispatch(setToolOptions({ options }));
     },
     [dispatch]
   );
@@ -125,17 +109,15 @@ export const useSidePanelActions = () => {
     addNewTab,
     removeById,
     setActiveTab,
-    updateBreadcrumbs,
     updateCurrentTab,
     moveLeft,
     moveRight,
-    setOptions,
     setSplitState,
     setPreventSplit,
   };
 };
 
-const useSidePanelSelectors = () => {
+const useTabSelectors = () => {
   const leftTabs = useSelector(select.leftTabs);
   const rightTabs = useSelector(select.rightTabs);
   const currentLeftTab = useSelector(select.currentLeftTab);
@@ -144,7 +126,6 @@ const useSidePanelSelectors = () => {
   const currentRightIndex = useSelector(select.currentRightIndex);
   const isSplit = useSelector(select.isSplit);
   const preventSplit = useSelector(select.preventSplit);
-  const options = useSelector(select.options);
 
   return {
     leftTabs,
@@ -155,12 +136,11 @@ const useSidePanelSelectors = () => {
     currentRightIndex,
     isSplit,
     preventSplit,
-    options,
   };
 };
 
 export const useSidePanel = () => {
-  const selectors = useSidePanelSelectors();
+  const selectors = useTabSelectors();
   const actions = useSidePanelActions();
 
   return { ...selectors, ...actions };

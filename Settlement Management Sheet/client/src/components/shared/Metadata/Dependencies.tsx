@@ -5,7 +5,7 @@ import React, {
   lazy,
   useContext,
 } from 'react';
-import { useTools } from '@/hooks/useTools.jsx';
+import { useTools } from '@/hooks/tools/useTools.jsx';
 
 import { v4 as newId } from 'uuid';
 

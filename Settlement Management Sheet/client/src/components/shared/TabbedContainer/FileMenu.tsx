@@ -7,8 +7,8 @@ import ViewSubMenu from './SubFileMenus/ViewSubMenu.js';
 
 import { useTheme, alpha } from '@mui/material/styles';
 import { TabType } from '@/app/types/ToolTypes.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
-import { useTools } from '@/hooks/useTools.js';
+import { Tab } from '@/app/types/TabTypes.js';
+import { useTools } from '@/hooks/tools/useTools.js';
 import { ToolName } from 'types/common.js';
 import { fontSize } from '@mui/system';
 

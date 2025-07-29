@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
-    "start": "node src/server.js",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "start": "node src/index.js",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -28,6 +28,7 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.4.2",
     "prisma": "^6.2.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
   }
 }

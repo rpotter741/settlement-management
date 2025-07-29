@@ -8,7 +8,7 @@ import PreviewAttribute from './PreviewAttribute.jsx';
 import checklistContent from '../../helpers/attributeChecklist.js';
 
 import CreateShell from '@/components/shared/CreateShell/CreateToolShell.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 
 export const validationFields = [
   'name',

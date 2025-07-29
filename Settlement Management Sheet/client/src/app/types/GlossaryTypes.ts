@@ -1,8 +1,5 @@
-import {
-  GlossaryEntry,
-  GlossaryEntryType,
-  GlossaryNode,
-} from '../../../../types/index.js';
+import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
+import { GlossaryEntry, GlossaryEntryType, GlossaryNode } from 'types/index.js';
 
 export type GlossaryEntryArrayKeys = 'regions' | 'climate' | 'type';
 
@@ -13,7 +10,7 @@ export interface GlossaryStateEntry {
     string: string;
   };
   id: string;
-  genre: string;
+  genre: Genre;
   subGenre: string;
   hydrated: boolean;
   loading: boolean;
@@ -40,6 +37,7 @@ export interface GlossaryStateEntry {
       >
     >
   >;
+  integrationState: any;
 }
 
 export interface GlossaryState {

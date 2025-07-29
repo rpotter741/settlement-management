@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 
 import { Box, Typography, Button } from '@mui/material';
 

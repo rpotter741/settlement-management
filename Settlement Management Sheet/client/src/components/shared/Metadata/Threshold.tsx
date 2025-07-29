@@ -8,7 +8,7 @@ const ThresholdNameField = {
   tooltip: '',
   validateFn: (value: string) => {
     if (value.length < 3) {
-      return 'oh shitty fuck, name must be at least 3 characters long';
+      return 'Name must be at least 3 characters long';
     }
     return null;
   },

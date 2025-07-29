@@ -3,13 +3,13 @@ import { lazy } from 'react';
 const contextKeyComponentMap = (props: Record<string, any>) => ({
   'Palette Settings': {
     component: lazy(
-      () => import('../features/Glossary/forms/CustomizePalette.js')
+      () => import('../features/Glossary/EditGlossary/CustomizePalette.js')
     ),
     props: { ...props, column: true },
   },
   [`${props.name} Validation Checklist`]: {
     component: lazy(
-      () => import('../features/Glossary/forms/CustomizePalette.js')
+      () => import('../features/Glossary/EditGlossary/CustomizePalette.js')
     ),
     props: { ...props },
   },

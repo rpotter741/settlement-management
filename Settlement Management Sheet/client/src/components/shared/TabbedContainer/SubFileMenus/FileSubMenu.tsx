@@ -22,7 +22,7 @@ import {
   SaveAs,
 } from '@mui/icons-material';
 import { alpha } from '@mui/material/styles';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import {
   createNewToolFile,
   saveToolFile,

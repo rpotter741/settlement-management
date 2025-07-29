@@ -1,1 +1,1 @@
-import{w as e,aY as p,aZ as l,a_ as S,a$ as o}from"./main.js";const z=()=>{const s=e(p),a=e(l),i=e(S),n=o(`(min-width: ${i?"1750px":"1450px"})`),t=o(`(max-width: ${i?"1200px":"900px"})`);return{splitTabs:s,noSplit:a,soloSize:t,splitSize:n,either:s||t,both:s&&t}};export{z as u};
+import{p as e,aP as p,aQ as l,aR as S,aS as o}from"./main.js";const h=()=>{const s=e(p),a=e(l),i=e(S),n=o(`(min-width: ${i?"1750px":"1450px"})`),t=o(`(max-width: ${i?"1200px":"900px"})`);return{splitTabs:s,noSplit:a,soloSize:t,splitSize:n,either:s||t,both:s&&t}};export{h as u};

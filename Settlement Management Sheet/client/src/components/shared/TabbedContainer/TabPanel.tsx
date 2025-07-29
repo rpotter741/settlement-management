@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { alpha, Box, useTheme } from '@mui/material';
 import FileMenu from './FileMenu.js';
-import { Tab } from '@/app/types/SidePanelTypes.js';
+import { Tab } from '@/app/types/TabTypes.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { setActiveTab } from '@/app/slice/sidePanelSlice.js';
-import { focusedTab } from '@/app/selectors/sidePanelSelectors.js';
+import { setActiveTab } from '@/app/slice/tabSlice.js';
+import { focusedTab } from '@/app/selectors/tabSelectors.js';
 import { useSelector } from 'react-redux';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
 

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Box, Divider, Typography, Drawer, Collapse } from '@mui/material';
 import { TitledCollapse } from '../../../../components/index.js';
 
-import { useTools } from 'hooks/useTools.jsx';
+import { useTools } from 'hooks/tools/useTools.jsx';
 import { useShellContext } from '@/context/ShellContext.js';
-import { useSidePanel } from 'hooks/useSidePanel.jsx';
+import { useSidePanel } from 'hooks/global/useSidePanel.jsx';
 
 import InnerTabbedContainer from 'components/shared/TabbedContainer/InnerTabbedContainer.jsx';
 

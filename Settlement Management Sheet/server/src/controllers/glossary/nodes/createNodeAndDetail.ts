@@ -33,16 +33,15 @@ export default async function createNodeAndDetail(req, res) {
       name,
       entryType,
       fileType: GlossShape.detail,
+      glossaryId,
       parentId: parentId || null,
-      glossary: {
-        connect: { id: glossaryId },
-      },
     };
+
+    console.log(nodeData, 'Node data for creation');
 
     const entryInsert = {
       id,
       name,
-      entryType,
       ...baseEntry,
       contentType,
       createdBy,
