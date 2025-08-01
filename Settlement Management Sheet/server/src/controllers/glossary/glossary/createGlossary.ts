@@ -29,6 +29,7 @@ export default async function createGlossary(req, res) {
         createdBy: req?.user?.id || 'robbiepottsdm',
         contentType: 'CUSTOM',
         theme,
+        integrationState: {},
       },
     });
     return res.json({ glossary: newGlossary });

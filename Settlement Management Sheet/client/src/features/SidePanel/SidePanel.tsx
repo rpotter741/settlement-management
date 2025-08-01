@@ -232,7 +232,7 @@ const SidePanel = () => {
             {!open ? <MoreVert /> : <Menu />}
           </IconButton>
         </Tooltip>
-        <Divider flexItem sx={{ mb: 2 }} />
+        <Divider flexItem sx={{ mb: 0 }} />
         {iconButtonList.map((modeTarget, index) => (
           <Box
             key={modeTarget}
@@ -289,10 +289,6 @@ const SidePanel = () => {
             height: 'calc(33vh - 32px)',
             mb: '48px',
             flexDirection: 'column',
-            // backgroundColor: (theme) =>
-            //   themeMode === 'light'
-            //     ? darken(theme.palette.background.paper, 0.25)
-            //     : lighten(theme.palette.background.paper, 0.25),
           }}
         >
           {contextKey &&
@@ -353,8 +349,9 @@ const SidePanel = () => {
             >
               <Box
                 sx={{
-                  height: 48,
+                  height: 65.5,
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   width: '100%',
                   justifyContent: 'center',
@@ -380,6 +377,7 @@ const SidePanel = () => {
                 )}
                 <Typography variant="h5">Eclorean Ledger</Typography>
               </Box>
+              <Divider flexItem sx={{ width: '100%' }} />
               {activeContext ? (
                 <Suspense fallback={<Box>Loading...</Box>}>
                   {(() => {

@@ -10,7 +10,7 @@ import {
 } from '@/app/slice/glossarySlice.js';
 import { GenericObject } from '../../../../../../shared/types/common.js';
 import { get } from 'lodash';
-import { genreDefaults } from '@/features/Glossary/utils/getTerm.js';
+import { genreSectionDefaults } from '@/features/Glossary/utils/getTerm.js';
 import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
 
 export default function updateGlossaryTermThunk({
@@ -38,7 +38,21 @@ export default function updateGlossaryTermThunk({
         );
         return;
       }
-      if (genreDefaults[genre][key] === value) {
+      console.log(glossary.integrationState.terms);
+      const currentTerm = get(
+        glossary.integrationState?.terms || {},
+        key,
+        null
+      );
+      if (currentTerm === value) {
+        return;
+      }
+
+      if (genreSectionDefaults[genre][key] === value) {
+        console.log(
+          `Removing term for ${key} as it matches the default value.`
+        );
+        // If the value matches
         dispatch(
           updateGlossaryTerm({
             id,
@@ -52,6 +66,7 @@ export default function updateGlossaryTermThunk({
           value: null, // Send null to remove the term
         });
       } else {
+        console.log(`Updating term for ${key} to ${value}.`);
         dispatch(
           updateGlossaryTerm({
             id,

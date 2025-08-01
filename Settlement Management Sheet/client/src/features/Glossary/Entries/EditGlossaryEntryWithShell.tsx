@@ -1,7 +1,7 @@
 import { useShellContext } from '@/context/ShellContext.js';
 import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
 import { Box } from '@mui/system';
-import propertyArrayMap from '../utils/entryTypePropertyArray.js';
+import propertyArrayMap from '../utils/propertyMaps/entryTypePropertyArray.js';
 import PropertyMapTabs from '../Shared/PropertyMapTabs.js';
 
 interface EditGlossaryEntryFormProps {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
-import { PropertySectionDescriptors } from '../utils/entryTypePropertyArray.js';
+import { PropertySectionDescriptors } from '../utils/propertyMaps/entryTypePropertyArray.js';
 import { GlossaryEntryType } from 'types/index.js';
 import { useShellContext } from '@/context/ShellContext.js';
 import useNodeEditor from '@/hooks/glossary/useNodeEditor.js';
@@ -10,6 +10,12 @@ import { updateTab } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import OverviewTab from './tabs/EntryOverviewTab.js';
+import getPropertyLabel, {
+  SubSectionTypes,
+} from '../utils/getPropertyLabel.js';
+import { useSelector } from 'react-redux';
+import { selectGlossaryById } from '@/app/selectors/glossarySelectors.js';
+import { capitalize } from 'lodash';
 
 interface PropertyMapTabsProps {
   propertyMap: any;
@@ -41,6 +47,7 @@ const constantTabs = [
 const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
   const dispatch: AppDispatch = useDispatch();
   const { tab } = useShellContext();
+  const glossary = useSelector(selectGlossaryById(tab.glossaryId));
   const [activeTab, setActiveTab] = useState<string>(
     tab?.viewState?.activeTab || 'Overview'
   );
@@ -72,7 +79,11 @@ const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
 
   const tabs = useMemo(() => {
     const calculatedTabs = propertyMap.map((section: any) => ({
-      name: section.name,
+      name: getPropertyLabel({
+        glossary,
+        section: section.name.toLowerCase() as SubSectionTypes,
+        key: `${capitalize(section.name)} Name`,
+      }),
       key: section.name,
       disabled: false,
       props: {
@@ -83,7 +94,7 @@ const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
     const usedTabs = constantTabs.toSpliced(1, 0, ...calculatedTabs);
 
     return usedTabs;
-  }, [propertyMap]);
+  }, [propertyMap, glossary.integrationState]);
 
   const componentMap = useMemo(() => {
     return tabs.reduce(

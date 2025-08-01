@@ -46,6 +46,7 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
           sx={{
             gridColumn: `span ${columns}`,
             height: '90%',
+            overflowX: 'hidden',
           }}
         >
           {children}

@@ -11,4 +11,13 @@ const MotionBox = styled(motion.div)({
   backgroundColor: 'transparent',
 });
 
-export default MotionBox;
+const RowMotionBox = styled(motion.div)({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  top: 0,
+  left: 0,
+  backgroundColor: 'transparent',
+});
+
+export { MotionBox as default, MotionBox, RowMotionBox };

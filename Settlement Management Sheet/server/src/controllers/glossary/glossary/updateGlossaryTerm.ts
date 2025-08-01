@@ -30,6 +30,8 @@ export default async function updateGlossaryTerm(req: any, res: any) {
       terms: updateTerms,
     };
 
+    console.log(`Updating glossary ${id} with terms:`, updatedIntegrationState);
+
     const updatedGlossary = await prisma.glossary.update({
       where: { id },
       data: { integrationState: updatedIntegrationState },

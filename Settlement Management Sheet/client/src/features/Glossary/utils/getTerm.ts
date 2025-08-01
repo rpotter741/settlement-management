@@ -2,7 +2,7 @@ import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.js';
 import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
 import { entryTypes, GlossaryEntryTypeString } from './glossaryConstants.js';
 
-export const genreDefaults: Record<
+export const genreSectionDefaults: Record<
   Genre,
   Record<GlossaryEntryTypeString | string, string>
 > = {
@@ -51,9 +51,8 @@ export default function getTerm({
   key: string;
 }): string {
   if (!glossary || !key) return '';
+  const { genre, integrationState } = glossary;
   return (
-    glossary?.integrationState?.[key] ||
-    genreDefaults[glossary.genre as Genre][key] ||
-    ''
+    integrationState?.terms?.[key] || genreSectionDefaults[genre]?.[key] || ''
   );
 }

@@ -9,7 +9,7 @@ const RenderHeader = ({ entry, index, setActive, active, setTool }) => {
       key={entry.title}
       sx={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}
     >
-      <Box
+      {/* <Box
         sx={{
           minHeight: 36,
           maxHeight: 36,
@@ -37,7 +37,7 @@ const RenderHeader = ({ entry, index, setActive, active, setTool }) => {
             }}
           />
         </Divider>
-      </Box>
+      </Box> */}
       {entry.children.map((child, childIndex) => (
         <RenderEntry
           key={child.title}

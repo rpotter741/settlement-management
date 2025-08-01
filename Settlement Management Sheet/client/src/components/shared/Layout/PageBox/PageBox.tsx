@@ -6,6 +6,7 @@ import { PageBoxContext } from '@/context/PageBox.js';
 import lockHeightDuringTransition from './utils/lockHeightOnTransition.js';
 import getWidths from './utils/getWidths.js';
 import pageBoxVariantSx from './utils/sxVariants.js';
+import MotionBox from '../Motion/MotionBox.js';
 
 export type PageBoxVariant = 'default' | 'blend' | 'fullWidth';
 
@@ -76,7 +77,7 @@ const PageBox: React.FC<PageBoxProps> = ({
                 : '0px 2px 8px rgba(255, 255, 255, 0.2)',
             borderRadius: variant === 'fullWidth' ? 0 : 4,
             height: '100%',
-            overflowY: 'scroll',
+            overflowY: 'none',
             ...pageBoxVariantSx[
               overrideVariant as keyof typeof pageBoxVariantSx
             ],

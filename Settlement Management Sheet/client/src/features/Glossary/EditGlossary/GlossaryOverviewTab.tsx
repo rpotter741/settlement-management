@@ -5,15 +5,24 @@ import {
 import { setTabDirty } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import Editor from '@/components/shared/TipTap/Editor.js';
-import { TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import { Box } from '@mui/system';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import thunks from '@/app/thunks/glossaryThunks.js';
 import { Circle } from '@mui/icons-material';
+import { useModalActions } from '@/hooks/global/useModal.js';
+import { Tab } from '@/app/types/TabTypes.js';
 
-const EditGlossaryOverviewTab = ({ glossary }: { glossary: any }) => {
+const EditGlossaryOverviewTab = ({
+  glossary,
+  tab,
+}: {
+  glossary: any;
+  tab: Tab;
+}) => {
   const dispatch: AppDispatch = useDispatch();
+  const { showModal } = useModalActions();
   if (!glossary) return null;
 
   const [name, setName] = useState(glossary?.name || '');
@@ -93,7 +102,14 @@ const EditGlossaryOverviewTab = ({ glossary }: { glossary: any }) => {
   }, [isDescriptionDirty]);
 
   return (
-    <Box sx={{ p: 2, height: '100%', boxSizing: 'border-box' }}>
+    <Box
+      sx={{
+        p: 2,
+        height: '100%',
+        boxSizing: 'border-box',
+        position: 'relative',
+      }}
+    >
       <TextField
         label="Glossary Name"
         variant="outlined"
@@ -119,6 +135,22 @@ const EditGlossaryOverviewTab = ({ glossary }: { glossary: any }) => {
         propUpdate={handleUpdateDescription}
         immediateOnChange={() => setIsDescriptionDirty(true)}
       />
+      <Button
+        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        onClick={() => {
+          const entry = {
+            componentKey: 'ConfirmDeleteGlossary',
+            props: {
+              tab: tab,
+              glossary,
+            },
+            id: `delete-glossary-${glossary.id}`,
+          };
+          showModal({ entry });
+        }}
+      >
+        Delete Glossary
+      </Button>
     </Box>
   );
 };

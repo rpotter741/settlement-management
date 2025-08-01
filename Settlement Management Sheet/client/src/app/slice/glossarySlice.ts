@@ -106,7 +106,7 @@ const glossarySlice = createSlice({
       const { id, key, value } = action.payload;
       const glossary = state.glossaries[id];
       if (glossary) {
-        if (!glossary.integrationState.terms) {
+        if (!glossary.integrationState?.terms) {
           glossary.integrationState.terms = {};
         }
         if (value === null || value === undefined) {

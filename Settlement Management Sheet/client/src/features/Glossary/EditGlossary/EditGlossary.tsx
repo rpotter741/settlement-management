@@ -12,7 +12,7 @@ import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedConten
 import EditGlossaryOverviewTab from './GlossaryOverviewTab.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
 import { Tab } from '@/app/types/TabTypes.js';
-import GlossaryTerms from '../Shared/tabs/GlossaryTerms.js';
+import GlossaryTerms from '../Terms/GlossaryTermsTab.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import { updateTab } from '@/app/slice/tabSlice.js';
@@ -21,16 +21,19 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
   if (!tab.glossaryId) return null;
   const dispatch: AppDispatch = useDispatch();
   const glossary = useSelector(selectGlossaryById(tab.glossaryId));
-  const { showModal } = useModalActions();
   const [activeTab, setActiveTab] = useState(
     tab.viewState?.tabData?.activeTab || 'Overview'
+  );
+  const [activeIndex, setActiveIndex] = useState(
+    tab.viewState?.tabData?.activeTermIndex || 0
   );
   const [lastIndex, setLastIndex] = useState(
     tab.viewState?.tabData?.activeIndex || 0
   );
   const handleTabClick = (tabKey: string, index: number) => {
     setActiveTab(tabKey);
-    setLastIndex(index);
+    setLastIndex(activeIndex);
+    setActiveIndex(index);
   };
 
   useEffect(() => {
@@ -42,12 +45,12 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
           keypath: 'viewState.tabData',
           updates: {
             activeTab,
-            activeIndex: lastIndex,
+            activeIndex: activeIndex,
           },
         })
       );
     };
-  }, [activeTab, lastIndex, dispatch]);
+  }, [dispatch, tab.tabId, tab.side, activeTab, activeIndex]);
 
   const editGlossaryTabs = [
     { name: 'Overview', props: { tab } },
@@ -58,7 +61,7 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
 
   const editGlossaryComponentMap = useMemo(
     () => ({
-      Overview: () => <EditGlossaryOverviewTab glossary={glossary} />,
+      Overview: () => <EditGlossaryOverviewTab glossary={glossary} tab={tab} />,
       Terms: () => <GlossaryTerms tab={tab} />,
       Settings: () => <div>Settings Component</div>,
       Palette: () => <CustomizePalette column={false} />,
@@ -92,7 +95,7 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
           height: '100%',
           borderRadius: 2,
           boxSizing: 'border-box',
-          overflowY: 'scroll',
+          overflow: 'none',
           width: '100%',
           px: 2,
         }}
@@ -105,21 +108,6 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
           lastIndex={lastIndex}
           isTool={false}
         />
-        <Button
-          onClick={() => {
-            const entry = {
-              componentKey: 'ConfirmDeleteGlossary',
-              props: {
-                tab: activeTab,
-                glossary,
-              },
-              id: `delete-glossary-${glossary.id}`,
-            };
-            showModal({ entry });
-          }}
-        >
-          Delete Glossary
-        </Button>
       </Box>
     </PageBox>
   );
