@@ -51,8 +51,6 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
 
   const options = getOptionsByKeypath(keypath);
 
-  console.log(options);
-
   const buildGroupedSelectOptions = (
     rawOptions: Record<
       string,
@@ -183,18 +181,19 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
     if (!options) return [];
 
     return Object.entries(options).flatMap(([groupLabel, entries]) =>
-      entries
-        .filter((e) => !!e[keypath])
-        .map((e) => ({
+      entries.map((e) => {
+        return {
           label: capitalize(e[keypath as string]),
           value: e[keypath as string],
           group: capitalize(groupLabel), // <-- keep the label for grouping
-          meta: { id: e.id, name: e.name },
-        }))
+          meta: { id: e.id[0], name: e.name },
+        };
+      })
     );
   }, [options, keypath]);
 
   const handleChange = (newValue: string | string[]) => {
+    console.log(newValue, 'newValue from handleChange');
     if (Array.isArray(newValue)) {
       if (hasPrimary) {
         if (!newValue.includes(primary)) {
@@ -210,9 +209,6 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
     multiple && inputRef.current?.focus();
   };
 
-  console.log(displayOptions, 'displayOptions');
-  console.log(entry[keypath], 'entry[keypath]');
-
   const deduped = options
     ? dedupeGroupedGlossaryOptions(
         options as Record<
@@ -222,7 +218,6 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
         keypath
       )
     : [];
-  console.log(deduped, 'deduped options');
 
   return (
     <Autocomplete

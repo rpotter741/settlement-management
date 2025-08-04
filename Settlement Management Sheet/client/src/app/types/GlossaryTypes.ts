@@ -1,4 +1,4 @@
-import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
+import { Genre } from 'types/index.js';
 import { GlossaryEntry, GlossaryEntryType, GlossaryNode } from 'types/index.js';
 
 export type GlossaryEntryArrayKeys = 'regions' | 'climate' | 'type';
@@ -25,23 +25,33 @@ export interface GlossaryStateEntry {
     }
   >;
   entries: Record<string, GlossaryEntry>;
-  options: Record<
-    string,
-    Partial<
-      Record<
-        keyof GlossaryEntry,
-        Record<
-          'inherited' | 'local' | 'other',
-          Array<{ id: string; name: string; [key: string]: any }>
-        >
-      >
-    >
-  >;
+  // options: Record<
+  //   string,
+  //   Partial<
+  //     Record<
+  //       keyof GlossaryEntry,
+  //       Record<
+  //         'inherited' | 'nearby' | 'extended' | 'other',
+  //         Array<{ id: string; name: string; [key: string]: any }>
+  //       >
+  //     >
+  //   >
+  // >;
+  options: any;
   integrationState: any;
 }
 
 export interface GlossaryState {
-  glossaries: Record<string, GlossaryStateEntry>;
+  glossaries: {
+    edit: {
+      byId: Record<string, GlossaryStateEntry>;
+      allIds: string[];
+    };
+    static: {
+      byId: Record<string, GlossaryStateEntry>;
+      allIds: string[];
+    };
+  };
   activeGlossaryId: string | null;
   snackbar: {
     message: string;

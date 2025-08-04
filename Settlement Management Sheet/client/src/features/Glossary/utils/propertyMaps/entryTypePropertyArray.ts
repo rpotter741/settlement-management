@@ -47,63 +47,7 @@ const definePropertyArrayMap = <T extends string>(
   arr: PropertySectionDescriptors<T>[]
 ): PropertySectionDescriptors<T>[] => arr;
 
-const continentPropertyArrayMap = definePropertyArrayMap<keyof ContinentEntry>([
-  {
-    name: 'Geography',
-    children: [
-      {
-        multiple: false,
-        keypath: 'climates',
-        label: 'Climate',
-      },
-      {
-        multiple: true,
-        keypath: 'terrain',
-        label: 'Terrain',
-      },
-      {
-        multiple: true,
-        keypath: 'locations',
-        label: 'Locations',
-      },
-    ],
-  },
-  {
-    name: 'Political',
-    children: [
-      {
-        multiple: true,
-        keypath: 'nations',
-        label: 'Nations',
-      },
-      {
-        multiple: true,
-        keypath: 'regions',
-        label: 'Regions',
-      },
-      {
-        multiple: false,
-        keypath: 'population',
-        label: 'Population',
-      },
-      {
-        multiple: true,
-        keypath: 'resources',
-        label: 'Resources',
-      },
-    ],
-  },
-  {
-    name: 'History',
-    children: [
-      {
-        multiple: true,
-        keypath: 'eventLog',
-        label: 'Event Log',
-      },
-    ],
-  },
-]);
+import continentPropertyArrayMap from './fantasy/continent.js';
 
 const territoryPropertyArrayMap = definePropertyArrayMap<keyof TerritoryEntry>([
   {
@@ -712,7 +656,7 @@ type PropertyArrayMap = {
   >[];
 };
 
-const propertyArrayMap: PropertyArrayMap = {
+const propertyArrayMap = {
   continent: continentPropertyArrayMap,
   territory: territoryPropertyArrayMap,
   domain: domainPropertyArrayMap,

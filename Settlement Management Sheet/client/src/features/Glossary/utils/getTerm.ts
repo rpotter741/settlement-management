@@ -53,6 +53,8 @@ export default function getTerm({
   if (!glossary || !key) return '';
   const { genre, integrationState } = glossary;
   return (
-    integrationState?.terms?.[key] || genreSectionDefaults[genre]?.[key] || ''
+    integrationState?.terms?.[key] ||
+    genreSectionDefaults[genre]?.[key] ||
+    'yo shit busted bruh'
   );
 }

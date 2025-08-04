@@ -1,5 +1,27 @@
-import { Genre } from '../client/src/components/shared/Metadata/GenreSelect.js';
-import { UUID, Timestamp, ContentType, EventSeverity } from './index';
+import {
+  UUID,
+  Timestamp,
+  ContentType,
+  EventSeverity,
+  GenericObject,
+} from './index';
+
+export type Genre =
+  | 'Agnostic'
+  | 'Fantasy'
+  | 'Sci-Fi'
+  | 'Horror'
+  | 'Mystery'
+  | 'Historical'
+  | 'Modern'
+  | 'Other';
+
+export type SubModelType =
+  | 'politics'
+  | 'history'
+  | 'geography'
+  | 'relationships'
+  | 'custom';
 
 export interface GlossaryNode {
   id: string;
@@ -22,20 +44,101 @@ export interface GlossaryNode {
 }
 
 export interface BaseEntry {
-  id: UUID;
-  refID: UUID;
+  refId?: UUID; // unique identifier for the entry, shared across versions
+  id: UUID; // unique identifier for the entry in the glossary
+  version?: number; // version number for optimistic updates
+  contentType?: ContentType; // type of content (e.g., 'html', 'markdown', 'json')
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+  createdBy?: UUID; // user ID of the creator
+  forkedBy?: UUID; // user ID of the user who forked this entry
+  collaborators?: UUID[]; // list of user IDs who can edit this entry
+  editors?: UUID[]; // list of user IDs who can edit this entry
+  subType?: string; // sub-type of the entry, e.g., 'note', 'event', 'person'
   name: string;
-  summary: string;
-  description: string | null;
-  content: {
-    type: 'html' | 'markdown' | 'json';
-    body: string;
+  description?: {
+    markdown?: string;
+    string?: string;
   };
+  dataString?: string; // stringified JSON for compatibility with older versions
   tags?: string[];
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  contentType: ContentType;
-  createdBy: UUID;
+}
+
+export interface GlossarySection extends BaseEntry {
+  entryType: GlossaryEntryType;
+  subSections?: string[]; // list of sub-sections or categories within the entry
+  geography?: GlossaryGeography;
+  politics?: GlossaryPolitics;
+  history?: GlossaryHistory;
+  relationships?: GlossaryRelationships;
+  customTabIds?: string[]; // list of custom tab IDs for additional data
+  customFields?: GenericObject; // custom fields for additional data
+  integrationState?: GenericObject; // state for integrations
+  backlinksFrom: UUID[];
+  backlinksTo: UUID[];
+}
+
+export interface GlossaryCustom {
+  refId?: UUID;
+  id: UUID;
+  customTabId: UUID;
+  version?: number;
+  updatedAt?: Timestamp;
+  groups?: string[];
+  customFields?: GenericObject;
+}
+
+export interface GlossaryGeography {
+  refId?: UUID;
+  id: UUID;
+  version?: number;
+  updatedAt?: Timestamp;
+  climates?: ClimateType[];
+  terrain?: TerrainType[];
+  regions?: UUID[]; // list of region IDs
+  landmarks?: UUID[]; // list of landmark IDs
+  customFields?: GenericObject; // custom fields for additional data
+}
+
+export interface GlossaryPolitics {
+  refId?: UUID;
+  id: UUID;
+  version?: number;
+  updatedAt?: Timestamp;
+  nations?: UUID[]; // list of nation IDs
+  settlements?: UUID[]; // list of settlement IDs
+  factions?: UUID[]; // list of faction IDs
+  locations?: UUID[]; // list of location IDs
+  resources?: GenericObject; // resources related to politics
+  population?: GenericObject; // population data related to politics
+  economy?: GenericObject; // economic data related to politics
+  cultures?: GenericObject; // cultural data related to politics
+  customFields?: GenericObject; // custom fields for additional data
+}
+
+export interface GlossaryRelationships {
+  refId?: UUID;
+  id: UUID;
+  version?: number;
+  updatedAt?: Timestamp;
+  allies?: UUID[]; // list of ally IDs
+  enemies?: UUID[]; // list of enemy IDs
+  relationships?: GenericObject; // relationships data
+  notoriety?: GenericObject; // notoriety data
+  influence?: GenericObject; // influence data
+  customFields?: GenericObject; // custom fields for additional data
+}
+
+export interface GlossaryHistory {
+  refId?: UUID;
+  id: UUID;
+  version?: number;
+  updatedAt?: Timestamp;
+  events?: UUID[]; // list of event IDs
+  flags?: GenericObject; // flags related to history
+  history?: GenericObject; // historical data
+  customFields?: GenericObject; // custom fields for additional data
+  historyDataString?: string; // stringified JSON for compatibility with older versions
 }
 
 export type TerrainType =
@@ -148,115 +251,6 @@ export const ClimateTypeOptions: ClimateType[] = [
   'icecap',
 ];
 
-export interface TerritoryEntry extends BaseEntry {
-  climates: ClimateType[];
-  terrain: TerrainType[];
-  nations: UUID[];
-  factions: UUID[];
-  population: number | string;
-  locations: UUID[];
-  landmarks: UUID[];
-  resources?: string[];
-}
-
-export interface ProvinceEntry extends BaseEntry {
-  nations: UUID[];
-  terrain: TerrainType[];
-  locations: UUID[];
-  landmarks: UUID[];
-  people: UUID[];
-  eventLog?: UUID[];
-  resources?: string[];
-  population: number | string;
-}
-
-export interface LandmarkEntry extends BaseEntry {
-  regions: UUID[];
-  climates: ClimateType;
-  terrain: TerrainType;
-  type: GeographicEntryType;
-  eventLog: UUID[];
-}
-
-export interface PersonEntry extends BaseEntry {
-  occupation: string;
-  title: string;
-  traits: string[];
-  faction: UUID;
-  location: UUID;
-  relationships: { id: UUID; type: string; relationship: string }[];
-  notoriety?:
-    | 'unknown'
-    | 'local'
-    | 'regional'
-    | 'national'
-    | 'international'
-    | 'global'
-    | 'cosmic'
-    | 'universal';
-}
-
-export interface ContinentEntry extends BaseEntry {
-  nations: UUID[];
-  regions: UUID[];
-  notableLocations: UUID[];
-  resources?: string[];
-  population: number | string;
-  climate: ClimateType[];
-  terrain: GeographicEntryType[];
-  eventLog?: UUID[];
-}
-
-export interface DomainEntry extends BaseEntry {
-  continent: UUID[];
-  regions: UUID[];
-  capital: UUID;
-  population: number | string;
-  governmentType: string;
-  economy: string;
-  culture: string;
-  languages: string[];
-  notableFigures: UUID[];
-  notableEvents?: UUID[];
-  resources?: string[];
-  flags?: string[]; // URLs or base64 encoded images
-  history?: string; // A brief history of the nation
-  relationships?: { id: UUID; type: string; relationship: string }[]; // Relationships with other nations or factions
-  notableLocations?: UUID[]; // Significant locations within the nation
-  geography?: LandmarkEntry[]; // Geographic features within the nation
-}
-
-export interface SettlementEntry extends BaseEntry {
-  nation: UUID;
-  region: UUID;
-  population: number | string;
-  type: 'hamlet' | 'village' | 'town' | 'city' | 'capital';
-  economy: string;
-  government: string;
-  culture: string;
-  notableFigures: UUID[];
-  notableEvents?: UUID[];
-  notableLocations?: UUID[]; // Significant locations within the settlement
-  history?: string; // A brief history of the settlement
-  relationships?: { id: UUID; type: string; relationship: string }[];
-}
-
-export interface FactionEntry extends BaseEntry {
-  leader: UUID;
-  members: UUID[];
-  allies: UUID[];
-  enemies: UUID[];
-  nations: UUID[];
-  regions: UUID[];
-  homeBase: UUID;
-  relationships: { id: UUID; type: string; relationship: string }[];
-  influence: number;
-  notoriety: number;
-  cultureTags: string[];
-  activeKeys: string[];
-  passiveBonuses: Record<string, any>; // flesh out later
-}
-
 export type LocationType =
   | 'Ruin'
   | 'Temple'
@@ -348,13 +342,30 @@ export const LocationTypes: LocationType[] = [
   'Quarry',
 ];
 
+export interface PersonEntry extends BaseEntry {
+  occupation: string;
+  title: string;
+  traits: string[];
+  faction: UUID;
+  location: UUID;
+  relationships: { id: UUID; type: string; relationship: string }[];
+  notoriety?:
+    | 'unknown'
+    | 'local'
+    | 'regional'
+    | 'national'
+    | 'international'
+    | 'global'
+    | 'cosmic'
+    | 'universal';
+}
+
 export interface LocationEntry extends BaseEntry {
-  type: LocationType;
-  region: UUID;
-  currentOccupants?: UUID[];
+  locationType: LocationType;
+  regions: UUID[];
+  occupants?: UUID[];
   nearbyFeatures?: Record<string, number>; //id & distance
-  resources?: string[];
-  eventLog?: UUID[];
+  events?: UUID[];
 }
 
 export interface EventEntry extends BaseEntry {
@@ -387,13 +398,7 @@ export interface NoteEntry extends BaseEntry {
 }
 
 export type GlossaryEntry =
-  | ContinentEntry
-  | TerritoryEntry
-  | DomainEntry
-  | ProvinceEntry
-  | LandmarkEntry
-  | FactionEntry
-  | SettlementEntry
+  | GlossarySection
   | LocationEntry
   | PersonEntry
   | EventEntry

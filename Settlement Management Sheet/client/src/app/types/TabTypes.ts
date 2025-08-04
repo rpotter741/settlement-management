@@ -42,6 +42,7 @@ export interface TabState {
   splitTabs: boolean; // whether the tabs are split into left and right panels
   preventSplit: boolean; // whether splitting is prevented
   focusedTab: Tab | null; // the currently focused tab, if any
+  lastRemovedTab: string | null; // the ID of the last removed tab
 }
 
 export interface AddTabPayload {

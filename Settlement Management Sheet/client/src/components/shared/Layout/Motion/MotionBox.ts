@@ -20,4 +20,13 @@ const RowMotionBox = styled(motion.div)({
   backgroundColor: 'transparent',
 });
 
-export { MotionBox as default, MotionBox, RowMotionBox };
+const RowMotionButton = styled(motion.button)({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  top: 0,
+  left: 0,
+  backgroundColor: 'transparent',
+});
+
+export { MotionBox as default, MotionBox, RowMotionBox, RowMotionButton };

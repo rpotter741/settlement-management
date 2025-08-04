@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
 import {
   selectActiveId,
-  selectGlossaryById,
+  selectEditGlossaryById,
 } from '@/app/selectors/glossarySelectors.js';
 import { Box, Button } from '@mui/material';
 import { useModalActions } from '@/hooks/global/useModal.js';
@@ -16,11 +16,13 @@ import GlossaryTerms from '../Terms/GlossaryTermsTab.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import { updateTab } from '@/app/slice/tabSlice.js';
+import GlossaryPropertyLabels from '../utils/propertyMaps/GlossaryPropertyLabels.js';
+import GlossaryTermsTab from '../Terms/GlossaryTermsTab.js';
 
 const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
   if (!tab.glossaryId) return null;
   const dispatch: AppDispatch = useDispatch();
-  const glossary = useSelector(selectGlossaryById(tab.glossaryId));
+  const glossary = useSelector(selectEditGlossaryById(tab.glossaryId));
   const [activeTab, setActiveTab] = useState(
     tab.viewState?.tabData?.activeTab || 'Overview'
   );
@@ -56,14 +58,16 @@ const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
     { name: 'Overview', props: { tab } },
     { name: 'Terms', props: { tab } },
     { name: 'Settings', props: { tab } },
+    { name: 'Templates', props: { tab } },
     { name: 'Palette', props: { tab } },
   ];
 
   const editGlossaryComponentMap = useMemo(
     () => ({
       Overview: () => <EditGlossaryOverviewTab glossary={glossary} tab={tab} />,
-      Terms: () => <GlossaryTerms tab={tab} />,
+      Terms: () => <GlossaryTermsTab tab={tab} />,
       Settings: () => <div>Settings Component</div>,
+      Templates: () => <Box>Templates Component</Box>,
       Palette: () => <CustomizePalette column={false} />,
     }),
     []

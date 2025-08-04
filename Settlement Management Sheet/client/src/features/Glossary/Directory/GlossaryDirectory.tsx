@@ -44,9 +44,9 @@ import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import {
   nodeRenderState,
   selectActiveId,
-  selectNodeById,
+  selectEditNodeById,
   glossaryRenderState,
-  selectGlossaryById,
+  selectEditGlossaryById,
 } from '../../../app/selectors/glossarySelectors.js';
 import {
   toggleExpand,
@@ -103,7 +103,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const glossaryId = useSelector(selectActiveId());
-  const glossary = useSelector(selectGlossaryById(glossaryId));
+  const glossary = useSelector(selectEditGlossaryById(glossaryId));
   const renderState = useSelector(glossaryRenderState(glossaryId));
 
   //click delineation
@@ -204,7 +204,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
   const NodeItem = ({ id, offset }: { id: string; offset: number }) => {
     if (glossaryId === null) return null;
-    const data = useSelector(selectNodeById(glossaryId, id));
+    const data = useSelector(selectEditNodeById(glossaryId, id));
     if (!data) return null;
     const { expanded, rename } = useSelector(nodeRenderState(glossaryId, id));
     const [name, setName] = useState<string>(data.name);
@@ -400,7 +400,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
         </Tooltip>
       </ButtonGroup>
       {visibleNodeList &&
-        visibleNodeList.map((entry: GlossaryNode) => {
+        visibleNodeList.map((entry: any) => {
           const node = nodeMap[entry.id];
           return (
             <DropZone

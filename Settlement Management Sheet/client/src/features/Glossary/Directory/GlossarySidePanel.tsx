@@ -15,7 +15,7 @@ import GlossaryDirectory from './GlossaryDirectory.js';
 import { GlossaryNode } from 'types/glossaryEntry.js';
 import {
   selectActiveId,
-  selectAllGlossaries,
+  selectAllEditGlossaries,
 } from '../../../app/selectors/glossarySelectors.js';
 import { GlossaryDragProvider } from '@/context/DnD/GlossaryDragContext.js';
 import useGlossaryManager from '@/hooks/glossary/useGlossaryManager.js';
@@ -33,7 +33,7 @@ export interface Glossary {
 
 const GlossarySidePanel: React.FC<GlossarySidePanelProps> = ({}) => {
   const glossaryId = useSelector(selectActiveId());
-  const glossaries = useSelector(selectAllGlossaries());
+  const glossaries = useSelector(selectAllEditGlossaries());
   const activeGlossary = glossaries.find(
     (glossary) => glossary.id === glossaryId
   );

@@ -15,120 +15,134 @@ import {
 } from '@mui/material';
 import GlossaryTermEditor from '@/components/shared/DynamicForm/GlossaryTermEditor.js';
 import { AppDispatch } from '@/app/store.js';
-import updateGlossaryThunk from '@/app/thunks/glossary/glossary/updateGlossaryThunk.js';
 import { useDispatch } from 'react-redux';
 import { isEven } from '@/utility/booleans/numberTests.js';
 import useTheming from '@/hooks/layout/useTheming.js';
+import updateGlossaryTermThunk from '@/app/thunks/glossary/glossary/updateGlossaryTermThunk.js';
+import { useMemo } from 'react';
+import { Tab } from '@/app/types/TabTypes.js';
+import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';
+import { AnimatePresence } from 'framer-motion';
 
 const GlossaryPropertyLabels = ({
+  tab,
   glossary,
+  entryType,
 }: {
+  tab: Tab;
   glossary: GlossaryStateEntry;
+  entryType: SubSectionTypes;
 }) => {
-  const { darkenColor } = useTheming();
+  const { darkenColor, getAlphaColor } = useTheming();
   const dispatch: AppDispatch = useDispatch();
-  const labels = genrePropertyLabelDefaults[glossary.genre] || {};
+  const labels = genrePropertyLabelDefaults[glossary.genre][entryType] || {};
 
-  const handleTermChange = (key: string, newTerm: string) => {
-    if (newTerm === ' ' || newTerm.trim() === '') return;
+  const handleTermChange = (key: string, newTerm: string | null) => {
     dispatch(
-      updateGlossaryThunk({
+      updateGlossaryTermThunk({
         id: glossary.id,
-        updates: {
-          integrationState: {
-            ...glossary.integrationState,
-            [key]: newTerm,
-          },
-        },
+        key,
+        section: entryType,
+        genre: glossary.genre,
+        value: newTerm,
+        tabId: tab.tabId,
       })
     );
   };
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {Object.entries(labels).map(([section, keys]) => (
+    <AnimatePresence>
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.4 }}
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Box
-          key={section}
           sx={{
-            width: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
+            width: '100%',
+            px: 2,
+            height: '54px',
+            alignItems: 'center',
+            border: '1px solid',
+            borderColor: (theme) => alpha(theme.palette.divider, 0.5),
           }}
         >
-          <Box
-            sx={{
-              width: '100%',
-              position: 'sticky',
-              height: '54px',
-              top: 54,
-              backgroundColor: (theme) =>
-                alpha(theme.palette.background.default, 1),
-              mt: 2,
-              zIndex: 1,
-            }}
+          <Typography
+            variant="body1"
+            sx={{ width: '50%', textAlign: 'left', fontSize: '1.1rem' }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                width: '100%',
-                textAlign: 'center',
-              }}
-            >
-              {capitalize(section)}
-            </Typography>
-          </Box>
-          <List>
-            {Object.entries(keys).map(([k, v], n) => {
-              const defaultValue = getPropertyLabel({
-                glossary,
-                section: section as SubSectionTypes,
-                key: k,
-              });
-              if (!defaultValue) return null;
-              return (
-                <ListItem
-                  key={k}
+            System Name
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ width: '50%', textAlign: 'left', fontSize: '1.1rem' }}
+          >
+            Custom Name
+          </Typography>
+        </Box>
+        <List sx={{ pt: 0 }}>
+          {Object.entries(labels).map(([systemName, fallbackName], n) => {
+            const defaultValue = getPropertyLabel({
+              glossary,
+              section: entryType,
+              key: systemName,
+            });
+            return (
+              <ListItem
+                key={systemName}
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  height: '54px',
+                  backgroundColor: isEven(n)
+                    ? 'background.default'
+                    : darkenColor({
+                        color: 'background',
+                        key: 'default',
+                        amount: 0.1,
+                      }),
+                  borderLeft: '1px solid',
+                  borderRight: '1px solid',
+                  borderBottom:
+                    n === Object.entries(labels).length - 1
+                      ? '1px solid'
+                      : 'none',
+                  borderColor: (theme) => alpha(theme.palette.divider, 0.5),
+                }}
+              >
+                <Typography
+                  variant="body1"
                   sx={{
-                    width: '100%',
-                    display: 'flex',
-                    height: '54px',
-                    backgroundColor: isEven(n)
-                      ? 'background.default'
-                      : darkenColor({
-                          color: 'background',
-                          key: 'default',
-                          amount: 0.1,
-                        }),
+                    width: '50%',
+                    textAlign: 'left',
+                    fontWeight: 'bold',
+                    flex: 1,
                   }}
                 >
-                  <Typography
-                    variant="body1"
-                    sx={{ width: '50%', textAlign: 'left', fontWeight: 'bold' }}
-                  >
-                    {capitalize(k)}
-                  </Typography>
-                  <GlossaryTermEditor
-                    handleChange={(newTerm) => {
-                      // Handle term change logic here
-                      handleTermChange(k, newTerm);
-                    }}
-                    defaultTerm={defaultValue}
-                  />
-                </ListItem>
-              );
-            })}
-          </List>
-        </Box>
-      ))}
-    </Box>
+                  {capitalize(systemName)}
+                </Typography>
+                <GlossaryTermEditor
+                  handleChange={(newTerm) => {
+                    // Handle term change logic here
+                    handleTermChange(systemName, newTerm);
+                  }}
+                  defaultTerm={defaultValue}
+                  fallback={fallbackName}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      </MotionBox>
+    </AnimatePresence>
   );
 };
 

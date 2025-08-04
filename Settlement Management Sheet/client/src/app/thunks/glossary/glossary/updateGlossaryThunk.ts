@@ -19,7 +19,7 @@ export default function updateGlossaryThunk({
     try {
       const trueUpdates: GenericObject = {};
       const state = getState();
-      const glossary = state.glossary.glossaries[id];
+      const glossary = state.glossary.glossaries.edit.byId[id];
       if (!glossary) {
         dispatch(
           showSnackbar({

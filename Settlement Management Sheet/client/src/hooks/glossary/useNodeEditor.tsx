@@ -3,9 +3,9 @@ import { useCallback, useEffect } from 'react';
 import thunks from '@/app/thunks/glossaryThunks.js';
 import { AppDispatch } from '@/app/store.js';
 import {
-  selectEntryById,
+  selectEditEntryById,
   selectKeypathOptions,
-  selectNodeById,
+  selectEditNodeById,
 } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
 import { GlossaryEntry, GlossaryNode } from 'types/index.js';
@@ -15,11 +15,23 @@ import { InheritanceMap } from '@/utility/hasParentProperty.js';
 const useNodeEditor = (glossaryId: string, entryId: string) => {
   const dispatch: AppDispatch = useDispatch();
 
-  const node: GlossaryNode = useSelector(selectNodeById(glossaryId, entryId));
+  const node: GlossaryNode = useSelector(
+    selectEditNodeById(glossaryId, entryId)
+  );
 
   const entry: GlossaryEntry = useSelector(
-    selectEntryById(glossaryId, entryId)
+    selectEditEntryById(glossaryId, entryId)
   );
+
+  useEffect(() => {
+    if (!entry && node?.entryType) {
+      dispatch(
+        thunks.getEntryById({
+          node,
+        })
+      );
+    }
+  }, [dispatch, entryId, glossaryId, node?.entryType, entry]);
 
   const buildOptionsByKeypath = useCallback(
     (property: keyof GlossaryEntry, inheritanceMap: InheritanceMap) => {
@@ -38,14 +50,29 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
   const getOptionsByKeypath = (keypath: keyof GlossaryEntry) =>
     useSelector(selectKeypathOptions(glossaryId, entryId, keypath));
 
+  // optional dispatches for fetching subModels
+  const getSubModel = (subModel: keyof typeof entry) => {
+    if (!entry[subModel]) {
+      dispatch(
+        thunks.getEntrySubModel({
+          glossaryId,
+          entryId,
+          entryType: node.entryType,
+          subModel: subModel as string,
+        })
+      );
+    }
+  };
+
+  // local storage stuff
+
   const storage = createScopedStorage(`${glossaryId}-${entryId}`);
 
   const updateGlossaryEntry = useCallback(
     (content: Record<string, any>) => {
-      console.log('updating node ', node, ' with content: ', content);
-      // dispatch(thunks.updateEntry({ node, content }));
+      dispatch(thunks.updateEntryById({ glossaryId, entryId, content }));
     },
-    [dispatch, glossaryId, node]
+    [dispatch, glossaryId, entryId]
   );
 
   const getLocalStorage = useCallback(() => {
@@ -73,16 +100,6 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     return localUpdatedAt > entryUpdatedAt;
   }, [glossaryId, entryId]);
 
-  useEffect(() => {
-    if (!entry && node?.entryType) {
-      dispatch(
-        thunks.getEntryById({
-          node,
-        })
-      );
-    }
-  }, [dispatch, entryId, glossaryId, node.entryType, entry]);
-
   return {
     node,
     entry,
@@ -93,6 +110,7 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     setLocalStorage,
     clearLocalStorage,
     localIsNewer,
+    getSubModel,
   };
 };
 

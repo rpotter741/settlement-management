@@ -16,6 +16,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './components/pages/Login';
 import Register from './components/pages/Register';
 import CustomCreation from './components/pages/CustomCreation';
+import { GlobalStyles } from '@mui/system';
 /*!!localStorage.getItem('token') */
 const App = () => {
   const isAuthenticated = true;

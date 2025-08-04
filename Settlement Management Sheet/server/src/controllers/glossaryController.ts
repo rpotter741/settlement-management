@@ -5,6 +5,7 @@ import updateGlossary from './glossary/glossary/updateGlossary.ts';
 import deleteGlossary from './glossary/glossary/deleteGlossary.ts';
 import getGlossaryById from './glossary/glossary/getGlossaryById.ts';
 import updateGlossaryTerm from './glossary/glossary/updateGlossaryTerm.ts';
+import batchUpdateTerms from './glossary/glossary/batchUpdateTerms.ts';
 
 // node actions
 import updateNodeSortIndices from './glossary/nodes/updateNodeSortIndices.ts';
@@ -19,6 +20,8 @@ import createNodeAndDetail from './glossary/nodes/createNodeAndDetail.ts';
 // entry actions
 import getOptionsByProperty from './glossary/entry/getOptionsByProperty.ts';
 import getEntryById from './glossary/entry/getEntryById.ts';
+import getEntrySubModel from './glossary/entry/getEntrySubModel.ts';
+import updateEntrySubModel from './glossary/entry/updateEntrySubModel.ts';
 
 export {
   // glossary actions
@@ -28,6 +31,7 @@ export {
   deleteGlossary,
   getGlossaryById,
   updateGlossaryTerm,
+  batchUpdateTerms,
   // node actions
   updateNodeSortIndices,
   updateNodeParentId,
@@ -40,4 +44,6 @@ export {
   // entry actions
   getOptionsByProperty,
   getEntryById,
+  getEntrySubModel,
+  updateEntrySubModel,
 };

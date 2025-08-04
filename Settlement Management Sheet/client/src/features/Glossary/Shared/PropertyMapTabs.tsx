@@ -14,7 +14,7 @@ import getPropertyLabel, {
   SubSectionTypes,
 } from '../utils/getPropertyLabel.js';
 import { useSelector } from 'react-redux';
-import { selectGlossaryById } from '@/app/selectors/glossarySelectors.js';
+import { selectEditGlossaryById } from '@/app/selectors/glossarySelectors.js';
 import { capitalize } from 'lodash';
 
 interface PropertyMapTabsProps {
@@ -47,7 +47,7 @@ const constantTabs = [
 const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
   const dispatch: AppDispatch = useDispatch();
   const { tab } = useShellContext();
-  const glossary = useSelector(selectGlossaryById(tab.glossaryId));
+  const glossary = useSelector(selectEditGlossaryById(tab.glossaryId));
   const [activeTab, setActiveTab] = useState<string>(
     tab?.viewState?.activeTab || 'Overview'
   );
@@ -87,6 +87,7 @@ const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
       key: section.name,
       disabled: false,
       props: {
+        section: section.name.toLowerCase() as SubSectionTypes,
         propertyMap: section.children,
       },
     }));

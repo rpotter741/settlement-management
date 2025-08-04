@@ -41,59 +41,56 @@ const PageBox: React.FC<PageBoxProps> = ({
   };
 
   return (
-    <PageBoxContext.Provider value={{ lockHeight, ref, height }}>
+    <Box
+      className="page-box-outside"
+      sx={{
+        display: 'flex',
+        justifyContent: 'start',
+        flexDirection: 'column',
+        alignItems: 'center',
+        position: 'relative',
+        maxHeight:
+          variant === 'fullWidth'
+            ? 'calc(100vh - 80.5px)'
+            : 'calc(100vh - 100.5px)',
+        height: '100%',
+        width: '100%',
+        pt: 2,
+        pb: 2,
+        overflowY: 'hidden',
+        overflowX: 'hidden',
+        ...outerStyle,
+      }}
+    >
       <Box
-        className="page-box-outside"
+        className="page-box-inside"
+        //@ts-ignore
         sx={{
+          boxSizing: 'border-box',
           display: 'flex',
           justifyContent: 'start',
           flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative',
-          maxHeight:
-            variant === 'fullWidth'
-              ? 'calc(100vh - 100.5px)'
-              : 'calc(100vh - 120.5px)',
+          px: 4,
+          boxShadow: (theme) =>
+            theme.palette.mode === 'light'
+              ? 4
+              : '0px 2px 8px rgba(255, 255, 255, 0.2)',
+          borderRadius: variant === 'fullWidth' ? 0 : 4,
           height: '100%',
-          width: '100%',
-          pt: 2,
-          pb: variant === 'fullWidth' ? 0 : 4,
-          overflowY: 'hidden',
-          overflowX: 'hidden',
-          ...outerStyle,
+          overflowY: 'none',
+          ...pageBoxVariantSx[overrideVariant as keyof typeof pageBoxVariantSx],
+          ...innerStyle,
+          width: getWidths(overrideVariant, tabType),
+          minWidth,
+          backgroundColor:
+            mode === 'edit' ? 'background.default' : 'background.paper',
+          transition: 'all 0.3s ease-in-out',
         }}
       >
-        <Box
-          className="page-box-inside"
-          sx={{
-            boxSizing: 'border-box',
-            display: 'flex',
-            justifyContent: 'start',
-            flexDirection: 'column',
-            px: 4,
-            boxShadow: (theme) =>
-              theme.palette.mode === 'light'
-                ? 4
-                : '0px 2px 8px rgba(255, 255, 255, 0.2)',
-            borderRadius: variant === 'fullWidth' ? 0 : 4,
-            height: '100%',
-            overflowY: 'none',
-            ...pageBoxVariantSx[
-              overrideVariant as keyof typeof pageBoxVariantSx
-            ],
-            ...innerStyle,
-            width: getWidths(overrideVariant, tabType),
-            minWidth,
-            backgroundColor:
-              mode === 'edit' ? 'background.default' : 'background.paper',
-            transition: 'all 0.3s ease-in-out',
-          }}
-        >
-          {children}
-          {/* height is passed to the outermost child since these are automagically max height for vh */}
-        </Box>
+        {children}
+        {/* height is passed to the outermost child since these are automagically max height for vh */}
       </Box>
-    </PageBoxContext.Provider>
+    </Box>
   );
 };
 

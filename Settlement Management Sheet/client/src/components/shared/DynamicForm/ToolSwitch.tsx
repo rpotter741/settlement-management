@@ -65,12 +65,8 @@ const ToolSwitch: React.FC<ToolSwitchProps> = ({
   const { updateTool, selectEditValue } = useTools(tool, id);
   const switchState = selectEditValue(keypath);
   const { utils } = useSharedHooks();
-  const { lockHeight } = usePageBoxContext();
 
   const handleUpdate = () => {
-    if (heightLock && switchState) {
-      lockHeight();
-    }
     updateTool(keypath, !switchState);
     if (typeof onChange === 'function') {
       onChange(!switchState);

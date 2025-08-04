@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 
 import useSharedHooks from '@/hooks/utility/useSharedHooks.js';
+import { Genre } from 'types/index.js';
 
 export const genreOptions = [
   'Agnostic',
@@ -20,8 +21,6 @@ export const genreOptions = [
   'Modern',
   'Other',
 ] as const;
-
-export type Genre = (typeof genreOptions)[number];
 
 export const subGenreMap: Record<Genre, string[]> = {
   Agnostic: [],

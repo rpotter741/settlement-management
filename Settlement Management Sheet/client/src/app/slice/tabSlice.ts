@@ -27,6 +27,7 @@ const initialState: TabState = {
   splitTabs: false,
   preventSplit: false,
   focusedTab: null,
+  lastRemovedTab: null,
 };
 
 const tabSlice = createSlice({
@@ -156,6 +157,7 @@ const tabSlice = createSlice({
             state.left.data[state.left.order[state.left.currentIndex]];
         }
       }
+      state.lastRemovedTab = tabId;
       if (preventSplit !== undefined) state.preventSplit = preventSplit;
     },
     setCurrentTab: (state, action: PayloadAction<SetCurrentTabPayload>) => {
@@ -169,17 +171,17 @@ const tabSlice = createSlice({
       }
     },
     updateTab: (state, action: PayloadAction<UpdateTabPayload>) => {
-      const { tabId, side, keypath, updates } = action.payload;
-      if (side === 'left' || state.preventSplit) {
-        set(state.left.data[tabId], keypath, updates);
-      } else {
-        const index = state.right.order.findIndex((id) => id === tabId);
-        if (index === -1) {
-          console.error(`Tab with id ${tabId} not found in right tabs`);
-          return;
-        }
-        set(state.right.data[tabId], keypath, updates);
+      const { tabId, keypath, updates } = action.payload;
+      if (state.lastRemovedTab === tabId) {
+        state.lastRemovedTab = null;
+        return;
       }
+      const tab = state.left.data[tabId] || state.right.data[tabId];
+      if (!tab) {
+        console.warn(`Tab with id ${tabId} not found in updateTab`);
+        return;
+      }
+      set(tab, keypath, updates);
       if (state.focusedTab?.tabId === tabId) {
         set(state.focusedTab, keypath, updates);
       }
@@ -306,12 +308,22 @@ const tabSlice = createSlice({
         console.error(`Tab with id ${tabId} not found`);
       }
     },
-    clearDirtyKeypaths: (state, action: PayloadAction<{ tabId: string }>) => {
-      const { tabId } = action.payload;
+    clearDirtyKeypaths: (
+      state,
+      action: PayloadAction<{ tabId: string; key?: string }>
+    ) => {
+      const { tabId, key } = action.payload;
       const tab = state.left.data[tabId] || state.right.data[tabId];
       if (tab) {
-        console.log(`Clearing dirty keypaths for tab ${tab.name}`);
-        tab.viewState.dirtyKeypaths = {};
+        if (key) {
+          Object.keys(tab.viewState.dirtyKeypaths).forEach((dirtyKey) => {
+            if (dirtyKey.startsWith(`${key}.`)) {
+              delete tab.viewState.dirtyKeypaths[dirtyKey];
+            }
+          });
+        } else {
+          tab.viewState.dirtyKeypaths = {};
+        }
         tab.viewState.isDirty = false;
       } else {
         console.error(`Tab with id ${tabId} not found`);

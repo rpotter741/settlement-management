@@ -1,11 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
-
 import { Box } from '@mui/material';
-
 import AttrValues from '../forms/AttrValues.jsx';
 import SettlementPointsCost from '../forms/SPC.jsx';
 import ObjectThresholds from 'components/shared/Metadata/Thresholds.jsx';
-
 import { useShellContext } from '@/context/ShellContext.js';
 import AttrProperties from '../forms/AttrProperties.js';
 import useTabSplit from '@/hooks/layout/useTabSplit.js';
@@ -21,9 +18,7 @@ import {
 import TabbedContent, {
   TabbedContentTabs,
 } from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
-import { usePageBoxContext } from '@/context/PageBox.js';
 import { useAutosave } from '@/hooks/utility/useAutosave/useAutosave.js';
-import attributeAutosaveConfig from '@/hooks/utility/useAutosave/configs/toolConfig.js';
 import toolAutosaveConfig from '@/hooks/utility/useAutosave/configs/toolConfig.js';
 
 interface EditAttributeProps {}
@@ -84,16 +79,13 @@ const EditAttribute: React.FC<EditAttributeProps> = () => {
     localDispatch(setActiveTab(name as AttrPropertyTypes, index));
   };
 
-  const { ref, height } = usePageBoxContext();
-
   return (
     <Box
       id={`edit-attribute-${tab.id}`}
-      ref={ref}
       sx={{
         height: '100%',
         transition: 'height 0.4s ease-in-out',
-        overflow: typeof height === 'number' ? 'hidden' : 'auto',
+        overflow: 'auto',
         width: '100%',
         px: 2,
         boxSizing: 'border-box',

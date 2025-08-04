@@ -1,7 +1,3 @@
-import {
-  selectActiveId,
-  selectGlossaryById,
-} from '@/app/selectors/glossarySelectors.js';
 import { setTabDirty } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import Editor from '@/components/shared/TipTap/Editor.js';

@@ -13,7 +13,7 @@ export default function getNodesThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
-      const glossary = getState().glossary.glossaries[glossaryId];
+      const glossary = getState().glossary.glossaries.edit.byId[glossaryId];
       if (glossary.hydrated) return; // already hydrated, no need to fetch again
       const nodes = await serverAction.getNodes({ glossaryId });
       const existingState = glossary.renderState;

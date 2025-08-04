@@ -5,7 +5,7 @@ import serverAction from '@/services/glossaryServices.js';
 import { updateGlossaryNode } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { cloneDeep } from 'lodash';
-import { selectNodeById } from '@/app/selectors/glossarySelectors.js';
+import { selectEditNodeById } from '@/app/selectors/glossarySelectors.js';
 import { GlossaryNode } from 'types/index.js';
 
 export default function renameNodeAndEntryThunk({
@@ -15,7 +15,9 @@ export default function renameNodeAndEntryThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const { id, glossaryId, fileType, name, entryType } = node;
-    const backupNode = cloneDeep(selectNodeById(glossaryId, id)(getState()));
+    const backupNode = cloneDeep(
+      selectEditNodeById(glossaryId, id)(getState())
+    );
     if (backupNode.name === name) {
       console.warn('No change in name, skipping update.');
       return;

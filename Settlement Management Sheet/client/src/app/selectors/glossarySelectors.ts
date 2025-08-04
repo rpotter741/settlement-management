@@ -1,13 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
-import { GlossaryEntry, GlossaryNode } from '../../../../types/index.js';
+import { GlossaryEntry, GlossaryNode } from 'types/index.js';
 
 const base = (state: RootState): GlossaryState => state.glossary;
 
-export const selectAllGlossaries = () =>
+export const selectAllStaticGlossaries = () =>
   createSelector(base, (glossaryState: GlossaryState) => {
-    const glossaries = glossaryState.glossaries;
+    const glossaries = glossaryState.glossaries.static.byId;
     const glossariesArray = Object.entries(glossaries).map(
       ([id, { name, description }]: [string, GlossaryStateEntry]) => ({
         id,
@@ -18,30 +18,66 @@ export const selectAllGlossaries = () =>
     return glossariesArray;
   });
 
-export const selectGlossaryById = (glossaryId: string) =>
+export const selectAllEditGlossaries = () =>
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const glossaries = glossaryState.glossaries.edit.byId;
+    const glossariesArray = Object.entries(glossaries).map(
+      ([id, { name, description }]: [string, GlossaryStateEntry]) => ({
+        id,
+        name,
+        description,
+      })
+    );
+    return glossariesArray;
+  });
+
+export const selectStaticGlossaryById = (glossaryId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId] || null
+      glossaryState.glossaries.static.byId[glossaryId] || null
   );
 
-export const selectNodeById = (glossaryId: string, nodeId: string) =>
+export const selectEditGlossaryById = (glossaryId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId]?.nodes[nodeId] || null
+      glossaryState.glossaries.edit.byId[glossaryId] || null
   );
 
-export const selectEntryById = (glossaryId: string, entryId: string) =>
+export const selectEditNodeById = (glossaryId: string, nodeId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId]?.entries[entryId] || null
+      glossaryState.glossaries.edit.byId[glossaryId]?.nodes[nodeId] || null
+  );
+
+export const selectStaticNodeById = (glossaryId: string, nodeId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.static.byId[glossaryId]?.nodes[nodeId] || null
+  );
+
+export const selectEditEntryById = (glossaryId: string, entryId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.edit.byId[glossaryId]?.entries[entryId] || null
+  );
+
+export const selectStaticEntryById = (glossaryId: string, entryId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.static.byId[glossaryId]?.entries[entryId] || null
   );
 
 export const glossaryRenderState = (glossaryId: string | null) =>
   createSelector(base, (glossaryState: GlossaryState) =>
-    glossaryId ? glossaryState.glossaries[glossaryId]?.renderState : null
+    glossaryId
+      ? glossaryState.glossaries.edit.byId[glossaryId]?.renderState
+      : null
   );
 
 export const nodeRenderState = (glossaryId: string | null, nodeId: string) =>
@@ -49,7 +85,9 @@ export const nodeRenderState = (glossaryId: string | null, nodeId: string) =>
     base,
     (glossaryState: GlossaryState) =>
       (glossaryId &&
-        glossaryState.glossaries[glossaryId]?.renderState[nodeId]) || {
+        glossaryState.glossaries.edit.byId[glossaryId]?.renderState[
+          nodeId
+        ]) || {
         expanded: false,
         rename: false,
       }
@@ -59,14 +97,14 @@ export const selectGlossaryStructure = (glossaryId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId]?.structure || []
+      glossaryState.glossaries.edit.byId[glossaryId]?.structure || []
   );
 
 export const selectGlossaryNodes = (glossaryId: string) =>
   createSelector(
     base,
     (glossaryState: GlossaryState) =>
-      glossaryState.glossaries[glossaryId]?.nodes || {}
+      glossaryState.glossaries.edit.byId[glossaryId]?.nodes || {}
   );
 
 export const selectActiveId = () =>
@@ -87,7 +125,7 @@ export const selectKeypathOptions = (
   keypath: keyof GlossaryEntry
 ) =>
   createSelector(base, (glossaryState: GlossaryState) => {
-    const glossary = glossaryState.glossaries[glossaryId];
+    const glossary = glossaryState.glossaries.edit.byId[glossaryId];
     if (!glossary) return null;
     const options = glossary.options[entryId];
     if (!options) return null;
@@ -95,10 +133,14 @@ export const selectKeypathOptions = (
   });
 
 export const selectors = {
-  selectAllGlossaries,
-  selectGlossaryById,
-  selectNodeById,
-  selectEntryById,
+  selectAllStaticGlossaries,
+  selectAllEditGlossaries,
+  selectStaticGlossaryById,
+  selectEditGlossaryById,
+  selectEditNodeById,
+  selectStaticNodeById,
+  selectEditEntryById,
+  selectStaticEntryById,
   glossaryRenderState,
   nodeRenderState,
   selectGlossaryStructure,

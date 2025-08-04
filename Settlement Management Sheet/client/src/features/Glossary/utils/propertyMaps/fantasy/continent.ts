@@ -1,31 +1,26 @@
+import GlossaryAutocomplete from '@/components/shared/DynamicForm/GlossaryAutocomplete.js';
+
 const continentPropertyArrayMap = [
   {
     name: 'Geography',
     children: [
       {
         multiple: false,
+        component: GlossaryAutocomplete,
         keypath: 'climates',
-        label: 'Climate',
       },
       {
         multiple: true,
         keypath: 'terrain',
-        label: 'Terrain',
       },
       {
         multiple: true,
         keypath: 'regions',
-        label: 'Regions',
-      },
-      {
-        multiple: true,
-        keypath: 'locations',
-        label: 'Locations',
       },
     ],
   },
   {
-    name: 'Political',
+    name: 'Politics',
     children: [
       {
         multiple: true,
@@ -52,11 +47,6 @@ const continentPropertyArrayMap = [
         keypath: 'population',
         label: 'Population',
       },
-      {
-        multiple: true,
-        keypath: 'resources',
-        label: 'Resources',
-      },
     ],
   },
   {
@@ -64,7 +54,7 @@ const continentPropertyArrayMap = [
     children: [
       {
         multiple: true,
-        keypath: 'eventLog',
+        keypath: 'events',
         label: 'Event Log',
       },
       {
@@ -75,3 +65,5 @@ const continentPropertyArrayMap = [
     ],
   },
 ];
+
+export default continentPropertyArrayMap;

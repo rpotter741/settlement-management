@@ -8,7 +8,7 @@ import {
 } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { GlossaryNode } from 'types/glossaryEntry.js';
-import { selectNodeById } from '@/app/selectors/glossarySelectors.js';
+import { selectEditNodeById } from '@/app/selectors/glossarySelectors.js';
 import { cloneDeep } from 'lodash';
 import { findAndDeleteTab } from '@/app/thunks/tabThunks.js';
 
@@ -19,7 +19,9 @@ export default function deleteEntryThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const { id, entryType, fileType, glossaryId } = node;
-    const backupNode = cloneDeep(selectNodeById(glossaryId, id)(getState()));
+    const backupNode = cloneDeep(
+      selectEditNodeById(glossaryId, id)(getState())
+    );
     try {
       await serverAction.deleteEntry({ id, entryType, fileType, glossaryId });
       dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));

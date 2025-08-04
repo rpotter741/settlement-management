@@ -12,16 +12,21 @@ import { RowMotionBox } from '../Layout/Motion/MotionBox.js';
 import { AnimatePresence } from 'framer-motion';
 import getRippleBorder from '@/utility/style/getRippleBorder.js';
 import BorderWrapper from '../Layout/Motion/BorderWrapper.js';
+import useTheming from '@/hooks/layout/useTheming.js';
 
 const GlossaryTermEditor = ({
-  handleChange = (term: string) => {},
+  handleChange = (term: string | null) => {},
   defaultTerm = '',
   maxLength = 30,
+  fallback = 'noFallbackProvided',
 }) => {
+  const { getAlphaColor } = useTheming();
   const [isEditing, setIsEditing] = useState(false);
   const [term, setTerm] = useState(defaultTerm || '');
 
   const [showCheck, setShowCheck] = useState(false);
+  const [showRowContent, setShowRowContent] = useState(false);
+  const [wasReset, setWasReset] = useState(false);
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -29,9 +34,26 @@ const GlossaryTermEditor = ({
   };
 
   const handleSave = () => {
-    handleChange(term);
+    if (term.trim() !== '') {
+      handleChange(term);
+    } else {
+      handleChange(fallback);
+      setTerm(fallback);
+    }
     setIsEditing(false);
     setShowCheck(true);
+  };
+
+  const handleReset = () => {
+    console.log('Resetting term to fallback:', fallback);
+    setWasReset(true);
+    setShowCheck(true);
+    handleChange(null);
+    setTerm(fallback);
+    setTimeout(() => {
+      setWasReset(false);
+      setShowCheck(false);
+    }, 500);
   };
 
   return (
@@ -55,9 +77,11 @@ const GlossaryTermEditor = ({
           onBlur={handleSave}
           variant="standard"
           fullWidth
+          sx={{ flex: 1 }}
         />
       ) : (
         <RowMotionBox
+          className={wasReset ? 'invalid-shake' : ''}
           initial={{
             x: -20,
             opacity: 0,
@@ -76,6 +100,8 @@ const GlossaryTermEditor = ({
           sx={(theme) => ({
             width: '100%',
             display: 'flex',
+            flex: 1,
+            position: 'relative',
             justifyContent: 'flex-start',
             alignItems: 'center',
             textTransform: 'none',
@@ -86,39 +112,61 @@ const GlossaryTermEditor = ({
             gap: 1,
             border: '1px solid',
             borderColor: (theme) =>
-              showCheck
-                ? alpha(theme.palette.success.main, 0.55)
-                : 'transparent',
-            transition: 'border-color 0.3s ease-in-out',
+              wasReset
+                ? getAlphaColor({
+                    color: 'info',
+                    key: 'main',
+                    opacity: 0.4,
+                  })
+                : showCheck
+                  ? alpha(theme.palette.success.main, 0.55)
+                  : 'transparent',
           })}
+          onMouseEnter={() => setShowRowContent(true)}
+          onMouseLeave={() => setShowRowContent(false)}
+          onFocus={() => setShowRowContent(true)}
+          onBlur={() => setShowRowContent(false)}
         >
-          <IconButton
+          <Button
             onClick={() => setIsEditing(true)}
             sx={{
-              cursor: 'pointer',
-              textAlign: 'left',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                color: 'primary.main',
-              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 1,
+              width: '100%',
+              color: 'inherit',
+              textTransform: 'none',
             }}
           >
             {showCheck ? (
               <Check sx={{ fontSize: '1rem', color: 'success.main' }} />
-            ) : (
+            ) : !showCheck && showRowContent ? (
               <Edit sx={{ fontSize: '1rem' }} />
+            ) : (
+              <Edit sx={{ fontSize: '1rem', color: 'transparent' }} />
             )}
-          </IconButton>
 
-          <Typography
-            variant="body1"
-            sx={{
-              width: '25%',
-              textAlign: 'left',
-            }}
-          >
-            {term || 'Add Term'}
-          </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                width: '50%',
+                textAlign: 'left',
+                fontStyle: term.trim() === '' ? 'italic' : 'normal',
+              }}
+            >
+              {term || fallback || 'Add Term'}
+            </Typography>
+          </Button>
+          {showRowContent && term !== fallback && (
+            <Button
+              color="warning"
+              sx={{ position: 'absolute', right: 8 }}
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
+          )}
         </RowMotionBox>
       )}
     </AnimatePresence>

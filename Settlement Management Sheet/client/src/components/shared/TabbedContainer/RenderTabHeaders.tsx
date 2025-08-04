@@ -165,7 +165,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                   }}
                 />
               </Tooltip>
-              {isDirty && (
+              {/* {isDirty && (
                 <Circle
                   sx={{
                     color:
@@ -173,7 +173,7 @@ const RenderTabHeaders: React.FC<RenderTabHeadersProps> = ({
                     fontSize: '0.75rem',
                   }}
                 />
-              )}
+              )} */}
               <IconButton
                 size="small"
                 onClick={(e) => {

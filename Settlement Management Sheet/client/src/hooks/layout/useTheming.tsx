@@ -10,17 +10,21 @@ type ColorType =
   | 'info'
   | 'background';
 
-type KeyType = 'main' | 'dark' | 'light' | 'default' | 'paper';
+type KeyType = 'main' | 'dark' | 'light' | 'default' | 'paper' | 'contrastText';
 
 const useTheming = () => {
   const theme = useTheme();
 
-  const getAlphaColor = (
-    color: ColorType,
-    key: KeyType,
-    opacity: number
+  const getAlphaColor = ({
+    color,
+    key,
+    opacity,
+  }: {
+    color: ColorType;
+    key: KeyType;
+    opacity: number;
     //@ts-ignore
-  ) => alpha(theme.palette[color][key], opacity);
+  }) => alpha(theme.palette[color][key], opacity);
 
   const darkenColor = ({
     color,
@@ -58,7 +62,18 @@ const useTheming = () => {
     alphaValue?: number;
   }) => getRippleBorder(theme, color, alphaValue);
 
-  return { getAlphaColor, darkenColor, lightenColor, getBorderRipple };
+  const getHexValue = ({ color, key }: { color: ColorType; key: KeyType }) => {
+    //@ts-ignore
+    return theme.palette[color][key];
+  };
+
+  return {
+    getAlphaColor,
+    darkenColor,
+    lightenColor,
+    getBorderRipple,
+    getHexValue,
+  };
 };
 
 export default useTheming;

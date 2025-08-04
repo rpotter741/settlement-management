@@ -1,0 +1,16 @@
+import api from '../interceptor.js';
+
+export default async function updateGlossaryTerm({
+  id,
+  updates,
+}: {
+  id: string;
+  updates: Array<{ key: string; value: any }>;
+}) {
+  console.log('Batch updating glossary terms:', { id, updates });
+  return api
+    .post('/glossary/batchUpdateTerms', { id, updates })
+    .then((res: any) => {
+      return res.data;
+    });
+}

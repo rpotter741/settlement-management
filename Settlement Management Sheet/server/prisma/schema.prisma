@@ -636,10 +636,11 @@ model GlossarySection {
   tags             String[]
   subSections      String[]
   geography        GlossaryGeography?   @relation("SectionToGeography")
-  political        GlossaryPolitical?   @relation("SectionToPolitical")
+  politics        GlossaryPolitics?   @relation("SectionToPolitics")
   relationships    GlossaryRelationships? @relation("SectionToRelationships")
   history          GlossaryHistory?     @relation("SectionToHistory")
-  customTabs       GlossaryCustom?      @relation("SectionToCustom")
+  customTabIds     String[]
+  customTabs       GlossaryCustom[]      @relation("SectionToCustom")
   integrationState Json?
   backlinksFrom    BacklinkIndex[]        @relation("SourceSection")
   backlinksTo      BacklinkIndex[]        @relation("TargetSection")
@@ -652,14 +653,16 @@ model GlossarySection {
 }
 
 model GlossaryCustom {
-  refId             String            @id @default(uuid())
-  id                String            @unique
-  version           Int
-  updatedAt         DateTime          @updatedAt
-  groups            String[]
-  customFields      Json?
-  entryId           String?
-  GlossarySection   GlossarySection @relation("SectionToCustom", fields: [id], references: [refId], onDelete: Cascade)
+  refId           String           @id @default(uuid())
+  id              String           // foreign key to GlossarySection.refId
+  customTabId     String           // user-defined tab key
+  version         Int
+  updatedAt       DateTime         @updatedAt
+  groups          String[]
+  customFields    Json?
+  GlossarySection GlossarySection @relation("SectionToCustom", fields: [id], references: [refId], onDelete: Cascade)
+
+  @@unique([id, customTabId]) // allows safe upserts
 }
 
 model GlossaryGeography {
@@ -672,11 +675,10 @@ model GlossaryGeography {
   regions         String[]
   landmarks       String[]
   customFields    Json?
-  entryId         String?
   GlossarySection GlossarySection @relation("SectionToGeography", fields: [id], references: [refId], onDelete: Cascade)
 }
 
-model GlossaryPolitical {
+model GlossaryPolitics {
   refId           String            @id @default(uuid())
   id              String            @unique
   version         Int
@@ -690,8 +692,7 @@ model GlossaryPolitical {
   economy         Json?
   cultures        Json?
   customFields    Json?
-  entryId         String?
-  GlossarySection GlossarySection @relation("SectionToPolitical", fields: [id], references: [refId], onDelete: Cascade)
+  GlossarySection GlossarySection @relation("SectionToPolitics", fields: [id], references: [refId], onDelete: Cascade)
 }
 
 model GlossaryRelationships {
@@ -705,7 +706,6 @@ model GlossaryRelationships {
   notoriety       Json?
   influence       Json?
   customFields    Json?
-  entryId         String?
   GlossarySection GlossarySection @relation("SectionToRelationships", fields: [id], references: [refId], onDelete: Cascade)
 }
 
@@ -719,7 +719,6 @@ model GlossaryHistory {
   history           Json?
   customFields      Json?
   historyDataString String?
-  entryId           String?
   GlossarySection   GlossarySection @relation("SectionToHistory", fields: [id], references: [refId], onDelete: Cascade)
 }
 
@@ -740,18 +739,21 @@ model BacklinkIndex {
 
 ////////////// Location ////////////
 model LocationGlossary {
-  refId          String       @id @default(uuid())
-  id             String       @unique
-  version        Int
-  name           String
-  description    Json
-  descDataString String
-  contentType    ContentTypes
-  createdBy      String
-  collaborators  String[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  tags           String[]
+  refId            String                 @id @default(uuid())
+  id               String                 @unique
+  version          Int
+  contentType      ContentTypes
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  createdBy        String
+  forkedBy         String?
+  collaborators    String[]
+  editors          String[]
+  subType          String?
+  name             String?
+  description      Json?
+  dataString       String?
+  tags             String[]
   locationType   String[]
   regions        String[]
   occupants      String[]
@@ -765,18 +767,21 @@ model LocationGlossary {
 
 ////////////// Person ////////////
 model PersonGlossary {
-  refId          String       @id @default(uuid())
-  id             String       @unique
-  version        Int
-  name           String
-  description    Json
-  descDataString String
-  contentType    ContentTypes
-  createdBy      String
-  collaborators  String[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  tags           String[]
+  refId            String                 @id @default(uuid())
+  id               String                 @unique
+  version          Int
+  contentType      ContentTypes
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  createdBy        String
+  forkedBy         String?
+  collaborators    String[]
+  editors          String[]
+  subType          String?
+  name             String?
+  description      Json?
+  dataString       String?
+  tags             String[]
   occupations    String[]
   titles         String[]
   traits         String[]
@@ -784,7 +789,7 @@ model PersonGlossary {
   locations      String[]
   relationships  Json
   notoriety      String
-    integrationState Json?
+integrationState Json?
 
 
   @@index([contentType])
@@ -796,14 +801,16 @@ model NoteGlossary {
   refId          String       @id @default(uuid())
   id             String       @unique
   version        Int
-  name           String
-  description    Json
-  descDataString String
   contentType    ContentTypes
-  createdBy      String
-  collaborators  String[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  name           String
+  description    Json
+  dataString     String
+  createdBy      String
+  collaborators  String[]
+  forkedBy         String?
+  editors          String[]
   noteType       String?
   priority       String?
   dueDate        String?
@@ -814,7 +821,7 @@ model NoteGlossary {
   isShared       Boolean
   sharedWith     String[]
   attachments    Json
-    integrationState Json?
+  integrationState Json?
 
 
   @@index([contentType])
@@ -823,24 +830,28 @@ model NoteGlossary {
 
 ///////////////////// eventGlossary //////////////
 model EventGlossary {
-  refId          String       @id @default(uuid())
-  id             String       @unique
-  version        Int
-  name           String
-  description    Json
-  descDataString String
-  contentType    ContentTypes
-  createdBy      String
-  collaborators  String[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  significance   String?
-  gameDate       String?
-  frequency      String?
-  locations      String[] //includes more than just the location model
-  relatedEntries String[]
-  tags           String[]
-    integrationState Json?
+  refId            String                 @id @default(uuid())
+  id               String                 @unique
+  version          Int
+  contentType      ContentTypes
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  createdBy        String
+  forkedBy         String?
+  collaborators    String[]
+  editors          String[]
+  subType          String?
+  name             String?
+  description      Json?
+  dataString       String?
+  tags             String[]
+  significance     String?
+  gameDate         String?
+  frequency        String?
+  locations        String[] // location model, classic one to many or many to many
+  sections         String[] // section model, classic one to many or many to many
+  relatedEntries   String[] // no idea how this will work but whatever
+  integrationState Json?
 
 
   @@index([contentType])

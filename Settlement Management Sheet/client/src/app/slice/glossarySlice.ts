@@ -1,13 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { remove, set } from 'lodash';
-import { GlossaryEntry, GlossaryNode } from 'types/index.js';
-import { GlossaryState } from '../types/GlossaryTypes.js';
+import { cloneDeep, remove, set } from 'lodash';
+import {
+  GlossaryEntry,
+  GlossaryNode,
+  GlossarySection,
+  SubModelType,
+} from 'types/index.js';
+import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
 import { rehydrateGlossaryTree } from '../../features/Glossary/utils/rehydrateGlossary.js';
 import sortByIndex from '../../features/Glossary/utils/sortByIndex.js';
 import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
 
 const defaultGlossaryState: GlossaryState = {
-  glossaries: {},
+  glossaries: {
+    edit: {
+      byId: {},
+      allIds: [],
+    },
+    static: {
+      byId: {},
+      allIds: [],
+    },
+  },
   activeGlossaryId: null,
   snackbar: null,
 };
@@ -38,7 +52,7 @@ const glossarySlice = createSlice({
         subGenre,
         integrationState,
       } = action.payload;
-      state.glossaries[glossaryId] = {
+      const newGlossary: GlossaryStateEntry = {
         name,
         description,
         id: glossaryId,
@@ -54,18 +68,25 @@ const glossarySlice = createSlice({
         options: {},
         integrationState,
       };
+      state.glossaries.static.byId[glossaryId] = newGlossary;
+      state.glossaries.static.allIds.push(glossaryId);
+      state.glossaries.edit.byId[glossaryId] = newGlossary;
+      state.glossaries.edit.allIds.push(glossaryId);
     },
     setGlossaryLoading: (
       state,
       action: PayloadAction<{ glossaryId: string; loading: boolean }>
     ) => {
       const { glossaryId, loading } = action.payload;
-      state.glossaries[glossaryId].loading = loading;
+      state.glossaries.edit.byId[glossaryId].loading = loading;
     },
     removeGlossary: (state, action: PayloadAction<{ glossaryId: string }>) => {
       const { glossaryId } = action.payload;
-      if (state.glossaries[glossaryId]) {
-        delete state.glossaries[glossaryId];
+      if (state.glossaries.edit.byId[glossaryId]) {
+        delete state.glossaries.edit.byId[glossaryId];
+        delete state.glossaries.static.byId[glossaryId];
+        remove(state.glossaries.edit.allIds, (id) => id === glossaryId);
+        remove(state.glossaries.static.allIds, (id) => id === glossaryId);
       } else {
         console.warn(`Glossary with id ${glossaryId} not found for removal.`);
       }
@@ -78,7 +99,7 @@ const glossarySlice = createSlice({
       action: PayloadAction<{ glossaryId: string; error: string | null }>
     ) => {
       const { glossaryId, error } = action.payload;
-      state.glossaries[glossaryId].error = error;
+      state.glossaries.edit.byId[glossaryId].error = error;
     },
     updateGlossary: (
       state,
@@ -88,7 +109,8 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { id, updates } = action.payload;
-      const glossary = state.glossaries[id];
+      const glossary = state.glossaries.edit.byId[id];
+      console.log(`Updating glossary ${glossary.name} with updates:`, updates);
       if (glossary) {
         Object.assign(glossary, updates);
       } else {
@@ -104,7 +126,7 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { id, key, value } = action.payload;
-      const glossary = state.glossaries[id];
+      const glossary = state.glossaries.edit.byId[id];
       if (glossary) {
         if (!glossary.integrationState?.terms) {
           glossary.integrationState.terms = {};
@@ -118,6 +140,18 @@ const glossarySlice = createSlice({
         console.warn(`Glossary with id ${id} not found for term update.`);
       }
     },
+    syncGlossaryTerms: (state, action: PayloadAction<{ id: string }>) => {
+      const { id } = action.payload;
+      const editGlossary = state.glossaries.edit.byId[id];
+      const staticGlossary = state.glossaries.static.byId[id];
+      if (editGlossary) {
+        staticGlossary.integrationState.terms = {
+          ...editGlossary.integrationState.terms,
+        };
+      } else {
+        console.warn(`Glossary with id ${id} not found for term sync.`);
+      }
+    },
     setGlossaryNodes: (
       state,
       action: PayloadAction<{
@@ -128,10 +162,10 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, nodes, structure, renderState } = action.payload;
-      state.glossaries[glossaryId].nodes = nodes;
-      state.glossaries[glossaryId].structure = structure;
-      state.glossaries[glossaryId].renderState = renderState;
-      state.glossaries[glossaryId].hydrated = true;
+      state.glossaries.edit.byId[glossaryId].nodes = nodes;
+      state.glossaries.edit.byId[glossaryId].structure = structure;
+      state.glossaries.edit.byId[glossaryId].renderState = renderState;
+      state.glossaries.edit.byId[glossaryId].hydrated = true;
     },
 
     updateGlossaryNode: (
@@ -143,7 +177,7 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, nodeId, nodeData } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         const node = glossary.nodes[nodeId];
         if (node && node.flatIndex !== undefined) {
@@ -161,7 +195,7 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, updates } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         updates.forEach(({ nodeId, nodeData }) => {
           const node = glossary.nodes[nodeId];
@@ -179,7 +213,7 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, nodeId, nodeData } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (!glossary) return;
 
       const withFlatIndex = {
@@ -205,7 +239,7 @@ const glossarySlice = createSlice({
       action: PayloadAction<{ glossaryId: string; nodeId: string }>
     ) => {
       const { glossaryId, nodeId } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (!glossary) return;
 
       const collectDescendantIds = (id: string, acc: string[]) => {
@@ -242,7 +276,7 @@ const glossarySlice = createSlice({
     ) => {
       const { glossaryId, nodeId, expanded } = action.payload;
       if (glossaryId === null) return;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         glossary.renderState[nodeId].expanded = expanded;
       }
@@ -252,7 +286,7 @@ const glossarySlice = createSlice({
       action: PayloadAction<{ glossaryId: string; expand: boolean }>
     ) => {
       const { glossaryId, expand } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         glossary.structure.forEach((node) => {
           glossary.renderState[node.id].expanded = expand;
@@ -274,7 +308,7 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, nodeId } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         if (!glossary.renderState[nodeId]?.rename) {
           glossary.renderState[nodeId].rename = true;
@@ -292,16 +326,16 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, entryId, entryData } = action.payload;
-      const glossary = state.glossaries[glossaryId];
-      if (!glossary) return;
-
+      const glossary = state.glossaries.static.byId[glossaryId];
+      const editGlossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !editGlossary) return;
       // Ensure the entry has a unique ID
       if (!entryData.id) {
         entryData.id = entryId;
       }
-
       // Add the new entry to the glossary
       glossary.entries[entryId] = entryData;
+      editGlossary.entries[entryId] = entryData;
     },
     updateGlossaryEntry: (
       state,
@@ -312,18 +346,81 @@ const glossarySlice = createSlice({
       }>
     ) => {
       const { glossaryId, entryId, content } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         const entry = glossary.entries[entryId];
         if (entry) {
+          console.log(
+            cloneDeep(entry),
+            'updating entry:',
+            entryId,
+            'with content:',
+            content
+          );
           Object.entries(content).forEach(([key, value]) => {
             if (key in entry) {
-              (entry as GlossaryEntry)[key as keyof GlossaryEntry] = value;
+              (entry as any)[key] = value;
             } else {
               console.warn(`Key ${key} does not exist in entry ${entryId}`);
             }
           });
         }
+      }
+    },
+    appendEntrySubModel: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        entryId: string;
+        subModel: string;
+        data: Record<string, any>;
+      }>
+    ) => {
+      const { glossaryId, entryId, subModel, data } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (glossary) {
+        const entry = glossary.entries[entryId];
+        if (entry) {
+          //@ts-ignore
+          entry[subModel as keyof typeof entry] = data;
+        } else {
+          console.warn(`Entry ${entryId} not found in glossary ${glossaryId}.`);
+        }
+      } else {
+        console.warn(
+          `Glossary ${glossaryId} not found for appending sub-model.`
+        );
+      }
+    },
+    updateEntrySubModel: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        entryId: string;
+        subModel: SubModelType;
+        keypath: string;
+        data: Record<string, any>;
+      }>
+    ) => {
+      const { glossaryId, entryId, subModel, keypath, data } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (glossary) {
+        const entry = glossary.entries[entryId];
+        //@ts-ignore
+        const entrySubModel = entry[subModel];
+        if (entrySubModel) {
+          set(entrySubModel, keypath, data);
+          console.log(
+            `Updated subModel ${subModel} for entry ${entryId} at keypath ${keypath} with data:`,
+            data
+          );
+        } else {
+          console.warn(`Entry ${entryId} not found in glossary ${glossaryId}.`);
+        }
+      } else {
+        console.warn(
+          `Glossary ${glossaryId} not found for updating sub-model.`
+        );
       }
     },
     addOptionsForEntry: (
@@ -332,11 +429,19 @@ const glossarySlice = createSlice({
         glossaryId: string;
         entryId: string;
         property: keyof GlossaryEntry;
-        options: Record<'inherited' | 'local' | 'other', string[]>;
+        options: Record<
+          'inherited' | 'nearby' | 'extended' | 'other',
+          {
+            id: string;
+            name: string;
+            [key: string]: any;
+          }
+        >;
       }>
     ) => {
       const { glossaryId, entryId, property, options } = action.payload;
-      const glossary = state.glossaries[glossaryId];
+      console.log(options, 'options for entry:', entryId);
+      const glossary = state.glossaries.edit.byId[glossaryId];
       if (glossary) {
         if (!glossary.options[entryId]) {
           console.warn(
@@ -345,9 +450,10 @@ const glossarySlice = createSlice({
           glossary.options[entryId] = {};
         }
         glossary.options[entryId][property] = {
-          inherited: options.inherited.map((str) => ({ id: str, name: str })),
-          local: options.local.map((str) => ({ id: str, name: str })),
-          other: options.other.map((str) => ({ id: str, name: str })),
+          inherited: options.inherited,
+          nearby: options.nearby,
+          extended: options.extended,
+          other: options.other,
         };
       }
     },
@@ -356,6 +462,7 @@ const glossarySlice = createSlice({
 
 export const {
   initializeGlossary,
+  appendEntrySubModel,
   setGlossaryLoading,
   setGlossaryError,
   updateGlossary,
@@ -372,6 +479,7 @@ export const {
   toggleNameEdit,
   addGlossaryEntry,
   removeGlossary,
+  syncGlossaryTerms,
   addOptionsForEntry,
 } = glossarySlice.actions;
 

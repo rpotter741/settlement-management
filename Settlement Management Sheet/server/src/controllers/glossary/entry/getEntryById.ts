@@ -3,7 +3,7 @@ import glossaryModelMap from '../../../utils/glossaryModelMap.ts';
 import isDetailFileType from '../../../utils/isDetailFileType.ts';
 import requireFields from '../../../utils/requireFields.ts';
 
-export default async function getEntryById(req, res) {
+export default async function getEntryById(req: any, res: any) {
   try {
     const { id, entryType } = req.query;
     if (!requireFields(['id', 'entryType'], req.query, res)) return;
@@ -16,6 +16,28 @@ export default async function getEntryById(req, res) {
     }
     const entry = await (entryModel as any).findUnique({
       where: { id },
+      select: {
+        refId: true,
+        id: true,
+        version: true,
+        contentType: true,
+        entryType: true,
+        createdBy: true,
+        forkedBy: true,
+        collaborators: true,
+        editors: true,
+        subType: true,
+        name: true,
+        description: true,
+        dataString: true,
+        tags: true,
+        subSections: true,
+        customTabIds: true,
+        customTabs: true,
+        integrationState: true,
+        backlinksFrom: true,
+        backlinksTo: true,
+      },
     });
     console.log(`Found entry:`, entry);
     if (!entry) {
