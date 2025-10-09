@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" id="Galaxy-2--Streamline-Plump">
+  <desc>
+    galaxy
+  </desc>
+  <g id="galaxy-2--science-space-universe-astronomy">
+    <path id="Ellipse 22" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M24 19c-2.7614 0 -5 2.2386 -5 5s2.2386 5 5 5 5 -2.2386 5 -5 -2.2386 -5 -5 -5Z" stroke-width="3"></path>
+    <path id="Vector" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M25.4473 14.4967c-6.2296 -1.6692 -12.633 2.0278 -14.3022 8.2574 -1.97277 7.3624 2.3964 14.93 9.7587 16.9027 10.1941 2.7315 20.6723 -3.3181 23.4038 -13.5121 2.6102 -9.7417 -2.3764 -19.72913 -11.3284 -23.67235 -0.8897 -0.39188 -1.6608 0.69055 -1.1744 1.53225 2.8039 4.85225 3.5584 10.4014 3.5584 10.4014" stroke-width="3"></path>
+    <path id="Vector_2" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M22.5525 33.5035c6.2297 1.6692 12.6331 -2.0278 14.3023 -8.2575 1.9727 -7.3623 -2.3964 -14.9299 -9.7588 -16.90263C16.902 5.61188 6.42379 11.6615 3.69231 21.8555 1.08204 31.5971 6.0687 41.5846 15.0207 45.5278c0.8896 0.3919 1.6608 -0.6905 1.1744 -1.5322 -2.8039 -4.8523 -3.5585 -10.4014 -3.5585 -10.4014" stroke-width="3"></path>
+  </g>
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Consellation--Streamline-Sharp" height="24" width="24">
+  <desc>
+    Consellation
+  </desc>
+  <g id="consellation--science-space-universe-star">
+    <path id="Vector 3003" stroke="#000000" d="M19.5 7V1" stroke-width="1.5"></path>
+    <path id="Ellipse 1218" stroke="#000000" d="M17 9.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1.5"></path>
+    <path id="Ellipse 1219" stroke="#000000" d="M11.5 19.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1.5"></path>
+    <path id="Ellipse 1220" stroke="#000000" d="M2 16a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1.5"></path>
+    <path id="Ellipse 1221" stroke="#000000" d="M5.5 6.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1.5"></path>
+    <path id="Vector 3002" stroke="#000000" d="m6.846 16.864 4.807 1.771" stroke-width="1.5"></path>
+    <path id="Vector 3004" stroke="#000000" d="m15.205 17.309 3.09 -5.618" stroke-width="1.5"></path>
+    <path id="Vector 3005" stroke="#000000" d="m7.136 8.846 -1.772 4.807" stroke-width="1.5"></path>
+    <path id="Vector 3006" stroke="#000000" d="m17.08 8.868 -6.66 -1.737" stroke-width="1.5"></path>
+  </g>
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" id="Planet--Streamline-Core" height="14" width="14">
+  <desc>
+    scifi planet
+  </desc>
+  <g id="planet--science-solar-system-ring-planet-saturn-space-astronomy-astronomy">
+    <path id="Vector" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M8.73005 2.21004C10.8201 0.800042 12.5601 0.150042 13.2001 0.800042c1 0.999998 -1.04 4.559998 -4.44005 7.999998 -3.4 3.43996 -7 5.43996 -7.999998 4.43996 -0.657468 -0.6574 -0.020115 -2.4554 1.491208 -4.59179" stroke-width="1"></path>
+    <path id="Vector_2" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M5.43958 11.754c0.50324 0.1629 1.02975 0.2462 1.56042 0.246 0.8379 0.0005 1.6625 -0.2095 2.39804 -0.6109 0.73556 -0.4013 1.35846 -0.981 1.81146 -1.68594 0.453 -0.70489 0.7215 -1.51232 0.7811 -2.3481 0.0475 -0.66806 -0.0397 -1.3371 -0.2547 -1.96785" stroke-width="1"></path>
+    <path id="Vector_3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" d="M3.00001 10c-0.72215 -0.96285 -1.07274 -2.15389 -0.98742 -3.35444 0.08532 -1.20055 0.60083 -2.33003 1.45188 -3.18109 0.85106 -0.85105 1.98054 -1.36656 3.18109 -1.45188 1.20055 -0.08532 2.39159 0.26527 3.35444 0.98742" stroke-width="1"></path>
+  </g>
+</svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="City-Light--Streamline-Phosphor" height="16" width="16">
+  <desc>
+    City Light Streamline Icon: https://streamlinehq.com
+  </desc>
+  <path d="M15 13.125h-0.625V5.5a0.375 0.375 0 0 0 -0.375 -0.375h-4a0.375 0.375 0 0 0 -0.375 0.375v2.625h-3.25V2.5a0.375 0.375 0 0 0 -0.375 -0.375H2a0.375 0.375 0 0 0 -0.375 0.375v10.625H1a0.375 0.375 0 0 0 0 0.75h14a0.375 0.375 0 0 0 0 -0.75ZM10.375 5.875h3.25v7.25h-3.25Zm-0.75 3v4.25h-3.25v-4.25ZM2.375 2.875h3.25v10.25H2.375Zm2 1.625v1a0.375 0.375 0 0 1 -0.75 0V4.5a0.375 0.375 0 0 1 0.75 0Zm0 3v1a0.375 0.375 0 0 1 -0.75 0v-1a0.375 0.375 0 0 1 0.75 0Zm0 3v1a0.375 0.375 0 0 1 -0.75 0v-1a0.375 0.375 0 0 1 0.75 0Zm3.25 1v-1a0.375 0.375 0 0 1 0.75 0v1a0.375 0.375 0 0 1 -0.75 0Zm4 0v-1a0.375 0.375 0 0 1 0.75 0v1a0.375 0.375 0 0 1 -0.75 0Zm0 -3v-1a0.375 0.375 0 0 1 0.75 0v1a0.375 0.375 0 0 1 -0.75 0Z" stroke-width="0.0625"></path>
+</svg>

@@ -1,0 +1,99 @@
+import { selectRelayById } from '@/app/selectors/relaySelectors.js';
+import {
+  updateRelay as update,
+  addErrorMessage,
+  initializeRelay,
+  clearRelay,
+  refreshRelay,
+} from '@/app/slice/relaySlice.js';
+import { AppDispatch } from '@/app/store.js';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+
+export type RelayStatus = 'pending' | 'complete' | 'error';
+
+export interface UseRelayReturn<T> {
+  data: T | null;
+  status: RelayStatus;
+  isPending: boolean;
+  isComplete: boolean;
+  isError: boolean;
+  closeRelay: () => void;
+  refreshTTL: () => void;
+}
+
+export interface UseRelayPubReturn<T> {
+  updateRelay: (data: T) => void;
+  openRelay: (data?: T, status?: RelayStatus) => void; //reducer assigns null / 'pending' if not provided
+  addError: (errorMessage: string) => void;
+}
+
+export function useRelayPub<T = unknown>({
+  id,
+}: {
+  id: string;
+}): UseRelayPubReturn<T> {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const openRelay = (data?: T, status?: RelayStatus) => {
+    dispatch(initializeRelay({ id, data, status }));
+  };
+
+  const updateRelay = (data: T) => {
+    dispatch(update({ id, data }));
+  };
+
+  const addError = (errorMessage: string) => {
+    dispatch(addErrorMessage({ id, errorMessage }));
+  };
+
+  return {
+    openRelay,
+    updateRelay,
+    addError,
+  };
+}
+
+export function useRelaySub<T = unknown>({
+  id,
+  onComplete,
+  deps = [],
+  removeAfterConsume = true,
+}: {
+  id: string;
+  onComplete?: (data: T) => void;
+  deps?: any[];
+  removeAfterConsume?: boolean;
+}): UseRelayReturn<T> {
+  const dispatch = useDispatch<AppDispatch>();
+  const relay = useSelector(selectRelayById(id));
+
+  const data = (relay?.data as T) ?? null;
+  const status: RelayStatus = relay?.status ?? 'pending';
+
+  const closeRelay = () => {
+    dispatch(clearRelay({ id }));
+  };
+
+  const refreshTTL = () => {
+    dispatch(refreshRelay({ id }));
+  };
+
+  useEffect(() => {
+    if (status === 'complete' && onComplete && data !== null) {
+      onComplete(data);
+      if (removeAfterConsume) closeRelay();
+    }
+  }, [status, data, onComplete, removeAfterConsume, ...deps]);
+
+  return {
+    data,
+    status,
+    isPending: status === 'pending',
+    isComplete: status === 'complete',
+    isError: status === 'error',
+    closeRelay,
+    refreshTTL,
+  };
+}
