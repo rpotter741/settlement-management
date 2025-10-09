@@ -12,7 +12,7 @@ function flattenVisibleNodes({
   tree: SelectionObject[];
   renderState: Record<string, { expanded: boolean }>;
 }): DepthEntry[] {
-  if (!tree.length || !renderState) return [];
+  if (!tree.length) return [];
   const visible: DepthEntry[] = [];
   const traverse = (node: SelectionObject, depth: number) => {
     visible.push({ id: node.id, depth });

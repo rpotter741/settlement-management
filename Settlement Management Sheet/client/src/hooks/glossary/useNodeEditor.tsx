@@ -6,9 +6,10 @@ import {
   selectEditEntryById,
   selectKeypathOptions,
   selectEditNodeById,
+  selectEditGlossaryById,
 } from '@/app/selectors/glossarySelectors.js';
 import { useSelector } from 'react-redux';
-import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { GlossaryEntry, GlossaryNode, SubModelType } from 'types/index.js';
 import createScopedStorage from '@/utility/localStorageActions.js';
 import { InheritanceMap } from '@/utility/hasParentProperty.js';
 
@@ -23,6 +24,9 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     selectEditEntryById(glossaryId, entryId)
   );
 
+  const glossary = useSelector(selectEditGlossaryById(glossaryId));
+  console.log(glossary);
+
   useEffect(() => {
     if (!entry && node?.entryType) {
       dispatch(
@@ -32,6 +36,46 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
       );
     }
   }, [dispatch, entryId, glossaryId, node?.entryType, entry]);
+
+  // update entry metadata
+
+  const updateGlossaryEntry = useCallback(
+    (content: Record<string, any>) => {
+      dispatch(thunks.updateEntryById({ glossaryId, entryId, content }));
+    },
+    [dispatch, glossaryId, entryId]
+  );
+
+  // update entry submodel by id
+
+  const updateSubModel = useCallback(
+    ({
+      subModel,
+      keypath,
+      data,
+      tabId,
+    }: {
+      subModel: SubModelType;
+      keypath: string;
+      data: any;
+      tabId: string;
+    }) => {
+      console.log(tabId, 'tabId in updateSubModel');
+      dispatch(
+        thunks.updateEntrySubModelById({
+          glossaryId,
+          entryId,
+          subModel,
+          keypath,
+          data,
+          tabId,
+        })
+      );
+    },
+    [dispatch, glossaryId, entryId]
+  );
+
+  // options for select inputs
 
   const buildOptionsByKeypath = useCallback(
     (property: keyof GlossaryEntry, inheritanceMap: InheritanceMap) => {
@@ -68,13 +112,6 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
 
   const storage = createScopedStorage(`${glossaryId}-${entryId}`);
 
-  const updateGlossaryEntry = useCallback(
-    (content: Record<string, any>) => {
-      dispatch(thunks.updateEntryById({ glossaryId, entryId, content }));
-    },
-    [dispatch, glossaryId, entryId]
-  );
-
   const getLocalStorage = useCallback(() => {
     return storage.get();
   }, [glossaryId, entryId]);
@@ -95,7 +132,7 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     if (!localStorageData) return false;
 
     const entryUpdatedAt = new Date(entry?.updatedAt || 0);
-    const localUpdatedAt = new Date(localStorageData.updatedAt);
+    const localUpdatedAt = new Date(localStorageData?.updatedAt || 0);
 
     return localUpdatedAt > entryUpdatedAt;
   }, [glossaryId, entryId]);
@@ -111,6 +148,7 @@ const useNodeEditor = (glossaryId: string, entryId: string) => {
     clearLocalStorage,
     localIsNewer,
     getSubModel,
+    updateSubModel,
   };
 };
 

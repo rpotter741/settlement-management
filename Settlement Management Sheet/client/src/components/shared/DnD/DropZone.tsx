@@ -5,8 +5,9 @@ import { DropResult } from './DragWrapper.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { border } from '@mui/system';
 import { alpha, useTheme } from '@mui/material/styles';
+import getDropStyle from './getDropStyle.js';
 
-type DropZoneStyleType = 'tabs' | 'glossary';
+export type DropZoneStyleType = 'tabs' | 'glossary' | 'columns' | 'default';
 
 interface DropZoneProps {
   type: string[]; // Type for the DropZone
@@ -20,6 +21,7 @@ interface DropZoneProps {
   draggedType?: string | null; // Type of the currently dragged item
   endDrag?: () => void; // Function to reset drag context
   styleType?: DropZoneStyleType; // Optional style type for the drop zone
+  index?: number; // Optional index for ordering
 }
 
 const DropZone: React.FC<DropZoneProps> = ({
@@ -34,20 +36,30 @@ const DropZone: React.FC<DropZoneProps> = ({
   draggedType = null,
   endDrag = () => {},
   styleType = 'tabs', // Default style type
+  index = 0,
 }) => {
   const [droppedItems, setDroppedItems] = useState(defaultItems);
   const theme = useTheme();
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: type,
-    drop: (item: Record<string, any>, monitor) => {
-      const offset = monitor.getClientOffset();
+    hover: (item, monitor) => {
       const hoverIndex = (monitor.getDropResult() as DropResult)?.hoverIndex;
+      console.log(hoverIndex);
       if (onReorder && hoverIndex !== undefined) {
         onReorder(item, hoverIndex); // Trigger reordering logic
+      }
+    },
+    drop: (item: unknown, monitor) => {
+      const castItem = item as Record<string, any>;
+      const offset = monitor.getClientOffset();
+      const hoverIndex = (monitor.getDropResult() as DropResult)?.hoverIndex;
+      console.log(hoverIndex, offset);
+      if (onReorder && hoverIndex !== undefined) {
+        onReorder(castItem, hoverIndex); // Trigger reordering logic
       } else if (onAbsolutePlacement && offset) {
         const newItem = {
-          ...item,
+          ...castItem,
           x: offset.x,
           y: offset.y,
         };
@@ -55,9 +67,9 @@ const DropZone: React.FC<DropZoneProps> = ({
         onAbsolutePlacement(newItem); // Trigger absolute placement logic
       } else {
         if (defaultItems) {
-          setDroppedItems((prev = []) => [...prev, item]);
+          setDroppedItems((prev = []) => [...prev, castItem]);
         }
-        handleAdd(item, hoverIndex || 0); // Add the dropped item
+        handleAdd(castItem, hoverIndex || 0); // Add the dropped item
       }
       endDrag(); // Reset drag context
     },
@@ -67,58 +79,26 @@ const DropZone: React.FC<DropZoneProps> = ({
   }));
 
   useEffect(() => {
+    console.log(isOver, draggedType);
+  }, [isOver, draggedType]);
+
+  useEffect(() => {
     defaultItems && setDroppedItems(defaultItems); // Synchronize with defaults
   }, [defaultItems]);
-
-  const dropStyleMap = {
-    tabs: {
-      position: 'relative',
-      border: type.includes(draggedType || '') ? '2px dashed #ccc' : '',
-      backgroundColor: isOver ? bg2 : 'inherit',
-      pt: 0,
-      height: '100%',
-      borderRadius: 4,
-      zIndex: 1000,
-      boxSizing: 'border-box',
-    },
-    glossary: {
-      maxHeight: '36px',
-      position: 'relative',
-      borderTop: '2px solid',
-      borderColor: isOver
-        ? 'primary.main'
-        : type.includes(draggedType || '')
-          ? alpha(theme.palette.primary.light, 0.25)
-          : 'transparent',
-      backgroundColor: isOver
-        ? alpha(theme.palette.success.main, 0.5)
-        : type.includes(draggedType || '')
-          ? alpha(theme.palette.success.main, 0.0625)
-          : 'inherit',
-
-      pt: 0,
-      borderRadius: 0,
-      zIndex: 1000,
-      boxSizing: 'border-box',
-    },
-  };
 
   return (
     <Box
       ref={drop}
-      sx={
-        dropStyleMap[styleType] ?? {
-          position: 'relative',
-          border: type.includes(draggedType || '') ? '2px dashed #ccc' : '',
-          backgroundColor: isOver ? bg2 : 'inherit',
-          pt: 0,
-          height: '100%',
-          borderRadius: 4,
-          zIndex: 1000,
-          boxSizing: 'border-box',
-          boxShadow: isOver ? `5px 5px 10px red` : 'none',
-        }
-      }
+      sx={getDropStyle({
+        key: styleType,
+        type,
+        draggedType,
+        bg2,
+        bg1,
+        isOver,
+        alpha,
+        theme,
+      })}
     >
       {children}
     </Box>

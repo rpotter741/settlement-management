@@ -21,7 +21,10 @@ export default function deleteEntryThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
-      const glossary = getState().glossary.glossaries[glossaryId];
+      const glossary = getState().glossary.glossaries.edit.byId[glossaryId];
+      if (!glossary) {
+        throw new Error(`Glossary with ID ${glossaryId} not found`);
+      }
       dispatch(findAndDeleteTab(glossaryId));
       await serverAction.deleteGlossary({ glossaryId });
       dispatch(removeGlossary({ glossaryId }));

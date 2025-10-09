@@ -1,6 +1,6 @@
 import api from '@/services/interceptor.js';
 
-export default async function getEntryById({
+export default async function updateEntrySubModel({
   id,
   subModel,
   updates,
@@ -11,8 +11,9 @@ export default async function getEntryById({
 }) {
   return api
     .patch(`/glossary/entry/subModel/update`, {
-      params: { id, subModel },
-      data: updates,
+      id,
+      subModel,
+      updates,
     })
     .then((res: any) => {
       return res.data;

@@ -1,4 +1,4 @@
-import { Check, Edit } from '@mui/icons-material';
+import { Check, Close, Edit } from '@mui/icons-material';
 import {
   alpha,
   Button,
@@ -45,7 +45,6 @@ const GlossaryTermEditor = ({
   };
 
   const handleReset = () => {
-    console.log('Resetting term to fallback:', fallback);
     setWasReset(true);
     setShowCheck(true);
     handleChange(null);
@@ -53,7 +52,7 @@ const GlossaryTermEditor = ({
     setTimeout(() => {
       setWasReset(false);
       setShowCheck(false);
-    }, 500);
+    }, 1000);
   };
 
   return (
@@ -97,7 +96,7 @@ const GlossaryTermEditor = ({
               setShowCheck(false);
             }, 1000);
           }}
-          sx={(theme) => ({
+          sx={{
             width: '100%',
             display: 'flex',
             flex: 1,
@@ -110,18 +109,7 @@ const GlossaryTermEditor = ({
             boxSizing: 'border-box',
             py: 1,
             gap: 1,
-            border: '1px solid',
-            borderColor: (theme) =>
-              wasReset
-                ? getAlphaColor({
-                    color: 'info',
-                    key: 'main',
-                    opacity: 0.4,
-                  })
-                : showCheck
-                  ? alpha(theme.palette.success.main, 0.55)
-                  : 'transparent',
-          })}
+          }}
           onMouseEnter={() => setShowRowContent(true)}
           onMouseLeave={() => setShowRowContent(false)}
           onFocus={() => setShowRowContent(true)}
@@ -132,25 +120,40 @@ const GlossaryTermEditor = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-start',
+              justifyContent: 'start',
               gap: 1,
               width: '100%',
               color: 'inherit',
               textTransform: 'none',
+              px: 0,
+              border: '1px solid',
+              borderColor: (theme) =>
+                wasReset
+                  ? getAlphaColor({
+                      color: 'info',
+                      key: 'main',
+                      opacity: 0.4,
+                    })
+                  : showCheck
+                    ? alpha(theme.palette.success.main, 0.55)
+                    : 'transparent',
             }}
           >
-            {showCheck ? (
-              <Check sx={{ fontSize: '1rem', color: 'success.main' }} />
-            ) : !showCheck && showRowContent ? (
-              <Edit sx={{ fontSize: '1rem' }} />
-            ) : (
-              <Edit sx={{ fontSize: '1rem', color: 'transparent' }} />
-            )}
-
+            <Box>
+              <IconButton>
+                {showCheck ? (
+                  <Check sx={{ fontSize: '1rem', color: 'success.main' }} />
+                ) : !showCheck && showRowContent ? (
+                  <Edit sx={{ fontSize: '1rem' }} />
+                ) : (
+                  <Edit sx={{ fontSize: '1rem', color: 'transparent' }} />
+                )}
+              </IconButton>
+            </Box>
             <Typography
               variant="body1"
               sx={{
-                width: '50%',
+                width: '75%',
                 textAlign: 'left',
                 fontStyle: term.trim() === '' ? 'italic' : 'normal',
               }}
@@ -158,14 +161,15 @@ const GlossaryTermEditor = ({
               {term || fallback || 'Add Term'}
             </Typography>
           </Button>
+
           {showRowContent && term !== fallback && (
-            <Button
+            <IconButton
               color="warning"
               sx={{ position: 'absolute', right: 8 }}
               onClick={handleReset}
             >
-              Reset
-            </Button>
+              <Close fontSize="small" />
+            </IconButton>
           )}
         </RowMotionBox>
       )}

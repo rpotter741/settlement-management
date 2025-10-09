@@ -21,6 +21,7 @@ type EditorProps = {
     dataString: string;
   }) => void;
   immediateOnChange?: () => void;
+  width?: string;
 };
 
 const debouncedUpdate = debounce((callback, value, text) => {
@@ -37,6 +38,7 @@ const Editor: React.FC<EditorProps> = ({
   maxHeight = '1000px',
   propUpdate = () => {},
   immediateOnChange = () => {},
+  width = '100%',
 }) => {
   const theme = useTheme();
   const [content, setContent] = useState(html || '');
@@ -60,7 +62,7 @@ const Editor: React.FC<EditorProps> = ({
   }, 10000);
 
   return (
-    <Box>
+    <>
       <Box
         className="non-shell-editor"
         sx={{
@@ -73,6 +75,7 @@ const Editor: React.FC<EditorProps> = ({
           overflowY: 'auto',
           borderRadius: '4px 4px 0 0',
           borderBottom: 0,
+          width,
           // minWidth: 300,
         }}
       >
@@ -93,7 +96,7 @@ const Editor: React.FC<EditorProps> = ({
           <Typography
             variant="caption"
             sx={{
-              width: '100%',
+              width,
               backgroundColor: (theme) =>
                 theme.palette.mode === 'dark'
                   ? 'secondary.main'
@@ -106,7 +109,7 @@ const Editor: React.FC<EditorProps> = ({
           </Typography>
         )}
       </Box>
-    </Box>
+    </>
   );
 };
 

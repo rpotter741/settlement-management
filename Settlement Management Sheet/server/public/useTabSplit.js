@@ -1,1 +1,0 @@
-import{z as e,aX as p,aY as l,aZ as S,a_ as o}from"./main.js";const h=()=>{const t=e(p),a=e(l),i=e(S),n=o(`(min-width: ${i?"1750px":"1450px"})`),s=o(`(max-width: ${i?"1200px":"900px"})`);return{splitTabs:t,noSplit:a,soloSize:s,splitSize:n,either:t||s,both:t&&s}};export{h as u};

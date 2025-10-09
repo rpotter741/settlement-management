@@ -17,11 +17,12 @@ import {
   selectGlossaryStructure,
   selectKeypathOptions,
 } from '@/app/selectors/glossarySelectors.js';
-import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { GlossaryEntry, GlossaryNode, SubModelType } from 'types/index.js';
 import thunks from '@/app/thunks/glossaryThunks.js';
 import actions from '@/services/glossaryServices.js';
 
 interface GlossaryAutocompleteProps {
+  subModel: SubModelType;
   multiple?: boolean;
   label: string;
   keypath: keyof GlossaryEntry;
@@ -32,6 +33,7 @@ interface GlossaryAutocompleteProps {
 
 const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
   multiple = true,
+  subModel,
   label,
   keypath,
   alphabetizeOptions = true,
@@ -39,12 +41,12 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
   placeholder,
 }) => {
   //
-  const { glossaryId, id, inheritanceMap } = useShellContext();
+  const { glossaryId, id, inheritanceMap, tabId } = useShellContext();
   if (!glossaryId) return null;
   const {
     entry,
     node,
-    updateGlossaryEntry,
+    updateSubModel,
     getOptionsByKeypath,
     buildOptionsByKeypath,
   } = useNodeEditor(glossaryId, id);
@@ -126,7 +128,7 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
       extended: 3,
       other: 4,
     };
-    for (const rel of Object.keys(relationships)) {
+    for (const rel of Object.keys(relationships) as RelationshipType[]) {
       for (const entry of raw[rel] ?? []) {
         const values = Array.isArray(entry[property])
           ? entry[property]
@@ -140,7 +142,7 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
               name: entry.name,
               relationship: rel as RelationshipType,
             });
-            const tier = relationships[rel];
+            const tier = relationships[rel as RelationshipType];
             const existingTier =
               relationships[existing.group as RelationshipType];
             console.log(tier, existingTier, 'tier and existingTier');
@@ -181,7 +183,7 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
     if (!options) return [];
 
     return Object.entries(options).flatMap(([groupLabel, entries]) =>
-      entries.map((e) => {
+      (entries as any).map((e: any) => {
         return {
           label: capitalize(e[keypath as string]),
           value: e[keypath as string],
@@ -193,7 +195,6 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
   }, [options, keypath]);
 
   const handleChange = (newValue: string | string[]) => {
-    console.log(newValue, 'newValue from handleChange');
     if (Array.isArray(newValue)) {
       if (hasPrimary) {
         if (!newValue.includes(primary)) {
@@ -202,10 +203,12 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
       }
       newValue = newValue.map((v: string) => v.trim().toLowerCase());
     }
-    const content = {
-      [keypath]: newValue,
-    };
-    updateGlossaryEntry(content);
+    updateSubModel({
+      subModel,
+      keypath,
+      data: newValue,
+      tabId,
+    });
     multiple && inputRef.current?.focus();
   };
 
@@ -219,6 +222,14 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
       )
     : [];
 
+  const testValue = useMemo(() => {
+    return entry?.[subModel]?.[keypath]?.map((v: string) => ({
+      label: capitalize(v),
+    }));
+  }, [entry, subModel, keypath]);
+
+  if (!entry[subModel]) return <div>Loading...</div>;
+
   return (
     <Autocomplete
       freeSolo
@@ -226,13 +237,7 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
       multiple={multiple}
       options={deduped}
       groupBy={(option) => option.group}
-      value={
-        Array.isArray(entry[keypath])
-          ? entry[keypath].map((v: string) => ({ label: capitalize(v) }))
-          : entry[keypath]
-            ? { label: capitalize(entry[keypath] as string) }
-            : []
-      }
+      value={testValue ?? []}
       disableCloseOnSelect={multiple}
       onChange={(_event, value) => {
         if (value === null) {

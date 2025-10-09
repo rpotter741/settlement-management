@@ -16,7 +16,6 @@ export function useDragProvider<TItem, TType = string>() {
   const [lastDragged, setLastDragged] = useState<TItem | null>(null);
 
   const startDrag = (type: TType, item: TItem) => {
-    console.log('startDrag', type, item);
     setIsDragging(true);
     setDraggedType(type);
     setDraggedItem(item);

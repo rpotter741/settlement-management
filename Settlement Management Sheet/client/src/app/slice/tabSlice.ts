@@ -154,7 +154,7 @@ const tabSlice = createSlice({
         }
         if (state.left.order.length > 0 && state.left.currentIndex !== null) {
           state.focusedTab =
-            state.left.data[state.left.order[state.left.currentIndex]];
+            state.left.data[state.left.order[state.left.currentIndex]] || null;
         }
       }
       state.lastRemovedTab = tabId;
@@ -187,6 +187,7 @@ const tabSlice = createSlice({
       }
     },
     moveRightToLeft: (state, action: PayloadAction<MoveTabPayload>) => {
+      console.log('moveRightToLeft action:', action.payload);
       const { tabId, dropIndex } = action.payload;
       const tab = cloneDeep(state.right.data[tabId]);
       if (tab) {
@@ -255,8 +256,10 @@ const tabSlice = createSlice({
       if (prevent) {
         Object.entries(state.right.data).forEach(([id, tab]) => {
           tab.side = 'left';
-          state.left.data[id] = tab;
+          set(state.left.data, id, tab);
+          state.left.order.push(id);
         });
+        state.right.order = [];
         state.right.data = {};
         state.right.currentId = null;
         state.right.currentIndex = null;

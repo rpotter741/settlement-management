@@ -1,119 +1,54 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
-import {
-  selectActiveId,
-  selectEditGlossaryById,
-} from '@/app/selectors/glossarySelectors.js';
-import { Box, Button } from '@mui/material';
-import { useModalActions } from '@/hooks/global/useModal.js';
-import CustomizePalette from './CustomizePalette.js';
-import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
-import EditGlossaryOverviewTab from './GlossaryOverviewTab.js';
-import useTabSplit from '@/hooks/layout/useTabSplit.js';
-import { Tab } from '@/app/types/TabTypes.js';
-import GlossaryTerms from '../Terms/GlossaryTermsTab.js';
-import { AppDispatch } from '@/app/store.js';
-import { useDispatch } from 'react-redux';
-import { updateTab } from '@/app/slice/tabSlice.js';
-import GlossaryPropertyLabels from '../utils/propertyMaps/GlossaryPropertyLabels.js';
-import GlossaryTermsTab from '../Terms/GlossaryTermsTab.js';
+import React, { useMemo } from 'react';
+import { Box } from '@mui/material';
+import GlossaryOverview from './Overview/GlossaryOverview.js';
+import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
+import CustomizePalette from './Palette/CustomizePalette.js';
+import TermRowAndSettings from '../forms/TermRowAndSetting.js';
+import GlossaryTermsEditor from './Terms/GlossaryTermsTab.js';
+import TemplateManager from './Templates/TemplateManager.js';
+import EntriesViewer from '../Entries/EntriesViewer.js';
+import GlossaryGraph from './Graph/GlossaryGraph.js';
+import { AnimatePresence } from 'framer-motion';
+import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';
 
-const EditGlossary: React.FC<{ tab: Tab }> = ({ tab }) => {
-  if (!tab.glossaryId) return null;
-  const dispatch: AppDispatch = useDispatch();
-  const glossary = useSelector(selectEditGlossaryById(tab.glossaryId));
-  const [activeTab, setActiveTab] = useState(
-    tab.viewState?.tabData?.activeTab || 'Overview'
-  );
-  const [activeIndex, setActiveIndex] = useState(
-    tab.viewState?.tabData?.activeTermIndex || 0
-  );
-  const [lastIndex, setLastIndex] = useState(
-    tab.viewState?.tabData?.activeIndex || 0
-  );
-  const handleTabClick = (tabKey: string, index: number) => {
-    setActiveTab(tabKey);
-    setLastIndex(activeIndex);
-    setActiveIndex(index);
-  };
-
-  useEffect(() => {
-    return () => {
-      dispatch(
-        updateTab({
-          tabId: tab.tabId,
-          side: tab.side,
-          keypath: 'viewState.tabData',
-          updates: {
-            activeTab,
-            activeIndex: activeIndex,
-          },
-        })
-      );
-    };
-  }, [dispatch, tab.tabId, tab.side, activeTab, activeIndex]);
-
-  const editGlossaryTabs = [
-    { name: 'Overview', props: { tab } },
-    { name: 'Terms', props: { tab } },
-    { name: 'Settings', props: { tab } },
-    { name: 'Templates', props: { tab } },
-    { name: 'Palette', props: { tab } },
-  ];
+const EditGlossary: React.FC = () => {
+  const {
+    ui,
+    updatePaletteColor,
+    savePaletteSettings,
+    resetPaletteToDefault,
+    activeId,
+  } = useGlossaryEditor();
 
   const editGlossaryComponentMap = useMemo(
     () => ({
-      Overview: () => <EditGlossaryOverviewTab glossary={glossary} tab={tab} />,
-      Terms: () => <GlossaryTermsTab tab={tab} />,
-      Settings: () => <div>Settings Component</div>,
-      Templates: () => <Box>Templates Component</Box>,
-      Palette: () => <CustomizePalette column={false} />,
+      Overview: () => <GlossaryOverview />,
+      Graph: () => <GlossaryGraph />,
+      Entries: () => <EntriesViewer />,
+      Terms: () => <GlossaryTermsEditor />,
+      Templates: () => <TemplateManager />,
+      Palette: () => (
+        <CustomizePalette
+          column={false}
+          onChange={updatePaletteColor}
+          onSave={savePaletteSettings}
+          onReset={resetPaletteToDefault}
+        />
+      ),
+      Calendar: () => <TemplateManager />,
     }),
-    []
+    [activeId]
   );
-  const { splitSize, soloSize, splitTabs } = useTabSplit();
+
+  const Component =
+    editGlossaryComponentMap[
+      ui.activeTab as keyof typeof editGlossaryComponentMap
+    ] || (() => <MotionBox layoutId="glossary-main">Not Found</MotionBox>);
 
   return (
-    <PageBox
-      mode={'edit'}
-      variant={
-        !splitTabs
-          ? soloSize
-            ? 'blend'
-            : 'default'
-          : splitSize
-            ? 'default'
-            : 'blend'
-      }
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          mt: 2,
-          alignContent: 'start',
-          justifyContent: 'start',
-          gap: 2,
-          height: '100%',
-          borderRadius: 2,
-          boxSizing: 'border-box',
-          overflow: 'none',
-          width: '100%',
-          px: 2,
-        }}
-      >
-        <TabbedContent
-          tabs={editGlossaryTabs}
-          componentMap={editGlossaryComponentMap}
-          activeTab={activeTab}
-          handleTabClick={handleTabClick}
-          lastIndex={lastIndex}
-          isTool={false}
-        />
-      </Box>
-    </PageBox>
+    <AnimatePresence mode="wait">
+      <Component key={ui.activeTab} />
+    </AnimatePresence>
   );
 };
 

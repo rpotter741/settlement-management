@@ -15,6 +15,9 @@ type KeyType = 'main' | 'dark' | 'light' | 'default' | 'paper' | 'contrastText';
 const useTheming = () => {
   const theme = useTheme();
 
+  const themeMode = theme.palette.mode;
+  const isDarkMode = themeMode === 'dark';
+
   const getAlphaColor = ({
     color,
     key,
@@ -68,6 +71,8 @@ const useTheming = () => {
   };
 
   return {
+    isDarkMode,
+    themeMode,
     getAlphaColor,
     darkenColor,
     lightenColor,

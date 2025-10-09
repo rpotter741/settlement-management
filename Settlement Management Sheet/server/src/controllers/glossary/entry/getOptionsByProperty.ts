@@ -4,6 +4,46 @@ import glossaryTypeMap from '../../../utils/glossaryTypeMap.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import fallbackPropertyMap from '../../../utils/fallbackPropertyMap.ts';
 
+/*
+Okay. so we're gonna need to do a lot of work here. Maybe not a lot. But!
+
+First, we're going to need to get the glossary integration state. I think fetching
+that will be useful to possibly omitting entry types that don't have the property.
+
+With that, we need a helper to build a map of booleans by entry type and property.
+This way we have O(1) access to check if a property exists for an entry type.
+
+Next, we iterate through all of the entries, comparing their types to the integration state.
+That allows us to respect user's configuration while still returning all the data.
+
+I don't think we need to check an entry's integration state because if it's disabled,
+then it shouldn't have data in the first place.
+
+All of this, too, is going to have to be taking into account both integration state as a whole and any saved templates, which means we'll want each section or detail to have a 'templateId' field that's nullable. We might get something like this:
+
+const integrationState = prisma.glossary.findUnique({ where: { id: glossaryId }, select: { integrationState: true, templates: true } });
+
+then a helper called 'mapPropertyIntegrationState' that references it and returns something like this:
+  {
+    continent: {
+      default: true,
+      templateIdA: false,
+      templateIdB: true,
+    },
+    domain: {
+      default: false,
+      templateIdA: true,
+    },
+    settlement: {
+      default: true,
+    },
+    ...
+  }
+
+  Then when we iterate through the entries, we can just do a quick map check of the property against the integration state map to see if it should be included in the results.
+
+*/
+
 export default async function getOptionsByProperty(req, res) {
   try {
     const { property, inheritanceMap } = req.body;

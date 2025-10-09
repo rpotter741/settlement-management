@@ -10,9 +10,7 @@ import { updateTab } from '@/app/slice/tabSlice.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import OverviewTab from './tabs/EntryOverviewTab.js';
-import getPropertyLabel, {
-  SubSectionTypes,
-} from '../utils/getPropertyLabel.js';
+import getPropertyLabel, { SubModelType } from '../utils/getPropertyLabel.js';
 import { useSelector } from 'react-redux';
 import { selectEditGlossaryById } from '@/app/selectors/glossarySelectors.js';
 import { capitalize } from 'lodash';
@@ -81,13 +79,13 @@ const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
     const calculatedTabs = propertyMap.map((section: any) => ({
       name: getPropertyLabel({
         glossary,
-        section: section.name.toLowerCase() as SubSectionTypes,
+        subModel: section.name.toLowerCase() as SubModelType,
         key: `${capitalize(section.name)} Name`,
-      }),
+      }).label,
       key: section.name,
       disabled: false,
       props: {
-        section: section.name.toLowerCase() as SubSectionTypes,
+        subModel: section.name.toLowerCase() as SubModelType,
         propertyMap: section.children,
       },
     }));
@@ -111,6 +109,16 @@ const PropertyMapTabs: React.FC<PropertyMapTabsProps> = ({ propertyMap }) => {
       {}
     );
   }, [tabs]);
+
+  useEffect(() => {
+    if (tabs.findIndex((innerTab: any) => innerTab.name === activeTab) === -1) {
+      setActiveTab(
+        tabs[lastIndex]?.name ??
+          tabs[tab?.viewState?.activeIndex]?.name ??
+          'Overview'
+      );
+    }
+  }, [tabs, activeTab]);
 
   return (
     <TabbedContent

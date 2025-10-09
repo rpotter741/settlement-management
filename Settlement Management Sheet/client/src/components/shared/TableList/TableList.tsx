@@ -16,6 +16,7 @@ import {
   Checkbox,
   ListItemText,
   Button,
+  Skeleton,
 } from '@mui/material';
 
 const TableList = ({
@@ -379,7 +380,9 @@ const TableList = ({
           >
             {Row}
           </List>
-          <Box>{isFetchingNextPage && <Box colSpan={6}>Loading...</Box>}</Box>
+          <Box>
+            {isFetchingNextPage && <Box sx={{ colSpan: 6 }}>Loading...</Box>}
+          </Box>
         </Box>
       </Box>
       {checkbox && (

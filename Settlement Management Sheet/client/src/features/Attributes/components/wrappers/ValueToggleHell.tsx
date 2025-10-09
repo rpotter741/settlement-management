@@ -40,10 +40,6 @@ const ValueToggleHell: React.FC<ValueToggleHellProps> = ({
   disabled,
   property,
   fields,
-  slide,
-  setSlide,
-  slideLabel = '',
-  slideColor = 'secondary',
   borderColor = 'honey.main',
   accentColor = 'info.main',
 }) => {
@@ -53,43 +49,7 @@ const ValueToggleHell: React.FC<ValueToggleHellProps> = ({
 
   const source = selectEditValue(`balance.${property}`);
   if (!source) return null;
-  const {
-    valuePerLevel,
-    interval,
-    scaleToggle,
-    scaleCurve,
-    base,
-    perLevel,
-    valuesPerInterval,
-  } = source;
-
-  const getValueByLevel = (level: number) => {
-    const source = edit.balance[property];
-    const { base, valuePerLevel, interval, scaleToggle } = source;
-
-    if (base === undefined) return '0';
-
-    if (scaleToggle) {
-      return ((level / interval) * valuePerLevel + base).toFixed(0);
-    } else if (perLevel) {
-      return ((level / interval) * base).toFixed(0);
-    } else {
-      return base.toFixed(0);
-    }
-  };
-
-  const getValueTooltip = () => {
-    const source = edit.balance[property];
-    const { base, valuePerLevel, interval, scaleToggle } = source;
-
-    if (scaleToggle) {
-      return `Floor(${slide} / ${interval}) * ${valuePerLevel} + ${base})`;
-    } else if (perLevel) {
-      return `Floor(${slide} / ${interval}) * ${base})`;
-    } else {
-      return `${base}`;
-    }
-  };
+  const { interval, scaleCurve, valuesPerInterval } = source;
 
   const getIntervals = () => {
     const source = edit.balance[property];

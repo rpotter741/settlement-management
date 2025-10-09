@@ -40,6 +40,7 @@ const DragWrapper: React.FC<DragWrapperProps> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (draggedItem, monitor) => {
+      console.log(monitor.didDrop(), monitor.getDropResult());
       if (monitor.didDrop()) {
         if (onReorder && draggedItem.index !== null) {
           // Reorder-specific handling
@@ -50,6 +51,7 @@ const DragWrapper: React.FC<DragWrapperProps> = ({
           }
         } else if (onDropEnd) {
           // Standard drop handling
+          console.log('dropped', draggedItem);
           onDropEnd(draggedItem, draggedItem.index || 0);
         }
       }

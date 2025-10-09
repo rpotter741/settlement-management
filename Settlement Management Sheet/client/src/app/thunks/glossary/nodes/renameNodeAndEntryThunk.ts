@@ -22,6 +22,7 @@ export default function renameNodeAndEntryThunk({
       console.warn('No change in name, skipping update.');
       return;
     }
+    console.log({ ...backupNode, name }, 'updating node to:');
     dispatch(
       updateGlossaryNode({
         glossaryId,

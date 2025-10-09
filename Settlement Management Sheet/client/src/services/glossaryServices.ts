@@ -18,6 +18,7 @@ import deleteEntry from './glossary/entry/deleteEntry.js';
 import getEntryById from './glossary/entry/getEntryById.js';
 import getOptionsByProperty from './glossary/entry/getOptionsByProperty.js';
 import getEntrySubModel from './glossary/entry/getEntrySubModel.js';
+import updateEntrySubModel from './glossary/entry/updateEntrySubModel.js';
 
 const actions = {
   // glossary actions
@@ -40,6 +41,7 @@ const actions = {
   getEntryById,
   getOptionsByProperty,
   getEntrySubModel,
+  updateEntrySubModel,
 };
 
 export default actions;

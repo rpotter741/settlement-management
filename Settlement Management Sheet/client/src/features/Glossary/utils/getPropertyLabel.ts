@@ -1,6 +1,8 @@
-import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
+import { useSelector } from 'react-redux';
+import { Genre } from '../../../../../shared/types/index.js';
+import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
 
-export type SubSectionTypes =
+export type SubModelTypes =
   | 'system'
   | 'geography'
   | 'politics'
@@ -10,7 +12,7 @@ export type SubSectionTypes =
 
 export const genrePropertyLabelDefaults: Record<
   Genre,
-  Record<SubSectionTypes, Record<string, string>>
+  Record<SubModelTypes, Record<string, string>>
 > = {
   Fantasy: {
     system: {
@@ -28,14 +30,65 @@ export const genrePropertyLabelDefaults: Record<
       note: 'Note',
     },
     geography: {
-      'Geography Name': 'Geography',
+      geography: 'Geography',
       climates: 'Climate',
       terrain: 'Terrain',
       regions: 'Regions',
       landmarks: 'Landmarks',
     },
     politics: {
-      'Politics Name': 'Political',
+      politics: 'Politics',
+      nations: 'Nations',
+      settlements: 'Settlements',
+      factions: 'Factions',
+      locations: 'Locations',
+      resources: 'Resources',
+      population: 'Population',
+      economy: 'Economy',
+      cultures: 'Cultures',
+    },
+    relationships: {
+      relationships: 'Relationships',
+      allies: 'Allies',
+      enemies: 'Enemies',
+      connections: 'Connections',
+      notoriety: 'Notoriety',
+      influence: 'Influence',
+    },
+    history: {
+      history: 'History',
+      events: 'Events',
+      flags: 'Flags',
+      historyData: 'Documentation',
+    },
+    custom: {
+      custom: 'Custom',
+    },
+  },
+  'Sci-Fi': {
+    system: {
+      glossary: 'Tome',
+      continent: 'Continent',
+      territory: 'Territory',
+      domain: 'Domain',
+      province: 'Province',
+      landmark: 'Landmark',
+      settlement: 'Settlement',
+      faction: 'Faction',
+      location: 'Location',
+      person: 'Person',
+      event: 'Event',
+      note: 'Note',
+    },
+    geography: {
+      'Geography Name': 'Survivability Data',
+      climates: 'Atmosphere',
+      terrain: 'Geologic Profile',
+      regions: 'Tectonic Region',
+      locations: 'Significant Locale',
+    },
+    politics: {
+      'Politics Name': 'Politics',
       nations: 'Nations',
       settlements: 'Settlements',
       factions: 'Factions',
@@ -62,32 +115,6 @@ export const genrePropertyLabelDefaults: Record<
     custom: {
       'Custom Name': 'Custom',
     },
-  },
-  'Sci-Fi': {
-    system: {
-      glossary: 'Tome',
-      continent: 'Continent',
-      territory: 'Territory',
-      domain: 'Domain',
-      province: 'Province',
-      landmark: 'Landmark',
-      settlement: 'Settlement',
-      faction: 'Faction',
-      location: 'Location',
-      person: 'Person',
-      event: 'Event',
-      note: 'Note',
-    },
-    geography: {
-      climates: 'Atmosphere',
-      terrain: 'Terrain',
-      regions: 'Regions',
-      locations: 'Locations',
-    },
-    politics: {},
-    relationships: {},
-    history: {},
-    custom: {},
   },
   Agnostic: {
     system: {
@@ -219,22 +246,69 @@ export const genrePropertyLabelDefaults: Record<
     history: {},
     custom: {},
   },
+  Mystery: {
+    system: {},
+    geography: {},
+    politics: {},
+    relationships: {},
+    history: {},
+    custom: {},
+  },
+  Historical: {
+    system: {},
+    geography: {},
+    politics: {},
+    relationships: {},
+    history: {},
+    custom: {},
+  },
+};
+
+const usePropertyLabel = () => {
+  const { glossary } = useGlossaryEditor();
+  if (!glossary)
+    return { getPropertyLabel: () => ({ label: '', defaultLabel: '' }) };
+  const { genre, integrationState } = glossary;
+
+  const getPropertyLabel = (subModel: SubModelTypes, key: string) => {
+    const sectionLabels = genrePropertyLabelDefaults[genre]?.[subModel];
+    const label =
+      integrationState?.[subModel]?.[key]?.label ||
+      sectionLabels?.[key] ||
+      'yo shit busted bruh';
+
+    if (label === 'yo shit busted bruh') {
+      console.log(subModel, key);
+    }
+    return {
+      label,
+      defaultLabel: sectionLabels?.[key] || 'yo shit busted bruh',
+    };
+  };
+
+  return { getPropertyLabel };
 };
 
 export default function getPropertyLabel({
   glossary,
-  section,
+  subModel,
   key,
 }: {
   glossary: { genre: Genre; integrationState: any };
-  section: SubSectionTypes;
+  subModel: SubModelTypes;
   key: string;
 }) {
   const { genre, integrationState } = glossary;
-  const sectionLabels = genrePropertyLabelDefaults[genre]?.[section];
+  const sectionLabels = genrePropertyLabelDefaults[genre]?.[subModel];
   const label =
-    integrationState?.terms?.[key] ||
+    integrationState?.[subModel]?.[key]?.label ||
     sectionLabels?.[key] ||
     'yo shit busted bruh';
-  return label;
+
+  if (label === 'yo shit busted bruh') {
+    console.log(subModel, key);
+  }
+  return { label, defaultLabel: sectionLabels?.[key] || 'yo shit busted bruh' };
 }
+
+export { usePropertyLabel };

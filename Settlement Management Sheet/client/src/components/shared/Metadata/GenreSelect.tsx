@@ -42,6 +42,8 @@ export const subGenreMap: Record<Genre, string[]> = {
   Horror: ['Psychological Horror', 'Supernatural Horror', 'Gothic Horror'],
   Modern: ['Contemporary Fiction', 'Realistic Fiction'],
   Other: [],
+  Mystery: [],
+  Historical: [],
 };
 
 const defaultSx = {
@@ -104,10 +106,12 @@ const GenreSelect: React.FC<GenreSelectProps> = ({
           options={genreOptions}
           onChange={(event, newValue) => {
             if (newValue !== null) {
+              if (newValue !== defaultGenre) {
+                updateFn('subGenre', ''); // Reset sub-genre when genre changes
+                setSubGenreInputValue('');
+              }
               setGenreInputValue(newValue);
               updateFn('genre', newValue);
-              updateFn('subGenre', ''); // Reset sub-genre when genre changes
-              setSubGenreInputValue('');
             } else {
               setGenreInputValue('');
               setSubGenreInputValue('');
@@ -115,6 +119,8 @@ const GenreSelect: React.FC<GenreSelectProps> = ({
               updateFn('subGenre', '');
             }
           }}
+          filterOptions={(options, { inputValue }) => options}
+          filterSelectedOptions={false}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -124,7 +130,11 @@ const GenreSelect: React.FC<GenreSelectProps> = ({
               onChange={(e) => setGenreInputValue(e.target.value as Genre)}
             />
           )}
-          sx={{ width: { xs: '80%', md: '60%' } }}
+          sx={{
+            width: { xs: '80%', md: '60%' },
+            border: '1px solid',
+            borderColor: genreInputValue ? 'transparent' : 'error.main',
+          }}
         />
       </Box>
       {defaultGenre !== 'Agnostic' && (
@@ -139,6 +149,7 @@ const GenreSelect: React.FC<GenreSelectProps> = ({
             freeSolo={defaultGenre === 'Other'}
             inputValue={subGenreInputValue}
             options={subGenreMap[defaultGenre as Genre] || []}
+            filterOptions={(options, { inputValue }) => options}
             onChange={(event, newValue) => {
               if (newValue !== null) {
                 setSubGenreInputValue(newValue);

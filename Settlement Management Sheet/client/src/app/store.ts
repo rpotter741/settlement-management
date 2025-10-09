@@ -7,6 +7,10 @@ import selectionReducer from './slice/selectionSlice.js';
 import snackbarReducer from './slice/snackbarSlice.js';
 import modalReducer from './slice/modalSlice.js';
 import panelReducer from './slice/panelSlice.js';
+import uiReducer from './slice/uiSlice.js';
+import dirtyReducer from './slice/dirtySlice.js';
+import relayReducer from './slice/relaySlice.js';
+import { relayTimerMiddleware } from './middleware/relayTTLMiddleware.js';
 
 export const store = configureStore({
   reducer: {
@@ -18,7 +22,12 @@ export const store = configureStore({
     snackbar: snackbarReducer,
     modal: modalReducer,
     panel: panelReducer,
+    ui: uiReducer,
+    dirty: dirtyReducer,
+    relay: relayReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat([relayTimerMiddleware(10000)]),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -32,6 +32,7 @@ export default function addAndActivateGlossaryThunk({
         genre,
         subGenre,
         integrationState: {},
+        theme: 'default',
       })
     );
     dispatch(setActiveGlossaryId({ glossaryId: id }));

@@ -40,7 +40,7 @@
 //   return { roots, nodeMap };
 // }
 
-import { GlossaryNode } from '../../../../../types/index.js';
+import { GlossaryNode } from '../../../../../shared/types/index.js';
 
 /**
  * Rehydrates a flat array of glossary nodes into a tree of root nodes,
@@ -60,8 +60,12 @@ export function rehydrateGlossaryTree(
   const renderState: Record<string, { expanded: boolean; rename: boolean }> =
     {};
 
+  const sortedFlat = [...flatNodes].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
   // First pass: clone nodes, add flatIndex, and initialize children
-  flatNodes.forEach((node, index) => {
+  sortedFlat.forEach((node, index) => {
     nodeMap[node.id] = { ...node, children: [], flatIndex: index };
   });
 
@@ -81,8 +85,6 @@ export function rehydrateGlossaryTree(
       roots.push(node);
     }
     if (existingState[node.id]) {
-      console.log(node.name, 'mx state');
-
       renderState[node.id] = existingState[node.id];
     } else {
       // console.log(node.name, 'going false');

@@ -13,7 +13,7 @@ export const initialState: ModalState = {
   positionSx: {
     position: 'absolute',
     top: '50%',
-    left: [0, '50%', '50%', 'calc(50% + 174px)'],
+    left: '50%',
     transform: 'translate(-50%, -50%)',
     backgroundColor: 'background.default',
     border: '2px solid #000',
@@ -22,6 +22,7 @@ export const initialState: ModalState = {
     p: 4,
     borderRadius: 4,
     boxSizing: 'border-box',
+    minWidth: '50%',
   },
   disableBackgroundClose: false,
   nextCloseFn: undefined,

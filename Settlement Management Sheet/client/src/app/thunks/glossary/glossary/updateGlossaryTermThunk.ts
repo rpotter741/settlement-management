@@ -3,34 +3,28 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { updateGlossaryTerm } from '@/app/slice/glossarySlice.js';
-import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
-import {
+import getPropertyLabel, {
   genrePropertyLabelDefaults,
-  SubSectionTypes,
+  SubModelTypes,
 } from '@/features/Glossary/utils/getPropertyLabel.js';
 import getTermChangeValue from '@/features/Glossary/utils/getTermChange.js';
-import { addDirtyKeypath } from '@/app/slice/tabSlice.js';
+import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 
 export default function updateGlossaryTermThunk({
   id,
-  genre,
-  section,
+  subModel,
   key,
   value,
-  tabId,
 }: {
   id: string;
-  genre: Genre;
   key: string;
-  section: SubSectionTypes;
+  subModel: SubModelTypes;
   value: string | null;
-  tabId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const state = getState();
       const glossary = state.glossary.glossaries.edit.byId[id];
-      const tab = state.tabs.left.data[tabId] || state.tabs.right.data[tabId];
       if (!glossary) {
         dispatch(
           showSnackbar({
@@ -42,17 +36,24 @@ export default function updateGlossaryTermThunk({
         return;
       }
 
+      const defaultValue = getPropertyLabel({
+        glossary,
+        key,
+        subModel,
+      }).label;
+
       const termUpdate = getTermChangeValue({
-        glossaryTerms: glossary.integrationState?.terms || {},
+        glossaryTerms: glossary.integrationState?.[subModel] || {},
         key,
         value,
-        defaultValue: genrePropertyLabelDefaults[genre][section][key],
+        defaultValue,
       });
 
       dispatch(
         addDirtyKeypath({
-          tabId: tab.tabId,
-          keypath: `integrationState.terms.${key}`,
+          scope: 'glossary',
+          id,
+          keypath: `integrationState.${subModel}.${key}.label`,
         })
       );
 
@@ -62,13 +63,16 @@ export default function updateGlossaryTermThunk({
           updateGlossaryTerm({
             id,
             key,
+            subModel,
             value: null, // Send null to remove the term if it matches the default
           })
         );
       } else {
+        console.log('Term update found:', termUpdate);
         dispatch(
           updateGlossaryTerm({
             id,
+            subModel,
             key: termUpdate.key,
             value: termUpdate.value,
           })

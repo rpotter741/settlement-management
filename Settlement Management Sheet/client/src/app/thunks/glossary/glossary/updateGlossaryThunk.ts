@@ -7,6 +7,10 @@ import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { updateGlossary } from '@/app/slice/glossarySlice.js';
 import { GenericObject } from '../../../../../../shared/types/common.js';
 import { get } from 'lodash';
+import {
+  addBulkDirtyKeypaths,
+  addDirtyKeypath,
+} from '@/app/slice/dirtySlice.js';
 
 export default function updateGlossaryThunk({
   id,
@@ -40,22 +44,17 @@ export default function updateGlossaryThunk({
         }
       });
       if (Object.keys(trueUpdates).length === 0) {
-        dispatch(
-          showSnackbar({
-            message: 'No updates provided.',
-            type: 'warning',
-            duration: 3000,
-          })
-        );
         return;
       }
       console.log('Updating glossary with:', trueUpdates);
       dispatch(updateGlossary({ id, updates: trueUpdates }));
-      const newGlossary = await serverAction.updateGlossary({
-        id,
-        updates: trueUpdates,
-      });
-      console.log(newGlossary);
+      dispatch(
+        addBulkDirtyKeypaths({
+          keypaths: Object.keys(trueUpdates),
+          id,
+          scope: 'glossary',
+        })
+      );
     } catch (error) {
       console.error('Error updating glossary:', error);
       dispatch(

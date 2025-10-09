@@ -5,22 +5,29 @@ import { RootState } from '@/app/store.js';
 import serverAction from '@/services/glossaryServices.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
+  updateEntrySubModel,
   updateGlossary,
   updateGlossaryEntry,
 } from '@/app/slice/glossarySlice.js';
 import { GenericObject } from '../../../../../../shared/types/common.js';
 import { get } from 'lodash';
+import { SubModelType } from 'types/index.js';
+import { addDirtyKeypath } from '@/app/slice/tabSlice.js';
 
 export default function updateEntrySubModelById({
   glossaryId,
+  tabId,
   entryId,
   subModel,
-  content,
+  keypath,
+  data,
 }: {
   glossaryId: string;
+  tabId: string;
   entryId: string;
-  subModel: string;
-  content: Record<string, any>;
+  subModel: SubModelType;
+  keypath: string;
+  data: any;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const state = getState();
@@ -48,10 +55,18 @@ export default function updateEntrySubModelById({
     }
     try {
       dispatch(
-        updateGlossaryEntry({
+        updateEntrySubModel({
           glossaryId,
           entryId,
-          content,
+          subModel,
+          keypath,
+          data,
+        })
+      );
+      dispatch(
+        addDirtyKeypath({
+          tabId,
+          keypath: `entries.${entryId}.${subModel}.${keypath}`,
         })
       );
     } catch (error) {

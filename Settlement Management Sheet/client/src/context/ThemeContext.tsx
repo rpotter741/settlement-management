@@ -14,6 +14,8 @@ import { BreakpointOverrides } from '@mui/system';
 import commonStyles from '../themes/commonStyles.js';
 
 import themeOptions from '../themes/themeOptions.js';
+import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
+import { isEqual } from 'lodash';
 
 declare module '@mui/material/styles' {
   interface BreakpointOverrides {
@@ -54,15 +56,25 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       setThemeKey('default');
     }
   };
+  const { staticTheme } = useGlossaryEditor();
 
   // Dynamically generate the theme based on the themeKey state
   const muiTheme = useMemo(() => {
     const selectedTheme = themeOptionsTyped[themeKey] || themeOptions.default;
+    const mode = selectedTheme.palette?.mode as 'light' | 'dark';
+    let glossaryAdjustments = {};
+    if (staticTheme && typeof staticTheme === 'object') {
+      glossaryAdjustments = {
+        ...staticTheme[mode],
+      };
+    }
+
     return createTheme({
       ...selectedTheme,
       palette: {
         ...selectedTheme.palette,
-        mode: selectedTheme.palette?.mode as 'light' | 'dark' | undefined,
+        ...glossaryAdjustments,
+        mode,
       },
       components: {
         ...commonStyles,
@@ -80,7 +92,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         },
       },
     });
-  }, [themeKey]);
+  }, [themeKey, staticTheme]);
 
   useEffect(() => {
     const backgroundColor =

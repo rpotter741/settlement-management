@@ -8,16 +8,14 @@ import { AnimatePresence } from 'framer-motion';
 import { capitalize } from 'lodash';
 import { Suspense, useEffect, useState } from 'react';
 import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.js';
-import GlossaryPropertyLabels from '../utils/propertyMaps/GlossaryPropertyLabels.js';
+import GlossaryPropertyLabels from '../EditGlossary/components/GlossaryPropertyLabels.js';
 import { isEven } from '@/utility/booleans/numberTests.js';
 import useTheming from '@/hooks/layout/useTheming.js';
-import getPropertyLabel, {
-  SubSectionTypes,
-} from '../utils/getPropertyLabel.js';
+import getPropertyLabel, { SubModelTypes } from '../utils/getPropertyLabel.js';
+import { SubModelType } from '../../../../../shared/types/index.js';
 import { Tab } from '@/app/types/TabTypes.js';
 
 interface TermRowAndSettingsProps {
-  tab: Tab;
   index: number;
   activeIndex: number;
   setEditing: (index: number) => void;
@@ -27,7 +25,6 @@ interface TermRowAndSettingsProps {
 }
 
 const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
-  tab,
   index,
   activeIndex,
   setEditing,
@@ -79,6 +76,12 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
 
   const Component = GlossaryPropertyLabels;
 
+  const { label, defaultLabel } = getPropertyLabel({
+    glossary,
+    subModel: entryType.toLowerCase() as SubModelType,
+    key: entryType,
+  });
+
   return (
     <MotionBox
       key={index}
@@ -86,7 +89,7 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
       layoutId={`term-row-${index}`}
       initial={{ height: 0, opacity: 0, paddingBottom: 0 }}
       animate={{
-        height: index === activeIndex ? 'auto' : 54,
+        height: 'auto',
         opacity: 1,
         paddingBottom: 1,
       }}
@@ -97,6 +100,9 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
         width: '100%',
         position: 'relative',
         boxSizing: 'border-box',
+        mx: 'auto',
+        overflowY: 'scroll',
+        maxHeight: '1000px',
       }}
       onLayoutAnimationComplete={() => {
         if (index === activeIndex && !isEditing) {
@@ -146,23 +152,14 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
             alignItems: 'center',
           }}
         >
-          {entryType === 'System' ? (
+          {entryType === 'system' ? (
             <Typography variant="h6">System</Typography>
           ) : (
             <>
-              <Typography variant="h6">
-                {getPropertyLabel({
-                  glossary,
-                  section: entryType.toLowerCase() as SubSectionTypes,
-                  key: `${entryType} Name`,
-                })}
-              </Typography>
-              {entryType !==
-                getPropertyLabel({
-                  glossary,
-                  section: entryType.toLowerCase() as SubSectionTypes,
-                  key: `${entryType} Name`,
-                }) && <Typography>{` (${capitalize(entryType)})`}</Typography>}
+              <Typography variant="h6">{label}</Typography>
+              {label !== defaultLabel && (
+                <Typography>{defaultLabel}</Typography>
+              )}
             </>
           )}
         </Box>
@@ -173,7 +170,7 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
           </Button>
         </Box>
       </RowMotionBox>
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="sync" initial={false}>
         {isEditing && (
           <MotionBox
             layout
@@ -193,8 +190,7 @@ const TermRowAndSettings: React.FC<TermRowAndSettingsProps> = ({
             >
               {React.createElement(Component, {
                 glossary,
-                entryType: entryType.toLowerCase() as SubSectionTypes,
-                tab,
+                subModel: entryType.toLowerCase() as SubModelTypes,
               })}
             </Suspense>
           </MotionBox>

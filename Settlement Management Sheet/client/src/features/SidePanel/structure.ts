@@ -138,7 +138,7 @@ const structure = [
         },
         children: [
           {
-            title: 'Create Event +',
+            title: 'Go To Event Creator ->',
             type: 'button',
             onClick: () => getTabInfo('event'),
           },

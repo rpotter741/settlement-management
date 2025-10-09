@@ -51,6 +51,7 @@ import {
 import {
   toggleExpand,
   toggleNameEdit,
+  updateGlossaryNode,
 } from '../../../app/slice/glossarySlice.js';
 import { AppDispatch } from '@/app/store.js';
 import capitalize from '../../../utility/inputs/capitalize.js';
@@ -75,6 +76,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   nodeMap,
   onRename,
   onDelete,
+  onMultipleDelete,
   onNewFile,
   onNewFolder,
 }) => {
@@ -103,7 +105,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const glossaryId = useSelector(selectActiveId());
-  const glossary = useSelector(selectEditGlossaryById(glossaryId));
+  const glossary = useSelector(selectEditGlossaryById(glossaryId || ''));
   const renderState = useSelector(glossaryRenderState(glossaryId));
 
   //click delineation
@@ -402,6 +404,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
       {visibleNodeList &&
         visibleNodeList.map((entry: any) => {
           const node = nodeMap[entry.id];
+          if (!node) return null; // Skip if node is not found
           return (
             <DropZone
               key={entry.id}
@@ -485,6 +488,15 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
             <MenuItem
               onClick={(e) => {
                 e.preventDefault();
+                if (selected.length > 1) {
+                  onMultipleDelete(
+                    selected
+                      .map((id) => find(nodeMap, (n) => n.id === id))
+                      .filter((n): n is GlossaryNode => n !== undefined)
+                  );
+                  closeContextMenu();
+                  return;
+                }
                 if (contextMenu.node) {
                   onDelete(contextMenu.node);
                   closeContextMenu();

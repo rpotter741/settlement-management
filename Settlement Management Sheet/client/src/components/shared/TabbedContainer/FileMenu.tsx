@@ -6,7 +6,6 @@ import EditSubMenu from './SubFileMenus/EditSubMenu.js';
 import ViewSubMenu from './SubFileMenus/ViewSubMenu.js';
 
 import { useTheme, alpha } from '@mui/material/styles';
-import { TabType } from '@/app/types/ToolTypes.js';
 import { Tab } from '@/app/types/TabTypes.js';
 import { useTools } from '@/hooks/tools/useTools.js';
 import { ToolName } from 'types/common.js';

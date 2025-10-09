@@ -1,3 +1,4 @@
+import { SubModelTypes } from '@/features/Glossary/utils/getPropertyLabel.js';
 import api from '../interceptor.js';
 
 export default async function updateGlossaryTerm({
@@ -5,7 +6,12 @@ export default async function updateGlossaryTerm({
   updates,
 }: {
   id: string;
-  updates: Array<{ key: string; value: any }>;
+  updates: Array<{
+    subModel: SubModelTypes;
+    termKey: string;
+    visibilityKey: string | null;
+    value: any;
+  }>;
 }) {
   console.log('Batch updating glossary terms:', { id, updates });
   return api

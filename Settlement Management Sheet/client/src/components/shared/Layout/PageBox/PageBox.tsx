@@ -51,8 +51,8 @@ const PageBox: React.FC<PageBoxProps> = ({
         position: 'relative',
         maxHeight:
           variant === 'fullWidth'
-            ? 'calc(100vh - 80.5px)'
-            : 'calc(100vh - 100.5px)',
+            ? 'calc(100vh - 128.5px)'
+            : 'calc(100vh - 148.5px)',
         height: '100%',
         width: '100%',
         pt: 2,

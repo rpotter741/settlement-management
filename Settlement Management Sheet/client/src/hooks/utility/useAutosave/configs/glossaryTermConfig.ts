@@ -1,16 +1,14 @@
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { Genre } from '@/components/shared/Metadata/GenreSelect.js';
+import { Genre } from '../../../../../../shared/types/index.js';
 import batchGlossaryTermsThunk from '@/app/thunks/glossary/glossary/batchGlossaryTermsThunk.js';
 
 export default function glossaryTermAutosaveConfig({
   id,
-  tabId,
   genre,
   name,
 }: {
   id: string;
-  tabId: string;
   name?: string;
   genre: Genre;
 }) {
@@ -20,7 +18,6 @@ export default function glossaryTermAutosaveConfig({
       batchGlossaryTermsThunk({
         id,
         genre,
-        tabId,
       })
     );
   };

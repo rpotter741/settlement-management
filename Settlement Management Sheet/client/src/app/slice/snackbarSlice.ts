@@ -29,6 +29,7 @@ const snackbarSlice = createSlice({
         component,
         props,
       } = action.payload;
+      if (state.queue[0]?.message === message) return;
       state.queue.push({ message, type, duration, component, props });
       if (!state.open) {
         state.open = true;

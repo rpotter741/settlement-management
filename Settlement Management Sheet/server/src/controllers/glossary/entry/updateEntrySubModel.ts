@@ -2,7 +2,7 @@ import prisma from '../../../db/db.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import { subModelMap } from './subModelMap.ts';
 
-export default async function getEntrySubModel(req: any, res: any) {
+export default async function updateEntrySubModel(req: any, res: any) {
   const {
     id,
     subModel,
@@ -24,7 +24,7 @@ export default async function getEntrySubModel(req: any, res: any) {
           upsert: {
             update: updates,
             create: {
-              id,
+              version: 1,
               ...updates,
             },
           },

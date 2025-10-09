@@ -1,57 +1,30 @@
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
-import queryClient from './context/QueryClient';
+import queryClient from './context/QueryClient.js';
 import './App.css';
 
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext.js';
+import { ThemeProvider } from './context/ThemeContext.js';
 
-import LoginPage from './components/pages/Login';
-import Register from './components/pages/Register';
-import CustomCreation from './components/pages/CustomCreation';
-import { GlobalStyles } from '@mui/system';
-/*!!localStorage.getItem('token') */
-const App = () => {
-  const isAuthenticated = true;
+import AppShell from './components/shared/AppShell/AppShell.js';
+import pageRoutes from './components/shared/AppShell/routes.js';
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <Router>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <ThemeProvider>
+        <Router>
+          <AppShell>
             <Routes>
-              {/* Public Route */}
-              <Route
-                path="/"
-                element={
-                  <Navigate to={isAuthenticated ? '/dashboard' : '/login'} />
-                }
-              />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/customCreation" element={<CustomCreation />} />
-
-              {/* Protected Route */}
-              <Route
-                path="/dashboard"
-                element={<ProtectedRoute></ProtectedRoute>}
-              />
-
-              {/* Fallback Route */}
-              <Route path="*" element={<p>404: Page not found</p>} />
+              {pageRoutes.map((route, index) => (
+                <Route key={index} path={route.path} element={route.element} />
+              ))}
             </Routes>
-          </Router>
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-};
+          </AppShell>
+        </Router>
+      </ThemeProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
 
 export default App;

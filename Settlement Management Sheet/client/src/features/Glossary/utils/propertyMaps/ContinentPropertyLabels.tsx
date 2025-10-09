@@ -7,7 +7,7 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import getPropertyLabel, { SubSectionTypes } from '../getPropertyLabel.js';
+import getPropertyLabel, { SubModelType } from '../getPropertyLabel.js';
 
 const ContinentPropertyLabels = ({ glossary }) => {
   return (
@@ -70,11 +70,13 @@ const ContinentPropertyLabels = ({ glossary }) => {
               variant="h6"
               sx={{ mb: 1, width: '40%', textAlign: 'left' }}
             >
-              {getPropertyLabel({
-                glossary,
-                section: section.name.toLowerCase() as SubSectionTypes,
-                key: `${section.name} Name`,
-              })}
+              {
+                getPropertyLabel({
+                  glossary,
+                  subModel: section.name.toLowerCase() as SubModelType,
+                  key: `${section.name} Name`,
+                }).label
+              }
             </Typography>
             <Box sx={{ width: '20%' }}>
               <Checkbox />
@@ -90,11 +92,13 @@ const ContinentPropertyLabels = ({ glossary }) => {
             {section.children.map((child) => (
               <ListItem key={child.keypath} sx={{ display: 'flex', px: 0 }}>
                 <ListItemText
-                  primary={getPropertyLabel({
-                    glossary,
-                    key: child.keypath,
-                    section: section.name.toLowerCase() as SubSectionTypes,
-                  })}
+                  primary={
+                    getPropertyLabel({
+                      glossary,
+                      key: child.keypath,
+                      subModel: section.name.toLowerCase() as SubModelType,
+                    }).label
+                  }
                   secondary={`System Name: ${child.keypath}`}
                   sx={{ width: '40%' }}
                 />

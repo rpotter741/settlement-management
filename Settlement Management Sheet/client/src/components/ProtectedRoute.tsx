@@ -6,9 +6,11 @@ const ProtectedRoute = ({ children }) => {
   const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
 
   if (skipAuth) {
-    console.warn('Auth is skipped based on environment settings.');
+    // console.warn('Auth is skipped based on environment settings.');
     return children;
   }
+
+  console.log('Token found:', token);
 
   return token ? children : <Navigate to="/login" />;
 };

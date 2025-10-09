@@ -16,9 +16,11 @@ import { alphabetize } from '@/utility/alphabetizeStringArray.js';
 import { alpha, Box } from '@mui/system';
 import { Close, Delete } from '@mui/icons-material';
 import { GlossaryEntry } from 'types/index.js';
+import { SubModelTypes } from '@/features/Glossary/utils/getPropertyLabel.js';
 
 interface GlossaryPropEditorProps {
   multiple?: boolean;
+  subModel: SubModelTypes;
   label: string;
   keypath: keyof GlossaryEntry;
   options: string[];
@@ -29,6 +31,7 @@ interface GlossaryPropEditorProps {
 
 const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
   multiple = true,
+  subModel,
   label,
   keypath,
   options,
@@ -40,7 +43,7 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
   const { glossaryId, id } = useShellContext();
   if (!glossaryId) return null;
   const [inputValue, setInputValue] = React.useState<any>('');
-  const { entry, node, updateGlossaryEntry } = useNodeEditor(glossaryId, id);
+  const { entry, node, updateSubModel } = useNodeEditor(glossaryId, id);
   const [primary, setPrimary] = React.useState<string>(
     hasPrimary ? 'Aymaq' : ''
   );
@@ -76,38 +79,46 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
 
   const handleChange = (newValue: string | string[]) => {
     if (multiple) {
-      const content = {
-        [keypath]: [
-          ...(Array.isArray(entry[keypath])
-            ? entry[keypath]
-            : entry[keypath]
-              ? [entry[keypath]]
-              : []),
-          newValue,
-        ].flat(),
-      };
-      updateGlossaryEntry(content);
+      const content = [
+        ...(Array.isArray(entry[subModel][keypath])
+          ? entry[subModel][keypath]
+          : entry[subModel][keypath]
+            ? [entry[subModel][keypath]]
+            : []),
+        newValue,
+      ].flat();
+      updateSubModel({
+        subModel: subModel,
+        keypath,
+        data: content,
+      });
       multiple && inputRef.current?.focus();
       return;
     } else {
-      const content = {
-        [keypath]: newValue,
-      };
-      updateGlossaryEntry(content);
+      const content = newValue;
+      updateSubModel({
+        subModel: subModel,
+        keypath,
+        data: content,
+      });
     }
   };
 
   const handleRemove = (option: string) => {
     let values: string[] = [];
-    if (Array.isArray(entry[keypath])) {
-      values = entry[keypath] as string[];
-    } else if (typeof entry[keypath] === 'string') {
-      values = [entry[keypath] as string];
+    if (Array.isArray(entry[subModel][keypath])) {
+      values = entry[subModel][keypath] as string[];
+    } else if (typeof entry[subModel][keypath] === 'string') {
+      values = [entry[subModel][keypath] as string];
     }
     const updatedOptions = values.filter(
       (item: string) => item.toLowerCase() !== option.toLowerCase()
     );
-    updateGlossaryEntry({ [keypath]: updatedOptions });
+    updateSubModel({
+      subModel,
+      keypath,
+      data: updatedOptions,
+    });
   };
 
   return (
@@ -133,7 +144,7 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
           <TextField
             {...params}
             inputRef={inputRef}
-            placeholder={`Search for ${keypath}…`}
+            placeholder={`Search for ${label}…`}
             variant="outlined"
             fullWidth
           />
@@ -216,7 +227,7 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
                 fontStyle: 'italic',
               }}
             >
-              No {keypath} selected
+              No {label} selected
             </Box>
           )
         ) : (
@@ -228,8 +239,8 @@ const GlossaryPropEditor: React.FC<GlossaryPropEditorProps> = ({
             }}
           >
             {entry[keypath]
-              ? `Selected: ${capitalize(entry[keypath] as string)}`
-              : `No ${keypath} selected`}
+              ? `Selected: ${capitalize(entry[subModel][keypath] as string)}`
+              : `No ${{ label }} selected`}
           </Box>
         )}
       </Box>

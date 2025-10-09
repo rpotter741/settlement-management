@@ -21,9 +21,16 @@ enum Status {
 /////////////////// ATTRIBUTE //////////////////////
 
 model Attribute {
-  refId               String       @id @default(uuid())
-  id                  String       @unique // ID for versioning or app-level tracking
-  version             Int // per id
+  id                  String       @id @default(uuid()) // unique per version
+  refId               String       @default(uuid()) // shared lineage / permanent identity
+  version             Int
+  contentType         ContentTypes // for separating official from custom content
+  createdBy           String // Potential foreign key to User model in the future
+  collaborators       String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+  isImmutable         Boolean      @default(false)
   genre               String?
   subGenre            String?
   name                String
@@ -41,23 +48,26 @@ model Attribute {
   tags                String[] // Array of strings for tags
   isValid             Boolean
   status              Status
-  contentType         ContentTypes // for separating official from custom content
-  createdBy           String // Potential foreign key to User model in the future
-  collaborators       String[]
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
 
   @@index([contentType])
   @@index([tags])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// CATEGORY //////////////////////////
 
 model Category {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   name          String
   description   String
   attributes    Json
@@ -66,23 +76,26 @@ model Category {
   tags          String[]
   isValid       Boolean
   status        Status
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   @@index([contentType])
   @@index([tags])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// EVENT //////////////////////////
 
 model Event {
-  refId           String       @id @default(uuid())
-  id              String       @unique // ID for versioning or app-level tracking
-  version         Int // per id
+  id              String       @id @default(uuid()) // unique per version
+  refId           String       @default(uuid()) // shared lineage / permanent identity
+  version         Int
+  contentType     ContentTypes
+  createdBy       String
+  collaborators   String[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  isImmutable     Boolean      @default(false)
   name            String
   description     String
   flavorText      Json
@@ -93,11 +106,6 @@ model Event {
   entryPhaseId    String
   isValid         Boolean
   status          Status
-  contentType     ContentTypes
-  createdBy       String
-  collaborators   String[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
 
   //flavorText:
   //trivial: string,
@@ -128,26 +136,29 @@ model Event {
   //]
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// LISTENER //////////////////////////
 
 model Listener {
-  refId               String       @id @default(uuid())
-  id                  String       @unique // ID for versioning or app-level tracking
-  version             Int // per id
+  id                  String       @id @default(uuid()) // unique per version
+  refId               String       @default(uuid()) // shared lineage / permanent identity
+  version             Int
+  contentType         ContentTypes
+  createdBy           String
+  collaborators       String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+  isImmutable         Boolean      @default(false)
   name                String
   description         String
   conditionEventPairs Json
   active              Boolean?
   isValid             Boolean
   status              Status
-  contentType         ContentTypes
-  createdBy           String
-  collaborators       String[]
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
 
   //conditions:
   //array of logic objects, eg:
@@ -167,54 +178,67 @@ model Listener {
   // }
   // ]
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 /////////////////// KITS //////////////////////////
 
 model Kit {
-  refId         String       @id @default(uuid())
-  id            String       @unique
-  name          String
-  data          Json
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  data          Json
+
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 /////////////////// KEYS ///////////////////////////
 
 model Key {
-  refId         String        @id @default(uuid())
-  id            String        @unique
-  name          String        @unique
+  id            String        @id @default(uuid()) // unique per version
+  refId         String        @unique @default(uuid()) // shared lineage / permanent identity
   version       Int
-  description   String?
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean       @default(false)
+  name          String        @unique
+  description   String?
   backLinks     KeySettings[] // just want keySetting ids
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 model KeySettings {
-  id               String       @id @default(uuid())
-  refId            String
-  delay            Int
-  duration         Int
-  durationType     String
-  severityOverTime Json
+  id               String       @id @default(uuid()) // unique per version
+  refId            String       @default(uuid()) // shared lineage / permanent identity
+  version          Int
   contentType      ContentTypes
   createdBy        String
   collaborators    String[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+  isImmutable      Boolean      @default(false)
+  delay            Json
+  duration         Json
+  durationType     String
+  severityOverTime Json
   key              Key          @relation(fields: [refId], references: [refId], onDelete: Cascade)
 }
 
@@ -231,32 +255,42 @@ enum StatusMode {
 }
 
 model gameStatus {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
   name          String
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   description   String
   type          StatusType
   steps         Json
   mode          StatusMode
   isValid       Boolean
   status        Status
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// BUILDING //////////////////////////
 
 model Building {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   name          String
   description   String
   metrics       Json
@@ -268,18 +302,14 @@ model Building {
   dependencies  String[]
   isValid       Boolean
   status        Status[]
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   //upgrades:
   //upgrade_base_id
   //upgrade_ref_id
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// UPGRADE //////////////////////////
@@ -290,23 +320,26 @@ enum UpgradeType {
 }
 
 model Upgrade {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   name          String
   description   String
   root          String
   nodes         Json
   isValid       Boolean
   status        Status
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 //impact:
@@ -317,9 +350,16 @@ model Upgrade {
 ////////////////// TRADE HUB //////////////////////////
 
 model TradeHub {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   name          String
   description   String
   stock         Json
@@ -330,11 +370,6 @@ model TradeHub {
   faction       String?
   isValid       Boolean
   status        Status
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   // region pulls from narrative data
   // location pulls from narrative data
@@ -345,36 +380,47 @@ model TradeHub {
   // trend: tuple (eg, -1, 1) for weekly loss/gain limit (0, 2) would be increasing, (-5, -2) would be decreasing
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// SETTLEMENT TYPE //////////////////////////
 
 model SettlementType {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
-  name          String
-  description   String
-  upgrades      String[]
-  isValid       Boolean
-  status        Status
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  upgrades      String[]
+  isValid       Boolean
+  status        Status
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////////// SETTLEMENT //////////////////////////
 
 model Settlement {
-  refId         String       @id @default(uuid())
-  id            String       @unique // ID for versioning or app-level tracking
-  version       Int // per id
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   name          String
   stats         Json
   population    Json
@@ -383,11 +429,6 @@ model Settlement {
   eventLog      Json
   narrativeData String // foreign key later
   isValid       Boolean
-  contentType   ContentTypes
-  createdBy     String
-  collaborators String[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   //stats includes:
   // level
@@ -415,78 +456,95 @@ model Settlement {
   // dates (irl && calendar)
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////// APT ////////////
 
 model APT {
-  refId           String       @id @default(uuid())
-  id              String       @unique
+  id              String       @id @default(uuid()) // unique per version
+  refId           String       @default(uuid()) // shared lineage / permanent identity
   version         Int
+  contentType     ContentTypes
+  createdBy       String
+  collaborators   String[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  isImmutable     Boolean      @default(false)
   name            String
   description     String
   display         Json
   eventThresholds Json
   progressType    String
   decay           Int
-  contentType     ContentTypes
-  createdBy       String
-  collaborators   String[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////// Action ////////////
 
 model Action {
-  refId         String       @id @default(uuid())
-  id            String       @unique
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
   version       Int
-  name          String
-  description   String
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
   effects       Json
   conditions    Json?
   cooldown      String?
   flavorText    String[]
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////// StoryThread ////////////
 
 model StoryThread {
-  refId         String       @id @default(uuid())
-  id            String       @unique
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
   version       Int
-  name          String
-  description   String
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
   origin        Json
   primaryKey    Json
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 ////////////// Glossary /////////////
 
-enum GlossShape {
+enum EntryShape {
   section
   detail
+}
+
+enum GlossVisibilitySettings {
+  private
+  standard
+  open
+  public
 }
 
 enum EntryTypes {
@@ -500,6 +558,7 @@ enum EntryTypes {
   location
   person
   note
+  item
   event
 }
 
@@ -561,299 +620,151 @@ enum GeographicTypes {
 }
 
 model GlossaryTheme {
-  id            String       @id @default(uuid())
-  refId         String
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
   name          String
   createdBy     String
   collaborators String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   contentType   ContentTypes
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
   description   String
   palettes      Json
   glossaries    String[]
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 model Glossary {
-  id               String         @id @default(uuid())
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  forkedBy      String?
+  editors       String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+
   name             String
   genre            String
   subGenre         String
+  visibility       GlossVisibilitySettings @default(standard)
   description      Json?
-  createdBy        String
-  collaborators    String[]
-  forkedBy         String?
-  editors          String[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  contentType      ContentTypes
   nodes            GlossaryNode[]
   theme            Json?
   integrationState Json?
   templates        Json?
 
   @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
+  @@index([refId])
+  @@unique([refId, version])
 }
 
 model GlossaryNode {
-  id         String         @id @default(uuid())
-  name       String
-  entryType  EntryTypes?
-  fileType       GlossShape
-  icon       Json?
-  parentId   String?
-  children   GlossaryNode[] @relation("NodeHierarchy")
-  parent     GlossaryNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  glossaryId String
-  glossary   Glossary       @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
-  sortIndex  Int            @default(0)
-
-
+  id               String         @id @default(uuid())
+  name             String
+  entryType        EntryTypes?
+  fileType         EntryShape
+  templateId       String?
+  icon             Json?
+  integrationState Json?
+  parentId         String?
+  children         GlossaryNode[] @relation("NodeHierarchy")
+  parent           GlossaryNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  glossaryId       String
+  glossary         Glossary       @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
+  sortIndex        Int            @default(0)
 
   @@index([id])
 }
 
-model GlossarySection {
-  refId            String                 @id @default(uuid())
-  id               String                 @unique
+model GlossaryEntry {
+  id               String                   @id @default(uuid()) // unique per version
+  refId            String                   @default(uuid()) // shared lineage / permanent identity
   version          Int
   contentType      ContentTypes
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  entryType        String
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
   createdBy        String
   forkedBy         String?
   collaborators    String[]
   editors          String[]
-  subType          String?
+  deletedAt        DateTime?
+  isImmutable      Boolean                  @default(false)
+  format           EntryShape
+  entryType        EntryTypes
+  subTypeId        String?
+  subType          EntrySubType?            @relation(fields: [subTypeId], references: [id], onDelete: SetNull)
   name             String?
   description      Json?
   dataString       String?
   tags             String[]
-  subSections      String[]
-  geography        GlossaryGeography?   @relation("SectionToGeography")
-  politics        GlossaryPolitics?   @relation("SectionToPolitics")
-  relationships    GlossaryRelationships? @relation("SectionToRelationships")
-  history          GlossaryHistory?     @relation("SectionToHistory")
-  customTabIds     String[]
-  customTabs       GlossaryCustom[]      @relation("SectionToCustom")
   integrationState Json?
-  backlinksFrom    BacklinkIndex[]        @relation("SourceSection")
-  backlinksTo      BacklinkIndex[]        @relation("TargetSection")
+  backlinksFrom    BacklinkIndex[]          @relation("SourceEntry")
+  backlinksTo      BacklinkIndex[]          @relation("TargetEntry")
+  searchVector     Unsupported("tsvector")? // requires native Postgres support
 
-  @@index([id])
+  @@index([refId])
+  @@unique([refId, version])
   @@index([entryType])
-  @@index([subType])
-  @@index([entryType, subType])
+  @@index([subTypeId])
+  @@index([entryType, subTypeId])
   @@index([createdBy])
+  @@index([searchVector], type: Gin) // GIN index for full-text search
 }
 
-model GlossaryCustom {
-  refId           String           @id @default(uuid())
-  id              String           // foreign key to GlossarySection.refId
-  customTabId     String           // user-defined tab key
-  version         Int
-  updatedAt       DateTime         @updatedAt
-  groups          String[]
-  customFields    Json?
-  GlossarySection GlossarySection @relation("SectionToCustom", fields: [id], references: [refId], onDelete: Cascade)
+model EntrySubType {
+  id            String          @id @default(uuid()) // unique per version
+  refId         String          @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  createdBy     String
+  forkedBy      String?
+  collaborators String[]
+  editors       String[]
+  contentType   ContentTypes
+  deletedAt     DateTime?
+  isImmutable   Boolean         @default(false)
+  name          String
+  entryType     EntryTypes
+  groups        EntryGroup[]
+  updatedAt     DateTime        @updatedAt
+  entries       GlossaryEntry[]
 
-  @@unique([id, customTabId]) // allows safe upserts
+  @@index([refId])
+  @@index([entryType])
+  @@unique([refId, version])
 }
 
-model GlossaryGeography {
-  refId           String            @id @default(uuid())
-  id              String            @unique
-  version         Int
-  updatedAt       DateTime          @updatedAt
-  climates        String[]
-  terrain         String[]
-  regions         String[]
-  landmarks       String[]
-  customFields    Json?
-  GlossarySection GlossarySection @relation("SectionToGeography", fields: [id], references: [refId], onDelete: Cascade)
-}
-
-model GlossaryPolitics {
-  refId           String            @id @default(uuid())
-  id              String            @unique
-  version         Int
-  updatedAt       DateTime          @updatedAt
-  nations         String[]
-  settlements     String[]
-  factions        String[]
-  locations       String[]
-  resources       Json?
-  population      Json?
-  economy         Json?
-  cultures        Json?
-  customFields    Json?
-  GlossarySection GlossarySection @relation("SectionToPolitics", fields: [id], references: [refId], onDelete: Cascade)
-}
-
-model GlossaryRelationships {
-  refId           String            @id @default(uuid())
-  id              String            @unique
-  version         Int
-  updatedAt       DateTime          @updatedAt
-  allies          String[]
-  enemies         String[]
-  relationships   Json?
-  notoriety       Json?
-  influence       Json?
-  customFields    Json?
-  GlossarySection GlossarySection @relation("SectionToRelationships", fields: [id], references: [refId], onDelete: Cascade)
-}
-
-model GlossaryHistory {
-  refId             String            @id @default(uuid())
-  id                String            @unique
-  version           Int
-  updatedAt         DateTime          @updatedAt
-  events            String[]
-  flags             Json?
-  history           Json?
-  customFields      Json?
-  historyDataString String?
-  GlossarySection   GlossarySection @relation("SectionToHistory", fields: [id], references: [refId], onDelete: Cascade)
+model EntryGroup {
+  id         String       @id
+  name       String
+  order      Int
+  subTypeId  String
+  subType    EntrySubType @relation(fields: [subTypeId], references: [id])
+  properties Json // still an array of field definitions
+  updatedAt  DateTime     @updatedAt
 }
 
 model BacklinkIndex {
   id String @id @default(uuid())
 
   sourceId String
-  source   GlossarySection @relation("SourceSection", fields: [sourceId], references: [id], onDelete: Cascade)
+  source   GlossaryEntry @relation("SourceEntry", fields: [sourceId], references: [id], onDelete: Cascade)
 
   targetId String
-  target   GlossarySection @relation("TargetSection", fields: [targetId], references: [id], onDelete: Cascade)
+  target   GlossaryEntry @relation("TargetEntry", fields: [targetId], references: [id], onDelete: Cascade)
 
   type String // optional: enum like "ally", "enemy", "mentionedIn"
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-////////////// Location ////////////
-model LocationGlossary {
-  refId            String                 @id @default(uuid())
-  id               String                 @unique
-  version          Int
-  contentType      ContentTypes
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  createdBy        String
-  forkedBy         String?
-  collaborators    String[]
-  editors          String[]
-  subType          String?
-  name             String?
-  description      Json?
-  dataString       String?
-  tags             String[]
-  locationType   String[]
-  regions        String[]
-  occupants      String[]
-  nearbyFeatures Json? // split by landmark and location
-  events         String[]
-  integrationState Json?
-
-  @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
-}
-
-////////////// Person ////////////
-model PersonGlossary {
-  refId            String                 @id @default(uuid())
-  id               String                 @unique
-  version          Int
-  contentType      ContentTypes
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  createdBy        String
-  forkedBy         String?
-  collaborators    String[]
-  editors          String[]
-  subType          String?
-  name             String?
-  description      Json?
-  dataString       String?
-  tags             String[]
-  occupations    String[]
-  titles         String[]
-  traits         String[]
-  factions       String[]
-  locations      String[]
-  relationships  Json
-  notoriety      String
-integrationState Json?
-
-
-  @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
-}
-
-////////////// Note ////////////
-model NoteGlossary {
-  refId          String       @id @default(uuid())
-  id             String       @unique
-  version        Int
-  contentType    ContentTypes
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  name           String
-  description    Json
-  dataString     String
-  createdBy      String
-  collaborators  String[]
-  forkedBy         String?
-  editors          String[]
-  noteType       String?
-  priority       String?
-  dueDate        String?
-  relatedEntries Json
-  tags           String[]
-  isArchived     Boolean
-  isPinned       Boolean
-  isShared       Boolean
-  sharedWith     String[]
-  attachments    Json
-  integrationState Json?
-
-
-  @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
-}
-
-///////////////////// eventGlossary //////////////
-model EventGlossary {
-  refId            String                 @id @default(uuid())
-  id               String                 @unique
-  version          Int
-  contentType      ContentTypes
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  createdBy        String
-  forkedBy         String?
-  collaborators    String[]
-  editors          String[]
-  subType          String?
-  name             String?
-  description      Json?
-  dataString       String?
-  tags             String[]
-  significance     String?
-  gameDate         String?
-  frequency        String?
-  locations        String[] // location model, classic one to many or many to many
-  sections         String[] // section model, classic one to many or many to many
-  relatedEntries   String[] // no idea how this will work but whatever
-  integrationState Json?
-
-
-  @@index([contentType])
-  @@index([id, updatedAt(sort: Desc)])
 }

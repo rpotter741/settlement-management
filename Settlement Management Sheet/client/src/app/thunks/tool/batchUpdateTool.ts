@@ -33,7 +33,11 @@ export default function batchUpdateToolThunk({
     if (tabDirtyKeypaths.length === 0) return;
     const updates: GenericObject = {};
     tabDirtyKeypaths.forEach((keypath) => {
-      updates[keypath] = get(editTool, keypath);
+      const objectKeypath = keypath.split('.').shift();
+      updates[objectKeypath as keyof typeof updates] = get(
+        editTool,
+        objectKeypath as string
+      );
     });
     dispatch(
       batchUpdateById({ tool, id, updates: { ...updates, version: 1 } })

@@ -12,9 +12,11 @@ export default async function getGlossaries(req: any, res: any) {
         id: true,
         name: true,
         description: true,
+        visibility: true,
         genre: true,
         subGenre: true,
         integrationState: true,
+        theme: true,
       },
     });
     return res.json(glossaries);

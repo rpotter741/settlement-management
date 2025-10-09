@@ -15,7 +15,8 @@ import openEditGlossaryThunk from './glossary/glossary/openEditGlossaryThunk.js'
 import createNodeAndDetailThunk from './glossary/nodes/createNodeAndDetailThunk.js';
 import deleteGlossaryThunk from './glossary/glossary/deleteGlossaryThunk.js';
 import updateEntryByIdThunk from './glossary/entries/updateEntryById.js';
-import getEntrySubModel from './glossary/glossary/getEntrySubModelThunk.js';
+import getEntrySubModel from './glossary/entries/getEntrySubModelThunk.js';
+import updateEntrySubModelById from './glossary/entries/updateEntrySubModelById.js';
 
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
@@ -40,6 +41,7 @@ const thunks = {
   openEditGlossary: openEditGlossaryThunk,
   deleteGlossary: deleteGlossaryThunk,
   getEntrySubModel,
+  updateEntrySubModelById,
 };
 
 export default thunks;

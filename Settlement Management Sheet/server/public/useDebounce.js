@@ -1,1 +1,0 @@
-import{k as u}from"./main.js";const n=(e,t,o)=>{const r=u.useRef();u.useEffect(()=>(clearTimeout(r.current),r.current=setTimeout(()=>{e()},t),()=>clearTimeout(r.current)),[e,t,...o])},f=(e,t=500)=>{const[o,r]=u.useState(e);return u.useEffect(()=>{const s=setTimeout(()=>r(e),t);return()=>clearTimeout(s)},[e,t]),o};export{n as a,f as u};

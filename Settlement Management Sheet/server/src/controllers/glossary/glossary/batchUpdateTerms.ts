@@ -1,5 +1,11 @@
 import prisma from '../../../db/db.ts';
 import requireFields from '../../../utils/requireFields.ts';
+import { ensure } from '../../../../../shared/utils/ensure.ts';
+
+type VisibilityMap = Record<string, string>;
+type UpdateTypeMap = Record<string, string | VisibilityMap>;
+type TermsMap = Record<string, UpdateTypeMap>;
+type IntegrationState = Record<string, TermsMap>;
 
 export default async function batchUpdateTerms(req: any, res: any) {
   try {
@@ -11,21 +17,40 @@ export default async function batchUpdateTerms(req: any, res: any) {
     if (!glossary) {
       return res.status(404).json({ message: 'Glossary not found.' });
     }
-    //@ts-ignore
-    const currentTerms = glossary?.integrationState?.terms || {};
-    updates.forEach((update: { key: string; value: string }) => {
-      if (update.value) {
-        currentTerms[update.key] = update.value;
-      } else {
-        delete currentTerms[update.key];
-      }
-    });
+    // Explicitly type currentTerms as a Record<string, any>
+    const currentTerms: any = glossary?.integrationState || {};
 
-    const updatedIntegrationState = {
-      //@ts-ignore
-      ...glossary.integrationState,
-      terms: currentTerms,
-    };
+    for (const u of updates) {
+      const { subModel, termKey, updateType, visibilityKey, value } = u;
+
+      // deletion path: remove the whole term if value is null
+      if (value == null) {
+        if (currentTerms[subModel]) {
+          delete currentTerms[subModel][termKey];
+          if (Object.keys(currentTerms[subModel]).length === 0) {
+            delete currentTerms[subModel];
+          }
+        }
+        continue;
+      }
+
+      // insertion/update path
+      const sub = ensure(currentTerms, subModel); // TermsMap
+      const term = ensure(sub, termKey); // UpdateTypeMap
+
+      if (visibilityKey) {
+        // ensure updateType is a nested map
+        let slot = term[updateType];
+        if (!slot || typeof slot !== 'object' || Array.isArray(slot)) {
+          slot = term[updateType] = {};
+        }
+        (slot as VisibilityMap)[visibilityKey] = value;
+      } else {
+        term[updateType] = value; // simple scalar
+      }
+    }
+
+    const updatedIntegrationState: IntegrationState = { ...currentTerms };
 
     console.log(`Updating glossary ${id} with terms:`, updatedIntegrationState);
 

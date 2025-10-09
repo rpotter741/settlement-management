@@ -15,6 +15,6 @@ export default async function getEntryById({
       params: { id, entryType, subModel },
     })
     .then((res: any) => {
-      return res.data;
+      return res.data[subModel];
     });
 }

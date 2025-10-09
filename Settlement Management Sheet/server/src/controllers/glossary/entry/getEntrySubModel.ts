@@ -22,32 +22,16 @@ export default async function getEntrySubModel(req: any, res: any) {
       return res.status(400).json({ message: `Invalid entry type.` });
     }
 
-    const parentExists = await getModelEntry({
-      model: entryModel,
+    const subModelEntry = await getModelEntry({
+      model: prisma.glossarySection,
       where: { id },
       res,
       select: {
-        id: true,
+        [subModel]: true,
       },
     });
 
-    if (!parentExists) {
-      console.log(`Parent entry not found for ID:`, id);
-      return res.status(404).json({ message: `Parent entry not found.` });
-    }
-
-    if (!subModelMap[subModel]) {
-      console.log(`Invalid sub-model:`, subModel);
-      return res.status(400).json({ message: `Invalid sub-model.` });
-    }
-
-    const subModelEntry = await getModelEntry({
-      model: subModelMap[subModel],
-      where: { id },
-      res,
-    });
-
-    return res.json({ data: subModelEntry });
+    return res.json(subModelEntry);
     // returning null is okay if the sub-model entry does not exist. Front end knows to create ephemeral entry.
   } catch (error) {
     console.error(`Error getting ${subModel}:`, error);

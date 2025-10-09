@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
 import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { rehydrateGlossaryTree } from '@/features/Glossary/utils/rehydrateGlossary.js';
 
 const base = (state: RootState): GlossaryState => state.glossary;
 
@@ -43,6 +44,20 @@ export const selectEditGlossaryById = (glossaryId: string) =>
     base,
     (glossaryState: GlossaryState) =>
       glossaryState.glossaries.edit.byId[glossaryId] || null
+  );
+
+export const selectEditThemeById = (glossaryId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.edit.byId[glossaryId]?.theme || null
+  );
+
+export const selectStaticThemeById = (glossaryId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.static.byId[glossaryId]?.theme || null
   );
 
 export const selectEditNodeById = (glossaryId: string, nodeId: string) =>
@@ -107,16 +122,27 @@ export const selectGlossaryNodes = (glossaryId: string) =>
       glossaryState.glossaries.edit.byId[glossaryId]?.nodes || {}
   );
 
+export const selectGlossaryTree = (glossaryId: string) =>
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const glossary = glossaryState.glossaries.edit.byId[glossaryId];
+    if (!glossary) return { roots: [], nodeMap: {} };
+    const { structure, renderState } = glossary;
+    const { roots, nodeMap } = rehydrateGlossaryTree(structure, renderState);
+    return { roots, nodeMap };
+  });
+
+export const selectSubTypeById = (glossaryId: string, subTypeId: string) =>
+  createSelector(
+    base,
+    (glossaryState: GlossaryState) =>
+      glossaryState.glossaries.edit.byId[glossaryId]?.templates?.[subTypeId] ||
+      null
+  );
+
 export const selectActiveId = () =>
   createSelector(
     base,
     (glossaryState: GlossaryState) => glossaryState.activeGlossaryId || null
-  );
-
-export const selectSnackbar = () =>
-  createSelector(
-    base,
-    (glossaryState: GlossaryState) => glossaryState.snackbar || null
   );
 
 export const selectKeypathOptions = (
@@ -146,6 +172,9 @@ export const selectors = {
   selectGlossaryStructure,
   selectGlossaryNodes,
   selectActiveId,
-  selectSnackbar,
   selectKeypathOptions,
+  selectEditThemeById,
+  selectStaticThemeById,
+  selectGlossaryTree,
+  selectSubTypeById,
 };

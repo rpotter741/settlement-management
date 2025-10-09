@@ -6,9 +6,9 @@ export default function getTermChangeValue({
   value,
   defaultValue,
 }: {
-  glossaryTerms: Record<string, string>;
+  glossaryTerms: Record<string, string | null>;
   key: string;
-  value: string;
+  value: string | null;
   defaultValue: string;
 }) {
   const currentTerm = get(glossaryTerms, key, null);
@@ -23,7 +23,9 @@ export default function getTermChangeValue({
     currentTerm === value ||
     (currentTerm === null && value === defaultValue)
   ) {
+    console.log('inside term change, no changes found');
     return null; // No change needed
   }
+  console.log('inside term change, changes found', { key, value });
   return { key, value }; // Return the new value to update
 }

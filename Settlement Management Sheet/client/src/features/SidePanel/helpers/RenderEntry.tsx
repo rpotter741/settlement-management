@@ -11,6 +11,8 @@ import getTrail from '@/features/SidePanel/getTrail.js';
 import { v4 as newId } from 'uuid';
 import structure from '../structure.js';
 import { ToolName } from '@/app/types/ToolTypes.js';
+import { AnimatePresence } from 'framer-motion';
+import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';
 
 const maxTrail = 3;
 
@@ -49,6 +51,10 @@ const RenderEntry: React.FC<RenderEntryProps> = ({
   setTool,
 }) => {
   const { addNewTab, setActiveTab } = useSidePanel();
+
+  if (entry.title === active) {
+    console.log(active, entry.children);
+  }
 
   const handleClick = (title: string) => {
     if (clickFn === undefined) {
@@ -135,8 +141,16 @@ const RenderEntry: React.FC<RenderEntryProps> = ({
           </Typography>
         </Box>
       </ListItemButton>
-      <Collapse in={active === entry.title}>
-        <Box
+      <AnimatePresence mode="popLayout">
+        <MotionBox
+          initial={{ height: 0, opacity: 0 }}
+          animate={
+            active === entry.title
+              ? { height: 'auto', opacity: 1 }
+              : { height: 0, opacity: 0 }
+          }
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3 }}
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -155,8 +169,8 @@ const RenderEntry: React.FC<RenderEntryProps> = ({
               clickFn={child.onClick}
             />
           ))}
-        </Box>
-      </Collapse>
+        </MotionBox>
+      </AnimatePresence>
     </Box>
   );
 };

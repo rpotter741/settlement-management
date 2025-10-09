@@ -33,7 +33,7 @@ export default async function getEntryById(req: any, res: any) {
         tags: true,
         subSections: true,
         customTabIds: true,
-        customTabs: true,
+        custom: true,
         integrationState: true,
         backlinksFrom: true,
         backlinksTo: true,

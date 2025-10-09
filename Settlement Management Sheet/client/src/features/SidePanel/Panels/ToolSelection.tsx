@@ -11,9 +11,7 @@ import { useSidebarContext } from '@/context/SidePanel/SidePanelContext.js';
 interface ToolSelectionProps {}
 
 const ToolSelection: React.FC<ToolSelectionProps> = ({}) => {
-  const { setContextKey, tool, setTool, active, setActive } =
-    useSidebarContext();
-
+  const { active, setActive, setTool } = useSidebarContext();
   const handleToolClick = (tool: ToolName) => {
     setTool(tool);
   };

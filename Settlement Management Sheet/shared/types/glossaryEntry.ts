@@ -13,6 +13,7 @@ export type Genre =
   | 'Horror'
   | 'Mystery'
   | 'Historical'
+  | 'Western'
   | 'Modern'
   | 'Other';
 
@@ -24,17 +25,19 @@ export type SubModelType =
   | 'custom';
 
 export interface GlossaryNode {
-  id: string;
+  id: UUID;
   name: string;
   fileType: 'section' | 'detail';
   entryType: GlossaryEntryType;
-  parentId: string | null;
+  parentId: UUID | null;
   children?: GlossaryNode[];
   parent?: GlossaryNode | null;
   glossaryId: UUID;
+  templateId?: UUID | null;
   icon?: {
     name: string;
     color: string;
+    backgroundColor: string;
     viewBox: string;
     path: string;
     size: number;
@@ -72,7 +75,7 @@ export interface GlossarySection extends BaseEntry {
   history?: GlossaryHistory;
   relationships?: GlossaryRelationships;
   customTabIds?: string[]; // list of custom tab IDs for additional data
-  customFields?: GenericObject; // custom fields for additional data
+  custom?: GenericObject; // custom fields for additional data
   integrationState?: GenericObject; // state for integrations
   backlinksFrom: UUID[];
   backlinksTo: UUID[];
@@ -416,6 +419,22 @@ export type GlossaryEntryType =
   | 'person'
   | 'event'
   | 'note';
+
+const glossaryEntryTypeOptions: GlossaryEntryType[] = [
+  'continent',
+  'territory',
+  'domain',
+  'province',
+  'landmark',
+  'settlement',
+  'faction',
+  'location',
+  'person',
+  'event',
+  'note',
+];
+
+export { glossaryEntryTypeOptions };
 
 export interface Glossary {
   id: UUID;

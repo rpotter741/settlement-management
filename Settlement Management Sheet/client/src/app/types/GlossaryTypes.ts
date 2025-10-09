@@ -1,4 +1,5 @@
-import { Genre } from 'types/index.js';
+import { VisibilitySetting } from '@/features/Glossary/EditGlossary/Settings/EditGlossarySettings.js';
+import { GenericObject, Genre } from 'types/index.js';
 import { GlossaryEntry, GlossaryEntryType, GlossaryNode } from 'types/index.js';
 
 export type GlossaryEntryArrayKeys = 'regions' | 'climate' | 'type';
@@ -39,6 +40,8 @@ export interface GlossaryStateEntry {
   // >;
   options: any;
   integrationState: any;
+  theme: string | { light: any; dark: any };
+  templates: any;
 }
 
 export interface GlossaryState {
@@ -73,6 +76,7 @@ export interface GlossaryDirectoryProps {
     entryType: GlossaryEntryType;
     glossaryId: string | null;
   }) => void;
+  onMultipleDelete: (nodes: GlossaryNode[]) => void;
   onNewFile: ({
     id,
     parentId,

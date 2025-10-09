@@ -3,14 +3,15 @@ import { GlossaryNode } from 'types/index.js';
 export default function sortGlossaryNodes(
   nodes: GlossaryNode[]
 ): GlossaryNode[] {
+  //@ts-ignore
   return nodes.sort(smartSort);
 }
 
 function smartSort<
-  T extends { name: string; sortIndex?: number; type: 'file' | 'folder' },
+  T extends { name: string; flatIndex?: number; type: 'file' | 'folder' },
 >(a: T, b: T): number {
-  const aPriority = a.sortIndex ?? 0;
-  const bPriority = b.sortIndex ?? 0;
+  const aPriority = a.flatIndex ?? 0;
+  const bPriority = b.flatIndex ?? 0;
 
   const aHasCustom = aPriority > 0;
   const bHasCustom = bPriority > 0;

@@ -5,7 +5,7 @@ import { Box } from '@mui/system';
 import { Mode } from '@/features/SidePanel/SidePanel.js';
 
 interface ModeButtonWithTooltipProps {
-  mode: Mode;
+  index: number;
   modeTarget: Mode;
   setMode: (mode: Mode) => void;
   icon: React.ElementType;
@@ -18,7 +18,7 @@ interface ModeButtonWithTooltipProps {
 }
 
 const ModeButtonWithTooltip: React.FC<ModeButtonWithTooltipProps> = ({
-  mode,
+  index,
   modeTarget,
   setMode,
   icon,
