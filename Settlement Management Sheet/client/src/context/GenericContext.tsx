@@ -11,3 +11,13 @@ export function createGenericContext<T>() {
 
   return [context.Provider, useCtx] as const;
 }
+
+export const GenericContext = createContext<any>(undefined);
+
+export const useGenericContext = () => {
+  const context = useContext(GenericContext);
+  if (!context) {
+    throw new Error('useGenericContext must be used within its provider');
+  }
+  return context;
+};

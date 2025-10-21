@@ -4,14 +4,14 @@ export default class EventGenerator {
   }
 
   generateEvent(type, settlement) {
-    const templates = this.eventTemplates[type];
-    if (!templates || templates.length === 0) {
-      console.warn(`No templates found for type "${type}".`);
+    const subTypes = this.eventTemplates[type];
+    if (!subTypes || subTypes.length === 0) {
+      console.warn(`No subTypes found for type "${type}".`);
       return null;
     }
 
     // Weighted random selection (optional)
-    const selectedTemplate = this.weightedRandom(templates);
+    const selectedTemplate = this.weightedRandom(subTypes);
 
     // Dynamic adjustments
     const impacts = selectedTemplate.impacts.map((impact) => ({
@@ -30,15 +30,15 @@ export default class EventGenerator {
     });
   }
 
-  weightedRandom(templates) {
-    const totalWeight = templates.reduce((sum, t) => sum + t.weight, 0);
+  weightedRandom(subTypes) {
+    const totalWeight = subTypes.reduce((sum, t) => sum + t.weight, 0);
     const rand = Math.random() * totalWeight;
     let cumulative = 0;
 
-    for (const template of templates) {
+    for (const template of subTypes) {
       cumulative += template.weight;
       if (rand <= cumulative) return template;
     }
-    return templates[0];
+    return subTypes[0];
   }
 }

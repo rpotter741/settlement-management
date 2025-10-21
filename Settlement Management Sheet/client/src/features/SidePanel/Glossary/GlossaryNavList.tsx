@@ -55,18 +55,13 @@ const NavList = () => {
           {glossary?.name}
         </Typography>
       </Box>
-      <TextField
-        variant="outlined"
-        placeholder="Search glossary..."
-        fullWidth
-        sx={{ marginTop: 2, marginBottom: 2 }}
-      />
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
           position: 'relative',
+          mt: 4,
         }}
       >
         {glossaryNavItems.map((item: string) => (

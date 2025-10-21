@@ -36,8 +36,8 @@ const Editor: React.FC<EditorProps> = ({
   html = '',
   minHeight = '300px',
   maxHeight = '1000px',
-  propUpdate = () => {},
-  immediateOnChange = () => {},
+  propUpdate,
+  immediateOnChange,
   width = '100%',
 }) => {
   const theme = useTheme();
@@ -46,9 +46,13 @@ const Editor: React.FC<EditorProps> = ({
   const [formattedTime, setFormattedTime] = useState<string>('');
 
   const handleChange = (value: string, text: string) => {
-    immediateOnChange();
-    debouncedUpdate(propUpdate, value, text);
-    debouncedSetLastSaved(setLastSaved);
+    if (immediateOnChange) {
+      immediateOnChange();
+    }
+    if (propUpdate) {
+      debouncedUpdate(propUpdate, value, text);
+      debouncedSetLastSaved(setLastSaved);
+    }
   };
 
   useEffect(() => {
@@ -76,7 +80,6 @@ const Editor: React.FC<EditorProps> = ({
           borderRadius: '4px 4px 0 0',
           borderBottom: 0,
           width,
-          // minWidth: 300,
         }}
       >
         <EditorProvider

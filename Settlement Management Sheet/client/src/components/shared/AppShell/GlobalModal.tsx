@@ -28,8 +28,6 @@ const GlobalModal = () => {
   const modalPosition = useSelector(modalPositionSx);
   const disableClickaway = useSelector(disableBackgroundClose);
 
-  console.log(disableClickaway);
-
   return (
     <>
       {modalOpen && (ModalComponent || modalKey) && (

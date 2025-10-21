@@ -19,6 +19,8 @@ import getEntryById from './glossary/entry/getEntryById.js';
 import getOptionsByProperty from './glossary/entry/getOptionsByProperty.js';
 import getEntrySubModel from './glossary/entry/getEntrySubModel.js';
 import updateEntrySubModel from './glossary/entry/updateEntrySubModel.js';
+//subType services
+import createSubType from './glossary/subTypes/createSubType.js';
 
 const actions = {
   // glossary actions
@@ -42,6 +44,8 @@ const actions = {
   getOptionsByProperty,
   getEntrySubModel,
   updateEntrySubModel,
+  //subType actions
+  createSubType,
 };
 
 export default actions;

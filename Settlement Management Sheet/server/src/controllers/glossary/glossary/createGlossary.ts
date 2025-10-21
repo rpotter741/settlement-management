@@ -22,6 +22,7 @@ export default async function createGlossary(req, res) {
     const newGlossary = await prisma.glossary.create({
       data: {
         id,
+        version: 1,
         name,
         description,
         genre,

@@ -2,7 +2,6 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import SidePanel from '@/features/SidePanel/SidePanel.jsx';
 import TopNav from './TopNav/TopNav.js';
 import GlobalModal from './GlobalModal.js';
 import { AnimatePresence } from 'framer-motion';

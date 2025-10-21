@@ -23,8 +23,8 @@ const useTheming = () => {
     key,
     opacity,
   }: {
-    color: ColorType;
-    key: KeyType;
+    color: any;
+    key: any;
     opacity: number;
     //@ts-ignore
   }) => alpha(theme.palette[color][key], opacity);
@@ -34,8 +34,8 @@ const useTheming = () => {
     key,
     amount,
   }: {
-    color: ColorType;
-    key: KeyType;
+    color: any;
+    key: any;
     amount: number;
   }) => {
     //@ts-ignore
@@ -48,8 +48,8 @@ const useTheming = () => {
     key,
     amount,
   }: {
-    color: ColorType;
-    key: KeyType;
+    color: any;
+    key: any;
     amount: number;
   }) => {
     //@ts-ignore
@@ -61,11 +61,11 @@ const useTheming = () => {
     color = 'primary',
     alphaValue = 0.5,
   }: {
-    color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+    color?: any;
     alphaValue?: number;
   }) => getRippleBorder(theme, color, alphaValue);
 
-  const getHexValue = ({ color, key }: { color: ColorType; key: KeyType }) => {
+  const getHexValue = ({ color, key }: { color: any; key: any }) => {
     //@ts-ignore
     return theme.palette[color][key];
   };

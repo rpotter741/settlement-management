@@ -6,6 +6,8 @@ import {
   GlossarySection,
   SubModelType,
   Genre,
+  GenericObject,
+  GlossaryEntryType,
 } from 'types/index.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
 import { rehydrateGlossaryTree } from '../../features/Glossary/utils/rehydrateGlossary.js';
@@ -17,6 +19,11 @@ import {
   ThemeKeys,
 } from '@/features/Glossary/EditGlossary/Palette/CustomizePalette.js';
 import { dark } from '@mui/material/styles/createPalette.js';
+import {
+  SubTypeCompoundData,
+  SubTypeCompoundDataTypes,
+  SubTypeCompoundDefinition,
+} from '@/features/Glossary/EditGlossary/Templates/components/types.js';
 
 const defaultGlossaryState: GlossaryState = {
   glossaries: {
@@ -50,7 +57,7 @@ const glossarySlice = createSlice({
         subGenre: string;
         integrationState: any;
         theme: string | { light: any; dark: any };
-        templates?: Record<string, any[]>;
+        subTypes?: Record<string, any[]>;
       }>
     ) => {
       const {
@@ -61,7 +68,7 @@ const glossarySlice = createSlice({
         subGenre,
         integrationState,
         theme,
-        templates,
+        subTypes = {},
       } = action.payload;
       const newGlossary: GlossaryStateEntry = {
         name,
@@ -77,9 +84,10 @@ const glossarySlice = createSlice({
         renderState: {},
         entries: {},
         options: {},
+        visibility: null,
         integrationState,
         theme,
-        templates,
+        subTypes,
       };
       state.glossaries.static.byId[glossaryId] = newGlossary;
       state.glossaries.static.allIds.push(glossaryId);
@@ -123,7 +131,6 @@ const glossarySlice = createSlice({
     ) => {
       const { id, updates } = action.payload;
       const glossary = state.glossaries.edit.byId[id];
-      console.log(`Updating glossary ${glossary.name} with updates:`, updates);
       if (glossary) {
         Object.entries(updates).forEach(([key, value]) => {
           set(glossary, key, value);
@@ -428,10 +435,6 @@ const glossarySlice = createSlice({
         const entrySubModel = entry[subModel];
         if (entrySubModel) {
           set(entrySubModel, keypath, data);
-          console.log(
-            `Updated subModel ${subModel} for entry ${entryId} at keypath ${keypath} with data:`,
-            data
-          );
         } else {
           console.warn(`Entry ${entryId} not found in glossary ${glossaryId}.`);
         }
@@ -458,9 +461,6 @@ const glossarySlice = createSlice({
         if (editEntry && staticEntry) {
           (staticEntry as any)[subModel] = cloneDeep(
             (editEntry as any)[subModel]
-          );
-          console.log(
-            `Synced subModel ${subModel} for entry ${entryId} in glossary ${glossaryId}`
           );
         } else {
           console.warn(
@@ -564,6 +564,294 @@ const glossarySlice = createSlice({
       if (!editGlossary || !staticGlossary) return;
       staticGlossary.theme = editGlossary.theme;
     },
+    addSubTypeToGlossary: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        subType: any;
+      }>
+    ) => {
+      const { glossaryId, subType } = action.payload;
+      const { id } = subType;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary) return;
+
+      if (!glossary.subTypes) {
+        glossary.subTypes = {};
+      }
+      if (!glossary.subTypes[subType.entryType]) {
+        glossary.subTypes[subType.entryType] = {};
+      }
+      if (glossary.subTypes[subType.entryType][id]) return;
+
+      glossary.subTypes[subType.entryType][id] = subType;
+    },
+    addSubTypeGroup: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        group: {
+          id: string;
+          name: string;
+          propertyOrder: string[];
+          propertyData: GenericObject;
+        };
+      }>
+    ) => {
+      const { glossaryId, subTypeId, group, type } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      subType.groupOrder.push(group.id);
+      subType.groupData[group.id] = group;
+    },
+    reorderSubTypeGroups: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        newOrder: string[];
+      }>
+    ) => {
+      const { glossaryId, subTypeId, newOrder, type } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      subType.groupOrder = newOrder;
+    },
+    addSubTypeProperty: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        property: {
+          id: string;
+          name: string;
+          type: string;
+          value: any;
+        };
+      }>
+    ) => {
+      const { glossaryId, subTypeId, groupId, property, type } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+
+      const group = subType.groupData[groupId];
+      if (!subType || !group) return;
+      group.propertyOrder.push(property.id);
+      group.propertyData[property.id] = property;
+      // Ensure properties are sorted by order after addition
+    },
+    updateSubTypeProperty: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        propertyId: string;
+        keypath: string;
+        value: any;
+      }>
+    ) => {
+      const {
+        glossaryId,
+        subTypeId,
+        groupId,
+        propertyId,
+        keypath,
+        value,
+        type,
+      } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      const group = subType.groupData[groupId];
+      if (!group) return;
+      const property = group.propertyData[propertyId];
+      if (!property) return;
+      set(property, keypath, value);
+    },
+    changeSubTypeProperty: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        propertyId: string;
+        property: GenericObject;
+      }>
+    ) => {
+      const { glossaryId, subTypeId, groupId, propertyId, type } =
+        action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      const group = subType.groupData[groupId];
+      if (!group) return;
+      const property = group.propertyData[propertyId];
+      if (!property) return;
+      group.propertyData[propertyId] = action.payload.property;
+    },
+    updateSubTypeAnchor: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        anchor: 'primary' | 'secondary';
+        value: string | null;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, anchor, value } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      subType.anchors[anchor] = value;
+    },
+    updateSubTypeName: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        name: string;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, name } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      subType.name = name;
+    },
+    updateSubTypeSubProperty: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        propertyId: string;
+        side: 'left' | 'right';
+        keypath: string;
+        value: any;
+      }>
+    ) => {
+      const {
+        glossaryId,
+        type,
+        subTypeId,
+        groupId,
+        propertyId,
+        side,
+        keypath,
+        value,
+      } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      const group = subType.groupData[groupId];
+      if (!group) return;
+      const property: SubTypeCompoundDefinition =
+        group.propertyData[propertyId];
+      if (!property) return;
+      const subProperty = property[side];
+      if (!subProperty) return;
+      set(subProperty, keypath, value);
+    },
+    changeSubTypeSubProperty: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        propertyId: string;
+        side: 'left' | 'right';
+        subProperty: GenericObject;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, groupId, propertyId, side } =
+        action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      const group = subType.groupData[groupId];
+      if (!group) return;
+      const property = group.propertyData[propertyId];
+      if (!property) return;
+      if (!property[side]) return;
+      property[side] = action.payload.subProperty;
+    },
+    changeSubTypeGroupName: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+        name: string;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, groupId, name } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      const group = subType.groupData[groupId];
+      if (!group) return;
+      group.name = name;
+    },
+    removeSubTypeGroup: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupId: string;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, groupId } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      delete subType.groupData[groupId];
+      subType.groupOrder = subType.groupOrder.filter(
+        (id: string) => id !== groupId
+      );
+    },
+    updateAllSubTypeGroupData: (
+      state,
+      action: PayloadAction<{
+        glossaryId: string;
+        type: GlossaryEntryType;
+        subTypeId: string;
+        groupData: GenericObject;
+      }>
+    ) => {
+      const { glossaryId, type, subTypeId, groupData } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (!glossary || !glossary.subTypes) return;
+      const subType = glossary.subTypes[type][subTypeId];
+      if (!subType) return;
+      subType.groupData = groupData;
+    },
   },
 });
 
@@ -593,6 +881,19 @@ export const {
   updatePalette,
   resetPalette,
   savePalette,
+  addSubTypeToGlossary,
+  addSubTypeGroup,
+  addSubTypeProperty,
+  updateSubTypeProperty,
+  updateSubTypeAnchor,
+  changeSubTypeProperty,
+  updateSubTypeName,
+  updateSubTypeSubProperty,
+  changeSubTypeSubProperty,
+  changeSubTypeGroupName,
+  removeSubTypeGroup,
+  reorderSubTypeGroups,
+  updateAllSubTypeGroupData,
 } = glossarySlice.actions;
 
 export default glossarySlice.reducer;

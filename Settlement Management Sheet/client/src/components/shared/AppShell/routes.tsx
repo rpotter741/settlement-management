@@ -6,23 +6,15 @@ import ProtectedRoute from '@/components/ProtectedRoute.js';
 import {
   AppRegistration,
   BookOnline,
-  ChildCare,
-  Construction,
   Dashboard,
   DesignServices,
-  Grading,
   Login,
-  MenuBook,
-  Settings,
 } from '@mui/icons-material';
-import { Box } from '@mui/material';
 
 import { Navigate } from 'react-router-dom';
 import MotionBox from '../Layout/Motion/MotionBox.js';
 import EditGlossary from '@/features/Glossary/EditGlossary/EditGlossary.js';
 import DefaultSidebar from './Sidebar/DefaultSidebar.js';
-import GlossaryOverviewSidebar from '@/features/SidePanel/Glossary/GlossaryOverviewSidebar.js';
-import { lazy } from 'react';
 import TemplateManager from '@/features/Glossary/EditGlossary/Templates/TemplateManager.js';
 
 const withAuth = ({ Component }: { Component: React.ComponentType }) => (

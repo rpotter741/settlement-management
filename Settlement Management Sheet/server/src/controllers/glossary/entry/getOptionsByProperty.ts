@@ -19,9 +19,9 @@ That allows us to respect user's configuration while still returning all the dat
 I don't think we need to check an entry's integration state because if it's disabled,
 then it shouldn't have data in the first place.
 
-All of this, too, is going to have to be taking into account both integration state as a whole and any saved templates, which means we'll want each section or detail to have a 'templateId' field that's nullable. We might get something like this:
+All of this, too, is going to have to be taking into account both integration state as a whole and any saved subTypes, which means we'll want each section or detail to have a 'templateId' field that's nullable. We might get something like this:
 
-const integrationState = prisma.glossary.findUnique({ where: { id: glossaryId }, select: { integrationState: true, templates: true } });
+const integrationState = prisma.glossary.findUnique({ where: { id: glossaryId }, select: { integrationState: true, subTypes: true } });
 
 then a helper called 'mapPropertyIntegrationState' that references it and returns something like this:
   {

@@ -5,9 +5,9 @@ type DirtyEntry = {
   dirtyKeypaths: Record<string, boolean>;
 };
 
-type DirtyScopes = 'tab' | 'glossary' | 'event' | 'apt';
+export type DirtyScopes = 'tab' | 'glossary' | 'event' | 'apt';
 
-type DirtyState = Record<DirtyScopes, Record<string, DirtyEntry>>;
+export type DirtyState = Record<DirtyScopes, Record<string, DirtyEntry>>;
 
 const initialState: DirtyState = {
   tab: {},

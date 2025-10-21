@@ -116,7 +116,7 @@ const useGlossaryEditor = () => {
   };
 
   return {
-    activeId,
+    activeId: activeId || '',
     glossary,
     glossaries,
     ui,

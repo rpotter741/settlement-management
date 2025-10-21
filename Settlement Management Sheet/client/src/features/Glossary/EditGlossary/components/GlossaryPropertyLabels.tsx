@@ -112,19 +112,27 @@ export function makeGlossarySettingsRow({
   const visibility = {
     collaborator:
       settings.visibility?.collaborator ??
-      defaultVisibilitySettings[glossary.visibility]?.collaborator ??
+      defaultVisibilitySettings[
+        glossary.visibility as keyof typeof defaultVisibilitySettings
+      ]?.collaborator ??
       true,
     player:
       settings.visibility?.player ??
-      defaultVisibilitySettings[glossary.visibility]?.player ??
+      defaultVisibilitySettings[
+        glossary.visibility as keyof typeof defaultVisibilitySettings
+      ]?.player ??
       true,
     resident:
       settings.visibility?.resident ??
-      defaultVisibilitySettings[glossary.visibility]?.resident ??
+      defaultVisibilitySettings[
+        glossary.visibility as keyof typeof defaultVisibilitySettings
+      ]?.resident ??
       false,
     public:
       settings.visibility?.public ??
-      defaultVisibilitySettings[glossary.visibility]?.public ??
+      defaultVisibilitySettings[
+        glossary.visibility as keyof typeof defaultVisibilitySettings
+      ]?.public ??
       false,
   };
 

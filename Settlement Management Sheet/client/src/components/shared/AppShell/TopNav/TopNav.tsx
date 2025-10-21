@@ -36,7 +36,7 @@ const TopNav = () => {
         alignItems: 'center',
         height: 48,
         borderBottom: '1px solid',
-        borderColor: 'divider',
+        borderColor: 'primary.dark',
       }}
     >
       <Box

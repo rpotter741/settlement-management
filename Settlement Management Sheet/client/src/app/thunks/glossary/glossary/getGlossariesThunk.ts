@@ -11,6 +11,11 @@ import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.js';
 export default function getGlossariesThunk(): AppThunk {
   return async (dispatch, getState) => {
     try {
+      const existingGlossaries = getState().glossary.glossaries.edit.allIds;
+      if (existingGlossaries.length > 0) {
+        // Glossaries already exist in state, no need to fetch again
+        return;
+      }
       const glossaries = await serverAction.getGlossaries();
       const existingState = getState().glossary.glossaries.edit.byId;
 

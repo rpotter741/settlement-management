@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { GlossaryNode } from '../../../../../shared/types/glossaryEntry.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
-import { addData } from '@/app/slice/relaySlice.js';
+import { updateRelay as addData } from '@/app/slice/relaySlice.js';
 
 interface EntriesChildrenModMenuProps {
   childrenArray: GlossaryNode[];
@@ -25,7 +25,7 @@ const EntriesChildrenModMenu = ({
     childrenArray.reduce((acc, curr, index) => {
       if (preselected.includes(curr.id)) acc.push(index);
       return acc;
-    }, [])
+    }, [] as number[])
   );
 
   const handleSelect = (index: number) => {

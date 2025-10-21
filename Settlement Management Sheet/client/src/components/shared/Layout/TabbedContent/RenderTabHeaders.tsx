@@ -49,11 +49,11 @@ const RenderTabHeaders: React.FC<MakeTabHeadersProps> = ({
           <Tab
             id={`tab-header-${tab.name}`}
             sx={{ flex: 1, transition: 'width 0.3s ease-in-out' }}
-            key={tab.name}
+            key={tab.key || tab.name}
             label={tab.name}
-            value={tab.name}
+            value={tab.key || tab.name}
             onClick={() => {
-              handleTabClick(tab.name, n);
+              handleTabClick(tab.key || tab.name, n);
             }}
           />
         );

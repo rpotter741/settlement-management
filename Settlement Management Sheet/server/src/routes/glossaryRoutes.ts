@@ -26,6 +26,8 @@ import {
   updateNode,
   getEntrySubModel,
   updateEntrySubModel,
+  //subType actions
+  createSubType,
 } from '../controllers/glossaryController.ts';
 
 const router = express.Router();
@@ -54,5 +56,10 @@ router.post('/optionsByProperty', getOptionsByProperty);
 router.post('/node/update', updateNode);
 router.get('/entry/subModel', getEntrySubModel);
 router.patch('/entry/subModel/update', updateEntrySubModel);
+
+//subType routes
+router.post('/subType/create', createSubType);
+router.patch('/subType/update');
+router.post('/subType/delete');
 
 export default router;

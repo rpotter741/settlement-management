@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
-import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { GlossaryEntry, GlossaryEntryType, GlossaryNode } from 'types/index.js';
 import { rehydrateGlossaryTree } from '@/features/Glossary/utils/rehydrateGlossary.js';
 
 const base = (state: RootState): GlossaryState => state.glossary;
@@ -132,12 +132,57 @@ export const selectGlossaryTree = (glossaryId: string) =>
   });
 
 export const selectSubTypeById = (glossaryId: string, subTypeId: string) =>
-  createSelector(
-    base,
-    (glossaryState: GlossaryState) =>
-      glossaryState.glossaries.edit.byId[glossaryId]?.templates?.[subTypeId] ||
-      null
-  );
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
+    if (!subTypes) return null;
+    for (const type of Object.values(subTypes)) {
+      if (subTypeId in (type as Record<string, unknown>)) {
+        return (type as Record<string, any>)[subTypeId];
+      }
+    }
+
+    return null;
+  });
+
+export const selectSubTypeGroupById = ({
+  glossaryId,
+  type,
+  subTypeId,
+  groupId,
+}: {
+  glossaryId: string;
+  type: GlossaryEntryType;
+  subTypeId: string;
+  groupId: string;
+}) =>
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
+    if (!subTypes) return null;
+    const subTypeGroup = subTypes[type]?.[subTypeId]?.groupData?.[groupId];
+    return subTypeGroup || null;
+  });
+
+export const selectSubTypePropertyById = ({
+  glossaryId,
+  subTypeId,
+  type,
+  groupId,
+  propertyId,
+}: {
+  glossaryId: string;
+  subTypeId: string;
+  type: GlossaryEntryType;
+  groupId: string;
+  propertyId: string;
+}) =>
+  createSelector(base, (glossaryState: GlossaryState) => {
+    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
+    return (
+      subTypes?.[type]?.[subTypeId]?.groupData[groupId]?.propertyData[
+        propertyId
+      ] || null
+    );
+  });
 
 export const selectActiveId = () =>
   createSelector(
@@ -177,4 +222,6 @@ export const selectors = {
   selectStaticThemeById,
   selectGlossaryTree,
   selectSubTypeById,
+  selectSubTypeGroupById,
+  selectSubTypePropertyById,
 };

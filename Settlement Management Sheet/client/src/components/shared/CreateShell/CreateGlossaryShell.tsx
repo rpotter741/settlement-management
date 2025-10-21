@@ -35,7 +35,6 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   const dispatch: AppDispatch = useDispatch();
   const { showModal, closeModal } = useModalActions();
   const { tool, id, mode, side, tabId, glossaryId, tabType } = tab;
-  console.log(tab);
 
   const updateLastSaved = (keypath: string) => {
     const lastSaved = cloneDeep(tab.viewState.lastSaved || {});
@@ -53,7 +52,6 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   if (!glossaryId) return null;
 
   const { node, entry } = useNodeEditor(glossaryId, id);
-  console.log(node, entry, glossaryId, id);
 
   const nodeStructure = useSelector(selectGlossaryNodes(glossaryId));
 

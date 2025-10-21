@@ -8,14 +8,23 @@ interface TabPanelProps {
   children: React.ReactNode;
   activeTab: string;
   tabName: string;
+  tabKey: string;
   columns: number;
   index?: number;
   lastIndex?: number;
 }
 
 const TabPanel: React.FC<TabPanelProps> = React.memo(
-  ({ children, activeTab, tabName, columns, index = 0, lastIndex = 0 }) => {
-    const isActive = activeTab === tabName;
+  ({
+    children,
+    activeTab,
+    tabName,
+    columns,
+    index = 0,
+    lastIndex = 0,
+    tabKey,
+  }) => {
+    const isActive = activeTab === tabKey;
     const sameIndex = index === lastIndex;
     if (!isActive) return null;
 

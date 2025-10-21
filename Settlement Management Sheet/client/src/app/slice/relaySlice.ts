@@ -6,6 +6,7 @@ interface RelayEntry {
   status: 'pending' | 'complete' | 'error';
   errorMessage?: string;
   ttl: number;
+  sourceId?: string; // Optional field for tracking source of relay
 }
 
 interface RelayState {
@@ -27,21 +28,38 @@ const relaySlice = createSlice({
         data?: any;
         status?: 'pending' | 'complete' | 'error';
         ttl?: number;
+        sourceId?: string; // Optional field for tracking source of relay
       }>
     ) => {
-      const { id, data, status, ttl } = action.payload;
+      const { id, data, status, ttl, sourceId } = action.payload;
       state.relays[id] = {
         data: data ?? null,
         timestamp: Date.now(),
         status: status ?? 'pending',
         ttl: ttl ?? 10000,
+        sourceId: sourceId ?? undefined,
       };
     },
-    updateRelay: (state, action: PayloadAction<{ id: string; data: any }>) => {
-      const { id, data } = action.payload;
+    updateRelay: (
+      state,
+      action: PayloadAction<{ id: string; data: any; sourceId?: string }>
+    ) => {
+      const { id, data, sourceId } = action.payload;
       if (state.relays[id]) {
-        state.relays[id].data = data;
-        state.relays[id].status = 'complete';
+        if (state.relays[id].data) {
+          // Merge existing data with new data
+          state.relays[id].data = {
+            ...state.relays[id].data,
+            ...data,
+          };
+          state.relays[id].status = 'complete';
+          state.relays[id].sourceId = sourceId ?? undefined;
+          return;
+        } else {
+          state.relays[id].data = data;
+          state.relays[id].status = 'complete';
+          state.relays[id].sourceId = sourceId ?? undefined;
+        }
       }
     },
     clearRelay: (state, action: PayloadAction<{ id: string }>) => {
@@ -52,12 +70,17 @@ const relaySlice = createSlice({
     },
     addErrorMessage: (
       state,
-      action: PayloadAction<{ id: string; errorMessage: string }>
+      action: PayloadAction<{
+        id: string;
+        errorMessage: string;
+        sourceId?: string;
+      }>
     ) => {
-      const { id, errorMessage } = action.payload;
+      const { id, errorMessage, sourceId } = action.payload;
       if (state.relays[id]) {
         state.relays[id].status = 'error';
         state.relays[id].errorMessage = errorMessage;
+        state.relays[id].sourceId = sourceId ?? undefined;
       }
     },
     refreshRelay: (state, action: PayloadAction<{ id: string }>) => {

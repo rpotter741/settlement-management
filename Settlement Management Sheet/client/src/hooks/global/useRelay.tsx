@@ -7,9 +7,11 @@ import {
   refreshRelay,
 } from '@/app/slice/relaySlice.js';
 import { AppDispatch } from '@/app/store.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
+import { v4 as newId } from 'uuid';
+import { GenericObject } from '../../../../shared/types/common.js';
 
 export type RelayStatus = 'pending' | 'complete' | 'error';
 
@@ -97,3 +99,73 @@ export function useRelaySub<T = unknown>({
     refreshTTL,
   };
 }
+
+export const useRelayChannel = <T extends GenericObject>({
+  id,
+  onComplete,
+  removeAfterConsume = true,
+  deps = [],
+}: {
+  id: string;
+  onComplete?: (data: T) => void;
+  removeAfterConsume?: boolean;
+  deps?: any[];
+}) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const sourceId = useMemo(() => newId(), []);
+  const relay = useSelector(selectRelayById(id));
+
+  const data = (relay?.data as T) ?? null;
+  const status: RelayStatus = relay?.status ?? 'pending';
+
+  const openRelay = ({ data, status }: { data?: T; status?: RelayStatus }) => {
+    if (status === 'pending') return; // Prevent reopening if already pending
+    dispatch(
+      initializeRelay({ id, data: { ...data, sourceId }, status, sourceId })
+    );
+  };
+
+  const updateRelay = ({ data }: { data: T }) => {
+    dispatch(update({ id, data: { ...data, sourceId }, sourceId }));
+  };
+
+  const addError = (errorMessage: string) => {
+    dispatch(addErrorMessage({ id, errorMessage, sourceId }));
+  };
+
+  const closeRelay = () => {
+    dispatch(clearRelay({ id }));
+  };
+
+  const refreshTTL = () => {
+    dispatch(refreshRelay({ id }));
+  };
+
+  useEffect(() => {
+    if (
+      status === 'complete' &&
+      onComplete &&
+      data !== null &&
+      data.sourceId !== sourceId
+    ) {
+      onComplete(data);
+      if (removeAfterConsume) closeRelay();
+    }
+  }, [status, data, onComplete, removeAfterConsume, ...deps]);
+
+  return useMemo(
+    () => ({
+      data,
+      status,
+      isPending: status === 'pending',
+      isComplete: status === 'complete',
+      isError: status === 'error',
+      openRelay,
+      updateRelay,
+      addError,
+      closeRelay,
+      refreshTTL,
+    }),
+    [data, status, openRelay, updateRelay, addError, closeRelay, refreshTTL]
+  );
+};

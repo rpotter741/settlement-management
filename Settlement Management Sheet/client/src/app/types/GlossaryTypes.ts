@@ -41,7 +41,8 @@ export interface GlossaryStateEntry {
   options: any;
   integrationState: any;
   theme: string | { light: any; dark: any };
-  templates: any;
+  subTypes: any;
+  visibility: VisibilitySetting | null;
 }
 
 export interface GlossaryState {

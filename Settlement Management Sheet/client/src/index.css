@@ -33,3 +33,14 @@ body {
   box-sizing: border-box;
   overflow: hidden;
 }
+
+.observerTest ::before {
+  content: '';
+  position: fixed;
+  top: 45%;
+  height: 10%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 0, 0, 1);
+  pointer-events: none;
+}

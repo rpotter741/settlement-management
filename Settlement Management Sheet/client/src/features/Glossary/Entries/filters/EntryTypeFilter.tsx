@@ -1,6 +1,6 @@
 import capitalize from '@/utility/inputs/capitalize.js';
 import { EntriesViewerFilterEntry } from '../useEntriesViewer.js';
-import { Autocomplete, Button, TextField } from '@mui/material';
+import { Autocomplete, Button, Menu, TextField } from '@mui/material';
 import BaseMenu from '@/components/shared/Menu/BaseMenu.js';
 import { useEffect, useState } from 'react';
 import CheckButton from '@/components/shared/Menu/Buttons/CheckButton.js';
@@ -32,10 +32,6 @@ const FilterMenu = ({
       }))
   );
 
-  useEffect(() => {
-    console.log(checklist);
-  }, [checklist]);
-
   function handleClick(item: { label: string; value: string }) {
     const isChecked = checklist.some((i) => i.value === item.value);
     const newChecklist = isChecked
@@ -60,7 +56,7 @@ const FilterMenu = ({
       >
         <LabelListCount label={'Type Filters'} length={checklist.length} />
       </Button>
-      <BaseMenu openMenu={openMenu} handleClose={() => setOpenMenu(null)}>
+      <Menu open={Boolean(openMenu)} onClose={() => setOpenMenu(null)}>
         {options.map((item: { label: string; value: string }) => (
           <CheckButton
             key={item.value}
@@ -69,7 +65,7 @@ const FilterMenu = ({
             onClick={() => handleClick(item)}
           />
         ))}
-      </BaseMenu>
+      </Menu>
     </>
   );
 };
