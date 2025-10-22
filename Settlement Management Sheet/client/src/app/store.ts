@@ -10,6 +10,7 @@ import panelReducer from './slice/panelSlice.js';
 import uiReducer from './slice/uiSlice.js';
 import dirtyReducer from './slice/dirtySlice.js';
 import relayReducer from './slice/relaySlice.js';
+import subTypeReducer from './slice/subTypeSlice.js';
 import { relayTimerMiddleware } from './middleware/relayTTLMiddleware.js';
 
 export const store = configureStore({
@@ -25,9 +26,10 @@ export const store = configureStore({
     ui: uiReducer,
     dirty: dirtyReducer,
     relay: relayReducer,
+    subType: subTypeReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat([relayTimerMiddleware(10000)]),
+    getDefaultMiddleware().concat([relayTimerMiddleware()]),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

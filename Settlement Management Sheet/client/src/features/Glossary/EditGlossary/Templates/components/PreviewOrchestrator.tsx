@@ -28,6 +28,7 @@ const PreviewOrchestrator = ({
     groupId: string,
     propertyId: string
   ) => {
+    //@ts-ignore
     console.log(source.groups[groupId].properties[propertyId]);
     const newData = generateCompoundPropertyValue(sourceProperty, propertyId);
     const addition = newData.value[newData.order[0]];

@@ -1,7 +1,4 @@
-import {
-  selectActiveId,
-  selectSubTypeById,
-} from '@/app/selectors/glossarySelectors.js';
+import { selectSubTypeById } from '@/app/selectors/subTypeSelectors.js';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as newId } from 'uuid';
@@ -9,14 +6,11 @@ import addSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/addSubTypePr
 import addSubTypeGroupThunk from '@/app/thunks/glossary/subtypes/addSubTypeGroupThunk.js';
 
 const useSubTypeEditor = (id: string) => {
-  const glossaryId = useSelector(selectActiveId());
-  const subType = useSelector(selectSubTypeById(glossaryId || '', id));
+  const subType = useSelector(selectSubTypeById(id));
 
   const addGroup = () => {
     addSubTypeGroupThunk({
-      glossaryId: glossaryId || '',
       subTypeId: id,
-      type: subType?.entryType,
       group: {
         name: 'New Group',
         id: newId(),
@@ -32,8 +26,6 @@ const useSubTypeEditor = (id: string) => {
     if (!group) return;
     const newPropertyId = newId();
     addSubTypePropertyThunk({
-      glossaryId: glossaryId || '',
-      type: subType.entryType,
       subTypeId: subType.id,
       groupId,
       property: {

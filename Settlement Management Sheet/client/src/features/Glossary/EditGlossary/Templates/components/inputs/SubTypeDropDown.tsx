@@ -36,7 +36,6 @@ const SubTypeDropDown = ({
   property,
   mode,
   propertyId,
-  subPropertyId,
   subPropertySide,
 }: {
   property: any;
@@ -46,7 +45,6 @@ const SubTypeDropDown = ({
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId?: string;
   subPropertySide?: 'left' | 'right';
 }) => {
   const { getPropertyLabel } = usePropertyLabel();
@@ -76,9 +74,7 @@ const SubTypeDropDown = ({
     subTypeId,
     groupId,
     propertyId,
-    mode,
     property,
-    subPropertyId,
     subPropertySide,
   });
 
@@ -107,7 +103,6 @@ const SubTypeDropDown = ({
         groupId={groupId}
         propertyId={propertyId}
         isCompound={isCompound}
-        subPropertyId={subPropertyId}
         side={subPropertySide}
       />
       <Box

@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { GlossaryEntryType } from '../../../../../../../../shared/types/index.js';
 import FieldDefinition from '../../wrappers/FieldDefinition.js';
+import useCompoundBridge from '../../hooks/useCompoundBridge.js';
 
 const SubTypeDate = ({
   glossaryId,
@@ -21,7 +22,14 @@ const SubTypeDate = ({
   propertyId: string;
   handleChange: (value: any, keypath: string) => void;
 }) => {
-  //
+  const { isCompound } = useCompoundBridge({
+    glossaryId,
+    type,
+    subTypeId,
+    groupId,
+    propertyId,
+    property,
+  });
 
   return (
     <>
@@ -34,6 +42,7 @@ const SubTypeDate = ({
         subTypeId={subTypeId}
         groupId={groupId}
         propertyId={propertyId}
+        isCompound={isCompound}
       />
     </>
   );

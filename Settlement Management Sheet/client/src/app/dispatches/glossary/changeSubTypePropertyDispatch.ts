@@ -6,7 +6,8 @@ import {
 import {
   changeSubTypeProperty,
   changeSubTypeSubProperty,
-} from '@/app/slice/glossarySlice.js';
+  SubTypeProperty,
+} from '@/app/slice/subTypeSlice.js';
 import { SubTypePropertyTypes } from '@/features/Glossary/EditGlossary/Templates/generics/genericContinent.js';
 import { v4 as newId } from 'uuid';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
@@ -28,8 +29,6 @@ export function changeSubTypePropertyDispatch({
 }) {
   dispatch(
     changeSubTypeProperty({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
       propertyId,
@@ -41,8 +40,8 @@ export function changeSubTypePropertyDispatch({
 export function createDefaultProperty(
   type: SubTypePropertyTypes,
   name: string
-): GenericObject | null {
-  let property: GenericObject = { name };
+): SubTypeProperty | null {
+  let property: Partial<SubTypeProperty> = { name };
   switch (type) {
     case 'text':
       property.id = newId();
@@ -105,12 +104,10 @@ export function createDefaultProperty(
       return null;
   }
 
-  return property;
+  return property as SubTypeProperty;
 }
 
 export function createAndDispatchDefaultProperty({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
   propertyId,
@@ -130,16 +127,14 @@ export function createAndDispatchDefaultProperty({
 
   dispatch(
     addDirtyKeypath({
-      scope: 'glossary',
-      id: glossaryId,
-      keypath: `subTypes.${type}.${subTypeId}.groupData.${groupId}.propertyData.${propertyId}`,
+      scope: 'subType',
+      id: subTypeId,
+      keypath: `${subTypeId}.groupData.${groupId}.propertyData.${propertyId}`,
     })
   );
 
   dispatch(
     changeSubTypeProperty({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
       propertyId,
@@ -149,8 +144,6 @@ export function createAndDispatchDefaultProperty({
 }
 
 export function createAndDispatchDefaultSubProperty({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
   propertyId,
@@ -173,16 +166,14 @@ export function createAndDispatchDefaultSubProperty({
 
   dispatch(
     addDirtyKeypath({
-      scope: 'glossary',
-      id: glossaryId,
-      keypath: `subTypes.${type}.${subTypeId}.groupData.${groupId}.propertyData.${propertyId}.${side}`,
+      scope: 'subType',
+      id: subTypeId,
+      keypath: `${subTypeId}.groupData.${groupId}.propertyData.${propertyId}.${side}`,
     })
   );
 
   dispatch(
     changeSubTypeSubProperty({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
       propertyId,

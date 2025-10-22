@@ -17,7 +17,6 @@ const SubTypeCheckbox = ({
   property,
   mode,
   propertyId,
-  subPropertyId,
   subPropertySide,
 }: {
   property: any;
@@ -27,7 +26,6 @@ const SubTypeCheckbox = ({
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId?: string;
   subPropertySide?: 'left' | 'right';
 }) => {
   //
@@ -37,9 +35,7 @@ const SubTypeCheckbox = ({
     subTypeId,
     groupId,
     propertyId,
-    mode,
     property,
-    subPropertyId,
     subPropertySide,
   });
 
@@ -55,7 +51,6 @@ const SubTypeCheckbox = ({
         groupId={groupId}
         propertyId={propertyId}
         isCompound={isCompound}
-        subPropertyId={subPropertyId}
         side={subPropertySide}
       />
       <FieldRow

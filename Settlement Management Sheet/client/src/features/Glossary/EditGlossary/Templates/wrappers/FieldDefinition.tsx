@@ -24,7 +24,6 @@ const FieldDefinition = ({
   children,
   sx = {},
   side,
-  subPropertyId,
   isCompound,
 }: {
   glossaryId: string;
@@ -38,7 +37,6 @@ const FieldDefinition = ({
   children?: React.ReactNode;
   isCompound: boolean;
   side?: 'left' | 'right';
-  subPropertyId?: string;
   sx?: any;
 }) => {
   const subTypePropertyTypesFiltered = isCompound

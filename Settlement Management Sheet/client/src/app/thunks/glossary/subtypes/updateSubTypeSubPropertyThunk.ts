@@ -3,27 +3,20 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import { GlossaryEntryType } from '../../../../../../shared/types/index.js';
-import { updateSubTypeSubPropertyDispatch } from '@/app/dispatches/glossary/updateSubTypeSubPropertyDispatch.js';
 import { dispatch } from '@/app/constants.js';
+import { updateSubTypeSubProperty } from '@/app/slice/subTypeSlice.js';
 
 export function updateSubTypeSubPropertyThunkRoot({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
   propertyId,
-  subPropertyId,
   side,
   keypath,
   value,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId: string;
   side: 'left' | 'right';
   keypath: string;
   value: any;
@@ -33,11 +26,11 @@ export function updateSubTypeSubPropertyThunkRoot({
 
     try {
       const state = getState();
-      const glossary = state.glossary.glossaries.edit.byId[glossaryId];
-      if (!glossary) {
+      const subType = state.subType.edit[subTypeId];
+      if (!subType) {
         dispatch(
           showSnackbar({
-            message: 'Glossary not found.',
+            message: 'SubType not found.',
             type: 'error',
             duration: 3000,
           })
@@ -45,32 +38,29 @@ export function updateSubTypeSubPropertyThunkRoot({
         return;
       }
 
-      console.log(keypath);
-
-      updateSubTypeSubPropertyDispatch({
-        glossaryId,
-        type,
-        subTypeId,
-        groupId,
-        propertyId,
-        subPropertyId,
-        side,
-        keypath,
-        value,
-      });
+      dispatch(
+        updateSubTypeSubProperty({
+          subTypeId,
+          groupId,
+          propertyId,
+          side,
+          keypath,
+          value,
+        })
+      );
 
       dispatch(
         addDirtyKeypath({
-          scope: 'glossary',
-          id: glossaryId,
-          keypath: `subTypes.${type}.${subTypeId}.groupData.${groupId}.propertyData.${propertyId}.${side}.${keypath}`,
+          scope: 'subType',
+          id: subTypeId,
+          keypath: `${subTypeId}.groupData.${groupId}.propertyData.${propertyId}.${side}.${keypath}`,
         })
       );
     } catch (error) {
-      console.error('Error updating glossary:', error);
+      console.error('Error updating subType:', error);
       dispatch(
         showSnackbar({
-          message: 'Error updating glossary. Try again later.',
+          message: 'Error updating subType. Try again later.',
           type: 'error',
           duration: 3000,
         })
@@ -80,34 +70,25 @@ export function updateSubTypeSubPropertyThunkRoot({
 }
 
 export default function updateSubTypeSubPropertyThunk({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
   propertyId,
-  subPropertyId,
   side,
   keypath,
   value,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId: string;
   side: 'left' | 'right';
   keypath: string;
   value: any;
 }) {
   dispatch(
     updateSubTypeSubPropertyThunkRoot({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
       propertyId,
-      subPropertyId,
       side,
       keypath,
       value,

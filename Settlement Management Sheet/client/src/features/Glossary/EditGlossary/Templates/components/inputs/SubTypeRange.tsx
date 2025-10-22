@@ -33,7 +33,6 @@ const SubTypeRange = ({
   property,
   mode,
   propertyId,
-  subPropertyId,
   subPropertySide,
 }: {
   property: any;
@@ -43,7 +42,6 @@ const SubTypeRange = ({
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId?: string;
   subPropertySide?: 'left' | 'right';
 }) => {
   const [hoverString, setHoverString] = useState('');
@@ -57,9 +55,7 @@ const SubTypeRange = ({
     subTypeId,
     groupId,
     propertyId,
-    mode,
     property,
-    subPropertyId,
     subPropertySide,
   });
 

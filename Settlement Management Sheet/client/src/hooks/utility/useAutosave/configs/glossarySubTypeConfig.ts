@@ -3,11 +3,11 @@ import { useDispatch } from 'react-redux';
 import batchSubTypeDefinitionThunk from '@/app/thunks/glossary/subtypes/batchSubTypeDefinitionThunk.js';
 
 export default function glossarySubTypeAutosaveConfig({
-  glossaryId,
+  subTypeId,
   name,
   intervalMs,
 }: {
-  glossaryId: string;
+  subTypeId: string;
   name: string;
   intervalMs?: number;
 }) {
@@ -15,7 +15,7 @@ export default function glossarySubTypeAutosaveConfig({
   const batchSaveFn = async () => {
     dispatch(
       batchSubTypeDefinitionThunk({
-        id: glossaryId,
+        id: subTypeId,
       })
     );
   };

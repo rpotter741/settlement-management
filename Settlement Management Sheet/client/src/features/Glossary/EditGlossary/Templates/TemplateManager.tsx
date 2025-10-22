@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import FocusOrchestrator from './components/FocusOrchestrator.js';
 import FormOrchestrator from './components/FormOrchestrator.js';
 import useTheming from '@/hooks/layout/useTheming.js';
-import { updateSubTypeName } from '@/app/slice/glossarySlice.js';
+import { updateSubTypeName } from '@/app/slice/subTypeSlice.js';
 import { glossaryEntryTypeOptions } from '../../../../../../shared/types/index.js';
 import { usePropertyLabel } from '../../utils/getPropertyLabel.js';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
@@ -62,7 +62,6 @@ const SubTypeManager = () => {
         addSubTypeThunk({
           subType: data.subType,
           setSubTypeId,
-          glossaryId: activeId,
         });
       }
       if (data?.setActiveGroup) {
@@ -100,7 +99,6 @@ const SubTypeManager = () => {
   );
 
   const { subType } = useSubTypeEditor(subTypeId || '');
-  console.log(subType);
   const { openRelay } = useRelayChannel({
     id: 'subType-sidebar-template',
     onComplete: handleData,
@@ -109,6 +107,7 @@ const SubTypeManager = () => {
   useEffect(() => {
     if (subType && activeGroup && activeProperty) {
       const firstGroupId = subType.groupOrder[0] || null;
+      if (!firstGroupId) return;
       if (!subType.groupData?.[activeGroup]) {
         setActiveGroup(firstGroupId);
       }
@@ -136,8 +135,6 @@ const SubTypeManager = () => {
       anchor: key,
       value: e,
       subTypeId: subTypeId || '',
-      type: subType?.entryType || 'entity',
-      glossaryId: activeId as string,
     });
   };
 
@@ -240,8 +237,8 @@ const SubTypeManager = () => {
         gId,
         pId,
         name:
-          subType.groupData[gId]?.propertyData[pId]?.name ||
-          subType.groupData[gId]?.name ||
+          subType!.groupData[gId]?.propertyData[pId]?.name ||
+          subType!.groupData[gId]?.name ||
           'Unnamed',
       };
     }
@@ -329,8 +326,6 @@ const SubTypeManager = () => {
     setNextLabel(nextLabel);
   }, [activeGroup, activeProperty, allGroups, allProperties, subType, mode]);
 
-  if (!activeId) return null;
-
   if (subType && mode === 'preview') {
     return (
       <PreviewOrchestrator
@@ -391,9 +386,7 @@ const SubTypeManager = () => {
                   onChange={(e) => {
                     dispatch(
                       updateSubTypeName({
-                        glossaryId: activeId as string,
                         subTypeId: subTypeId || '',
-                        type: subType.entryType,
                         name: e.target.value,
                       })
                     );
@@ -409,9 +402,7 @@ const SubTypeManager = () => {
                       onChange={(e) => {
                         dispatch(
                           updateSubTypeName({
-                            glossaryId: activeId,
                             subTypeId: subTypeId || '',
-                            type: e.target.value as any,
                             name: subType.name,
                           })
                         );
@@ -420,7 +411,7 @@ const SubTypeManager = () => {
                     >
                       {glossaryEntryTypeOptions.map((option) => (
                         <MenuItem key={option} value={option}>
-                          {getPropertyLabel('system', option).label}
+                          {getPropertyLabel(option).label}
                         </MenuItem>
                       ))}
                     </Select>

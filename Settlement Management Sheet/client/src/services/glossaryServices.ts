@@ -21,6 +21,8 @@ import getEntrySubModel from './glossary/entry/getEntrySubModel.js';
 import updateEntrySubModel from './glossary/entry/updateEntrySubModel.js';
 //subType services
 import createSubType from './glossary/subTypes/createSubType.js';
+import fetchSubTypesByUserId from './glossary/subTypes/fetchSubTypesByUserId.js';
+import fetchSystemSubTypes from './glossary/subTypes/fetchSystemSubtypes.js';
 
 const actions = {
   // glossary actions
@@ -46,6 +48,8 @@ const actions = {
   updateEntrySubModel,
   //subType actions
   createSubType,
+  fetchSubTypesByUserId,
+  fetchSystemSubTypes,
 };
 
 export default actions;

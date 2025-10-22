@@ -1,7 +1,4 @@
-import {
-  selectSubTypeById,
-  selectSubTypePropertyById,
-} from '@/app/selectors/glossarySelectors.js';
+import { selectSubTypeById } from '@/app/selectors/subTypeSelectors.js';
 import { Box, Divider, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
@@ -39,7 +36,7 @@ const FormOrchestrator = ({
   updateActiveGroupProperty: (propertyId: string, groupId: string) => void;
   scrolling: React.MutableRefObject<boolean>;
 }) => {
-  const subType = useSelector(selectSubTypeById(glossaryId, subTypeId));
+  const subType = useSelector(selectSubTypeById(subTypeId));
 
   const { getAlphaColor } = useTheming();
 
@@ -49,8 +46,6 @@ const FormOrchestrator = ({
   const handleChange = useCallback(
     (value: any, keypath: string, groupId: string, propertyId: string) => {
       updateSubTypePropertyThunk({
-        glossaryId,
-        type,
         subTypeId,
         groupId,
         propertyId,

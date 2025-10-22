@@ -1,4 +1,4 @@
-import { selectSubTypePropertyById } from '@/app/selectors/glossarySelectors.js';
+import { selectSubTypePropertyById } from '@/app/selectors/subTypeSelectors.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import {
   CalendarMonth,
@@ -82,9 +82,7 @@ const SidebarProperty = ({
   const { darkenColor, lightenColor, getAlphaColor } = useTheming();
   const property = useSelector(
     selectSubTypePropertyById({
-      glossaryId,
       subTypeId,
-      type,
       groupId,
       propertyId,
     })

@@ -49,7 +49,7 @@ const SubTypeSidebarEditor = ({
 
   useAutosave(
     glossarySubTypeAutosaveConfig({
-      glossaryId: glossaryId || '',
+      subTypeId: editId,
       name: subType ? `SubType:${subType.name}` : 'SubType:Unknown',
       intervalMs: 5000,
     })
@@ -61,6 +61,36 @@ const SubTypeSidebarEditor = ({
     index: number;
   } | null>(null);
 
+  useEffect(() => {
+    const groupId = subType?.groupOrder[0] || null;
+    if (!groupId) return;
+    const propertyId = subType?.groupData[groupId]?.propertyOrder[0] || null;
+    openRelay({
+      data: {
+        setActiveGroup: groupId || null,
+        setActiveProperty: propertyId || null,
+      },
+      status: 'complete',
+    });
+    setActiveGroup(groupId);
+    setActiveProperty(propertyId);
+  }, [subType?.id]);
+
+  useEffect(() => {
+    if (subType && activeGroup && activeProperty) {
+      const firstGroupId = subType.groupOrder[0] || null;
+      if (!firstGroupId) return;
+      if (!subType.groupData?.[activeGroup]) {
+        setActiveGroup(firstGroupId);
+      }
+      if (!subType.groupData?.[activeGroup]?.propertyData[activeProperty]) {
+        const firstPropertyId =
+          subType.groupData[firstGroupId]?.propertyOrder[0] || null;
+        setActiveProperty(firstPropertyId);
+      }
+    }
+  }, [subType, activeGroup, activeProperty]);
+
   function handlePropertyReorder(
     item: { kind: 'property'; propertyId: string; groupId: string },
     hoverIndex: number | null | undefined,
@@ -69,7 +99,8 @@ const SubTypeSidebarEditor = ({
     const srcGroupId = item.groupId;
     const propId = item.propertyId;
 
-    const draft = cloneDeep(subType.groupData);
+    const draft = cloneDeep(subType?.groupData);
+    if (!draft) return;
 
     // 1) Always recompute source index from id
     const srcOrder = Array.from(draft[srcGroupId].propertyOrder);
@@ -112,9 +143,7 @@ const SubTypeSidebarEditor = ({
     }
 
     updateAllSubTypeGroupDataThunk({
-      glossaryId: glossaryId || '',
-      type: subType.entryType,
-      subTypeId: subType.id,
+      subTypeId: subType?.id || '',
       groupData: draft,
     });
 
@@ -146,7 +175,8 @@ const SubTypeSidebarEditor = ({
     }
 
     // group→group reordering
-    const order = Array.from(subType.groupOrder) as string[];
+    const order = Array.from(subType?.groupOrder || []) as string[];
+    if (order.length === 0) return;
     const from = order.indexOf(item.groupId);
     if (from === -1) return;
     const to = Math.max(0, Math.min(hoverIndex ?? 0, order.length - 1));
@@ -154,9 +184,7 @@ const SubTypeSidebarEditor = ({
     order.splice(to, 0, g);
 
     reorderSubTypeGroupsThunk({
-      glossaryId: glossaryId || '',
-      type: subType.entryType,
-      subTypeId: subType.id,
+      subTypeId: subType?.id || '',
       newOrder: order,
     });
   }
@@ -168,41 +196,16 @@ const SubTypeSidebarEditor = ({
     openRelay({ data: { setMode: newMode }, status: 'complete' });
   };
 
-  useEffect(() => {
-    const groupId = subType?.groupOrder[0] || null;
-    const propertyId = subType?.groupData[groupId]?.propertyOrder[0] || null;
-    openRelay({
-      data: {
-        setActiveGroup: groupId || null,
-        setActiveProperty: propertyId || null,
-      },
-      status: 'complete',
-    });
-    setActiveGroup(groupId);
-    setActiveProperty(propertyId);
-  }, [subType?.id]);
-
-  useEffect(() => {
-    if (subType && activeGroup && activeProperty) {
-      const firstGroupId = subType.groupOrder[0] || null;
-      if (!subType.groupData?.[activeGroup]) {
-        setActiveGroup(firstGroupId);
-      }
-      if (!subType.groupData?.[activeGroup]?.propertyData[activeProperty]) {
-        const firstPropertyId =
-          subType.groupData[firstGroupId]?.propertyOrder[0] || null;
-        setActiveProperty(firstPropertyId);
-      }
-    }
-  }, [subType, activeGroup, activeProperty]);
-
   if (!subType) return <Box>No SubType Found</Box>;
+  const propertyLabels = getPropertyLabel(subType.entryType);
   return (
     <Box>
       <Typography variant="h5" sx={{ mt: 3 }}>
         {subType?.name} Properties
       </Typography>
-      <Typography variant="caption">{`( ${getPropertyLabel('system', subType.entryType).label} )`}</Typography>
+      {propertyLabels.label.length ? (
+        <Typography variant="caption">{`( ${propertyLabels.label} )`}</Typography>
+      ) : null}
       <Box sx={{ display: 'flex', gap: 0, justifyContent: 'center', mt: 2 }}>
         <IconButton
           size="small"

@@ -1,4 +1,4 @@
-import { selectSubTypePropertyById } from '@/app/selectors/glossarySelectors.js';
+import { selectSubTypePropertyById } from '@/app/selectors/subTypeSelectors.js';
 import { Box } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
@@ -40,8 +40,6 @@ const FocusOrchestrator = ({
   //
   const property = useSelector(
     selectSubTypePropertyById({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
       propertyId,

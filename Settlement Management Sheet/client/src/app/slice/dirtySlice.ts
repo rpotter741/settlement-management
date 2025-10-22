@@ -5,7 +5,7 @@ type DirtyEntry = {
   dirtyKeypaths: Record<string, boolean>;
 };
 
-export type DirtyScopes = 'tab' | 'glossary' | 'event' | 'apt';
+export type DirtyScopes = 'tab' | 'glossary' | 'event' | 'apt' | 'subType';
 
 export type DirtyState = Record<DirtyScopes, Record<string, DirtyEntry>>;
 
@@ -14,6 +14,7 @@ const initialState: DirtyState = {
   glossary: {},
   event: {},
   apt: {},
+  subType: {},
 };
 
 function ensureEntry(

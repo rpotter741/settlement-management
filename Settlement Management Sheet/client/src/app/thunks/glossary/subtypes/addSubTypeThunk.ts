@@ -4,50 +4,41 @@ import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { dispatch } from '@/app/constants.js';
-import addGlossarySubType from '@/app/dispatches/glossary/addSubTypeDispatch.js';
+import { addSubType } from '@/app/slice/subTypeSlice.js';
 import createSubType from '@/services/glossary/subTypes/createSubType.js';
 
 export function addSubTypeThunkRoot({
-  glossaryId,
   setSubTypeId,
   subType,
 }: {
-  glossaryId: string;
   setSubTypeId: (id: string) => void;
   subType: any;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const state = getState();
-      const glossary = state.glossary.glossaries.edit.byId[glossaryId];
-      if (!glossary) {
-        dispatch(
-          showSnackbar({
-            message: 'Glossary not found.',
-            type: 'error',
-            duration: 3000,
-          })
-        );
-        return;
+      const subTypeState = state.subType.edit;
+
+      setSubTypeId(subType.id);
+
+      dispatch(
+        addSubType({
+          subType,
+        })
+      );
+
+      if (!subTypeState[subType.id]) {
+        await createSubType({
+          subType,
+        }).then((res) => {
+          console.log('Created SubType:', res);
+        });
       }
-
-      addGlossarySubType({
-        glossaryId,
-        setSubTypeId,
-        subType,
-      });
-
-      await createSubType({
-        glossaryId,
-        subType,
-      }).then((res) => {
-        console.log('Created SubType:', res);
-      });
     } catch (error) {
-      console.error('Error updating glossary:', error);
+      console.error('Error adding SubType:', error);
       dispatch(
         showSnackbar({
-          message: 'Error updating glossary. Try again later.',
+          message: 'Error adding SubType. Try again later.',
           type: 'error',
           duration: 3000,
         })
@@ -57,17 +48,14 @@ export function addSubTypeThunkRoot({
 }
 
 export default function addSubTypeThunk({
-  glossaryId,
   setSubTypeId,
   subType,
 }: {
-  glossaryId: string;
   setSubTypeId: (id: string) => void;
   subType: any;
 }) {
   return dispatch(
     addSubTypeThunkRoot({
-      glossaryId,
       setSubTypeId,
       subType,
     })

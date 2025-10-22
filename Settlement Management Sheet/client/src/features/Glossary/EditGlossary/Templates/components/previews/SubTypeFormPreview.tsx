@@ -63,8 +63,6 @@ const SubTypeFormPreview = ({
 
   const handleResizeColumn = (size: number) => {
     updateSubTypePropertyThunk({
-      glossaryId: glossaryId!,
-      type: subType.entryType,
       subTypeId: subType.id,
       groupId: groupId,
       propertyId: contextMenu?.propertyId!,

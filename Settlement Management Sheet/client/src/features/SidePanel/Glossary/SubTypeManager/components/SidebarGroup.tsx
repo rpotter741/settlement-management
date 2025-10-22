@@ -13,7 +13,7 @@ import { addSubTypeProperty } from '@/app/slice/glossarySlice.js';
 import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
 import { v4 as newId } from 'uuid';
 import { useSelector } from 'react-redux';
-import { selectSubTypeGroupById } from '@/app/selectors/glossarySelectors.js';
+import { selectSubTypeGroupById } from '@/app/selectors/subTypeSelectors.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import { RelayStatus } from '@/hooks/global/useRelay.js';
 import { useCallback, useRef, useState } from 'react';
@@ -84,8 +84,6 @@ const SidebarGroup = ({
 }) => {
   const group = useSelector(
     selectSubTypeGroupById({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
     })
@@ -120,6 +118,8 @@ const SidebarGroup = ({
       setGroupHoverIndex(null);
     },
   });
+
+  if (!group) return null;
 
   const handleGroupClick = useCallback(() => {
     setActiveGroup(groupId);
@@ -199,8 +199,6 @@ const SidebarGroup = ({
                   if (e.key === 'Enter') {
                     setName((e.target as HTMLInputElement).value);
                     changeSubTypeGroupNameThunk({
-                      glossaryId,
-                      type,
                       subTypeId,
                       groupId: group.id,
                       name: (e.target as HTMLInputElement).value,
@@ -263,8 +261,6 @@ const SidebarGroup = ({
                   size="small"
                   onClick={() => {
                     removeSubTypeGroupThunk({
-                      glossaryId,
-                      type,
                       subTypeId,
                       groupId,
                     });

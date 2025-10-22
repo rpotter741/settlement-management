@@ -28,6 +28,9 @@ import {
   updateEntrySubModel,
   //subType actions
   createSubType,
+  fetchSubTypesByUserId,
+  fetchSystemSubTypes,
+  batchUpdateSubType,
 } from '../controllers/glossaryController.ts';
 
 const router = express.Router();
@@ -58,8 +61,10 @@ router.get('/entry/subModel', getEntrySubModel);
 router.patch('/entry/subModel/update', updateEntrySubModel);
 
 //subType routes
-router.post('/subType/create', createSubType);
-router.patch('/subType/update');
-router.post('/subType/delete');
+router.post('/subTypes/create', createSubType);
+router.get('/subTypes/user', fetchSubTypesByUserId);
+router.get('/subTypes/system', fetchSystemSubTypes);
+router.post('/subTypes/update', batchUpdateSubType);
+router.post('/subTypes/delete');
 
 export default router;

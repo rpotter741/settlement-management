@@ -35,7 +35,6 @@ const SubTypeCompound = ({
     subTypeId,
     groupId,
     propertyId,
-    mode,
     property,
   });
   //

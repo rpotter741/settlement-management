@@ -1,17 +1,15 @@
 import { ArrowBack } from '@mui/icons-material';
 import { Box, IconButton, Typography, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import GlossarySidePanelWrapper from '../GlossarySidePanelWrapper.js';
 import SubTypeSelect from './SubTypeSelect.js';
 import useGlossaryManager from '@/hooks/glossary/useGlossaryManager.js';
 import SubTypeSidebarEditor from './SubTypeSidebarEditor.js';
 import { GlossaryEntryType } from '../../../../../../shared/types/index.js';
-import { useRelayChannel, useRelayPub } from '@/hooks/global/useRelay.js';
+import { useRelayChannel } from '@/hooks/global/useRelay.js';
 import useTheming from '@/hooks/layout/useTheming.js';
-import { set } from 'lodash';
 import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
-import { useSelector } from 'react-redux';
-import { selectDirtyKeypathsByDomain } from '@/app/selectors/dirtySelectors.js';
+import { dispatch } from '@/app/constants.js';
+import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/fetchSubTypesByUserIdThunk.js';
 
 const SubTypeSidebarOrchestrator = () => {
   const { ui, updateUI } = useGlossaryEditor();
@@ -34,10 +32,7 @@ const SubTypeSidebarOrchestrator = () => {
     ui?.subType?.activeProperty ?? null
   );
 
-  const dirtyKeypaths = useSelector(
-    selectDirtyKeypathsByDomain('glossary', glossaryId || '')
-  );
-  console.log(dirtyKeypaths);
+  dispatch(fetchSubTypesByUserIdThunk());
 
   useEffect(() => {
     return () => {
@@ -100,7 +95,7 @@ const SubTypeSidebarOrchestrator = () => {
   };
 
   return (
-    <GlossarySidePanelWrapper>
+    <Box sx={{ p: 2 }}>
       <Box
         sx={{
           width: '100%',
@@ -188,7 +183,7 @@ const SubTypeSidebarOrchestrator = () => {
           </>
         )} */}
       </Box>
-    </GlossarySidePanelWrapper>
+    </Box>
   );
 };
 

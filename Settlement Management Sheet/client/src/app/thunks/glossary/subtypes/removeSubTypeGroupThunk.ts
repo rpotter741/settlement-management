@@ -7,26 +7,23 @@ import { dispatch } from '@/app/constants.js';
 import addGlossarySubType from '@/app/dispatches/glossary/addSubTypeDispatch.js';
 import { GlossaryEntryType } from '../../../../../../shared/types/index.js';
 import removeSubTypeGroupDispatch from '@/app/dispatches/glossary/removeSubTypeGroupDispatch.js';
+import { removeSubTypeGroup } from '@/app/slice/subTypeSlice.js';
 
 export function removeSubTypeGroupThunkRoot({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
   groupId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const state = getState();
-      const glossary = state.glossary.glossaries.edit.byId[glossaryId];
-      if (!glossary) {
+      const subType = state.subType.edit[subTypeId];
+      if (!subType) {
         dispatch(
           showSnackbar({
-            message: 'Glossary not found.',
+            message: 'SubType not found.',
             type: 'error',
             duration: 3000,
           })
@@ -34,20 +31,20 @@ export function removeSubTypeGroupThunkRoot({
         return;
       }
 
-      removeSubTypeGroupDispatch(glossaryId, type, subTypeId, groupId);
+      dispatch(removeSubTypeGroup({ subTypeId, groupId }));
 
       dispatch(
         addDirtyKeypath({
-          scope: 'glossary',
-          id: glossaryId,
-          keypath: `subTypes.${type}.${subTypeId}`,
+          scope: 'subType',
+          id: subTypeId,
+          keypath: `${subTypeId}`,
         })
       );
     } catch (error) {
-      console.error('Error updating glossary:', error);
+      console.error('Error updating subType:', error);
       dispatch(
         showSnackbar({
-          message: 'Error updating glossary. Try again later.',
+          message: 'Error updating subType. Try again later.',
           type: 'error',
           duration: 3000,
         })
@@ -57,20 +54,14 @@ export function removeSubTypeGroupThunkRoot({
 }
 
 export default function removeSubTypeGroupThunk({
-  glossaryId,
-  type,
   subTypeId,
   groupId,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
   groupId: string;
 }) {
   return dispatch(
     removeSubTypeGroupThunkRoot({
-      glossaryId,
-      type,
       subTypeId,
       groupId,
     })

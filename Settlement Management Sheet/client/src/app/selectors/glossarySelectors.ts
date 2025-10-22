@@ -131,59 +131,6 @@ export const selectGlossaryTree = (glossaryId: string) =>
     return { roots, nodeMap };
   });
 
-export const selectSubTypeById = (glossaryId: string, subTypeId: string) =>
-  createSelector(base, (glossaryState: GlossaryState) => {
-    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
-    if (!subTypes) return null;
-    for (const type of Object.values(subTypes)) {
-      if (subTypeId in (type as Record<string, unknown>)) {
-        return (type as Record<string, any>)[subTypeId];
-      }
-    }
-
-    return null;
-  });
-
-export const selectSubTypeGroupById = ({
-  glossaryId,
-  type,
-  subTypeId,
-  groupId,
-}: {
-  glossaryId: string;
-  type: GlossaryEntryType;
-  subTypeId: string;
-  groupId: string;
-}) =>
-  createSelector(base, (glossaryState: GlossaryState) => {
-    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
-    if (!subTypes) return null;
-    const subTypeGroup = subTypes[type]?.[subTypeId]?.groupData?.[groupId];
-    return subTypeGroup || null;
-  });
-
-export const selectSubTypePropertyById = ({
-  glossaryId,
-  subTypeId,
-  type,
-  groupId,
-  propertyId,
-}: {
-  glossaryId: string;
-  subTypeId: string;
-  type: GlossaryEntryType;
-  groupId: string;
-  propertyId: string;
-}) =>
-  createSelector(base, (glossaryState: GlossaryState) => {
-    const subTypes = glossaryState.glossaries.edit.byId[glossaryId]?.subTypes;
-    return (
-      subTypes?.[type]?.[subTypeId]?.groupData[groupId]?.propertyData[
-        propertyId
-      ] || null
-    );
-  });
-
 export const selectActiveId = () =>
   createSelector(
     base,
@@ -221,7 +168,4 @@ export const selectors = {
   selectEditThemeById,
   selectStaticThemeById,
   selectGlossaryTree,
-  selectSubTypeById,
-  selectSubTypeGroupById,
-  selectSubTypePropertyById,
 };

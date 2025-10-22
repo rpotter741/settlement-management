@@ -17,6 +17,9 @@ import { usePropertyLabel } from '@/features/Glossary/utils/getPropertyLabel.js'
 import useGlossaryManager from '@/hooks/glossary/useGlossaryManager.js';
 import makeNewSubType from '@/features/Glossary/EditGlossary/Templates/generics/genericContinent.js';
 import SubTypeSelectButton from './components/SubTypeSelectButton.js';
+import { useSelector } from 'react-redux';
+import { selectAllSubTypes } from '@/app/selectors/subTypeSelectors.js';
+import { SubType } from '@/app/slice/subTypeSlice.js';
 
 const SubTypeSelect = ({
   type,
@@ -35,22 +38,28 @@ const SubTypeSelect = ({
   const { showModal } = useModalActions();
   const { getPropertyLabel } = usePropertyLabel();
 
-  const { glossary } = useGlossaryManager();
+  const allSubTypes = useSelector(selectAllSubTypes);
 
   const existingSubTypes = useMemo(() => {
-    if (!glossary) return [];
-    const subTypes = glossary.subTypes || [];
+    if (!allSubTypes) return [];
 
-    if (type) {
-      return Object.values(subTypes[type] || {});
-    } else {
-      return Object.keys(subTypes);
-    }
-  }, [glossary, type]);
+    const contentType =
+      listState === 'custom'
+        ? 'CUSTOM'
+        : listState === 'system'
+          ? 'SYSTEM'
+          : null;
+
+    return allSubTypes.filter((subType) => {
+      if (type && subType.entryType !== type) return false;
+      if (contentType && subType.contentType !== contentType) return false;
+      return true;
+    });
+  }, [allSubTypes, type, listState]);
 
   const typeOptions = glossaryEntryTypeOptions
     .map((type) => {
-      const { label, defaultLabel } = getPropertyLabel('system', type);
+      const { label, defaultLabel } = getPropertyLabel(type);
       return {
         label: label || capitalize(defaultLabel || type),
         value: type,
@@ -67,7 +76,7 @@ const SubTypeSelect = ({
       };
       return showModal({ entry });
     }
-    const name = getPropertyLabel('system', type).label || type;
+    const name = getPropertyLabel(type).label || type;
     const { subType } = makeNewSubType(name, type as GlossaryEntryType);
     onSubmit(subType);
     return;
@@ -90,10 +99,7 @@ const SubTypeSelect = ({
         value={
           type
             ? {
-                label: capitalize(
-                  getPropertyLabel('system', type as GlossaryEntryType).label ||
-                    type
-                ),
+                label: capitalize(getPropertyLabel(type).label || type),
                 value: type as GlossaryEntryType,
               }
             : null
@@ -145,37 +151,17 @@ const SubTypeSelect = ({
           onClick={onNewSubType}
         >
           {type
-            ? `Create ${capitalize(getPropertyLabel('system', type).label || type)} SubType`
+            ? `Create ${capitalize(getPropertyLabel(type).label || type)} SubType`
             : 'Create New Sub-Type'}
         </Button>
-        {type
-          ? existingSubTypes.map((subType: any) => (
-              <SubTypeSelectButton
-                key={subType.id}
-                subType={subType}
-                editId={editId}
-                onClick={() => handleButtonClick(subType)}
-              />
-            ))
-          : (existingSubTypes as string[]).map((subTypeKey) => (
-              <Box key={subTypeKey}>
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  {capitalize(
-                    getPropertyLabel('system', subTypeKey).label || subTypeKey
-                  )}
-                </Typography>
-                {Object.values(glossary.subTypes?.[subTypeKey] || {}).map(
-                  (subType: any) => (
-                    <SubTypeSelectButton
-                      key={subType.id}
-                      subType={subType}
-                      editId={editId}
-                      onClick={() => handleButtonClick(subType)}
-                    />
-                  )
-                )}
-              </Box>
-            ))}
+        {existingSubTypes.map((subType: SubType) => (
+          <SubTypeSelectButton
+            key={subType.id}
+            subType={subType}
+            editId={editId}
+            onClick={() => handleButtonClick(subType)}
+          />
+        ))}
       </Box>
     </>
   );

@@ -5,30 +5,25 @@ import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { dispatch } from '@/app/constants.js';
 import {
-  GenericObject,
-  GlossaryEntryType,
-} from '../../../../../../shared/types/index.js';
-import updateAllSubTypeGroupDataDispatch from '@/app/dispatches/glossary/updateAllSubTypeGroupDataDispatch.js';
+  SubTypeGroup,
+  updateAllSubTypeGroupData,
+} from '@/app/slice/subTypeSlice.js';
 
 export function updateAllSubTypeGroupDataThunkRoot({
-  glossaryId,
-  type,
   subTypeId,
   groupData,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
-  groupData: GenericObject;
+  groupData: Record<string, SubTypeGroup>;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
       const state = getState();
-      const glossary = state.glossary.glossaries.edit.byId[glossaryId];
-      if (!glossary) {
+      const subType = state.subType.edit[subTypeId];
+      if (!subType) {
         dispatch(
           showSnackbar({
-            message: 'Glossary not found.',
+            message: 'SubType not found.',
             type: 'error',
             duration: 3000,
           })
@@ -36,25 +31,25 @@ export function updateAllSubTypeGroupDataThunkRoot({
         return;
       }
 
-      updateAllSubTypeGroupDataDispatch({
-        glossaryId,
-        type,
-        subTypeId,
-        groupData,
-      });
+      dispatch(
+        updateAllSubTypeGroupData({
+          subTypeId,
+          groupData,
+        })
+      );
 
       dispatch(
         addDirtyKeypath({
-          scope: 'glossary',
-          id: glossaryId,
-          keypath: `subTypes.${type}.${subTypeId}.groupData`,
+          scope: 'subType',
+          id: subTypeId,
+          keypath: `${subTypeId}.groupData`,
         })
       );
     } catch (error) {
-      console.error('Error updating glossary:', error);
+      console.error('Error updating subType:', error);
       dispatch(
         showSnackbar({
-          message: 'Error updating glossary. Try again later.',
+          message: 'Error updating subType. Try again later.',
           type: 'error',
           duration: 3000,
         })
@@ -64,20 +59,14 @@ export function updateAllSubTypeGroupDataThunkRoot({
 }
 
 export default function updateAllSubTypeGroupDataThunk({
-  glossaryId,
-  type,
   subTypeId,
   groupData,
 }: {
-  glossaryId: string;
-  type: GlossaryEntryType;
   subTypeId: string;
-  groupData: GenericObject;
+  groupData: Record<string, SubTypeGroup>;
 }) {
   return dispatch(
     updateAllSubTypeGroupDataThunkRoot({
-      glossaryId,
-      type,
       subTypeId,
       groupData,
     })

@@ -17,7 +17,6 @@ const SubTypeTextInput = ({
   property,
   mode,
   propertyId,
-  subPropertyId,
   subPropertySide,
 }: {
   property: any;
@@ -27,7 +26,6 @@ const SubTypeTextInput = ({
   subTypeId: string;
   groupId: string;
   propertyId: string;
-  subPropertyId?: string;
   subPropertySide?: 'left' | 'right';
 }) => {
   const { handleTransform, handleChange, isCompound } = useCompoundBridge({
@@ -36,9 +34,7 @@ const SubTypeTextInput = ({
     subTypeId,
     groupId,
     propertyId,
-    mode,
     property,
-    subPropertyId,
     subPropertySide,
   });
 
@@ -80,7 +76,6 @@ const SubTypeTextInput = ({
         groupId={groupId}
         propertyId={propertyId}
         isCompound={isCompound}
-        subPropertyId={subPropertyId}
         side={subPropertySide}
       />
       <FieldRow

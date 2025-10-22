@@ -1,12 +1,9 @@
-import { ThunkDispatch } from 'redux-thunk';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
-
-import { RootState } from '@/app/store.js';
 import serverAction from '@/services/glossaryServices.js';
 import { initializeGlossary } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
-import { Glossary } from 'types/index.js';
 import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.js';
+import { addSubType } from '@/app/slice/subTypeSlice.js';
 
 export default function getGlossariesThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -19,10 +16,11 @@ export default function getGlossariesThunk(): AppThunk {
       const glossaries = await serverAction.getGlossaries();
       const existingState = getState().glossary.glossaries.edit.byId;
 
-      console.log(glossaries);
-
       glossaries.forEach((glossary: GlossaryStateEntry) => {
         if (!existingState[glossary.id]) {
+          glossary.subTypes?.forEach((subType: any) => {
+            dispatch(addSubType({ subType }));
+          });
           dispatch(
             initializeGlossary({
               glossaryId: glossary.id,
