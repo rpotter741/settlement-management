@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "Node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "db/*": ["src/db/*"],
+      "controllers/*": ["src/controllers/*"],
+      "utils/*": ["src/utils/*"],
+      "app/*": ["src/../../client/src/*"]
+    }
+  },
+  "include": ["src/**/*", "tests/**/*", "../client/src/*"]
+}

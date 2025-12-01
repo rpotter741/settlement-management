@@ -1,0 +1,1 @@
+import{j as e,i as t,T as r}from"./main.js";const i=()=>e.jsx(t,{sx:{display:"flex",flexDirection:"column",width:"100%"},children:e.jsx(r,{variant:"h6",gutterBottom:!0,sx:{width:"100%",textAlign:"center"},children:"Name New Template"})});export{i as default};

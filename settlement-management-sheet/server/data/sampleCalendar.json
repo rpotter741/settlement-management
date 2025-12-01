@@ -1,0 +1,45 @@
+{
+  "calendar": {
+    "name": "The Eclorian Dial",
+    "months": [
+      { "name": "Dawnmarch", "days": 30 },
+      { "name": "Luminaris", "days": 30 },
+      { "name": "Flamehold", "days": 30 },
+      { "name": "Brightspire", "days": 30 },
+      { "name": "Mirthsong", "days": 30 },
+      { "name": "Verdentide", "days": 30 },
+      { "name": "Starshade", "days": 30 },
+      { "name": "Moonveil", "days": 30 },
+      { "name": "Frostfall", "days": 30 },
+      { "name": "Darkreach", "days": 30 },
+      { "name": "Snowrest", "days": 30 },
+      { "name": "Eclipsehaven", "days": 30 }
+    ],
+    "weekdays": [
+      "Moondraal",
+      "Twisdyl",
+      "Wensyn",
+      "Thuriel",
+      "Freydael",
+      "Saturna",
+      "Sundral"
+    ],
+    "specialDays": [
+      {
+        "date": "1-1",
+        "name": "Day of Renewal",
+        "description": "Celebrates the start of a new cycle."
+      },
+      {
+        "date": "5-15",
+        "name": "Festival of Blossoms",
+        "description": "Marks the peak of spring and new life."
+      },
+      {
+        "date": "9-30",
+        "name": "Night of Eternal Stars",
+        "description": "A mystical festival under the brightest starlight."
+      }
+    ]
+  }
+}

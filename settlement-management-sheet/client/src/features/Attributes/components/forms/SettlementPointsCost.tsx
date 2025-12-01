@@ -1,0 +1,292 @@
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+
+import { useTools } from 'hooks/tools/useTools.jsx';
+import { useShellContext } from '@/context/ShellContext.js';
+
+import { Box, Typography, Divider, Tooltip, IconButton } from '@mui/material';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+
+import {
+  DraggableList,
+  DropZone,
+  DynamicForm,
+} from '../../../../components/index.js';
+import sPCFormData from '../../helpers/sPCFormData.js';
+
+const settlementTypes = [
+  {
+    name: 'Fortified',
+    description:
+      'Fortified Settlements put their trust in theirs walls, preemptive reconnaissance, and well-trained troops.',
+    id: '789',
+  },
+  {
+    name: 'Mercantile',
+    description:
+      'Mercantile Settlements focus on establishing and expanding trade, developing vibrant culture, and welcoming artisans.',
+    id: '456',
+  },
+  {
+    name: 'Survivalist',
+    description:
+      'Survivalists focus on gathering food, supplies, medical items, and constructing durable shelters.',
+    id: '123',
+  },
+];
+
+const SettlementPointsCost = () => {
+  const { id } = useShellContext();
+  const {
+    edit,
+    selectValue,
+    updateTool: updateAttribute,
+    validateToolField: validateAttributeField,
+    errors: spcErrors,
+  } = useTools('attribute', id);
+
+  const settlementPointCost = selectValue('settlementPointCost');
+  const costs = edit?.settlementPointCost.data;
+  const errors = spcErrors.settlementPointCost;
+  const order = edit?.settlementPointCost.order;
+
+  const [selectedTypes, setSelectedTypes] = useState([]);
+
+  const available = useMemo(() => {
+    const assignedTypes = Object.keys(costs || {}).reduce((types, id) => {
+      types.push(id);
+      return types;
+    }, []);
+    const types = settlementTypes.filter(
+      (type) => !assignedTypes.includes(type.id)
+    );
+    return types;
+  }, [costs, selectedTypes]);
+
+  const fields = useMemo(() => {
+    return Object.entries(costs || {}).map(([id, spc]) => ({
+      ...sPCFormData,
+      name: spc.name,
+      label: spc.name.charAt(0).toUpperCase() + spc.name.slice(1),
+      tooltip: null,
+      id,
+    }));
+  }, [costs, edit]);
+
+  const orderedList = useMemo(() => {
+    return settlementPointCost.order.map((id) => ({
+      id,
+      ...settlementPointCost.data[id],
+    }));
+  });
+
+  const handleValidationUpdate = (error, { id }) => {
+    validateAttributeField(`settlementPointCost.${id}.value`, error);
+  };
+
+  // Handle drop
+  const handleDrop = (item) => {
+    setSelectedTypes((prevSelected) =>
+      prevSelected.includes(item.id)
+        ? prevSelected.filter((id) => id !== item.id)
+        : prevSelected
+    );
+
+    const formattedName = item.name.toLowerCase();
+    const newSPC = {
+      ...costs,
+      [item.id]: { name: formattedName, value: 1 },
+    };
+    updateAttribute('settlementPointCost.data', newSPC);
+
+    const newErrors = {
+      ...errors,
+      [item.id]: { name: null, value: null },
+    };
+
+    validateAttributeField('settlementPointCost.data', newErrors);
+
+    const newOrder = [...order, item.id];
+    updateAttribute('settlementPointCost.order', newOrder);
+  };
+
+  // Handle value change
+  const handleValueChange = useCallback(
+    (value, { id }) => {
+      updateAttribute(`settlementPointCost.data.${id}.value`, value);
+    },
+    [costs]
+  );
+
+  const handleRemoveSettlementType = useCallback(
+    (id) => {
+      const newSPC = { ...costs };
+      delete newSPC[id];
+      updateAttribute('settlementPointCost.data', newSPC);
+
+      const newErrors = { ...errors };
+      delete newErrors[id];
+      validateAttributeField('settlementPointCost', newErrors);
+
+      const newOrder = order.filter((order) => order !== id);
+      updateAttribute('settlementPointCost.order', newOrder);
+    },
+    [costs, errors]
+  );
+
+  const handleCheck = (checked, value) => {
+    if (checked) {
+      setSelectedTypes((prev) => [...prev, value]);
+    } else {
+      setSelectedTypes((prev) => prev.filter((type) => type !== value));
+    }
+  };
+
+  const handleTransfer = () => {
+    const newSPC = { ...costs };
+    const newErrors = { ...errors };
+    const newOrder = [...order];
+
+    selectedTypes.forEach((type) => {
+      newSPC[type.id] = { name: type.name.toLowerCase(), value: 1 };
+      newErrors[type.id] = { name: null, value: null };
+      newOrder.push(type.id);
+    });
+
+    updateAttribute('settlementPointCost.data', newSPC);
+
+    validateAttributeField('settlementPointCost', newErrors);
+
+    updateAttribute('settlementPointCost.order', newOrder);
+
+    setSelectedTypes([]); // Clear after transfer
+  };
+
+  if (!settlementPointCost) return <Box>Loading...</Box>;
+
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 16px 1fr',
+        alignItems: 'center',
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          my: 2,
+          height: '100%',
+        }}
+      >
+        <DraggableList
+          list={available}
+          label="Available"
+          type="type"
+          onCheck={handleCheck}
+          onDetails={true}
+          selected={selectedTypes}
+        />
+      </Box>
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          width: 'fit-content', // Automatically adjusts to content
+        }}
+      >
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{
+            position: 'absolute',
+            height: '100%',
+            backgroundColor: 'divider',
+            width: '1px',
+          }}
+        >
+          {/* Adornment (Button) */}
+          <Tooltip title="Transfer items">
+            <IconButton
+              aria-label="Transfer items" // For screen readers
+              onClick={handleTransfer} // Your transfer logic
+              sx={{
+                borderRadius: 1, // Optional: Adjust for a square/rounded look
+                p: 1, // Optional: Control padding for a compact feel
+                backgroundColor: 'primary.main',
+                color: 'background.paper',
+                position: 'absolute',
+                left: '50%', // Center the button
+                transform: 'translate(-50%, 0)', // Center the button
+                '&:hover': {
+                  backgroundColor: 'success.main',
+                },
+              }}
+            >
+              <ArrowForward />
+            </IconButton>
+          </Tooltip>
+        </Divider>
+      </Box>
+
+      <Box
+        sx={{
+          mt: 1,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          p: 1,
+          height: '100%',
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 0.5 }}>
+          Assigned
+        </Typography>
+        <DropZone type="type" handleAdd={handleDrop} defaultItems={orderedList}>
+          {({ droppedItems }) =>
+            droppedItems.map((type, index) => {
+              const field = fields.find((f) => f.id === type.id);
+              if (!field) return null;
+              return (
+                <DynamicForm
+                  key={type.name}
+                  initialValues={{
+                    [type.name]: type.value || 1,
+                  }}
+                  field={field}
+                  validate={field.validate}
+                  externalUpdate={handleValueChange}
+                  boxSx={{
+                    width: '100%',
+                    m: 0,
+                    p: 0,
+                  }}
+                  onRemove={
+                    type.name !== 'default'
+                      ? () => handleRemoveSettlementType(type.id)
+                      : null
+                  }
+                  onMoreDetails={
+                    type.name !== 'default'
+                      ? () => console.log('More details')
+                      : null
+                  }
+                  shrink
+                  parentError={errors[type.id] ? errors[type.id].value : null}
+                  onError={handleValidationUpdate}
+                />
+              );
+            })
+          }
+        </DropZone>
+      </Box>
+    </Box>
+  );
+};
+
+export default SettlementPointsCost;
