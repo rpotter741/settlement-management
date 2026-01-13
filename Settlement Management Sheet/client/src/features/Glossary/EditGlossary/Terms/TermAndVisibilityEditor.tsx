@@ -13,15 +13,6 @@ import {
 } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import {
-  genrePropertyLabelDefaults,
-  SubModelTypes,
-} from '../../utils/getPropertyLabel.js';
-import EcloreanGrid, {
-  Row,
-} from '@/components/shared/EcloreanGrid/EcloreanGrid.js';
-import { makeGlossarySettingsRow } from '../Settings/EditGlossarySettings.js';
-import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
 
 function isDisabled(
   visibility: 'player' | 'resident' | 'collaborator' | 'public',

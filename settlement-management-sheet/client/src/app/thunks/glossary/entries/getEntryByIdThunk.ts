@@ -1,0 +1,47 @@
+import { ThunkDispatch } from 'redux-thunk';
+import { AppThunk } from '@/app/thunks/glossaryThunks.js';
+import { RootState } from '@/app/store.js';
+import serverAction from '@/services/glossaryServices.js';
+import { addGlossaryEntry } from '@/app/slice/glossarySlice.js';
+import { showSnackbar } from '@/app/slice/snackbarSlice.js';
+import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { cloneDeep } from 'lodash';
+import { Backlink } from '@/features/SyncWorkspace/SyncWorkspace.js';
+
+export default function getEntryById({
+  node,
+}: {
+  node: GlossaryNode;
+}): AppThunk {
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    try {
+      const existingNode = node;
+      const data = await serverAction.getEntryById({
+        nodeId: existingNode.id,
+        entryType: existingNode.entryType,
+      });
+      const { entry, backlinksTo, backlinksFrom } = data;
+
+      const appendedLinks = cloneDeep(entry);
+      appendedLinks.backlinksTo = backlinksTo;
+      appendedLinks.backlinksFrom = backlinksFrom;
+
+      dispatch(
+        addGlossaryEntry({
+          glossaryId: existingNode.glossaryId,
+          entryId: existingNode.id,
+          entryData: appendedLinks as GlossaryEntry,
+        })
+      );
+    } catch (error) {
+      console.error('Error fetching glossary node:', error);
+      dispatch(
+        showSnackbar({
+          message: 'Error fetching glossary node. Try again later.',
+          type: 'error',
+          duration: 3000,
+        })
+      );
+    }
+  };
+}

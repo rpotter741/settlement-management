@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
-import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { GlossaryEntry, GlossaryEntryType, GlossaryNode } from 'types/index.js';
 import { rehydrateGlossaryTree } from '@/features/Glossary/utils/rehydrateGlossary.js';
 
 const base = (state: RootState): GlossaryState => state.glossary;
@@ -131,14 +131,6 @@ export const selectGlossaryTree = (glossaryId: string) =>
     return { roots, nodeMap };
   });
 
-export const selectSubTypeById = (glossaryId: string, subTypeId: string) =>
-  createSelector(
-    base,
-    (glossaryState: GlossaryState) =>
-      glossaryState.glossaries.edit.byId[glossaryId]?.templates?.[subTypeId] ||
-      null
-  );
-
 export const selectActiveId = () =>
   createSelector(
     base,
@@ -176,5 +168,4 @@ export const selectors = {
   selectEditThemeById,
   selectStaticThemeById,
   selectGlossaryTree,
-  selectSubTypeById,
 };

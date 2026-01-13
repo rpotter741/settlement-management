@@ -8,7 +8,7 @@ datasource db {
 }
 
 enum ContentTypes {
-  OFFICIAL
+  SYSTEM
   CUSTOM
 }
 
@@ -49,10 +49,10 @@ model Attribute {
   isValid             Boolean
   status              Status
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([tags])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// CATEGORY //////////////////////////
@@ -77,10 +77,10 @@ model Category {
   isValid       Boolean
   status        Status
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([tags])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// EVENT //////////////////////////
@@ -135,9 +135,9 @@ model Event {
   //}
   //]
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// LISTENER //////////////////////////
@@ -160,6 +160,7 @@ model Listener {
   isValid             Boolean
   status              Status
 
+  @@unique([refId, version])
   //conditions:
   //array of logic objects, eg:
   //  [
@@ -179,7 +180,6 @@ model Listener {
   // ]
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 /////////////////// KITS //////////////////////////
@@ -198,48 +198,30 @@ model Kit {
   name          String
   data          Json
 
-  @@index([refId])
   @@unique([refId, version])
+  @@index([refId])
 }
 
 /////////////////// KEYS ///////////////////////////
 
 model Key {
-  id            String        @id @default(uuid()) // unique per version
-  refId         String        @unique @default(uuid()) // shared lineage / permanent identity
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @unique @default(uuid()) // shared lineage / permanent identity
   version       Int
   contentType   ContentTypes
   createdBy     String
   collaborators String[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   deletedAt     DateTime?
-  isImmutable   Boolean       @default(false)
-  name          String        @unique
+  isImmutable   Boolean      @default(false)
+  name          String       @unique
   description   String?
-  backLinks     KeySettings[] // just want keySetting ids
+  settings      Json
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
-}
-
-model KeySettings {
-  id               String       @id @default(uuid()) // unique per version
-  refId            String       @default(uuid()) // shared lineage / permanent identity
-  version          Int
-  contentType      ContentTypes
-  createdBy        String
-  collaborators    String[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  deletedAt        DateTime?
-  isImmutable      Boolean      @default(false)
-  delay            Json
-  duration         Json
-  durationType     String
-  severityOverTime Json
-  key              Key          @relation(fields: [refId], references: [refId], onDelete: Cascade)
 }
 
 ////////////////// STATUS //////////////////////////
@@ -273,9 +255,9 @@ model gameStatus {
   isValid       Boolean
   status        Status
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// BUILDING //////////////////////////
@@ -307,9 +289,9 @@ model Building {
   //upgrade_base_id
   //upgrade_ref_id
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// UPGRADE //////////////////////////
@@ -337,9 +319,9 @@ model Upgrade {
   isValid       Boolean
   status        Status
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 //impact:
@@ -379,9 +361,9 @@ model TradeHub {
   // number
   // trend: tuple (eg, -1, 1) for weekly loss/gain limit (0, 2) would be increasing, (-5, -2) would be decreasing
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// SETTLEMENT TYPE //////////////////////////
@@ -403,9 +385,9 @@ model SettlementType {
   isValid       Boolean
   status        Status
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////////// SETTLEMENT //////////////////////////
@@ -455,9 +437,9 @@ model Settlement {
   // impacts
   // dates (irl && calendar)
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////// APT ////////////
@@ -480,9 +462,9 @@ model APT {
   progressType    String
   decay           Int
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////// Action ////////////
@@ -505,9 +487,9 @@ model Action {
   cooldown      String?
   flavorText    String[]
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////// StoryThread ////////////
@@ -528,9 +510,9 @@ model StoryThread {
   origin        Json
   primaryKey    Json
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 ////////////// Glossary /////////////
@@ -635,9 +617,9 @@ model GlossaryTheme {
   palettes      Json
   glossaries    String[]
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 model Glossary {
@@ -662,11 +644,11 @@ model Glossary {
   nodes            GlossaryNode[]
   theme            Json?
   integrationState Json?
-  templates        Json?
+  subTypes         EntrySubType[]          @relation("SubTypes")
 
+  @@unique([refId, version])
   @@index([contentType])
   @@index([refId])
-  @@unique([refId, version])
 }
 
 model GlossaryNode {
@@ -713,8 +695,8 @@ model GlossaryEntry {
   backlinksTo      BacklinkIndex[]          @relation("TargetEntry")
   searchVector     Unsupported("tsvector")? // requires native Postgres support
 
-  @@index([refId])
   @@unique([refId, version])
+  @@index([refId])
   @@index([entryType])
   @@index([subTypeId])
   @@index([entryType, subTypeId])
@@ -735,23 +717,16 @@ model EntrySubType {
   isImmutable   Boolean         @default(false)
   name          String
   entryType     EntryTypes
-  groups        EntryGroup[]
+  groupOrder    String[]
+  groupData     Json
   updatedAt     DateTime        @updatedAt
+  anchors       Json
   entries       GlossaryEntry[]
+  glossaries    Glossary[]      @relation("SubTypes")
 
+  @@unique([refId, version])
   @@index([refId])
   @@index([entryType])
-  @@unique([refId, version])
-}
-
-model EntryGroup {
-  id         String       @id
-  name       String
-  order      Int
-  subTypeId  String
-  subType    EntrySubType @relation(fields: [subTypeId], references: [id])
-  properties Json // still an array of field definitions
-  updatedAt  DateTime     @updatedAt
 }
 
 model BacklinkIndex {

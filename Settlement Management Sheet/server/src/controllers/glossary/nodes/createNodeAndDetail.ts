@@ -3,7 +3,7 @@ import glossaryModelMap from '../../../utils/glossaryModelMap.ts';
 import glossaryTypeMap from '../../../utils/glossaryTypeMap.ts';
 import isAdminUserId from '../../../utils/isAdminUserId.ts';
 import requireFields from '../../../utils/requireFields.ts';
-import { GlossShape } from '@prisma/client';
+import { EntryShape } from '@prisma/client';
 
 export default async function createNodeAndDetail(req, res) {
   try {
@@ -32,7 +32,7 @@ export default async function createNodeAndDetail(req, res) {
       id,
       name,
       entryType,
-      fileType: GlossShape.detail,
+      fileType: EntryShape.detail,
       glossaryId,
       parentId: parentId || null,
     };

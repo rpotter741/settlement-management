@@ -1,6 +1,7 @@
 import { createElement, useMemo } from 'react';
 import RenderTabHeaders from './RenderTabHeaders.js';
 import TabPanel from './RenderTab.js';
+import { Box } from '@mui/material';
 
 export interface TabPanelObject {
   name: string;
@@ -47,13 +48,14 @@ const TabbedContent: React.FC<TabbedContentProps> = ({
   //
   const renderedTabs = useMemo(() => {
     return tabs.map((tab, n) => {
-      if (tab.name !== activeTab) return null;
-      const Component = componentMap[tab.name];
+      if (tab.key !== activeTab) return null;
+      const Component = componentMap[tab.name] || Box;
       return (
         <TabPanel
-          key={tab.name}
+          key={tab.key}
           activeTab={activeTab}
           tabName={tab.name}
+          tabKey={tab.key}
           columns={columns}
           index={n}
           lastIndex={lastIndex}

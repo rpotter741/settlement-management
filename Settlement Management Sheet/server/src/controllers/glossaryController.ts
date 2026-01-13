@@ -23,6 +23,12 @@ import getEntryById from './glossary/entry/getEntryById.ts';
 import getEntrySubModel from './glossary/entry/getEntrySubModel.ts';
 import updateEntrySubModel from './glossary/entry/updateEntrySubModel.ts';
 
+//subType actions
+import createSubType from './glossary/subTypes/createSubType.ts';
+import fetchSubTypesByUserId from './glossary/subTypes/fetchSubTypesByUserId.ts';
+import fetchSystemSubTypes from './glossary/subTypes/fetchSystemSubTypes.ts';
+import batchUpdateSubType from './glossary/subTypes/batchUpdateSubType.ts';
+
 export {
   // glossary actions
   getGlossaries,
@@ -46,4 +52,9 @@ export {
   getEntryById,
   getEntrySubModel,
   updateEntrySubModel,
+  //subType actions
+  createSubType,
+  fetchSubTypesByUserId,
+  fetchSystemSubTypes,
+  batchUpdateSubType,
 };

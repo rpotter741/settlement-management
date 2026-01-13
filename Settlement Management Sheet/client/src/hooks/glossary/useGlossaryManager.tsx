@@ -41,6 +41,7 @@ const useGlossaryManager = () => {
 
   const handleSelect = (glossId: any) => {
     if (glossId === glossaryId) return;
+    console.log('setting active id');
     dispatch(setActiveGlossaryId({ glossaryId: glossId }));
   };
 
@@ -62,6 +63,7 @@ const useGlossaryManager = () => {
     deselectGlossary,
     glossary,
     glossaries,
+    glossaryId,
   };
 };
 

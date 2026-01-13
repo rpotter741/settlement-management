@@ -17,8 +17,10 @@ export default async function getGlossaries(req: any, res: any) {
         subGenre: true,
         integrationState: true,
         theme: true,
+        subTypes: true,
       },
     });
+    console.log(glossaries);
     return res.json(glossaries);
   } catch (error) {
     console.error(`Error getting glossaries:`, error);

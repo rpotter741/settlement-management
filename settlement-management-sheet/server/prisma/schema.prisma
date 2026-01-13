@@ -1,0 +1,851 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentTypes {
+  SYSTEM
+  CUSTOM
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/////////////////// ATTRIBUTE //////////////////////
+
+model Attribute {
+  id                  String       @id @default(uuid()) // unique per version
+  refId               String       @default(uuid()) // shared lineage / permanent identity
+  version             Int
+  contentType         ContentTypes // for separating official from custom content
+  createdBy           String // Potential foreign key to User model in the future
+  collaborators       String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+  isImmutable         Boolean      @default(false)
+  genre               String?
+  subGenre            String?
+  name                String
+  description         String
+  balance             Json
+  thresholds          Json
+  settlementPointCost Json
+  isPositive          Boolean
+  canHurt             Boolean
+  isTradeable         Boolean
+  hasSPC              Boolean
+  hasThresholds       Boolean
+  properties          Json
+  icon                Json
+  tags                String[] // Array of strings for tags
+  isValid             Boolean
+  status              Status
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([tags])
+  @@index([refId])
+}
+
+////////////////// CATEGORY //////////////////////////
+
+model Category {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  attributes    Json
+  thresholds    Json
+  dependencies  Json
+  tags          String[]
+  isValid       Boolean
+  status        Status
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([tags])
+  @@index([refId])
+}
+
+////////////////// EVENT //////////////////////////
+
+model Event {
+  id              String       @id @default(uuid()) // unique per version
+  refId           String       @default(uuid()) // shared lineage / permanent identity
+  version         Int
+  contentType     ContentTypes
+  createdBy       String
+  collaborators   String[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  isImmutable     Boolean      @default(false)
+  name            String
+  description     String
+  flavorText      Json
+  narrativeWeight String?
+  phases          Json
+  replacement     Json
+  links           String[]
+  entryPhaseId    String
+  isValid         Boolean
+  status          Status
+
+  //flavorText:
+  //trivial: string,
+  //minor: string,
+  //...
+  //significant: string
+
+  //phases:
+  //[
+  //  {
+  //    type: 'active / immediate / passive / indefinite'
+  //    impacts: see-below,
+  //    length: 0+,
+  //    productivity: 0+,
+  //  },
+  //]
+
+  //resolutions:
+  //[
+  //{
+  //uuid():
+  //{
+  //name:
+  //description:
+  //impacts:
+  //}
+  //}
+  //]
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// LISTENER //////////////////////////
+
+model Listener {
+  id                  String       @id @default(uuid()) // unique per version
+  refId               String       @default(uuid()) // shared lineage / permanent identity
+  version             Int
+  contentType         ContentTypes
+  createdBy           String
+  collaborators       String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+  isImmutable         Boolean      @default(false)
+  name                String
+  description         String
+  conditionEventPairs Json
+  active              Boolean?
+  isValid             Boolean
+  status              Status
+
+  @@unique([refId, version])
+  //conditions:
+  //array of logic objects, eg:
+  //  [
+  //    {
+  //    logic: 'none',
+  //   condition: {
+  //     attribute_base_id: value
+  //   }
+  // },
+  // {
+  //  logic: 'and',
+  // condition: {
+  //  attribute_base_id: value,
+  // attribute_base_id: value,
+  // }
+  // }
+  // ]
+  @@index([contentType])
+  @@index([refId])
+}
+
+/////////////////// KITS //////////////////////////
+
+model Kit {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  data          Json
+
+  @@unique([refId, version])
+  @@index([refId])
+}
+
+/////////////////// KEYS ///////////////////////////
+
+model Key {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @unique @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String       @unique
+  description   String?
+  settings      Json
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// STATUS //////////////////////////
+enum StatusType {
+  Weather
+  Morale
+  Settlement
+}
+
+enum StatusMode {
+  Simple
+  Advanced
+}
+
+model gameStatus {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  name          String
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  description   String
+  type          StatusType
+  steps         Json
+  mode          StatusMode
+  isValid       Boolean
+  status        Status
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// BUILDING //////////////////////////
+
+model Building {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  metrics       Json
+  attributes    String[]
+  upgradeTree   Json?
+  initialCost   Json
+  impacts       Json
+  flavorText    String?
+  dependencies  String[]
+  isValid       Boolean
+  status        Status[]
+
+  //upgrades:
+  //upgrade_base_id
+  //upgrade_ref_id
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// UPGRADE //////////////////////////
+enum UpgradeType {
+  Settlement
+  Leadership
+  Building
+}
+
+model Upgrade {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  root          String
+  nodes         Json
+  isValid       Boolean
+  status        Status
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+//impact:
+//attribute_base_id: value
+//ability:
+//description of skill. eg, 'Adaptive Resources: If losing an attribute in one category, you can spend from another at a 1:1 settlement point cost ratio. E.g., if losing 3 food, you could lose 1 medical supply instead. Once per turn.'
+
+////////////////// TRADE HUB //////////////////////////
+
+model TradeHub {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  stock         Json
+  region        String
+  location      String
+  trend         String
+  trendRange    Int[]
+  collective    String?
+  isValid       Boolean
+  status        Status
+
+  // region pulls from narrative data
+  // location pulls from narrative data
+  // stock:
+  // attribute_base_id
+  // attribute name
+  // number
+  // trend: tuple (eg, -1, 1) for weekly loss/gain limit (0, 2) would be increasing, (-5, -2) would be decreasing
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// SETTLEMENT TYPE //////////////////////////
+
+model SettlementType {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  upgrades      String[]
+  isValid       Boolean
+  status        Status
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////////// SETTLEMENT //////////////////////////
+
+model Settlement {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  stats         Json
+  population    Json
+  categories    Json
+  buildings     Json
+  eventLog      Json
+  narrativeData String // foreign key later
+  isValid       Boolean
+
+  //stats includes:
+  // level
+  // health
+  // gold (currency?)
+  // calendar id
+
+  //pop includes:
+  // DM (array)
+  // players (array)
+  // residents (array)
+  // aristocrats (array)
+
+  //categories includes:
+  //category_refId:
+  // bonus
+  // attribute refId:
+  // current
+  // bonus
+
+  //eventLog includes:
+  // eventId keys:
+  // narrative data selections (array of details in [[description tag]] order)
+  // impacts
+  // dates (irl && calendar)
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////// APT ////////////
+
+model APT {
+  id              String       @id @default(uuid()) // unique per version
+  refId           String       @default(uuid()) // shared lineage / permanent identity
+  version         Int
+  contentType     ContentTypes
+  createdBy       String
+  collaborators   String[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  isImmutable     Boolean      @default(false)
+  name            String
+  description     String
+  display         Json
+  eventThresholds Json
+  progressType    String
+  decay           Int
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////// Action ////////////
+
+model Action {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  effects       Json
+  conditions    Json?
+  cooldown      String?
+  flavorText    String[]
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////// StoryThread ////////////
+
+model StoryThread {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  name          String
+  description   String
+  origin        Json
+  primaryKey    Json
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+////////////// Glossary /////////////
+
+enum EntryShape {
+  section
+  detail
+}
+
+enum GlossVisibilitySettings {
+  private
+  standard
+  open
+  public
+}
+
+enum EntryTypes {
+  continent
+  region
+  nation
+  territory
+  landmark
+  settlement
+  district
+  collective
+  location
+  person
+  lore
+  item
+  event
+  folder
+}
+
+enum ClimateTypes {
+  tropical
+  arid
+  temperate
+  polar
+  subtropical
+  continental
+  icecap
+}
+
+enum TerrainTypes {
+  forests
+  mountains
+  deserts
+  swamps
+  plains
+  hills
+  valleys
+  plateaus
+  tundra
+  badlands
+  coastal
+  volcanic
+  glacial
+  taiga
+}
+
+enum GeographicTypes {
+  forest
+  mountain
+  river
+  lake
+  ocean
+  desert
+  swamp
+  cave
+  hill
+  plain
+  valley
+  plateau
+  island
+  archipelago
+  peninsula
+  bay
+  gulf
+  fjord
+  volcano
+  glacier
+  canyon
+  steppe
+  march
+  wetland
+  reef
+  delta
+  atoll
+}
+
+model GlossaryTheme {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  name          String
+  createdBy     String
+  collaborators String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  contentType   ContentTypes
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+  description   String
+  palettes      Json
+  glossaries    String[]
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+model Glossary {
+  id            String       @id @default(uuid()) // unique per version
+  refId         String       @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  contentType   ContentTypes
+  createdBy     String
+  collaborators String[]
+  forkedBy      String?
+  editors       String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  isImmutable   Boolean      @default(false)
+
+  name             String
+  genre            String
+  subGenre         String
+  visibility       GlossVisibilitySettings @default(standard)
+  description      Json?
+  nodes            GlossaryNode[]
+  theme            Json?
+  integrationState Json?
+  subTypes         EntrySubType[]          @relation("SubTypes")
+
+  @@unique([refId, version])
+  @@index([contentType])
+  @@index([refId])
+}
+
+model GlossaryNode {
+  id               String         @id @default(uuid())
+  name             String
+  entryType        EntryTypes?
+  fileType         EntryShape
+  subTypeId        String?
+  icon             Json?
+  integrationState Json?
+  parentId         String?
+  children         GlossaryNode[] @relation("NodeHierarchy")
+  parent           GlossaryNode?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  glossaryId       String
+  glossary         Glossary       @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
+  sortIndex        Int            @default(0)
+
+  @@index([id])
+}
+
+model GlossaryEntry {
+  id                   String                   @id @default(uuid()) // unique per version
+  refId                String                   @default(uuid()) // shared lineage / permanent identity
+  version              Int
+  contentType          ContentTypes
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  createdBy            String
+  forkedBy             String?
+  collaborators        String[]
+  editors              String[]
+  deletedAt            DateTime?
+  isImmutable          Boolean                  @default(false)
+  format               EntryShape
+  entryType            EntryTypes
+  subTypeId            String?
+  subType              EntrySubType?            @relation(fields: [subTypeId], references: [id], onDelete: SetNull)
+  name                 String?
+  groups               Json?
+  primaryAnchorId      String?
+  primaryAnchorValue   Json?
+  secondaryAnchorId    String?
+  secondaryAnchorValue Json?
+  tags                 String[]
+  integrationState     Json?
+  backlinksFrom        BacklinkIndex[]          @relation("SourceEntry")
+  backlinksTo          BacklinkIndex[]          @relation("TargetEntry")
+  searchVector         Unsupported("tsvector")? // requires native Postgres support
+
+  @@unique([refId, version])
+  @@index([refId])
+  @@index([entryType])
+  @@index([subTypeId])
+  @@index([entryType, subTypeId])
+  @@index([createdBy])
+  @@index([searchVector], type: Gin) // GIN index for full-text search
+}
+
+enum PropertyInputTypes {
+  text
+  date
+  range
+  checkbox
+  dropdown
+  compound
+}
+
+model SubTypeProperty {
+  id          String             @id @default(uuid()) // unique per version
+  refId       String             @default(uuid()) // shared lineage / permanent identity
+  version     Int
+  contentType ContentTypes
+  createdBy   String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+  isAnchor    Boolean
+  name        String
+  displayName String?
+  inputType   PropertyInputTypes
+  shape       Json
+  smartSync   Json?
+  isGeneric   Boolean            @default(false)
+
+  // Relations
+  groupProperties SubTypeGroupProperty[]
+  backlinks       BacklinkIndex[]
+}
+
+model SubTypeGroup {
+  id          String       @id @default(uuid()) // unique per version
+  refId       String       @default(uuid()) // shared lineage / permanent identity
+  version     Int
+  contentType ContentTypes
+  createdBy   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  name        String
+  displayName String?
+  display     Json? //used for property display, eg widths. Record<propertyId, Record<[key:string], any>
+  description String
+  isGeneric   Boolean      @default(false)
+
+  // Relations
+  properties   SubTypeGroupProperty[]
+  schemaGroups SubTypeSchemaGroup[]
+}
+
+model SubTypeGroupProperty {
+  id         String @id @default(uuid())
+  groupId    String
+  propertyId String
+  order      Int
+
+  //Relations
+  group    SubTypeGroup    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  property SubTypeProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, propertyId])
+}
+
+model SubTypeSchemaGroup {
+  id       String @id @default(uuid())
+  schemaId String
+  groupId  String
+  order    Int
+
+  // Relations
+  schema EntrySubType @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+  group  SubTypeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([schemaId, groupId])
+}
+
+model EntrySubType {
+  id            String               @id @default(uuid()) // unique per version
+  refId         String               @default(uuid()) // shared lineage / permanent identity
+  version       Int
+  createdBy     String
+  forkedBy      String?
+  collaborators String[]
+  editors       String[]
+  contentType   ContentTypes
+  deletedAt     DateTime?
+  isImmutable   Boolean              @default(false)
+  name          String
+  entryType     EntryTypes
+  groups        SubTypeSchemaGroup[]
+  updatedAt     DateTime             @updatedAt
+  anchors       Json
+  entries       GlossaryEntry[]
+  glossaries    Glossary[]           @relation("SubTypes")
+  status        Status               @default(DRAFT)
+  isGeneric     Boolean              @default(false)
+  context       String[]
+
+  @@unique([refId, version])
+  @@index([refId])
+  @@index([entryType])
+}
+
+enum BacklinkType {
+  direct
+  directCompound
+  indirect
+  hierarchal
+}
+
+model BacklinkIndex {
+  id String @id @default(uuid())
+
+  sourceId String
+  source   GlossaryEntry @relation("SourceEntry", fields: [sourceId], references: [id], onDelete: Cascade)
+
+  targetId String
+  target   GlossaryEntry @relation("TargetEntry", fields: [targetId], references: [id], onDelete: Cascade)
+
+  type             BacklinkType?
+  propertyId       String?
+  propertyName     String // so I know what the hell is going on
+  propertyValue    Json?
+  property         SubTypeProperty? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  ignoreDivergence Boolean          @default(false)
+  lastSyncedAt     DateTime         @default(now())
+  fromNameAtLink   String?
+  toNameAtLink     String?
+  targetIgnore     Boolean          @default(false)
+  subPropertyId    String?
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sourceId, targetId, propertyId])
+  @@index([targetId])
+  @@index([propertyId])
+}

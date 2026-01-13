@@ -6,6 +6,8 @@ import {
   GlossarySection,
   SubModelType,
   Genre,
+  GenericObject,
+  GlossaryEntryType,
 } from 'types/index.js';
 import { GlossaryState, GlossaryStateEntry } from '../types/GlossaryTypes.js';
 import { rehydrateGlossaryTree } from '../../features/Glossary/utils/rehydrateGlossary.js';
@@ -17,6 +19,11 @@ import {
   ThemeKeys,
 } from '@/features/Glossary/EditGlossary/Palette/CustomizePalette.js';
 import { dark } from '@mui/material/styles/createPalette.js';
+import {
+  SubTypeCompoundData,
+  SubTypeCompoundDataTypes,
+  SubTypeCompoundDefinition,
+} from '@/features/Glossary/EditGlossary/Templates/components/types.js';
 
 const defaultGlossaryState: GlossaryState = {
   glossaries: {
@@ -50,7 +57,7 @@ const glossarySlice = createSlice({
         subGenre: string;
         integrationState: any;
         theme: string | { light: any; dark: any };
-        templates?: Record<string, any[]>;
+        subTypes?: Record<string, any[]>;
       }>
     ) => {
       const {
@@ -61,7 +68,7 @@ const glossarySlice = createSlice({
         subGenre,
         integrationState,
         theme,
-        templates,
+        subTypes = {},
       } = action.payload;
       const newGlossary: GlossaryStateEntry = {
         name,
@@ -77,9 +84,10 @@ const glossarySlice = createSlice({
         renderState: {},
         entries: {},
         options: {},
+        visibility: null,
         integrationState,
         theme,
-        templates,
+        subTypes,
       };
       state.glossaries.static.byId[glossaryId] = newGlossary;
       state.glossaries.static.allIds.push(glossaryId);
@@ -123,7 +131,6 @@ const glossarySlice = createSlice({
     ) => {
       const { id, updates } = action.payload;
       const glossary = state.glossaries.edit.byId[id];
-      console.log(`Updating glossary ${glossary.name} with updates:`, updates);
       if (glossary) {
         Object.entries(updates).forEach(([key, value]) => {
           set(glossary, key, value);
@@ -428,10 +435,6 @@ const glossarySlice = createSlice({
         const entrySubModel = entry[subModel];
         if (entrySubModel) {
           set(entrySubModel, keypath, data);
-          console.log(
-            `Updated subModel ${subModel} for entry ${entryId} at keypath ${keypath} with data:`,
-            data
-          );
         } else {
           console.warn(`Entry ${entryId} not found in glossary ${glossaryId}.`);
         }
@@ -458,9 +461,6 @@ const glossarySlice = createSlice({
         if (editEntry && staticEntry) {
           (staticEntry as any)[subModel] = cloneDeep(
             (editEntry as any)[subModel]
-          );
-          console.log(
-            `Synced subModel ${subModel} for entry ${entryId} in glossary ${glossaryId}`
           );
         } else {
           console.warn(

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "BacklinkIndex" ADD COLUMN     "lastSyncedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
