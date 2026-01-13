@@ -1,9 +1,0 @@
-export { default as TitledCollapse } from './shared/TitledCollapse/TitledCollapse.jsx';
-export { default as TabbedContainer } from './shared/TabbedContainer/TabbedContainer.jsx';
-export { default as Icon } from './shared/Icons/Icon.jsx';
-export { default as IconSelector } from './shared/IconSelector/IconSelector.jsx';
-export { default as IconCustomizer } from './shared/IconSelector/IconCustomizer.jsx';
-export { default as IconColorPicker } from './shared/IconSelector/IconColorPicker.jsx';
-export { default as DropZone } from './shared/DnD/DropZone.jsx';
-export { default as DragWrapper } from './shared/DnD/DragWrapper.jsx';
-export { default as DraggableList } from './shared/DnD/DraggableList.jsx';
