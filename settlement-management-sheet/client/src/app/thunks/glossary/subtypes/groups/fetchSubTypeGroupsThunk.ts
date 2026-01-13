@@ -26,8 +26,6 @@ export default function fetchSubTypeGroupsThunk(): AppThunk {
         (g: SubTypeGroup) => !existingGroups[g.id]
       );
 
-      console.log(groups);
-
       dispatch(addSubTypeGroup({ groups: filteredGroups }));
     } catch (error) {
       console.error('Error fetching subTypes:', error);

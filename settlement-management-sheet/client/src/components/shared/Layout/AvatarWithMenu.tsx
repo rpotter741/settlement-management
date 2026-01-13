@@ -23,7 +23,8 @@ import { useTheme } from '@/context/ThemeContext.js';
 
 export default function AccountMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  // const { themeKey, changeThemeTo } = useTheme();
+  //@ts-ignore
+  const { themeKey, changeThemeTo } = useTheme();
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -100,17 +101,17 @@ export default function AccountMenu() {
         <MenuItem
           onClick={() => {
             handleClose();
-            // changeThemeTo(themeKey === 'dark' ? 'default' : 'dark');
+            changeThemeTo(themeKey === 'dark' ? 'default' : 'dark');
           }}
         >
-          {/* <ListItemIcon>
+          <ListItemIcon>
             {themeKey === 'dark' ? (
               <LightMode fontSize="small" />
             ) : (
               <DarkMode fontSize="small" sx={{ color: 'black' }} />
             )}
           </ListItemIcon>
-          {themeKey === 'dark' ? 'Light' : 'Dark'} Mode */}
+          {themeKey === 'dark' ? 'Light' : 'Dark'} Mode
         </MenuItem>
         <Divider> System </Divider>
         <MenuItem onClick={handleClose}>

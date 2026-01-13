@@ -167,7 +167,7 @@ const SubTypeSelect = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.33 }}
-        sx={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}
+        sx={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto', pb: 4 }}
       >
         {!editId &&
           filteredSubTypes.map((subType: SubType) => (

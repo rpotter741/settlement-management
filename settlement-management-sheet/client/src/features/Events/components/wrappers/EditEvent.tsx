@@ -22,7 +22,6 @@ const EditEvent = ({ setShowModal }) => {
 
   useEffect(() => {
     if (edit) {
-      console.log(edit.phases);
       const newPhaseTabs = edit.phases.order.map((id, index) => ({
         name: edit.phases.data[id]?.name,
         component: CreatePhase,

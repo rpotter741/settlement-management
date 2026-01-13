@@ -2,6 +2,7 @@ import prisma from '../../../db/db.ts';
 import isAdminUserId from '../../../utils/isAdminUserId.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import { generateFormSource } from '../../../../../client/src/features/Glossary/utils/generatePropertyValue.ts';
+import capitalize from '@/utils/capitalize.ts';
 
 export default async function createNodeAndEntry(req: any, res: any) {
   try {
@@ -11,13 +12,63 @@ export default async function createNodeAndEntry(req: any, res: any) {
     const contentType = 'SYSTEM';
     const createdBy = req?.user?.id || 'robbiepottsdm';
 
-    const subTypeShape = await prisma.entrySubType.findFirst({
-      where: {
-        id: entryData.subTypeId,
-      },
-    });
+    let raw;
 
-    const source: any = generateFormSource(subTypeShape);
+    if (entryData.subTypeId === '') {
+      raw = await prisma.entrySubType.findFirst({
+        where: { name: `Generic ${capitalize(entryData.entryType)}` },
+        include: {
+          groups: {
+            include: {
+              group: {
+                include: {
+                  properties: {
+                    include: {
+                      property: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      raw = await prisma.entrySubType.findUnique({
+        where: {
+          id: entryData.subTypeId,
+        },
+        include: {
+          groups: {
+            include: {
+              group: {
+                include: {
+                  properties: {
+                    include: {
+                      property: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    if (!raw) {
+      console.error('No subtype found for ID:', entryData.subTypeId);
+      return res
+        .status(400)
+        .json({ message: 'Invalid subTypeId, subtype not found.' });
+    }
+
+    const subTypeGroups = raw?.groups.map((g) => g.group) || [];
+    const properties = subTypeGroups.flatMap((group) =>
+      group.properties.map((p) => p.property)
+    );
+
+    const source: any = generateFormSource(raw!, subTypeGroups, properties);
 
     const { groups } = source;
     if (!groups) {
@@ -39,7 +90,7 @@ export default async function createNodeAndEntry(req: any, res: any) {
           fileType: entryData.fileType,
           glossaryId: entryData.glossaryId,
           parentId: entryData.parentId || null,
-          subTypeId: entryData.subTypeId,
+          subTypeId: raw.id,
         },
       });
       const entry = await tx.glossaryEntry.create({
@@ -52,7 +103,7 @@ export default async function createNodeAndEntry(req: any, res: any) {
           createdBy,
           version: 1,
           groups,
-          subTypeId: entryData.subTypeId,
+          subTypeId: raw.id,
           primaryAnchorId: source.primaryAnchorId,
           secondaryAnchorId: source.secondaryAnchorId,
         },

@@ -1,4 +1,5 @@
 import { dispatch } from '@/app/constants.js';
+import { selectSubTypeGroups } from '@/app/selectors/subTypeSelectors.js';
 import {
   SubType,
   SubTypeGroup,
@@ -22,6 +23,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const DraggableGroupEntry = ({
   group,
@@ -38,6 +40,7 @@ const DraggableGroupEntry = ({
   setHoverIndex: (index: number | null) => void;
   groupLinkId: string;
 }) => {
+  const allGroups = useSelector(selectSubTypeGroups);
   const [isHover, setIsHover] = useState(false);
   const { lightenColor, getAlphaColor } = useTheming();
   const { ref, draggedType } = useGlobalDrag({
@@ -78,6 +81,16 @@ const DraggableGroupEntry = ({
     index,
     type: 'subtype-group',
   });
+
+  function ownsAnchor(groupId: string, subtype: SubType) {
+    const group = allGroups.find((g) => g.id === groupId);
+    const isAnchor = group?.properties.some(
+      (p) =>
+        p.propertyId === subtype.anchors.primary ||
+        p.propertyId === subtype.anchors.secondary
+    );
+    return isAnchor;
+  }
   return (
     <Box
       ref={ref}
@@ -120,7 +133,7 @@ const DraggableGroupEntry = ({
         }}
       />
       <Typography sx={{ width: '50%', textAlign: 'start' }}>
-        {group.name}
+        {`${group.name} ${ownsAnchor(group.id, subtype) ? '*' : ''}`}
       </Typography>
       <IconButton
         sx={{ position: 'absolute', right: 0 }}

@@ -55,15 +55,17 @@ const SubTypeCompoundPreview = ({
 
   if (!LeftComponent && !RightComponent) return null;
 
+  console.log(source);
+
   const allLeftValues = useMemo(() => {
     return source?.order
-      ?.map((id: string) => source?.value[id].left?.value)
+      ?.map((id: string) => source?.value[id]?.left?.value)
       .filter((opt: string) => opt !== '');
   }, [source]);
 
   const allRightValues = useMemo(() => {
     return source?.order
-      ?.map((id: string) => source?.value[id].right?.value)
+      ?.map((id: string) => source?.value[id]?.right?.value)
       .filter((opt: string) => opt !== '');
   }, [source]);
 
@@ -134,7 +136,7 @@ const SubTypeCompoundPreview = ({
             >
               {/* @ts-ignore */}
               <LeftComponent
-                property={property.shape.left}
+                property={property?.shape?.left}
                 onChange={onChange}
                 source={source.value[id].left}
                 isCompound={true}

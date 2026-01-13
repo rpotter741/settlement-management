@@ -1,6 +1,13 @@
-import { Snackbar, Alert, useTheme } from '@mui/material';
+import { Snackbar, Alert, useTheme, Box } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import React, { useEffect, useCallback, useMemo, lazy, memo } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useMemo,
+  lazy,
+  memo,
+  Suspense,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   currentSnackbar as current,
@@ -16,6 +23,7 @@ import {
   SnackbarQueueItem,
 } from '@/app/types/SnackbarTypes.js';
 import { closeSnackbar, processQueue } from '@/app/slice/snackbarSlice.js';
+import snackMap from '@/maps/snackbarComponentMap.js';
 
 const snackbarComponent = memo(
   ({
@@ -28,6 +36,13 @@ const snackbarComponent = memo(
     open: boolean;
   }) => {
     const theme = useTheme();
+    const Component = currentSnackbar.componentKey
+      ? snackMap[currentSnackbar.componentKey]
+      : null;
+
+    if (Component) {
+      console.log(Component);
+    }
     return (
       <Snackbar
         key={currentSnackbar.message}
@@ -39,10 +54,23 @@ const snackbarComponent = memo(
         }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        {currentSnackbar.component ? (
-          <currentSnackbar.component {...currentSnackbar.props} />
-        ) : (
+        {Component ? (
           <Alert onClose={closeSnackbar} severity={currentSnackbar.type}>
+            <Suspense fallback={<Box>The suspense is killing me...</Box>}>
+              <Component
+                message={currentSnackbar.message}
+                type={currentSnackbar.type}
+                {...currentSnackbar.props}
+                closeSnackbar={closeSnackbar}
+              />
+            </Suspense>
+          </Alert>
+        ) : (
+          <Alert
+            onClose={closeSnackbar}
+            severity={currentSnackbar.type}
+            variant="filled"
+          >
             {currentSnackbar.message}
           </Alert>
         )}

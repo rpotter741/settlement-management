@@ -126,7 +126,6 @@ export default function deleteEntryThunk({
       const { id, data } = keypathMap;
       affectedEntries.set(id, data);
     });
-    console.log(allKeypaths);
 
     // Now process affected entries
 
@@ -164,7 +163,7 @@ export default function deleteEntryThunk({
         { keypath: string; oldValue: any; newValue: any; compKey?: string }[]
       > = {};
       const nodeIds: string[] = [node.id, ...allChildrenIds];
-      console.log(cloneDeep(affectedEntries), 'final affected entries');
+
       affectedEntries.entries().forEach(([id, data]: [string, any]) => {
         affectEntriesRecord[id] = data;
       });

@@ -1,7 +1,7 @@
 // toolThunks.ts
 import { ThunkDispatch } from '@reduxjs/toolkit';
 import { revertToStatic } from '@/app/slice/toolSlice.js';
-import { clearDirtyKeypaths, updateTab } from '@/app//slice/tabSlice.js';
+import { updateTab } from '@/app//slice/tabSlice.js';
 import { RootState } from '@/app/store.js';
 import { ToolName } from 'types/index.js';
 import {
@@ -30,13 +30,12 @@ export default async function cancelToolEdit({
     const state = getState();
     const current = selectToolById(tool, id)(state);
     const edit = selectEditToolById(tool, id)(state);
-    dispatch(updateTab({ tabId, side, keypath: 'mode', updates: 'preview' }));
+    dispatch(updateTab({ tabId, keypath: 'mode', updates: 'preview' }));
 
     if (current?.name !== edit?.name) {
       dispatch(
         updateTab({
           tabId,
-          side,
           keypath: 'name',
           updates: current?.name || 'Untitled',
         })
@@ -44,7 +43,7 @@ export default async function cancelToolEdit({
     }
 
     dispatch(revertToStatic({ tool, id }));
-    dispatch(clearDirtyKeypaths({ tabId }));
+    // dispatch(clearDirtyKeypaths({ tabId }));
     dispatch(
       validateTool({ tool, id, fields: validationFields, refObj: current })
     );

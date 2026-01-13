@@ -1,7 +1,7 @@
 {
   "watch": ["src", "prisma"],
   "ext": "js,json,ts",
-  "exec": "ts-node -r tsconfig-paths/register src/index.ts",
+  "exec": "node -r tsconfig-paths/register --import tsx src/index.ts",
   "ignore": ["node_modules", "dist"],
   "env": {
     "NODE_ENV": "development",

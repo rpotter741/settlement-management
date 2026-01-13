@@ -24,6 +24,12 @@ import ChangeSubTypeSelect from './inputs/ChangeSubTypeSelect.js';
 import ChangeSubTypeTypeSelect from './inputs/ChangeSubTypeTypeSelect.js';
 import { generateFormSource } from '@/features/Glossary/utils/generatePropertyValue.js';
 import useSubTypeOrchestrator from '../hooks/useSubTypeOrchestrator.js';
+import { cloneDeep } from 'lodash';
+import { updateSubTypeAnchorThunk } from '@/app/thunks/glossary/subtypes/schemas/updateSubTypeAnchorThunk.js';
+import { updateSubTypeNameThunk } from '@/app/thunks/glossary/subtypes/schemas/updateSubTypeNameThunk.js';
+import capitalize from '@/utility/inputs/capitalize.js';
+import SubTypeDropdownPreview from './previews/SubTypeDropdownPreview.js';
+import { updateSubTypeContextThunk } from '@/app/thunks/glossary/subtypes/schemas/updateSubTypeContextThunk.js';
 
 const SubTypeOrchestrator = ({
   subtype,
@@ -34,8 +40,6 @@ const SubTypeOrchestrator = ({
 }) => {
   const { source, allGroups, allProperties, anchorOptions } =
     useSubTypeOrchestrator({ subtype });
-
-  console.log(source, anchorOptions);
 
   const { getAlphaColor, lightenColor } = useTheming();
 
@@ -48,9 +52,7 @@ const SubTypeOrchestrator = ({
   //state for flat-access properties
   const { value: desc, handleChange: setDesc } = useDebouncedFieldEdit({
     source: subtype?.description || '',
-    updateFn: (value: string) => {
-      console.log('updating description to:', value);
-    },
+    updateFn: (value: string) => {},
     deps: [subtype?.description, subtype?.id],
   });
 
@@ -82,6 +84,18 @@ const SubTypeOrchestrator = ({
     return <Typography>No SubType Selected</Typography>;
   }
 
+  const contextPropertyRef = allProperties.find(
+    (prop) => prop.name === `${capitalize(subtype.entryType)} Type`
+  );
+  const contextProperty = cloneDeep(contextPropertyRef) || {
+    shape: {
+      selectType: 'single',
+    },
+    name: 'Context Pointer',
+  };
+  contextProperty.shape.selectType = 'multi';
+  contextProperty.name = 'Context Pointer';
+
   return (
     <MotionBox
       sx={{ mt: 4, px: 4, maxWidth: 800, height: '100%', minWidth: 765 }}
@@ -97,11 +111,39 @@ const SubTypeOrchestrator = ({
       >
         <NameEditor
           defaultValue={subtype?.name || ''}
-          handleSave={(name: string) => {}}
+          handleSave={(name: string) => {
+            if (name === subtype?.name) return;
+            dispatch(
+              updateSubTypeNameThunk({
+                subtypeId: subtype.id,
+                name,
+              })
+            );
+          }}
           label="Name"
         />
         <ChangeSubTypeTypeSelect editId={subtype?.id || ''} disabled={false} />
       </Box>
+      {!subtype.isGeneric && (
+        <Box sx={{ mb: 2 }}>
+          <SubTypeDropdownPreview
+            property={contextProperty}
+            onChange={(value, keypath) => {
+              dispatch(
+                updateSubTypeContextThunk({
+                  subtypeId: subtype.id,
+                  context: Array.isArray(value) ? value : [value],
+                })
+              );
+            }}
+            isPreview={false}
+            source={{ name: 'Context', value: subtype.context, id: subtype.id }}
+            keypath="context"
+            liveEdit={true}
+            glossaryId={null}
+          />
+        </Box>
+      )}
       <Box
         sx={{
           display: 'flex',
@@ -110,7 +152,16 @@ const SubTypeOrchestrator = ({
         }}
       >
         <SubTypeAnchorSelect
-          handleAnchorChange={() => {}}
+          handleAnchorChange={(propertyId: string) => {
+            const anchors = cloneDeep(subtype.anchors || {});
+            anchors.primary = propertyId;
+            dispatch(
+              updateSubTypeAnchorThunk({
+                subtypeId: subtype.id,
+                anchors,
+              })
+            );
+          }}
           subType={subtype}
           semanticAnchors={anchorOptions.filter(
             (option) => option.value !== subtype.anchors?.secondary
@@ -119,7 +170,16 @@ const SubTypeOrchestrator = ({
         />
 
         <SubTypeAnchorSelect
-          handleAnchorChange={() => {}}
+          handleAnchorChange={(propertyId: string) => {
+            const anchors = cloneDeep(subtype.anchors || {});
+            anchors.secondary = propertyId;
+            dispatch(
+              updateSubTypeAnchorThunk({
+                subtypeId: subtype.id,
+                anchors,
+              })
+            );
+          }}
           subType={subtype}
           semanticAnchors={anchorOptions.filter(
             (option) => option.value !== subtype.anchors?.primary

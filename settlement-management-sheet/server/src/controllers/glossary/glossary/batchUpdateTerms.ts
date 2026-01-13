@@ -52,13 +52,11 @@ export default async function batchUpdateTerms(req: any, res: any) {
 
     const updatedIntegrationState: IntegrationState = { ...currentTerms };
 
-    console.log(`Updating glossary ${id} with terms:`, updatedIntegrationState);
-
     const updatedGlossary = await prisma.glossary.update({
       where: { id },
       data: { integrationState: updatedIntegrationState },
     });
-    console.log(`Updated glossary:`, updatedGlossary);
+
     return res.json({ glossary: updatedGlossary });
   } catch (error) {
     console.error(`Error updating glossary:`, error);

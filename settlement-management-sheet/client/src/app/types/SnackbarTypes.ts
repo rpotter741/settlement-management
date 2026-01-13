@@ -24,7 +24,7 @@ export type SnackbarQueueItem = {
   message: string;
   type: SnackbarType;
   duration: number;
-  component?: React.ComponentType<any>;
+  componentKey?: string;
   props?: Record<string, any>;
 };
 

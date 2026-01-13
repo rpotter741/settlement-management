@@ -65,7 +65,6 @@ const EditAttribute: React.FC<EditAttributeProps> = () => {
       dispatch(
         updateTab({
           tabId: tab.tabId,
-          side: tab.side,
           keypath: 'viewState.editAttr',
           updates: { ...localState },
         })
@@ -94,6 +93,7 @@ const EditAttribute: React.FC<EditAttributeProps> = () => {
       <TabbedContent
         tabs={Object.values(editTabs).map((tab: TabbedContentTabs) => ({
           ...tab,
+          key: tab.name,
           disabled: tab.disabled || false,
           props: {
             localDispatch,

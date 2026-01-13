@@ -4,6 +4,7 @@ import {
   GlossaryEntryType,
 } from '../../../../shared/types/index.js';
 import { cloneDeep, set } from 'lodash';
+import { SmartSyncRule } from '@/features/Glossary/Modals/EditSmartSyncRule.js';
 
 export type SubTypePropertyTypes =
   | 'text'
@@ -13,15 +14,103 @@ export type SubTypePropertyTypes =
   | 'dropdown'
   | 'compound';
 
-export interface SubTypeProperty {
+interface SubTypePropertyBase {
   id: string;
   name: string;
-  inputType: SubTypePropertyTypes;
   isAnchor?: boolean;
-  shape: GenericObject;
   version?: number;
-  [key: string]: any;
 }
+
+interface TextShape {
+  inputType: 'text' | 'number' | 'richText';
+  defaultValue: string;
+  textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+}
+
+interface DropdownShape {
+  selectType: 'single' | 'multi';
+  optionType: 'list' | 'entryType';
+  defaultList?: string[];
+  maxSelections?: number;
+  relationship?: GlossaryEntryType[];
+  options?: string[];
+  isCompound: boolean;
+}
+
+interface CheckboxShape {
+  defaultChecked: boolean;
+}
+
+interface RangeShape {
+  isNumber: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  label: string;
+  options?: string[];
+}
+
+interface DateShape {}
+
+interface SubTypeTextProperty extends SubTypePropertyBase {
+  inputType: 'text';
+  shape: TextShape;
+}
+
+interface SubTypeDateProperty extends SubTypePropertyBase {
+  inputType: 'date';
+  shape: DateShape;
+}
+
+export interface SubTypeDropdownProperty extends SubTypePropertyBase {
+  inputType: 'dropdown';
+  shape: DropdownShape;
+  smartSync: SmartSyncRule | null;
+}
+
+interface SubTypeCheckboxProperty extends SubTypePropertyBase {
+  inputType: 'checkbox';
+  shape: CheckboxShape;
+}
+
+interface SubTypeRangeProperty extends SubTypePropertyBase {
+  inputType: 'range';
+  shape: RangeShape;
+}
+
+export type NonCompoundShapes =
+  | TextShape
+  | DateShape
+  | DropdownShape
+  | CheckboxShape
+  | RangeShape;
+
+export type NonCompoundProperties =
+  | SubTypeTextProperty
+  | SubTypeDateProperty
+  | SubTypeDropdownProperty
+  | SubTypeCheckboxProperty
+  | SubTypeRangeProperty;
+
+export interface CompoundShape {
+  left: NonCompoundProperties;
+  right: NonCompoundProperties;
+}
+
+export type AllShapes = NonCompoundShapes | CompoundShape;
+
+export interface SubTypeCompoundProperty extends SubTypePropertyBase {
+  inputType: 'compound';
+  shape: CompoundShape;
+  smartSync: SmartSyncRule | null;
+}
+
+/**
+ * SubTypeProperty exported as a discriminated union:
+ * - specific non-compound property interfaces (text, date, dropdown, checkbox, range)
+ * - compound property interface
+ */
+export type SubTypeProperty = NonCompoundProperties | SubTypeCompoundProperty;
 
 export interface SubTypePropertyLink {
   propertyId: string;
@@ -48,6 +137,11 @@ export interface SubTypeGroupLink {
   schemaId: string;
   order: number;
 }
+
+export type SemanticAnchors = {
+  primary: string | null;
+  secondary: string | null;
+};
 
 export type SubType = {
   id: string;
@@ -131,14 +225,17 @@ const subTypeSlice = createSlice({
       state,
       action: PayloadAction<{
         propertyId: string;
-        property: SubTypeProperty;
+        property: NonCompoundProperties;
         side: 'left' | 'right';
       }>
     ) => {
       const { propertyId, property, side } = action.payload;
       if (state.properties.edit[propertyId]) {
-        state.properties.edit[propertyId].shape[side] = {
-          ...(state.properties.edit[propertyId].shape[side] as GenericObject),
+        ((state.properties.edit[propertyId] as SubTypeCompoundProperty).shape[
+          side as keyof CompoundShape
+        ] as NonCompoundProperties) = {
+          ...((state.properties.edit[propertyId] as SubTypeCompoundProperty)
+            .shape[side] as NonCompoundProperties),
           ...property,
         };
       }
@@ -200,25 +297,18 @@ const subTypeSlice = createSlice({
       const { groupId, newOrder } = action.payload;
       const group = state.groups.edit[groupId];
       if (group && Array.isArray(group.properties)) {
-        const reordered = newOrder
-          .map((id, index) =>
-            group.properties!.find((p) => p.propertyId === id)
-          )
-          .filter((p) => p !== undefined)
-          .map((p, index) => ({
-            ...p!,
-            order: index,
-          }));
-        group.properties = reordered as SubTypePropertyLink[];
-        Object.entries(group.display).forEach(([key, value]) => {
-          if (
-            !newOrder.includes(
-              group.properties.find((p) => p.id === key)?.propertyId!
-            )
-          ) {
-            delete group.display[key];
+        const reordered = newOrder.reduce((acc, propertyId, index) => {
+          const propLink = group.properties.find(
+            (p) => p.propertyId === propertyId
+          );
+          if (!propLink) {
+            delete group.display[propertyId];
+            return acc;
           }
-        });
+          acc.push({ ...propLink, order: index });
+          return acc;
+        }, [] as SubTypePropertyLink[]);
+        group.properties = reordered;
       }
     },
     reorderSubTypeGroups: (
@@ -284,6 +374,45 @@ const subTypeSlice = createSlice({
         );
       }
     },
+    updateSubTypeAnchors: (
+      state,
+      action: PayloadAction<{
+        subtypeId: string;
+        anchors: SemanticAnchors;
+      }>
+    ) => {
+      const { subtypeId, anchors } = action.payload;
+      const subtype = state.edit[subtypeId];
+      if (subtype) {
+        subtype.anchors = anchors;
+      }
+    },
+    updateSubTypeName: (
+      state,
+      action: PayloadAction<{
+        subtypeId: string;
+        name: string;
+      }>
+    ) => {
+      const { subtypeId, name } = action.payload;
+      const subtype = state.edit[subtypeId];
+      if (subtype) {
+        subtype.name = name;
+      }
+    },
+    updateSubTypeContext: (
+      state,
+      action: PayloadAction<{
+        subtypeId: string;
+        context: string[];
+      }>
+    ) => {
+      const { subtypeId, context } = action.payload;
+      const subtype = state.edit[subtypeId];
+      if (subtype) {
+        subtype.context = context;
+      }
+    },
     someFunction: (
       state,
       action: PayloadAction<{
@@ -309,6 +438,9 @@ export const {
   deleteGroup,
   addGroupsToSubType,
   removeGroupsFromSubtype,
+  updateSubTypeAnchors,
+  updateSubTypeName,
+  updateSubTypeContext,
   // addSubTypeGroup,
   // reorderSubTypeGroups,
   // updateSubTypeProperty,

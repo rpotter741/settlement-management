@@ -171,8 +171,8 @@ const ValueToggleHell: React.FC<ValueToggleHellProps> = ({
             label="Scale Curve"
             options={[
               { value: 'linear', name: 'Linear' },
-              { value: 'slow-exponential', name: 'Slow Exponential' },
-              { value: 'fast-exponential', name: 'Fast Exponential' },
+              { value: 'slow-exponential', name: 'Slow Exponential (^1.5)' },
+              { value: 'fast-exponential', name: 'Fast Exponential (^2)' },
               { value: 'custom', name: 'Per Interval' },
             ]}
             small={false}

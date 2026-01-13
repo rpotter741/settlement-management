@@ -30,8 +30,6 @@ const NavList = () => {
     updateActiveTab(item);
   };
 
-  console.log(ui.activeTab === 'Graph');
-
   return (
     <GlossarySidePanelWrapper>
       <Box

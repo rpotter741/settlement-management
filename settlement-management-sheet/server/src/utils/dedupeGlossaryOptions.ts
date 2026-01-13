@@ -53,7 +53,7 @@ function dedupeGroupedGlossaryOptions(
           const tier = relationships[rel];
           const existingTier =
             relationships[existing.group as RelationshipType];
-          console.log(tier, existingTier, 'tier and existingTier');
+
           if (
             relationships[rel as RelationshipType] <
             relationships[existing.group as RelationshipType]

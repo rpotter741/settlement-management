@@ -7,7 +7,7 @@ import requireFields from '../../../utils/requireFields.ts';
 
 export default async function deleteNodeAndEntry(req: any, res: any) {
   try {
-    const { id, glossaryId } = req.body;
+    const { id, glossaryId, nukeIt } = req.body;
     if (!requireFields(['id', 'glossaryId'], req.body, res)) return;
 
     const structure = await prisma.glossaryNode.findMany({
@@ -24,6 +24,15 @@ export default async function deleteNodeAndEntry(req: any, res: any) {
     });
 
     const idsByType = collectEntriesByTypeFromFlat(id, structure);
+
+    if (nukeIt) {
+      console.log('bye bye entries created after 2026-01-12');
+      await prisma.glossaryEntry.deleteMany({
+        where: {
+          createdAt: { gte: new Date('2026-01-12T17:14:07.959Z') },
+        },
+      });
+    }
 
     await prisma.$transaction([
       prisma.glossaryNode.delete({ where: { id } }),

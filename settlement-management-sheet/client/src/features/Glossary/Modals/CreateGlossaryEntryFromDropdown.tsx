@@ -40,8 +40,8 @@ const CreateGlossaryEntryFromDropdown = ({
 
   const [name, setName] = useState<string>(newEntryName || 'Untitled');
   const [entryType, setEntryType] = useState<{ name: string; value: string }>({
-    name: getPropertyLabel(property.relationship[0]).label ?? '',
-    value: property.relationship[0],
+    name: getPropertyLabel(property.shape.relationship[0]).label ?? '',
+    value: property.shape.relationship[0],
   });
   const subTypeOptions = useMemo(() => {
     return [...allSubTypes]
@@ -75,10 +75,17 @@ const CreateGlossaryEntryFromDropdown = ({
       entryType: node.entryType,
     }));
   }, [allNodes, entryType.value]);
+
   const options = [
     ...filteredNodes,
     { value: null, name: 'None', entryType: null },
   ];
+
+  useEffect(() => {
+    if (filteredNodes.length > 0 && parentId === null) {
+      setParentId(filteredNodes.find((n) => n.value === sourceId) || null);
+    }
+  }, [filteredNodes, parentId, sourceId]);
 
   const handleCreateEntry = () => {
     if (!subType) return;
@@ -146,9 +153,9 @@ const CreateGlossaryEntryFromDropdown = ({
       />
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <Autocomplete
-          disabled={property.relationship.length <= 1}
+          disabled={property.shape.relationship.length <= 1}
           value={entryType}
-          options={property.relationship.map((rel: string) => ({
+          options={property.shape.relationship.map((rel: string) => ({
             name: getPropertyLabel(rel).label || rel,
             value: rel,
           }))}
@@ -225,7 +232,7 @@ const CreateGlossaryEntryFromDropdown = ({
         <Button
           color="secondary"
           variant="contained"
-          disabled={!entryType}
+          disabled={!entryType || !subType || name.trim().length === 0}
           onClick={() => handleCreateEntry()}
         >
           Create Entry

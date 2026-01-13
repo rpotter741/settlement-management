@@ -25,7 +25,6 @@ export function wrapThunk<Args, Return>(
 
     try {
       if (options.debug) {
-        console.log('[wrapThunk] args:', args);
       }
 
       const result = await fn(args, { dispatch, getState });

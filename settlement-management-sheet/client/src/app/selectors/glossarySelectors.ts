@@ -132,7 +132,7 @@ export const selectGlossaryTree = (glossaryId: string) =>
     if (!glossary) return { roots: [], nodeMap: {} };
     const { structure, renderState } = glossary;
     const { roots, nodeMap } = rehydrateGlossaryTree(structure, renderState);
-    console.log('rehydrating tree...', structure.length);
+
     return { roots, nodeMap };
   });
 

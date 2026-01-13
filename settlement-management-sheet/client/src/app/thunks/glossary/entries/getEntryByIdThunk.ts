@@ -5,6 +5,8 @@ import serverAction from '@/services/glossaryServices.js';
 import { addGlossaryEntry } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { GlossaryEntry, GlossaryNode } from 'types/index.js';
+import { cloneDeep } from 'lodash';
+import { Backlink } from '@/features/SyncWorkspace/SyncWorkspace.js';
 
 export default function getEntryById({
   node,
@@ -19,12 +21,16 @@ export default function getEntryById({
         entryType: existingNode.entryType,
       });
       const { entry, backlinksTo, backlinksFrom } = data;
-      console.log(entry, 'fetched entry by ID');
+
+      const appendedLinks = cloneDeep(entry);
+      appendedLinks.backlinksTo = backlinksTo;
+      appendedLinks.backlinksFrom = backlinksFrom;
+
       dispatch(
         addGlossaryEntry({
           glossaryId: existingNode.glossaryId,
           entryId: existingNode.id,
-          entryData: entry as GlossaryEntry,
+          entryData: appendedLinks as GlossaryEntry,
         })
       );
     } catch (error) {

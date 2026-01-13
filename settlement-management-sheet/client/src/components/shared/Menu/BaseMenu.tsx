@@ -19,7 +19,6 @@ const BaseMenu = ({
   closeKey,
   children,
 }: BaseMenuProps) => {
-  console.log('Rendering BaseMenu');
   const closeMenu = () => {
     closeKey ? handleClose(closeKey) : handleClose();
   };

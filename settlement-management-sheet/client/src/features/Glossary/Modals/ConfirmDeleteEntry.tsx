@@ -18,7 +18,6 @@ const ConfirmDelete: React.FC<ConfirmDeleteProps> = ({ node, glossaryId }) => {
   const [disabled, setDisabled] = useState(false);
 
   const onDelete = () => {
-    console.log('deleting single entry');
     dispatch(
       thunks.deleteEntry({
         node,

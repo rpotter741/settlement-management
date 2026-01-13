@@ -91,7 +91,7 @@ const AttrProperties: React.FC<AttrPropertiesProps> = ({
       }
     }
   };
-
+  console.log(attr);
   if (!attr) return null;
 
   return (

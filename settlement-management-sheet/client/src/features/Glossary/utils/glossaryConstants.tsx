@@ -11,21 +11,23 @@ import {
   CalendarMonth as CalendarMonthIcon,
   Terrain as TerrainIcon,
   Backpack,
+  PieChart,
 } from '@mui/icons-material';
 
-const entryTypeColors: Record<string, string> = {
-  continent: 'info.main',
-  nation: 'primary.main',
-  region: 'secondary.main',
-  settlement: 'warning.main',
-  territory: 'warning.dark',
-  location: 'honey.main',
-  person: 'success.main',
-  collective: 'error.main',
-  lore: 'text.primary',
-  event: 'text.secondary',
-  landmark: 'success.dark',
-  item: 'slateblue',
+export const entryTypeColors: Record<string, string> = {
+  continent: '#e6194b',
+  nation: '#ffe119 ',
+  region: '#4363d8',
+  settlement: '#f58231',
+  district: '#911eb4 ',
+  territory: '#e6beff',
+  location: '	#9a6324 ',
+  person: '#46f0f0',
+  collective: '#fabebe',
+  lore: '#008080',
+  event: '#bcf60c ',
+  landmark: '#3cb44b ',
+  item: '#f032e6 ',
 };
 
 export const entryTypeIcons: Record<string, React.ReactNode> = {
@@ -40,6 +42,9 @@ export const entryTypeIcons: Record<string, React.ReactNode> = {
   ),
   settlement: (
     <WbShadeIcon sx={{ color: entryTypeColors.settlement }} fontSize="small" />
+  ),
+  district: (
+    <PieChart sx={{ color: entryTypeColors.district }} fontSize="small" />
   ),
   region: <MapIcon sx={{ color: entryTypeColors.region }} fontSize="small" />,
   territory: (
@@ -80,7 +85,7 @@ export type GlossaryEntryTypeString =
   | 'landmark'
   | 'item';
 
-export const entryTypes = ['location', 'person', 'lore', 'event'];
+export const entryTypes = ['location', 'person', 'lore', 'event', 'item'];
 
 export const folderTypes = [
   'continent',
@@ -89,6 +94,7 @@ export const folderTypes = [
   'territory',
   'landmark',
   'settlement',
+  'district',
   'collective',
 ];
 
@@ -116,6 +122,7 @@ export const dragAcceptMap = {
     'territory',
     'landmark',
     'settlement',
+    'district',
     'collective',
     ...fileTypes,
   ],
@@ -124,18 +131,26 @@ export const dragAcceptMap = {
     'territory',
     'landmark',
     'settlement',
+    'district',
     'collective',
     ...fileTypes,
   ],
-  nation: ['territory', 'landmark', 'settlement', 'collective', ...fileTypes],
-  territory: ['landmark', 'settlement', 'collective', ...fileTypes],
-  landmark: ['settlement', 'collective', ...fileTypes],
-  settlement: ['collective', ...fileTypes],
+  nation: [
+    'territory',
+    'landmark',
+    'settlement',
+    'district',
+    'collective',
+    ...fileTypes,
+  ],
+  territory: ['landmark', 'settlement', 'district', 'collective', ...fileTypes],
+  landmark: ['settlement', 'district', 'collective', ...fileTypes],
+  settlement: ['district', 'collective', ...fileTypes],
+  district: ['collective', ...fileTypes],
   collective: [...fileTypes],
 };
 
 export function filterNodesByEntryType(allNodes: any[], entryType: string) {
-  console.log(entryType, allNodes);
   return allNodes.filter((node) => {
     return dragAcceptMap[
       node.entryType as keyof typeof dragAcceptMap

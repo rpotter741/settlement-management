@@ -51,8 +51,6 @@ export function removeGroupPropertyThunk({
       const newGroupDisplay = cloneDeep(group.display);
       delete newGroupDisplay[linkId];
 
-      console.log(newGroupDisplay);
-
       dispatch(reorderGroupProperties({ groupId, newOrder }));
 
       await removePropertyFromGroupService({

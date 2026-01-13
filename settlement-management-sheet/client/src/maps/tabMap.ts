@@ -26,11 +26,15 @@ import {
   Map,
   MenuBook,
   Person,
+  PieChart,
   Public,
   Room,
+  Sync,
   WbShade,
 } from '@mui/icons-material';
 import { TabTools, TabType } from '@/app/types/TabTypes.js';
+import { d } from 'node_modules/framer-motion/dist/types.d-CtuPurYT.js';
+import SyncWorkspace from '../features/SyncWorkspace/SyncWorkspace.js';
 
 const toolTabMap = {
   apt: {
@@ -176,6 +180,12 @@ const glossaryTabMap = {
     headerName: 'Settlement',
     validationFields: [],
   },
+  district: {
+    component: createEntryComponent,
+    icon: PieChart,
+    headerName: 'District',
+    validationFields: [],
+  },
   collective: {
     component: createEntryComponent,
     icon: Groups,
@@ -210,6 +220,12 @@ const glossaryTabMap = {
     component: createEntryComponent,
     icon: Backpack,
     headerName: 'Item',
+    validationFields: [],
+  },
+  sync: {
+    component: SyncWorkspace,
+    icon: Sync,
+    headerName: 'Synchronization Workspace',
     validationFields: [],
   },
   editGlossary: {

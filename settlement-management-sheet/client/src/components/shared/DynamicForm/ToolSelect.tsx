@@ -24,7 +24,7 @@ const ToolSelect: React.FC<ToolSelectProps> = ({
   const { tool, id } = useContext(ShellContext);
   const { edit, updateTool, selectEditValue } = useTools(tool, id);
   const [value, setValue] = useState(selectEditValue(keypath));
-  console.log(value, 'value in ToolSelect');
+
   return (
     <Box sx={{ width: '100%' }}>
       <FormControl fullWidth>

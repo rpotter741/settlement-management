@@ -22,6 +22,7 @@ export default async function updateEntryService({
       secondaryAnchorValue,
     })
     .then((res: any) => {
+      console.log(res.data);
       return res.data;
     });
 }

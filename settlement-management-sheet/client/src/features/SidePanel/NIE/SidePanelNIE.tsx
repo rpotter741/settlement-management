@@ -30,9 +30,7 @@ const SidePanelNIE = () => {
 
   const { openRelay } = useRelayChannel({
     id: 'NIEParser',
-    onComplete: (data) => {
-      console.log('NIE Parser Complete:', data);
-    },
+    onComplete: (data) => {},
   });
 
   const nodeList = useMemo(() => {
@@ -71,7 +69,7 @@ const SidePanelNIE = () => {
     const data = await getEntriesById({
       nodeIds: selected.map((node) => node.id),
     });
-    // console.log(data);
+    //
     const { entries, backlinks } = data;
     const worker = new Worker(
       new URL('../../../NIE/nie-worker.ts', import.meta.url),

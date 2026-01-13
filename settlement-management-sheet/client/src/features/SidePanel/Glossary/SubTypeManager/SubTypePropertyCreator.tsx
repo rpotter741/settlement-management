@@ -7,6 +7,7 @@ import CreateNewButton from './components/CreateNewButton.js';
 import SidebarProperty from './components/SidebarProperty.js';
 import { deleteSubTypePropertyThunkRoot } from '@/app/thunks/glossary/subtypes/properties/removeSubTypePropertyThunk.js';
 import { dispatch } from '@/app/constants.js';
+import PropertyTypeMenu from './components/PropertyTypeMenu.js';
 
 const SubTypePropertyCreator = ({
   openRelay,
@@ -23,8 +24,22 @@ const SubTypePropertyCreator = ({
   setActiveProperty?: (propertyId: string) => void;
   activeProperty?: string | null;
 }) => {
-  const { searchTerm, setSearchTerm, allProperties, addProperty } =
-    useSubTypePropertyCreator();
+  const {
+    searchTerm,
+    setSearchTerm,
+    allProperties,
+    addProperty,
+    filteredProperties,
+    typeFilters,
+    setTypeFilters,
+    relationshipFilter,
+    setRelationshipFilter,
+    typeAnchor,
+    handleMenu,
+    closeMenu,
+    typeSort,
+    setTypeSort,
+  } = useSubTypePropertyCreator();
 
   const handlePropertyClick = (propertyId: string) => {
     openRelay && openRelay({ data: { propertyId }, status: 'complete' });
@@ -66,7 +81,19 @@ const SubTypePropertyCreator = ({
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <Box sx={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'scroll' }}>
+      <PropertyTypeMenu
+        width={'200px'}
+        typeFilters={typeFilters}
+        setTypeFilters={setTypeFilters}
+        relationshipFilter={relationshipFilter}
+        setRelationshipFilter={setRelationshipFilter}
+        typeAnchor={typeAnchor}
+        handleMenu={handleMenu}
+        closeMenu={closeMenu}
+        typeSort={typeSort}
+        setTypeSort={setTypeSort}
+      />
+      <Box sx={{ maxHeight: 'calc(100vh - 312px)', overflowY: 'scroll' }}>
         <Box
           sx={{
             display: 'flex',
@@ -74,7 +101,7 @@ const SubTypePropertyCreator = ({
             overflowY: 'scroll',
           }}
         >
-          {allProperties.map((property, n: number) => (
+          {filteredProperties.map((property, n: number) => (
             <SidebarProperty
               key={property.id}
               propertyId={property.id}

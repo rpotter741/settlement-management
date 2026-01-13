@@ -44,7 +44,6 @@ export function updateSubTypeSubPropertyThunkRoot({
         })
       );
 
-      console.log(updates);
       // await updateSubTypePropertyService({
       //   propertyId,
       //   updates,

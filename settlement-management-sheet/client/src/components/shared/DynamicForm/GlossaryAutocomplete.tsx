@@ -145,7 +145,7 @@ const GlossaryAutocomplete: React.FC<GlossaryAutocompleteProps> = ({
             const tier = relationships[rel as RelationshipType];
             const existingTier =
               relationships[existing.group as RelationshipType];
-            console.log(tier, existingTier, 'tier and existingTier');
+
             if (
               relationships[rel as RelationshipType] <
               relationships[existing.group as RelationshipType]

@@ -42,8 +42,6 @@ export function addGroupToSubTypeThunk({
         throw new Error('No created group returned from service.');
       }
 
-      console.log('Created Group:', groupLink);
-
       dispatch(
         addGroupsToSubType({ subTypeId: subtypeId, groups: [groupLink] })
       );

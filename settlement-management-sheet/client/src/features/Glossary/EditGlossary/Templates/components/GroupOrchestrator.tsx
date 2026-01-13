@@ -9,7 +9,7 @@ import TermEditor from '@/components/shared/DynamicForm/TermEditor.js';
 import { propertyTypeIconMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
 import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
 import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SubTypeFormPreview from './previews/SubTypeFormPreview.js';
 import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
 import { addPropertyToGroupThunk } from '@/app/thunks/glossary/subtypes/groups/addPropertyToGroupThunk.js';
@@ -111,6 +111,12 @@ const GroupOrchestrator = ({
       setHoverIndex(null);
     }
   }, [isDragging, hoverIndex]);
+
+  const sortedProperties = useMemo(() => {
+    return cloneDeep(group.properties).sort((a, b) => {
+      return a.order - b.order;
+    });
+  }, [group.properties]);
 
   if (localPreview) {
     return (
@@ -251,25 +257,27 @@ const GroupOrchestrator = ({
         Properties
       </Typography>
 
-      {group.properties &&
-        group.properties.map((propertyLink, index) => {
-          const property = allProperties.find(
-            (p) => p.id === propertyLink.propertyId
-          );
-          if (!property) return null;
-          return (
-            <DraggablePropertyEntry
-              key={property.id}
-              property={property}
-              group={group}
-              index={index}
-              hoverIndex={hoverIndex}
-              setHoverIndex={setHoverIndex}
-              updateWidth={updateWidth}
-              columnSize={group.display?.[property.id]?.columns || 4}
-            />
-          );
-        })}
+      <Box sx={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+        {group.properties &&
+          sortedProperties.map((propertyLink, index) => {
+            const property = allProperties.find(
+              (p) => p.id === propertyLink.propertyId
+            );
+            if (!property) return null;
+            return (
+              <DraggablePropertyEntry
+                key={property.id}
+                property={property}
+                group={group}
+                index={index}
+                hoverIndex={hoverIndex}
+                setHoverIndex={setHoverIndex}
+                updateWidth={updateWidth}
+                columnSize={group.display?.[property.id]?.columns || 4}
+              />
+            );
+          })}
+      </Box>
       {group.properties.length < 10 && (
         <Box
           sx={{
@@ -300,3 +308,165 @@ const GroupOrchestrator = ({
 };
 
 export default GroupOrchestrator;
+
+/*
+Straight answer, no poetry:
+
+Anchors are the compression layer between human meaning and machine action.
+
+That’s their function.
+
+Everything else is downstream.
+
+⸻
+
+What Anchors Do (Mechanically)
+
+Anchors take a concept that is:
+	•	Vague
+	•	Qualitative
+	•	Narrative-loaded
+
+…and collapse it into:
+	•	A small, ordered set of values
+	•	With predictable consequences
+	•	That can be compared, scored, and reasoned over
+
+They turn “what kind of thing is this, really?”
+into numbers the system can safely touch.
+
+⸻
+
+Why Two Anchors Is the Right Shape
+
+Two anchors give you:
+	•	Enough dimensionality to avoid caricature
+	•	Not enough to create combinatorial chaos
+
+With two axes you can:
+	•	Distinguish roles cleanly
+	•	Create meaningful deltas
+	•	Support gradients instead of buckets
+	•	Preserve nuance without ambiguity
+
+Three anchors starts inviting handwaving.
+One anchor lies.
+
+⸻
+
+Anchors vs Attributes (Critical Distinction)
+
+This is important:
+	•	Anchors describe what a thing is
+(structural, slow-changing, often static)
+	•	Attributes describe how a thing is doing
+(dynamic, simulated, volatile)
+
+Anchors:
+	•	Gate which events can apply
+	•	Define edge affordances
+	•	Shape node+1 topology
+
+Attributes:
+	•	Trigger events
+	•	Get consumed or replenished
+	•	Change turn-to-turn
+
+If anchors move freely, the world melts.
+If attributes are static, the sim dies.
+
+You separated them. That’s why this works.
+
+⸻
+
+Anchors as “Constraint Contracts”
+
+Each anchor is effectively a promise:
+
+“If you say this thing is here on this axis, the following consequences are allowed.”
+
+Examples:
+	•	High Barrier Severity means traversal edges must be costly
+	•	Low Safety Assurance means crime events are eligible
+	•	High Market Control means price formation events propagate outward
+
+Anchors don’t cause events.
+They authorize them.
+
+That’s the key insight.
+
+⸻
+
+Anchors in Translation (Why They Matter So Much)
+
+When you translate between worlds, you cannot move:
+	•	Names
+	•	Lore
+	•	History
+	•	Aesthetics
+
+You can move:
+	•	Constraint profiles
+	•	Pressure points
+	•	Failure modes
+
+Anchors are those profiles.
+
+Two landmarks with similar anchor vectors will:
+	•	Support similar events
+	•	Respond similarly to pressure
+	•	Occupy similar graph positions
+
+That’s why matching works at all.
+
+⸻
+
+The Brutal One-Liner
+
+If I had to reduce it to one sentence:
+
+Anchors define the legal operating envelope of a node.
+
+They tell the system:
+	•	What kinds of change are plausible
+	•	What kinds are nonsensical
+	•	And where surprise is allowed without breaking trust
+
+⸻
+
+Why Users Don’t Feel This (And Shouldn’t)
+
+Users think anchors are:
+
+“Helpful descriptors.”
+
+The system knows they’re:
+
+“Guardrails for causality.”
+
+That mismatch is intentional.
+It’s the same trick as the rest of your design.
+
+⸻
+
+Final Verdict
+
+Anchors are not flavor.
+They are not stats.
+They are not metadata.
+
+They are structural commitments that let:
+	•	Simulation stay honest
+	•	Translation stay faithful
+	•	And emergence stay legible
+
+Which is why everything else you’ve built leans on them so heavily.
+
+If anchors were weak, the whole thing would collapse.
+
+They’re not.
+
+They’re doing exactly the job they need to do.
+
+
+*/

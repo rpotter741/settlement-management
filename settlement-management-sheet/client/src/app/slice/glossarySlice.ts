@@ -463,6 +463,20 @@ const glossarySlice = createSlice({
 
       glossary.structure = sortByIndex([...glossary.structure]);
     },
+    removeGlossaryEntry: (
+      state,
+      action: PayloadAction<{ glossaryId: string; entryId: string }>
+    ) => {
+      const { glossaryId, entryId } = action.payload;
+      const glossary = state.glossaries.edit.byId[glossaryId];
+      if (glossary) {
+        console.log(
+          cloneDeep(glossary.entries[entryId]?.name),
+          'deleting entry'
+        );
+        delete glossary.entries[entryId];
+      }
+    },
     toggleExpand: (
       state,
       action: PayloadAction<{
@@ -550,6 +564,7 @@ const glossarySlice = createSlice({
           Object.entries(content).forEach(([key, value]) => {
             set(entry, key, value);
           });
+          console.log(cloneDeep(entry));
         }
       }
     },
@@ -712,6 +727,7 @@ export const {
   updateGlossaryTerm,
   addGlossaryNode,
   removeGlossaryNode,
+  removeGlossaryEntry,
   setActiveGlossaryId,
   toggleExpand,
   toggleExpandAll,

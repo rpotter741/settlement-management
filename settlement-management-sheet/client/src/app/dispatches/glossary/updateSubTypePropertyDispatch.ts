@@ -19,7 +19,6 @@ export function updateSubTypeDispatch({
   keypath: string;
   value: any;
 }) {
-  console.log(keypath);
   dispatch(
     updateSubTypeProperty({
       glossaryId,

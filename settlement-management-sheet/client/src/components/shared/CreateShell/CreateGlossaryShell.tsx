@@ -62,6 +62,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   if (!glossaryId) return null;
 
   const { node, entry } = useNodeEditor(glossaryId, id);
+  console.log(entry, 'entry in shell');
 
   const nodeStructure = useSelector(selectGlossaryNodes(glossaryId));
 
@@ -77,8 +78,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   const { splitSize, soloSize, splitTabs } = useTabSplit();
 
   const handleChange = useCallback(
-    (value: any, keypath: string) => {
-      console.log(value, keypath, 'handleChange called');
+    (value: any, keypath: string, nukedIds?: string[]) => {
       dispatch(
         updateEntryById({
           glossaryId,
@@ -86,6 +86,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
           content: {
             [keypath]: value,
           },
+          nukedIds,
         })
       );
     },
@@ -94,6 +95,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
 
   const onAddData = useCallback(
     (sourceProperty: any, groupId: string, propertyId: string) => {
+      console.log(sourceProperty, groupId, propertyId, 'onadddata');
       const newData = generateCompoundPropertyValue(sourceProperty, propertyId);
       const addition = newData.value[newData.order[0]];
       const newSource = cloneDeep(entry);
@@ -102,8 +104,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
         `groups.${groupId}.properties.${propertyId}`,
         null
       );
-      console.log(groupId, propertyId, 'groupId, propertyId');
-      console.log(entry, 'entry');
+
       if (!targetProperty) return;
       targetProperty.value = {
         ...targetProperty.value,
@@ -130,9 +131,9 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
     (id: string, keypath: string) => {
       const newSource = cloneDeep(entry);
       const targetProperty: any = get(newSource, keypath, null);
-      console.log('targetProperty', targetProperty);
+
       if (!targetProperty) return;
-      console.log('fuck this shit baby');
+
       targetProperty.order = (targetProperty.order || []).filter(
         (orderId: string) => orderId !== id
       );

@@ -93,7 +93,7 @@ export function rehydrateGlossaryTree(
     if (existingState[node.id]) {
       renderState[node.id] = existingState[node.id];
     } else {
-      // console.log(node.name, 'going false');
+      //
       renderState[node.id] = {
         expanded: false,
         rename: false,

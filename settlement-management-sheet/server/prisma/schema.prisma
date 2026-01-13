@@ -732,6 +732,8 @@ model SubTypeProperty {
   displayName String?
   inputType   PropertyInputTypes
   shape       Json
+  smartSync   Json?
+  isGeneric   Boolean            @default(false)
 
   // Relations
   groupProperties SubTypeGroupProperty[]
@@ -751,6 +753,7 @@ model SubTypeGroup {
   displayName String?
   display     Json? //used for property display, eg widths. Record<propertyId, Record<[key:string], any>
   description String
+  isGeneric   Boolean      @default(false)
 
   // Relations
   properties   SubTypeGroupProperty[]
@@ -802,6 +805,8 @@ model EntrySubType {
   entries       GlossaryEntry[]
   glossaries    Glossary[]           @relation("SubTypes")
   status        Status               @default(DRAFT)
+  isGeneric     Boolean              @default(false)
+  context       String[]
 
   @@unique([refId, version])
   @@index([refId])
@@ -810,6 +815,7 @@ model EntrySubType {
 
 enum BacklinkType {
   direct
+  directCompound
   indirect
   hierarchal
 }
@@ -823,13 +829,18 @@ model BacklinkIndex {
   targetId String
   target   GlossaryEntry @relation("TargetEntry", fields: [targetId], references: [id], onDelete: Cascade)
 
-  type           BacklinkType? // should be something like 'direct', 'indirect'
-  propertyId     String // id of the property, like 'Nations' or 'Members' or something
-  propertyName   String // so I know what the hell is going on
-  propertyValue  Json? // for compound properties, include value of relationship (eg, value: 1, step: 'at War')
-  property       SubTypeProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  fromNameAtLink String?
-  toNameAtLink   String?
+  type             BacklinkType?
+  propertyId       String?
+  propertyName     String // so I know what the hell is going on
+  propertyValue    Json?
+  property         SubTypeProperty? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  ignoreDivergence Boolean          @default(false)
+  lastSyncedAt     DateTime         @default(now())
+  fromNameAtLink   String?
+  toNameAtLink     String?
+  targetIgnore     Boolean          @default(false)
+  subPropertyId    String?
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

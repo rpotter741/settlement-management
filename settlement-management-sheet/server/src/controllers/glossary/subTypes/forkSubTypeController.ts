@@ -10,8 +10,6 @@ export default async function forkSubType(req: any, res: any) {
 
     const forkedEntry = cloneSubTypeWithNewIds(subType).newSubType;
 
-    console.log(forkedEntry);
-
     const model = prisma.entrySubType;
     const newestSubType = await model.findFirst({
       where: { refId: subType.refId },

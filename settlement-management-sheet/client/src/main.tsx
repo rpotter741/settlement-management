@@ -8,6 +8,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import store from './app/store.js';
 import { Global } from '@emotion/react';
 import GlobalSnackbar from './features/Snackbar/GlobalSnackbar.js';
+import SystemOrchestrator from './features/System/SystemOrchestrator.js';
+import SmartLinkSpawner from './features/System/SmartLinkSpawner.js';
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
@@ -16,6 +18,9 @@ if (rootElement) {
       <DndProvider backend={HTML5Backend}>
         <App />
         <GlobalSnackbar />
+        <SystemOrchestrator>
+          <SmartLinkSpawner />
+        </SystemOrchestrator>
       </DndProvider>
     </Provider>
   );

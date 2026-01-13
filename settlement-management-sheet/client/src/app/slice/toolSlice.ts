@@ -129,12 +129,11 @@ const toolSlice = createSlice({
     },
     batchUpdateById: (state, action: PayloadAction<any>) => {
       const { tool, id, updates } = action.payload;
-      console.log(updates, 'batch updates for', tool, id);
+
       if (state[tool].edit.byId[id]) {
         const staticTool = state[tool].static.byId[id];
         const editTool = state[tool].edit.byId[id];
         for (const [keypath, value] of Object.entries(updates)) {
-          console.log(`setting ${keypath} to`, value);
           set(staticTool, keypath, value);
           set(editTool, keypath, value);
           set(state[tool].isDirty[id], keypath, false);

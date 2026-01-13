@@ -15,9 +15,9 @@ const GlossaryTermsEditor = () => {
 
   useAutosave(
     glossaryTermAutosaveConfig({
-      id: glossary.id,
-      genre: glossary.genre,
-      name: glossary.name,
+      id: glossary?.id,
+      genre: glossary?.genre,
+      name: glossary?.name,
     })
   );
 

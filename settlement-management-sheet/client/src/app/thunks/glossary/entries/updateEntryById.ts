@@ -5,26 +5,32 @@ import { RootState } from '@/app/store.js';
 import serverAction from '@/services/glossaryServices.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
+  removeGlossaryEntry,
   updateGlossary,
   updateGlossaryEntry,
+  updateGlossaryNode,
 } from '@/app/slice/glossarySlice.js';
 import { GenericObject } from '../../../../../../shared/types/common.js';
-import { get } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 import {
   addBulkDirtyKeypaths,
   addDirtyKeypath,
 } from '@/app/slice/dirtySlice.js';
+import updateEntryService from '@/services/glossary/entry/updateEntryService.js';
 
 export default function updateEntryById({
   glossaryId,
   entryId,
   content,
+  nukedIds,
 }: {
   glossaryId: string;
   entryId: string;
   content: Record<string, any>;
+  nukedIds?: string[];
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
+    console.log(nukedIds, 'nukedIds');
     const state = getState();
     const glossary = state.glossary.glossaries.edit.byId[glossaryId];
     if (!glossary) {
@@ -59,8 +65,8 @@ export default function updateEntryById({
         semanticContent['secondaryAnchorValue'] = value;
       }
     });
-    console.log('nooooooooop', content, semanticContent);
     try {
+      // optimistic first
       dispatch(
         updateGlossaryEntry({
           glossaryId,
@@ -68,13 +74,55 @@ export default function updateEntryById({
           content: { ...content, ...semanticContent },
         })
       );
-      dispatch(
-        addBulkDirtyKeypaths({
-          scope: 'glossary',
-          id: entryId,
-          keypaths: Object.keys(content),
-        })
-      );
+
+      // create new entry object to adjust and extract content to send to server
+      const newEntry = cloneDeep(editEntry);
+      Object.entries(content).forEach(([key, value]) => {
+        set(newEntry, key, value);
+      });
+
+      await updateEntryService({
+        id: entryId,
+        subTypeId: editEntry.subTypeId,
+        groups: newEntry.groups,
+        primaryAnchorValue: newEntry.primaryAnchorValue,
+        secondaryAnchorValue: newEntry.secondaryAnchorValue,
+      }).then(async (res) => {
+        if (nukedIds) {
+          // yeah side effects are ugly but whatever this works for now.
+          console.log(nukedIds);
+          nukedIds.forEach((entryId) => {
+            dispatch(
+              removeGlossaryEntry({
+                glossaryId,
+                entryId,
+              })
+            );
+          });
+        }
+        const { entry, backlinksTo, backlinksFrom } =
+          await serverAction.getEntryById({
+            nodeId: entryId,
+            entryType: editEntry.entryType,
+          });
+        dispatch(
+          updateGlossaryEntry({
+            glossaryId,
+            entryId,
+            content: {
+              backlinksTo,
+              backlinksFrom,
+            },
+          })
+        );
+      });
+      // dispatch(
+      //   addBulkDirtyKeypaths({
+      //     scope: 'glossary',
+      //     id: entryId,
+      //     keypaths: Object.keys(content),
+      //   })
+      // );
     } catch (error) {
       console.error('Error updating entry:', error);
       dispatch(

@@ -3,7 +3,6 @@ import prisma from '../../../db/db.ts';
 export default async function getGlossaries(req: any, res: any) {
   try {
     const userId = req?.user?.id || 'robbiepottsdm';
-    console.log(userId);
 
     const glossaries = await prisma.glossary.findMany({
       where: { createdBy: userId },
@@ -20,7 +19,7 @@ export default async function getGlossaries(req: any, res: any) {
         subTypes: true,
       },
     });
-    console.log(glossaries);
+
     return res.json(glossaries);
   } catch (error) {
     console.error(`Error getting glossaries:`, error);

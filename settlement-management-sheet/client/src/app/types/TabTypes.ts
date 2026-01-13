@@ -3,7 +3,7 @@ import { ToolName } from './ToolTypes.js';
 
 export type TabType = 'tool' | 'glossary' | 'other';
 
-export type TabTools = ToolName | GlossaryEntryType | 'editGlossary';
+export type TabTools = ToolName | GlossaryEntryType | 'editGlossary' | 'sync';
 
 export interface Tab {
   name: string; // the name of the tab, synced to the name of the tool or glossary entry

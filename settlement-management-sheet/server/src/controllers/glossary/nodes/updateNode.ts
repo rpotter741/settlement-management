@@ -3,11 +3,11 @@ import requireFields from '../../../utils/requireFields.ts';
 
 export default async function updateNode(req: any, res: any) {
   try {
-    const { id, name, fileType, parentId } = req.body;
-    if (!requireFields(['id', 'name'], req.body, res)) return;
+    const { id, updates } = req.body;
+    if (!requireFields(['id'], req.body, res)) return;
     const updatedEntry = await prisma.glossaryNode.update({
       where: { id },
-      data: { name, fileType, parentId },
+      data: { ...updates },
     });
     return res.json({ entry: updatedEntry });
   } catch (error) {

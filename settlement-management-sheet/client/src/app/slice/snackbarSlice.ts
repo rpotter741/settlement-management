@@ -18,7 +18,7 @@ const snackbarSlice = createSlice({
         message: string;
         type?: SnackbarType;
         duration?: number;
-        component?: React.ComponentType<any>;
+        componentKey?: string;
         props?: Record<string, any>;
       }>
     ) => {
@@ -26,11 +26,11 @@ const snackbarSlice = createSlice({
         message,
         type = 'info',
         duration = 3000,
-        component,
+        componentKey,
         props,
       } = action.payload;
       if (state.queue[0]?.message === message) return;
-      state.queue.push({ message, type, duration, component, props });
+      state.queue.push({ message, type, duration, componentKey, props });
       if (!state.open) {
         state.open = true;
         state.currentSnackbar = state.queue.shift() || null;

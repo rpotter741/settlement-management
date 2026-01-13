@@ -22,8 +22,6 @@ const SubTypeSelectWrapper = ({
 }) => {
   const labelId = `property-${label.toLowerCase().replace(/\s+/g, '-')}-label`;
 
-  console.log(label, multiple, get(property, keypath));
-
   if (mode !== 'property') {
     return (
       <FormControl sx={{ flex: 1, minWidth: 120, width: '100%' }}>

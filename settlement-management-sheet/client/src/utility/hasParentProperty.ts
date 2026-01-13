@@ -107,7 +107,6 @@ const getOptionsContextMaps = ({
     cloneDeep(nodeStructure)
   );
 
-  console.log(safeStructure, 'safeStructure in getOptionsContextMaps');
   const safeNodeReference = safeStructure[node.id];
 
   // Bail if node has no parent or if parent isn't in structure
@@ -205,8 +204,6 @@ export const ensureVirtualRoot = (
   };
 
   for (const node of rootNodes) node.parentId = VIRTUAL_ROOT_ID;
-
-  console.log(rootNodes, 'rootNodes in ensureVirtualRoot');
 
   return {
     ...nodeStructure,

@@ -89,7 +89,6 @@ const TabbedContainer: React.FC = () => {
 
   const moveLTR = useCallback(
     (entry: TabDataPayload, dropIndex: number) => {
-      console.log('moveLTR', entry);
       if (preventSplit) {
         dispatch(
           showSnackbar({
@@ -130,7 +129,6 @@ const TabbedContainer: React.FC = () => {
       dispatch(
         updateTab({
           tabId: activeTab?.tabId || '',
-          side: activeTab?.side || 'left',
           keypath: 'mode',
           updates: 'preview',
         })
@@ -141,7 +139,6 @@ const TabbedContainer: React.FC = () => {
       dispatch(
         updateTab({
           tabId: activeTab?.tabId || '',
-          side: activeTab?.side || 'left',
           keypath: 'mode',
           updates: 'edit',
         })
@@ -205,6 +202,7 @@ const TabbedContainer: React.FC = () => {
             backgroundColor: 'background.paper',
             height: 48,
             maxHeight: 48,
+            overflowX: 'scroll',
           }}
           className="tab-header"
         >

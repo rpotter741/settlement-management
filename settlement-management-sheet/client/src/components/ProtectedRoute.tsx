@@ -10,8 +10,6 @@ const ProtectedRoute = ({ children }) => {
     return children;
   }
 
-  console.log('Token found:', token);
-
   return token ? children : <Navigate to="/login" />;
 };
 

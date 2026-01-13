@@ -50,6 +50,7 @@ const TabbedContent: React.FC<TabbedContentProps> = ({
     return tabs.map((tab, n) => {
       if (tab.key !== activeTab) return null;
       const Component = componentMap[tab.name] || Box;
+
       return (
         <TabPanel
           key={tab.key}

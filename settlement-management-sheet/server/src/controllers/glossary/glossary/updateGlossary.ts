@@ -9,7 +9,7 @@ export default async function updateGlossary(req: any, res: any) {
       where: { id },
       data: { ...updates },
     });
-    console.log(`Updated glossary:`, updatedGlossary);
+
     return res.json({ glossary: updatedGlossary });
   } catch (error) {
     console.error(`Error updating glossary:`, error);

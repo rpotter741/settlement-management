@@ -69,8 +69,6 @@ const SubTypeTextInput = ({
         },
       ];
 
-  console.log(property);
-
   return (
     <>
       <FieldDefinition

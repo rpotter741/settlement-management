@@ -19,8 +19,10 @@ const ChangeSubTypeSelect = ({
     (st) => st.entryType === source?.entryType
   );
 
+  console.log(source?.subTypeId);
+
   const pushSubTypeChange = (newSubTypeId: string) => {
-    console.log(glossaryId, newSubTypeId, editId);
+    console.log('Pushing subtype change to ', newSubTypeId);
     dispatch(
       changeEntrySubTypeThunk({
         glossaryId,

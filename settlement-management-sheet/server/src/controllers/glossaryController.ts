@@ -44,6 +44,11 @@ import updateSubTypePropertyController from './glossary/subTypes/updateSubTypePr
 import deleteSubTypeGroupController from './glossary/subTypes/deleteSubTypeGroupController.ts';
 import addGroupsToSubTypeController from './glossary/subTypes/addGroupsToSubtypeController.ts';
 import removeGroupsFromSubTypeController from './glossary/subTypes/removeGroupsFromSubTypeController.ts';
+import updateAnchorsController from './glossary/subTypes/updateAnchorsController.ts';
+import updateSubTypeNameController from './glossary/subTypes/updateSubTypeNameController.ts';
+import updateSubTypeContextController from './glossary/subTypes/updateSubTypeContextController.ts';
+//backlinks
+import ignoreBacklinkController from './glossary/entry/ignoreBacklinkController.ts';
 
 export {
   // glossary actions
@@ -89,4 +94,9 @@ export {
   deleteSubTypeGroupController,
   addGroupsToSubTypeController,
   removeGroupsFromSubTypeController,
+  updateAnchorsController,
+  updateSubTypeNameController,
+  updateSubTypeContextController,
+  //backlinks
+  ignoreBacklinkController,
 };

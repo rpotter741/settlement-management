@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
 import { useDrag } from 'react-dnd';
+import { width } from '@mui/system';
 
 interface DragWrapperProps {
   type: string;
@@ -65,6 +66,9 @@ const DragWrapper: React.FC<DragWrapperProps> = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: 'move',
         height: 'fit-content',
+        width: '100%',
+        maxWidth: 'fit-content',
+        minWidth: 'fit-content',
       }}
     >
       {children}

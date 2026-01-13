@@ -12,7 +12,7 @@ import useTabSplit from '@/hooks/layout/useTabSplit.js';
 interface TabPanelProps {
   children: React.ReactNode;
   tab: Tab;
-  value: string | null;
+  value: string | null; //active tab by id
 }
 
 const TabPanel: React.FC<TabPanelProps> = React.memo(
@@ -50,7 +50,11 @@ const TabPanel: React.FC<TabPanelProps> = React.memo(
         {!tab.disableMenu && <FileMenu tab={tab} />}
         <Box
           id={`tab-panel-child-box-${tab.tabId}`}
-          sx={{ display: 'flex', height: '100%' }}
+          sx={{
+            display: 'flex',
+            height: '100%',
+            maxHeight: `calc(100vh - ${tab.disableMenu ? 96 : 136.5}px)`,
+          }}
         >
           {children}
         </Box>

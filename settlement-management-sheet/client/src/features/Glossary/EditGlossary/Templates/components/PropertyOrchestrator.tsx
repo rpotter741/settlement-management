@@ -1,5 +1,5 @@
 import { selectSubTypePropertyById } from '@/app/selectors/subTypeSelectors.js';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
 import SubTypeText from './inputs/SubTypeText.js';
@@ -11,6 +11,10 @@ import { SubTypePropertyTypes } from '../generics/genericContinent.js';
 import SubTypeDate from './inputs/SubTypeDate.js';
 import { useGenericContext } from '@/context/GenericContext.js';
 import { SubTypeModes } from '@/features/SidePanel/Glossary/SubTypeManager/SubTypeSidebarOrchestrator.js';
+import { useRelayChannel } from '@/hooks/global/useRelay.js';
+import { SmartSyncRule } from '@/features/Glossary/Modals/EditSmartSyncRule.js';
+import { cloneDeep, set } from 'lodash';
+import updateSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/properties/updateSubTypePropertyThunk.js';
 
 export const propertyTypeComponentMap: Record<
   SubTypePropertyTypes,
@@ -24,7 +28,7 @@ export const propertyTypeComponentMap: Record<
   compound: SubTypeCompound,
 };
 
-const FocusOrchestrator = ({
+const PropertyOrchestrator = ({
   propertyId,
   mode,
 }: {
@@ -40,6 +44,29 @@ const FocusOrchestrator = ({
     })
   );
 
+  console.log(property);
+
+  const saveRule = (data: SmartSyncRule & { sourceId: string }) => {
+    const { sourceId, ...rest } = data;
+    const updatedProperty = cloneDeep(property);
+    set(updatedProperty, 'smartSync', rest);
+    const updates = {
+      smartSync: rest,
+    };
+    updateSubTypePropertyThunk({
+      propertyId,
+      property: updatedProperty,
+      updates,
+    });
+  };
+
+  useRelayChannel({
+    id: 'property-smart-sync-rules',
+    onComplete: (data: unknown) => {
+      saveRule(data as SmartSyncRule & { sourceId: string });
+    },
+  });
+
   if (!property) return null;
 
   const Component =
@@ -48,11 +75,12 @@ const FocusOrchestrator = ({
   return (
     <Box
       sx={{
+        flex: 1,
         width: '100%',
-        py: 2,
+        pt: 4,
         maxWidth: 800,
-        mt: 6,
         px: 4,
+        mt: 2.5,
       }}
     >
       <Component
@@ -69,4 +97,4 @@ const FocusOrchestrator = ({
   );
 };
 
-export default FocusOrchestrator;
+export default PropertyOrchestrator;

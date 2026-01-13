@@ -71,11 +71,9 @@ const QuickSearch: React.FC = () => {
         )}
         onChange={(event, value) => {
           // Handle search logic here
-          console.log('Search value:', value);
         }}
         onInputChange={(event, value) => {
           // Handle input change logic here
-          console.log('Input changed:', value);
         }}
         sx={{ width: '100%' }}
         slotProps={{
@@ -102,7 +100,6 @@ const QuickSearch: React.FC = () => {
           variant="outlined"
           onClick={() => {
             // Handle search button click
-            console.log('Cancel button clicked');
           }}
         >
           Cancel
@@ -113,7 +110,6 @@ const QuickSearch: React.FC = () => {
           sx={{ ml: 2 }}
           onClick={() => {
             // Handle search button click
-            console.log('Open button clicked');
           }}
         >
           Open Tab(s)

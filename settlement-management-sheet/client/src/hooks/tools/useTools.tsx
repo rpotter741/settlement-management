@@ -64,7 +64,6 @@ export const useToolActions = (tool: ToolName, id: string) => {
 
   const batchUpdate = useCallback(
     (updates: Record<string, any>) => {
-      console.log('Batch updating tool:', tool, 'with updates:', updates);
       dispatch(batchUpdateById({ tool, id, updates }));
     },
     [dispatch]
@@ -171,8 +170,7 @@ export const useServer = (tool: ToolName) => {
       }
 
       const response = await actions[action as keyof typeof actions](data);
-      if (debug) console.log('Server response:', response.data);
-      return response.data;
+      if (debug) return response.data;
     } catch (error: any) {
       console.error('API error:', error.message);
       throw new Error(

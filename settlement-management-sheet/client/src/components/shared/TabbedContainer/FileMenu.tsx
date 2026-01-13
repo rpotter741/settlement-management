@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, Box, ButtonGroup } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Button, Box, ButtonGroup, Badge, Typography } from '@mui/material';
 
 import FileSubMenu from './SubFileMenus/FileSubMenu.js';
 import EditSubMenu from './SubFileMenus/EditSubMenu.js';
@@ -10,6 +10,11 @@ import { Tab } from '@/app/types/TabTypes.js';
 import { useTools } from '@/hooks/tools/useTools.js';
 import { ToolName } from 'types/common.js';
 import { fontSize } from '@mui/system';
+import ToolSubMenu from './SubFileMenus/ToolSubMenu.js';
+import { useSelector } from 'react-redux';
+import { selectEditEntryById } from '@/app/selectors/glossarySelectors.js';
+import { Backlink } from '@/features/SyncWorkspace/SyncWorkspace.js';
+import useTheming from '@/hooks/layout/useTheming.js';
 
 type MenuKey = 'file' | 'edit' | 'view' | 'tools' | 'help';
 
@@ -35,6 +40,40 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
   const [anyOpen, setAnyOpen] = useState(false);
 
   const theme = useTheme();
+  const { hexValues } = useTheming();
+
+  const entry =
+    tab.tabType === 'glossary' && tab.glossaryId
+      ? useSelector(selectEditEntryById(tab.glossaryId, tab.id))
+      : null;
+
+  const badgeCount = useMemo(() => {
+    if (!entry) return 0;
+    const inboundIds = new Set<string>();
+    let { sourceIds, count } = (entry.backlinksTo || [])?.reduce(
+      (acc: any, bl: Backlink, n: number) => {
+        if (!acc.sourceIds.includes(bl.sourceId) && !bl.targetIgnore) {
+          acc.sourceIds.push(bl.sourceId);
+          if (!inboundIds.has(bl.sourceId)) {
+            inboundIds.add(bl.sourceId);
+            acc.count += 1;
+          }
+        }
+        return acc;
+      },
+      { sourceIds: [], count: 0 }
+    );
+    const outboundIds = new Set<string>();
+    (entry.backlinksFrom || [])?.forEach((bl: Backlink) => {
+      if (sourceIds.includes(bl.targetId)) {
+        if (!outboundIds.has(bl.targetId) && !bl.targetIgnore) {
+          outboundIds.add(bl.targetId);
+          count -= 1;
+        }
+      }
+    });
+    return count;
+  }, [entry]);
 
   const handleClick = (e: any, key: string) => {
     e.preventDefault();
@@ -133,6 +172,8 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
           ? (theme: any) => alpha(theme.palette.primary.main, 0.1)
           : (theme: any) => alpha(theme.palette.secondary.main, 0.1),
     },
+    display: 'flex',
+    alignItems: 'center',
   });
 
   return (
@@ -143,6 +184,7 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
+        background: `linear-gradient(to top right, ${hexValues.background.paper}, ${hexValues.background.default})`,
       }}
     >
       <Box
@@ -152,16 +194,38 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
           borderRadius: 0,
         }}
       >
-        {menuItems.map((key) => (
-          <Button
-            key={key}
-            onClick={(e) => handleClick(e, key)}
-            onMouseEnter={(e) => handleMouseEnter(e, key)}
-            sx={buttonStyle}
-          >
-            {key.charAt(0).toUpperCase() + key.slice(1)}
-          </Button>
-        ))}
+        {menuItems.map((key) => {
+          //
+          if (
+            key === 'tools' &&
+            badgeCount >= 3 &&
+            !open.tools &&
+            tab.tool !== 'sync'
+          ) {
+            return (
+              <Button
+                key={key}
+                onClick={(e) => handleClick(e, key)}
+                onMouseEnter={(e) => handleMouseEnter(e, key)}
+                sx={buttonStyle}
+              >
+                <Badge variant="dot" color="warning">
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </Badge>
+              </Button>
+            );
+          }
+          return (
+            <Button
+              key={key}
+              onClick={(e) => handleClick(e, key)}
+              onMouseEnter={(e) => handleMouseEnter(e, key)}
+              sx={buttonStyle}
+            >
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </Button>
+          );
+        })}
       </Box>
       <FileSubMenu
         tab={tab}
@@ -182,6 +246,13 @@ const FileMenu: React.FC<FileMenuProps> = ({ tab }) => {
         viewOpen={open.view}
         handleClose={handleClose}
         menuSx={menuSx}
+      />
+      <ToolSubMenu
+        tab={tab}
+        toolsOpen={open.tools}
+        handleClose={handleClose}
+        menuSx={menuSx}
+        badgeCount={badgeCount}
       />
       {/* Add Tools and Help submenus as needed */}
     </Box>

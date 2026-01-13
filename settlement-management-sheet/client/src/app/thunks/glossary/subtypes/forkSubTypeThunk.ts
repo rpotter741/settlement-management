@@ -23,8 +23,6 @@ export function forkSubTypeThunkRoot({
         return res;
       });
 
-      console.log(newSubType);
-
       dispatch(
         addSubType({
           subType: newSubType,

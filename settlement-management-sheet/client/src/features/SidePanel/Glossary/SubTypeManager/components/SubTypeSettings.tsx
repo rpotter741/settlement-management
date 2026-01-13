@@ -31,8 +31,6 @@ const SubTypeSettings = ({
     showModal({ entry });
   };
 
-  console.log(subType);
-
   return (
     <Box
       sx={{

@@ -53,18 +53,20 @@ const useSubTypeGroupCreator = ({
   dispatch(fetchSubTypeGroupsThunk());
   const groups = useSelector(selectSubTypeGroups);
   const allGroups = useMemo(() => {
-    console.log('calculating groups', groups);
-    return groups.filter((group) => {
-      const matchesSearch = group.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesContentType =
-        contentFilters.length === 0 ||
-        (contentFilters.includes('system') && group.contentType === 'system') ||
-        (contentFilters.includes('custom') && group.contentType === 'custom');
+    return groups
+      .filter((group) => {
+        const matchesSearch = group.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesContentType =
+          contentFilters.length === 0 ||
+          (contentFilters.includes('system') &&
+            group.contentType === 'system') ||
+          (contentFilters.includes('custom') && group.contentType === 'custom');
 
-      return matchesSearch && matchesContentType;
-    });
+        return matchesSearch && matchesContentType;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [groups, searchTerm, contentFilters]);
 
   const addGroup = (name: string) => {

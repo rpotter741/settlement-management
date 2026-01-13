@@ -53,7 +53,6 @@ const RenderEntry: React.FC<RenderEntryProps> = ({
   const { addNewTab, setActiveTab } = useSidePanel();
 
   if (entry.title === active) {
-    console.log(active, entry.children);
   }
 
   const handleClick = (title: string) => {

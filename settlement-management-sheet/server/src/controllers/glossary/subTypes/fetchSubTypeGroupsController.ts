@@ -26,8 +26,6 @@ export default async function fetchSubTypeGroupsController(req: any, res: any) {
     const userGroups = groups.filter((p) => p.createdBy === userId) ?? [];
     const systemGroups = groups.filter((p) => p.contentType === 'SYSTEM') ?? [];
 
-    console.log('Fetched groups:', groups);
-
     return res.json({
       groups: system ? { ...userGroups, ...systemGroups } : userGroups,
     });

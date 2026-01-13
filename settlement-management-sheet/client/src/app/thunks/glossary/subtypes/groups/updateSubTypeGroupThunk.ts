@@ -11,11 +11,9 @@ import updateSubTypeGroupService from '@/services/glossary/subTypes/updateSubTyp
 
 export function updateSubTypeGroupThunk({
   groupId,
-  property,
   updates,
 }: {
   groupId: string;
-  property?: SubTypeProperty;
   updates: any;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {

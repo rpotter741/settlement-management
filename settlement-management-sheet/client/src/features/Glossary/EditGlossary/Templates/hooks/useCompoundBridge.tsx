@@ -26,7 +26,6 @@ const useCompoundBridge = ({
   const handleTransform = useCallback(
     (value: any, keypath: string) => {
       if (isCompound && subPropertySide && subPropertyParent) {
-        console.log('doing the transform');
         let newProperty = cloneDeep(property);
         set(newProperty, keypath, value);
         const newPropertyType = newProperty.inputType;
@@ -80,8 +79,6 @@ const useCompoundBridge = ({
         updates.inputType = newProperty.inputType;
         updates.shape = newProperty.shape;
 
-        console.log('doing the transform baby');
-
         updateSubTypePropertyThunk({
           propertyId,
           property: transformed || newProperty,
@@ -98,7 +95,7 @@ const useCompoundBridge = ({
         const updatedProperty = cloneDeep(subPropertyParent) as SubTypeProperty;
         const improvedKeypath = `shape.${subPropertySide}.${keypath}`;
         set(updatedProperty, improvedKeypath, value);
-        console.log(updatedProperty);
+
         const updates = { shape: updatedProperty.shape };
         updateSubTypePropertyThunk({
           propertyId: subPropertyParent.id,

@@ -3,6 +3,7 @@ import requireFields from '../../../utils/requireFields.ts';
 import _ from 'lodash';
 import { getSubTypeCached } from './updateEntry.ts';
 import generateFormSource from '../../../utils/generateFormSource.ts';
+import { SubTypeGroupLink } from '../../../../../client/src/app/slice/subTypeSlice.ts';
 
 export default async function changeEntrySubTypeController(req: any, res: any) {
   const {
@@ -18,8 +19,34 @@ export default async function changeEntrySubTypeController(req: any, res: any) {
     const subType = await getSubTypeCached(newSubTypeId, async () => {
       return prisma.entrySubType.findUnique({
         where: { id: newSubTypeId },
+        include: {
+          groups: {
+            include: {
+              group: {
+                include: {
+                  properties: {
+                    include: { property: true },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     });
+
+    const { allGroups, allProperties } = Object.values(subType.groups).reduce(
+      (acc: { allGroups: any[]; allProperties: any[] }, groupLink: any) => {
+        const { group } = groupLink;
+        acc.allGroups.push(group);
+        group.properties.forEach((propLink: any) => {
+          acc.allProperties.push(propLink.property);
+        });
+        return acc;
+      },
+      { allGroups: [], allProperties: [] }
+    );
+
     const entry = await prisma.glossaryEntry.findUnique({
       where: { id: entryId },
     });
@@ -30,34 +57,75 @@ export default async function changeEntrySubTypeController(req: any, res: any) {
         .json({ message: `Entry with id ${entryId} not found.` });
     }
 
-    const groups = generateFormSource(subType).groups;
+    const { groups, primaryAnchorId, secondaryAnchorId } = generateFormSource(
+      subType,
+      allGroups,
+      allProperties
+    );
 
-    console.log(groups);
+    const allFormerProperties: Record<string, any> = {};
+    Object.values(entry.groups as Record<string, any>).forEach((group: any) => {
+      Object.values(group.properties).forEach(
+        (p: any) => (allFormerProperties[p.id] = p)
+      );
+    });
+    const allNewProperties: Record<string, any> = {};
+    Object.values(groups).forEach((group: any) => {
+      Object.values(group.properties).forEach(
+        (p: any) => (allNewProperties[p.id] = p)
+      );
+    });
+
+    let primaryAnchorValue = '';
+    let secondaryAnchorValue = '';
+
+    Object.values(groups).forEach((group: any) => {
+      Object.values(group.properties).forEach((property: any) => {
+        if (allFormerProperties[property.id]) {
+          property.value = allFormerProperties[property.id].value;
+          if (property.order) {
+            property.order = allFormerProperties[property.id].order;
+          }
+          if (primaryAnchorId === property.id) {
+            primaryAnchorValue = property.value;
+          }
+          if (secondaryAnchorId === property.id) {
+            secondaryAnchorValue = property.value;
+          }
+        }
+      });
+    });
 
     const updates = {
       subTypeId: newSubTypeId,
-      primaryAnchorValue: null,
-      secondaryAnchorValue: null,
-      primaryAnchorId: subType.anchors.primary,
-      secondaryAnchorId: subType.anchors.secondary,
+      primaryAnchorValue,
+      secondaryAnchorValue,
+      primaryAnchorId,
+      secondaryAnchorId,
       groups,
     };
 
-    const updatedEntry = await prisma.glossaryEntry.update({
-      where: { id: entryId },
-      data: updates,
-    });
+    const { updatedEntry, updatedNode } = await prisma.$transaction(
+      async (tx) => {
+        const updatedEntry = await tx.glossaryEntry.update({
+          where: { id: entryId },
+          data: updates,
+        });
 
-    const updatedNode = await prisma.glossaryNode.update({
-      where: { id: entryId },
-      data: {
-        subTypeId: newSubTypeId,
-      },
-    });
+        const updatedNode = await tx.glossaryNode.update({
+          where: { id: entryId },
+          data: {
+            subTypeId: newSubTypeId,
+          },
+        });
 
+        return { updatedEntry, updatedNode };
+      }
+    );
     return res.json({
       message: `Entry updated successfully.`,
-      updates,
+      updatedEntry,
+      updatedNode,
     });
   } catch (error: any) {
     console.error(`Error updating entry for id ${entryId}:`, error);

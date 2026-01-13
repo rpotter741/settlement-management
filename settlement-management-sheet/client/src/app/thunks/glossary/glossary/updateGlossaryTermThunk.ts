@@ -68,7 +68,6 @@ export default function updateGlossaryTermThunk({
           })
         );
       } else {
-        console.log('Term update found:', termUpdate);
         dispatch(
           updateGlossaryTerm({
             id,

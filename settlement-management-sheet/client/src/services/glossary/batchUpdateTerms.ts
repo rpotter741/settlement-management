@@ -13,7 +13,6 @@ export default async function updateGlossaryTerm({
     value: any;
   }>;
 }) {
-  console.log('Batch updating glossary terms:', { id, updates });
   return api
     .post('/glossary/batchUpdateTerms', { id, updates })
     .then((res: any) => {

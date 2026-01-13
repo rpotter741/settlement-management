@@ -118,7 +118,7 @@ const ObjectThresholds = ({ max = 21 }) => {
     if (thresholds.order.length >= max) {
       dispatch(
         showSnackbar({
-          message: `Congrats on clicking at least ${max - 7} times! ${max} is the limit, friend. Hope that's enough!`,
+          message: `I hope 21 is enough! Scaling UIs is hard!`,
           type: 'info',
         })
       );

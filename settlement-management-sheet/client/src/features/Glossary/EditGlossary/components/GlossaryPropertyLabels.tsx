@@ -78,18 +78,20 @@ const defaultVisibilitySettings: Record<
 };
 
 export const genericSubTypeIds: Record<GlossaryEntryType, string> = {
-  continent: '63c87363-ecee-4ead-ace3-493b52bd083a',
-  region: '0e1ce32c-b9af-4e10-a888-81bcf35a9679',
-  nation: 'fd9662a3-8c4a-4466-899c-6cfedbca9dca',
-  territory: '7a721b38-d669-4b19-8eb2-233abeb5f730',
-  landmark: '6b6965b3-bd56-486c-bc4e-32c306bddee2',
-  settlement: '5541d132-8894-4f2d-9757-7f88751dcd02',
-  collective: '99897282-e7b0-4bf6-8d51-0d5ed3c99a54',
-  location: 'b5094b58-48e6-4860-b68c-f71df4cdb957',
-  person: '26202360-a1ee-42b1-9c31-e2dc62ad45de',
-  event: '97bd7dcd-6845-41d8-9cd3-a9e4b1650df9',
-  lore: 'fd272d17-88ec-46c4-906d-051ad80c4e48',
-  item: '617e4ebc-3e28-4606-b9e4-38c018429fdb',
+  continent: '3770c5f7-7886-4bb6-be8c-3b1f3f2a9dc9',
+  region: 'aee6aac0-f788-40df-a69f-f59fc032bd01',
+  nation: 'b2b10c72-7649-4276-b93c-06a660f0654a',
+  territory: '8555fce3-1678-4993-a4d2-71c4e47d1b1c',
+  landmark: '7849dc1f-c21e-4eef-9a24-0b86b9ba1e63',
+  settlement: '3a313b9b-d735-43ef-985f-07a032783bc5',
+  district: '153c5305-3efd-4e19-a108-1418f6e017cc',
+  collective: '3ee82037-4ba0-405b-a389-8e28b157ab9d',
+  location: '',
+  person: '',
+  event: '',
+  lore: '',
+  item: '',
+  folder: '',
 };
 
 export function makeGlossarySettingsRow({

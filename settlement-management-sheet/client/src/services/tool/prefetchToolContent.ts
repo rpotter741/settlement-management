@@ -21,7 +21,7 @@ export default async function prefetchToolContent(
               scope: currentScope,
             },
           });
-          console.log(data);
+
           return data;
         };
       })(scope),

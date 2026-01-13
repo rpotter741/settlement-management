@@ -16,7 +16,6 @@ export default async function removePropertyFromGroupService({
       groupId,
     })
     .then((res: any) => {
-      console.log(res.message);
       return res.data;
     });
 }

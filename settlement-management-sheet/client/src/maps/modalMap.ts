@@ -39,6 +39,18 @@ export const modalMap: Record<
     () =>
       import('../features/Glossary/Modals/CreateGlossaryEntryFromDropdown.js')
   ),
+  ConfirmChangeEntrySubType: React.lazy(
+    () => import('../features/Glossary/Modals/ConfirmChangeSubType.js')
+  ),
+  EditSmartSyncRule: React.lazy(
+    () => import('../features/Glossary/Modals/EditSmartSyncRule.js')
+  ),
+  ReviewSyncChanges: React.lazy(
+    () => import('../features/SyncWorkspace/ReviewSyncChanges.js')
+  ),
+  AdHocSmartLink: React.lazy(
+    () => import('../features/Glossary/Modals/AdHocSmartLinkModal.js')
+  ),
 };
 
 export type ModalKey = keyof typeof modalMap;

@@ -43,9 +43,7 @@ const ObjectDependencies: React.FC<ObjectDependenciesProps> = ({
         color="success"
         aria-label="Add dependency"
         sx={{ px: 4 }}
-        onClick={() => {
-          console.log('Fix me! I need to be implemented!');
-        }}
+        onClick={() => {}}
       >
         Add Dependency
       </Button>

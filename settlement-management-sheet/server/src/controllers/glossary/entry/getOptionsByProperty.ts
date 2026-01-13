@@ -104,14 +104,14 @@ export default async function getOptionsByProperty(req, res) {
         ]);
       }
     });
-    console.log(results, 'results from getOptionsByProperty before fallback');
+
     const other = fallback.filter((item) => !allProperties.has(item));
     results.other = other.map((value) => ({
       id: value[0],
       name: value[0],
       [property]: value,
     }));
-    console.log(results, 'results from getOptionsByProperty');
+
     res.status(200).json({
       property,
       results,

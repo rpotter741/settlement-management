@@ -206,13 +206,7 @@ const SettlementPointsCost = () => {
                   p: 0,
                 }}
                 shrink
-                onMoreDetails={
-                  field.name !== 'default'
-                    ? () => {
-                        console.log('More details clicked');
-                      }
-                    : undefined
-                }
+                onMoreDetails={field.name !== 'default' ? () => {} : undefined}
                 onRemove={
                   field.name !== 'default' ? () => remove(id) : undefined
                 }

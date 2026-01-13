@@ -8,7 +8,7 @@ export default async function deleteEntry({
   glossaryId: string;
 }) {
   return api
-    .post('/glossary/entry/delete', { id, glossaryId })
+    .post('/glossary/entry/delete', { id, glossaryId, nukeIt: true })
     .then((res: any) => {
       return res.data;
     });

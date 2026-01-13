@@ -1,3 +1,4 @@
+import { GenericObject } from '../../../../../shared/types/index.ts';
 import prisma from '../../../db/db.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import _ from 'lodash';
@@ -81,6 +82,21 @@ export default async function updateEntry(req: any, res: any) {
     const subType = await getSubTypeCached(subTypeId, async () => {
       return prisma.entrySubType.findUnique({
         where: { id: subTypeId },
+        include: {
+          groups: {
+            include: {
+              group: {
+                include: {
+                  properties: {
+                    include: {
+                      property: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     });
     const entry = await prisma.glossaryEntry.findUnique({
@@ -93,14 +109,37 @@ export default async function updateEntry(req: any, res: any) {
         .json({ message: `Entry with id ${id} not found.` });
     }
 
+    const updateNodeSubType = entry.subTypeId !== subTypeId;
+
     const oldIds = extractAllRelationshipIds(
       entry.groups as Record<string, any>,
       subType
     );
+
     const newIds = extractAllRelationshipIds(groups, subType);
 
-    const toAdd = [...newIds].filter((id) => !oldIds.has(id));
-    const toRemove = [...oldIds].filter((id) => !newIds.has(id));
+    console.table([...oldIds, 'oldIds', ...newIds, 'newIds']);
+
+    const toAdd = newIds.filter(
+      (idData) =>
+        !oldIds.find(
+          (oldId) =>
+            oldId.id === idData.id && oldId.propertyId === idData.propertyId
+        )
+    );
+
+    const toRemove = oldIds.filter(
+      (idData) =>
+        !newIds.find(
+          (newId) =>
+            newId.id === idData.id && newId.propertyId === idData.propertyId
+        )
+    );
+
+    console.table([...toAdd, 'toAdd', ...toRemove, 'toRemove']);
+
+    const toAddArray = toAdd.map((data) => data.id).filter(Boolean);
+    const toRemoveArray = toRemove.map((data) => data.id);
 
     const newGroups: any = _.cloneDeep(entry.groups);
     if (!newGroups) {
@@ -110,7 +149,7 @@ export default async function updateEntry(req: any, res: any) {
     }
 
     const targetEntries = await prisma.glossaryEntry.findMany({
-      where: { id: { in: toAdd } },
+      where: { id: { in: toAddArray } },
       select: { id: true, name: true },
     });
 
@@ -120,38 +159,81 @@ export default async function updateEntry(req: any, res: any) {
 
     // futhermore, for the sync workspace, we'll grab all backlinks where sourceId === entryId OR targetId === entryId. By doing this, rendering the sync workspace has everything needed (name, property) to showcase the backlinks in either direction without further queries. Add an `ignoredAt` field to the backlinkIndex instead of an isIgnored boolean, so that we can maybe filter by ignored date. Probably don't need a badge unless 'unanswered' backlinks exceeds a certain number (eg, 5) but we'll see.
 
-    await prisma.$transaction(async (tx) => {
-      if (toAdd.length) {
-        await tx.backlinkIndex.createMany({
-          data: toAdd.map((targetId) => ({
-            sourceId: id,
-            targetId,
-            type: 'dropdown',
-            fromNameAtLink: entry?.name || null,
-            toNameAtLink: nameMap[targetId] || null,
-          })),
-        });
-      }
-      if (toRemove.length) {
-        await tx.backlinkIndex.deleteMany({
-          where: {
-            sourceId: id,
-            targetId: { in: toRemove },
+    const { newEntry, backlinksTo, backlinksFrom } = await prisma.$transaction(
+      async (tx) => {
+        let newEntry, backlinksTo, backlinksFrom;
+        if (toAdd.length) {
+          await tx.backlinkIndex.createMany({
+            data: toAdd.map((item: BackLinkShape) => ({
+              sourceId: id,
+              targetId: item.id,
+              type: item.type as
+                | 'direct'
+                | 'indirect'
+                | 'hierarchal'
+                | 'directCompound',
+              fromNameAtLink: entry?.name || '',
+              toNameAtLink: nameMap[item.id as keyof typeof nameMap] || '',
+              propertyId: item.propertyId || '',
+              propertyName: item.propertyName || '',
+              propertyValue: item.propertyValue || '',
+            })),
+          });
+          backlinksTo = await tx.backlinkIndex.findMany({
+            where: {
+              targetId: id,
+            },
+          });
+        }
+        if (toRemove.length) {
+          for (const item of toRemove) {
+            // clean up any ignoredAt fields or other metadata here if needed in future
+            console.log('removing backlink to ', item.id);
+            await tx.backlinkIndex.deleteMany({
+              where: {
+                sourceId: id,
+                targetId: item.id,
+                propertyId: item.propertyId,
+              },
+            });
+          }
+          backlinksFrom = await tx.backlinkIndex.findMany({
+            where: {
+              sourceId: id,
+            },
+          });
+        }
+
+        newEntry = await tx.glossaryEntry.update({
+          where: { id },
+          data: {
+            groups,
+            primaryAnchorValue,
+            secondaryAnchorValue,
+            subTypeId,
           },
         });
+
+        if (updateNodeSubType) {
+          await tx.glossaryNode.update({
+            where: { id },
+            data: {
+              subTypeId,
+            },
+          });
+        }
+        return { newEntry, backlinksFrom, backlinksTo };
       }
+    );
 
-      await tx.glossaryEntry.update({
-        where: { id },
-        data: {
-          groups,
-          primaryAnchorValue,
-          secondaryAnchorValue,
-        },
-      });
+    return res.json({
+      message: `Entry updated successfully.`,
+      data: {
+        newEntry,
+        backlinksFrom,
+        backlinksTo,
+      },
     });
-
-    return res.json({ message: `Entry updated successfully.` });
   } catch (error: any) {
     console.error(`Error updating entry for id ${id}:`, error);
 
@@ -181,47 +263,126 @@ function extractIdsFromCompound(
     .filter(Boolean);
 }
 
+// need to update this shit with all properties and groups and all that jazz so that I can
+// actually recognize the properties and their relationship definitions
+
 function extractAllRelationshipIds(
   groups: Record<string, any>,
   subType: any
-): Set<string> {
-  const ids = new Set<string>();
+): BackLinkShape[] {
+  const ids: BackLinkShape[] = [];
 
-  for (const [groupKey, group] of Object.entries(groups)) {
-    for (const [propKey, property] of Object.entries(group.properties) as [
+  const allGroups = subType.groups.map((groupLink: any) => groupLink.group);
+  const allProperties = allGroups.flatMap((group: any) =>
+    group.properties.map((propertyLink: any) => propertyLink.property)
+  );
+
+  for (const [groupId, group] of Object.entries(groups)) {
+    for (const [propertyId, property] of Object.entries(group.properties) as [
       string,
       any,
     ][]) {
-      const propDef = subType.groupData?.[groupKey]?.propertyData?.[propKey];
+      const propDef = allProperties.find((p: any) => p.id === propertyId);
       if (!propDef) continue;
-
-      if (propDef.relationship) {
-        // Simple relationship (dropdown)
+      if (propDef.shape.relationship) {
         const value = property.value;
         if (Array.isArray(value)) {
-          value.forEach((id) => ids.add(id));
-        } else if (value) {
-          ids.add(value);
+          value.forEach((id) =>
+            ids.push({
+              id,
+              propertyName: propDef.name,
+              propertyValue: property.value,
+              propertyId,
+              type: 'direct',
+            })
+          );
+        } else {
+          ids.push({
+            id: value,
+            propertyName: propDef.name,
+            propertyValue: property.value,
+            propertyId,
+            type: 'direct',
+          });
         }
       }
 
-      if (propDef.type === 'compound') {
-        // Compound relationship
-        Object.values(property.value || {}).forEach((compValue: any) => {
-          if (propDef.left?.relationship) {
-            const leftVal = compValue.left?.value;
-            if (Array.isArray(leftVal)) leftVal.forEach((id) => ids.add(id));
-            else if (leftVal) ids.add(leftVal);
+      if (propDef.inputType === 'compound') {
+        Object.entries(property.value || {}).forEach(
+          ([key, compValue]: any, index: number) => {
+            if (propDef.shape.left?.shape?.relationship) {
+              const leftVal = compValue.left?.value;
+              if (Array.isArray(leftVal))
+                leftVal.forEach((id) =>
+                  ids.push({
+                    id,
+                    propertyName: propDef.shape.left.name,
+                    propertyValue: leftVal,
+                    //@ts-ignore
+                    propertyId: null,
+                    type: 'directCompound',
+                  })
+                );
+              else if (leftVal)
+                ids.push({
+                  id: leftVal,
+                  propertyName: propDef.shape.left.name,
+                  propertyValue: leftVal,
+                  //@ts-ignore
+                  propertyId: null,
+                  type: 'directCompound',
+                });
+            }
+            if (propDef.shape.right?.shape?.relationship) {
+              const rightVal = compValue.right?.value;
+              if (Array.isArray(rightVal))
+                rightVal.forEach((id) =>
+                  ids.push({
+                    id,
+                    propertyName: propDef.shape.right.name,
+                    propertyValue: rightVal,
+                    //@ts-ignore
+                    propertyId: null,
+                    type: 'directCompound',
+                  })
+                );
+              else if (rightVal)
+                ids.push({
+                  id: rightVal,
+                  propertyName: propDef.shape.right.name,
+                  propertyValue: rightVal,
+                  //@ts-ignore
+                  propertyId: null,
+                  type: 'directCompound',
+                });
+            }
           }
-          if (propDef.right?.relationship) {
-            const rightVal = compValue.right?.value;
-            if (Array.isArray(rightVal)) rightVal.forEach((id) => ids.add(id));
-            else if (rightVal) ids.add(rightVal);
-          }
-        });
+        );
       }
     }
   }
 
-  return ids;
+  return ids.filter((item) => item.id);
+}
+
+export type BackLinkShape = {
+  id: string;
+  propertyName: string;
+  propertyValue: string | string[];
+  propertyId: string;
+  type: 'direct' | 'indirect' | 'hierarchal' | 'directCompound';
+};
+
+function verifyBacklinkIntegrity(
+  oldLink: BackLinkShape,
+  newLink: BackLinkShape
+): Partial<BackLinkShape> | false {
+  if (oldLink.id !== newLink.id) return false;
+  const updates: Partial<BackLinkShape> = {};
+  (Object.keys(oldLink) as (keyof BackLinkShape)[]).forEach((key) => {
+    if (oldLink[key] !== newLink[key] && oldLink[key] !== undefined) {
+      updates[key] = newLink[key] as any;
+    }
+  });
+  return Object.keys(updates).length === 0 ? false : updates;
 }

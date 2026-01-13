@@ -45,7 +45,7 @@ const DropZone: React.FC<DropZoneProps> = ({
     accept: type,
     hover: (item, monitor) => {
       const hoverIndex = (monitor.getDropResult() as DropResult)?.hoverIndex;
-      console.log(hoverIndex);
+
       if (onReorder && hoverIndex !== undefined) {
         onReorder(item, hoverIndex); // Trigger reordering logic
       }
@@ -54,7 +54,7 @@ const DropZone: React.FC<DropZoneProps> = ({
       const castItem = item as Record<string, any>;
       const offset = monitor.getClientOffset();
       const hoverIndex = (monitor.getDropResult() as DropResult)?.hoverIndex;
-      console.log(hoverIndex, offset);
+
       if (onReorder && hoverIndex !== undefined) {
         onReorder(castItem, hoverIndex); // Trigger reordering logic
       } else if (onAbsolutePlacement && offset) {
@@ -78,9 +78,7 @@ const DropZone: React.FC<DropZoneProps> = ({
     }),
   }));
 
-  useEffect(() => {
-    console.log(isOver, draggedType);
-  }, [isOver, draggedType]);
+  useEffect(() => {}, [isOver, draggedType]);
 
   useEffect(() => {
     defaultItems && setDroppedItems(defaultItems); // Synchronize with defaults

@@ -38,13 +38,15 @@ const useSubTypeOrchestrator = ({ subtype }: { subtype: SubType | null }) => {
           value: property.id,
           inputType: property.inputType,
           group: groupPropertyMap[propertyId],
+          shape: property.shape,
         };
       })
       .filter(
         (option) =>
           option.inputType === 'dropdown' ||
           option.inputType === 'range' ||
-          option.inputType === 'checkbox'
+          option.inputType === 'checkbox' ||
+          (option.inputType === 'text' && option.shape.inputType === 'number')
       );
     return eligibleAnchors;
   }, [subtype, allGroups, allProperties]);
@@ -60,7 +62,6 @@ const useSubTypeOrchestrator = ({ subtype }: { subtype: SubType | null }) => {
       !verifyAnchorInOptions(subtype.anchors?.primary) ||
       !verifyAnchorInOptions(subtype.anchors?.secondary)
     ) {
-      console.log('One or more anchors are invalid, resetting to null anchors');
       // dispatch action to reset anchors to null
     }
   }, [subtype, anchorOptions]);

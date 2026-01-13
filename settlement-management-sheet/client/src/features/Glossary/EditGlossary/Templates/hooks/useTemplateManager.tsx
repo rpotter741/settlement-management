@@ -1,4 +1,3 @@
-import updateSubTypeAnchorThunk from '@/app/thunks/glossary/subtypes/updateSubTypeAnchorThunk.js';
 import { useRelayChannel } from '@/hooks/global/useRelay.js';
 import { cloneDeep, get, set } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -162,11 +161,11 @@ const useTemplateManager = () => {
   }, [openRelay]);
 
   const handleAnchorChange = (e: string, key: 'primary' | 'secondary') => {
-    updateSubTypeAnchorThunk({
-      anchor: key,
-      value: e,
-      subTypeId: subTypeId || '',
-    });
+    // updateSubTypeAnchorThunk({
+    //   anchor: key,
+    //   value: e,
+    //   subTypeId: subTypeId || '',
+    // });
   };
 
   const updateActiveGroupProperty = useCallback(
@@ -367,7 +366,7 @@ const useTemplateManager = () => {
   //       newSource,
   //       `groups.${groupId}.properties.${propertyId}`
   //     );
-  //     console.log(targetProperty);
+  //
   //     if (!targetProperty) return;
   //     targetProperty.value = {
   //       ...targetProperty.value,

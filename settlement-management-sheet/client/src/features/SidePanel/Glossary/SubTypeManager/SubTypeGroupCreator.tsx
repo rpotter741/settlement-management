@@ -2,7 +2,7 @@ import { Box, IconButton, TextField, Typography } from '@mui/material';
 import CreateNewButton from './components/CreateNewButton.js';
 import useSubTypeGroupCreator from './hooks/useSubTypeGroupCreator.js';
 import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';
-import { ArrowBack } from '@mui/icons-material';
+import { ArrowBack, Close } from '@mui/icons-material';
 import SidebarProperty from './components/SidebarProperty.js';
 import { AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -60,6 +60,15 @@ const SubTypeGroupCreator = ({
           placeholder="Search Groups..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton onClick={() => setSearchTerm('')}>
+                  <Close />
+                </IconButton>
+              ),
+            },
+          }}
         />
       </MotionBox>
       <MotionBox
@@ -67,9 +76,14 @@ const SubTypeGroupCreator = ({
         layoutId="subtype-group-list-box"
         layout
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{
+          opacity: 1,
+          maxHeight: 'calc(100vh - 280px)',
+          overflowY: 'auto',
+        }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.33 }}
+        sx={{}}
       >
         {!activeGroup &&
           allGroups.map((group) => (
@@ -128,6 +142,15 @@ const SubTypeGroupCreator = ({
             value={searchProperties}
             onChange={(e) => setSearchProperties(e.target.value)}
             sx={{ my: 1 }}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <IconButton onClick={() => setSearchProperties('')}>
+                    <Close />
+                  </IconButton>
+                ),
+              },
+            }}
           />
           {filteredAvailableProperties.map((property, index) => (
             <SidebarProperty

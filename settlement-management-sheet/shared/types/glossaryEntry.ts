@@ -1,3 +1,4 @@
+import { Backlink } from '@/features/SyncWorkspace/SyncWorkspace.js';
 import {
   UUID,
   Timestamp,
@@ -83,9 +84,8 @@ export interface GlossaryEntry extends BaseEntry {
   secondaryAnchorId: UUID | null;
   primaryAnchorValue: string;
   secondaryAnchorValue: string;
-  severity?: EventSeverity;
-  backlinksFrom: UUID[];
-  backlinksTo: UUID[];
+  backlinksFrom: Backlink[];
+  backlinksTo: Backlink[];
 }
 
 export type TerrainType =
@@ -330,6 +330,104 @@ const glossaryEntryTypeOptions: GlossaryEntryType[] = [
 ];
 
 export { glossaryEntryTypeOptions };
+
+export const TYPE_BITMASKS: Record<GlossaryEntryType, number> =
+  glossaryEntryTypeOptions.reduce((acc, type, index) => {
+    acc[type] = 1 << index;
+    return acc;
+  }, {} as Record<GlossaryEntryType, number>);
+
+export const typeAcceptMap = {
+  continent: {
+    region: TYPE_BITMASKS.region,
+    nation: TYPE_BITMASKS.nation,
+    territory: TYPE_BITMASKS.territory,
+    landmark: TYPE_BITMASKS.landmark,
+    settlement: TYPE_BITMASKS.settlement,
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  region: {
+    nation: TYPE_BITMASKS.nation,
+    territory: TYPE_BITMASKS.territory,
+    landmark: TYPE_BITMASKS.landmark,
+    settlement: TYPE_BITMASKS.settlement,
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  nation: {
+    territory: TYPE_BITMASKS.territory,
+    landmark: TYPE_BITMASKS.landmark,
+    settlement: TYPE_BITMASKS.settlement,
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  territory: {
+    landmark: TYPE_BITMASKS.landmark,
+    settlement: TYPE_BITMASKS.settlement,
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  landmark: {
+    settlement: TYPE_BITMASKS.settlement,
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  settlement: {
+    district: TYPE_BITMASKS.district,
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  district: {
+    collective: TYPE_BITMASKS.collective,
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  collective: {
+    location: TYPE_BITMASKS.location,
+    person: TYPE_BITMASKS.person,
+    event: TYPE_BITMASKS.event,
+    lore: TYPE_BITMASKS.lore,
+    item: TYPE_BITMASKS.item,
+  },
+  location: 0,
+  person: 0,
+  event: 0,
+  lore: 0,
+  item: 0,
+};
 
 export interface Glossary {
   id: UUID;

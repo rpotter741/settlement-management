@@ -20,9 +20,12 @@ export function reorderGroupPropertiesThunk({
       console.error(`Group with ID ${groupId} not found.`);
       return;
     }
+    console.log(
+      group.properties.map((p) => p.id),
+      newOrder
+    );
     try {
       // Reorder properties in the group locally
-      console.log(newOrder);
       dispatch(reorderGroupProperties({ groupId, newOrder }));
 
       //call the service to persist the new order

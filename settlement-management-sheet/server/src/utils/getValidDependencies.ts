@@ -1,8 +1,6 @@
 const getValidDependencies = (items, targetId) => {
   const graph = new Map();
   for (const item of items) {
-    console.log(item.dependencies?.refIds, 'refIds');
-    console.log(targetId, 'targetId');
     graph.set(
       item.refId,
       Array.isArray(item.dependencies?.refIds) ? item.dependencies.refIds : []

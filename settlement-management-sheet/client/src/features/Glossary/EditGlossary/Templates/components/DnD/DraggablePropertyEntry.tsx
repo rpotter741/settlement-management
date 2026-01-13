@@ -73,10 +73,9 @@ const DraggablePropertyEntry = ({
       } else if (draggedType === 'subtype-group-property') {
         //reordering within group handled in DraggablePropertyEntry
         if (item.index === index) return;
-        const order = group?.properties.length || 0;
         const newOrder = [...group.properties].map((p) => p.propertyId);
         newOrder.splice(item.index, 1);
-        newOrder.splice(order, 0, item.id);
+        newOrder.splice(index, 0, item.id);
         dispatch(
           reorderGroupPropertiesThunk({
             groupId: group.id,

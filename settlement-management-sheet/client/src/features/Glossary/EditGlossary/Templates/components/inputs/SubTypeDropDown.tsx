@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Box,
+  Button,
   Checkbox,
   IconButton,
   MenuItem,
@@ -23,8 +24,14 @@ import SubTypePreviewWrapper from '../previews/SubTypePreviewWrapper.js';
 import SubTypeDropdownPreview from '../previews/SubTypeDropdownPreview.js';
 import { useShellContext } from '@/context/ShellContext.js';
 import { SubTypeModes } from '@/features/SidePanel/Glossary/SubTypeManager/SubTypeSidebarOrchestrator.js';
-import { SubTypeProperty } from '@/app/slice/subTypeSlice.js';
+import {
+  SubTypeCompoundProperty,
+  SubTypeProperty,
+} from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
+import { useModalActions } from '@/hooks/global/useModal.js';
+import { ModalQueueEntry } from '@/app/types/ModalTypes.js';
+import { useRelayChannel } from '@/hooks/global/useRelay.js';
 
 const SubTypeDropDown = ({
   property,
@@ -34,18 +41,27 @@ const SubTypeDropDown = ({
   source,
   onChange,
   subPropertyParent,
+  hasSmartSync,
 }: {
   property: any;
   mode: SubTypeModes;
   propertyId: string;
   subPropertySide?: 'left' | 'right';
-  subPropertyParent?: SubTypeProperty;
+  subPropertyParent?: SubTypeCompoundProperty;
   source: any;
   onChange: (value: any, keypath: string) => void;
+  hasSmartSync?: boolean;
 }) => {
   const { getPropertyLabel } = usePropertyLabel();
   const [expand, setExpand] = useState(false);
   const [hoverString, setHoverString] = useState('');
+
+  // for synchronizing smart sync rules on entry type updates
+  const { openRelay } = useRelayChannel({
+    id: 'property-smart-sync-rules',
+  });
+
+  console.log(property);
 
   //local state for property editor
   const [value, setValue] = useState({
@@ -56,6 +72,8 @@ const SubTypeDropDown = ({
   const handleLocalChange = (newValue: any) => {
     setValue({ ...value, value: newValue });
   };
+
+  const { showModal } = useModalActions();
 
   const options = useMemo(() => {
     if (property?.shape.options) {
@@ -74,8 +92,6 @@ const SubTypeDropDown = ({
     }
   }, [options.length, expand]);
 
-  console.log(property, 'property in dropdown');
-
   const { handleChange, handleTransform, isCompound } = useCompoundBridge({
     propertyId,
     property,
@@ -90,8 +106,62 @@ const SubTypeDropDown = ({
         { name: 'Multi-Select', value: 'multi' },
       ];
 
+  useEffect(() => {
+    if (property.smartSync && property.smartSync.parameters.types) {
+      const sortJoinSyncTypes = property.smartSync.parameters.types
+        .slice()
+        .sort()
+        .join();
+      const sortJoinPropertyTypes = property.shape.relationship
+        .slice()
+        .sort()
+        .join();
+      if (sortJoinSyncTypes === sortJoinPropertyTypes) return;
+      console.log('matching types between prop and smart sync');
+      const ruleStateClone = cloneDeep(property.smartSync);
+      ruleStateClone.parameters.types = property.shape.relationship;
+      openRelay({
+        data: ruleStateClone,
+        status: 'complete',
+      });
+    }
+  }, [property.shape.relationship]);
+
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        maxWidth: 800,
+        position: 'relative',
+      }}
+    >
+      {!isCompound && property.shape.relationship && (
+        <Button
+          sx={{
+            width: '100%',
+            gridColumn: 'span 3',
+            position: 'absolute',
+            top: -42,
+          }}
+          variant="outlined"
+          onClick={() => {
+            const entry: ModalQueueEntry = {
+              id: 'edit-property-sync-rules',
+              componentKey: 'EditSmartSyncRule',
+              props: {
+                property,
+                rule: property.smartSync || {},
+                isCompound: false,
+              },
+            };
+            showModal({ entry });
+          }}
+          color={property.smartSync ? 'info' : 'success'}
+        >
+          {property.smartSync ? 'Edit' : 'Create'} Property Sync Rules
+        </Button>
+      )}
       <FieldDefinition
         mode={mode}
         property={property}
@@ -175,7 +245,15 @@ const SubTypeDropDown = ({
             options={[
               { name: 'Entry Type', value: 'entryType' },
               { name: 'List', value: 'list' },
-            ]}
+            ].filter((option) => {
+              if (
+                isCompound &&
+                option.value === 'entryType' &&
+                subPropertySide === 'right'
+              )
+                return false;
+              return true;
+            })}
             label="Option Type"
             keypath="shape.optionType"
           />
@@ -357,6 +435,30 @@ const SubTypeDropDown = ({
             </Typography>
           </Box>
         </FieldRow>
+      )}
+      {isCompound && property.shape.relationship && (
+        <Button
+          sx={{
+            width: '100%',
+            gridColumn: 'span 3',
+          }}
+          variant="outlined"
+          onClick={() => {
+            const entry: ModalQueueEntry = {
+              id: 'edit-property-sync-rules',
+              componentKey: 'EditSmartSyncRule',
+              props: {
+                property,
+                rule: subPropertyParent?.smartSync || {},
+                isCompound: true,
+              },
+            };
+            showModal({ entry });
+          }}
+          color={hasSmartSync ? 'info' : 'success'}
+        >
+          {hasSmartSync ? 'Edit' : 'Create'} Property Sync Rules
+        </Button>
       )}
       <Box sx={{ width: '100%', gridColumn: 'span 3' }}>
         {mode === 'property' && (

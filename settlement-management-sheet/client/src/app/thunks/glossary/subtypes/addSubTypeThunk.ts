@@ -22,9 +22,7 @@ export function addSubTypeThunkRoot({ subType }: { subType: any }): AppThunk {
       if (!subTypeState[subType.id]) {
         await createSubType({
           subType,
-        }).then((res) => {
-          console.log('Created SubType:', res);
-        });
+        }).then((res) => {});
       }
     } catch (error) {
       console.error('Error adding SubType:', error);

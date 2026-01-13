@@ -1,7 +1,7 @@
 import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
 import TabbedContent from '@/components/shared/Layout/TabbedContent/TabbedContent.js';
 import { Box, Select, TextField } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { ComponentType, useEffect, useMemo, useState } from 'react';
 import SubTypeFormPreview from './previews/SubTypeFormPreview.js';
 import { GenericObject } from '../../../../../../../shared/types/common.js';
 import { useShellContext } from '@/context/ShellContext.js';
@@ -9,6 +9,9 @@ import ChangeSubTypeSelect from './inputs/ChangeSubTypeSelect.js';
 import { debounce } from 'lodash';
 import { dispatch } from '@/app/constants.js';
 import renameNodeAndEntryThunk from '@/app/thunks/glossary/nodes/renameNodeAndEntryThunk.js';
+import { SubTypeGroup, SubTypeGroupLink } from '@/app/slice/subTypeSlice.js';
+import { useSelector } from 'react-redux';
+import { selectSubTypeGroups } from '@/app/selectors/subTypeSelectors.js';
 
 const PreviewOrchestrator = ({
   subType,
@@ -38,29 +41,36 @@ const PreviewOrchestrator = ({
     tabId,
   } = useShellContext();
 
+  console.log(source);
+
   const [name, setName] = useState<string>(
     source?.name || `New ${subType.name} Entry`
   );
 
+  const allGroups = useSelector(selectSubTypeGroups);
+
   const tabs = useMemo(() => {
-    return subType.groupOrder.map((groupId: string) => {
-      const group = subType.groupData[groupId];
+    console.log('generating tabs');
+    console.log(subType?.name);
+    if (!subType) return [];
+    return subType.groups.map((groupLink: SubTypeGroupLink) => {
+      const group = allGroups.find(
+        (g: SubTypeGroup) => g.id === groupLink.groupId
+      );
       return {
-        name: group.name,
-        key: groupId,
+        name: group?.displayName || '',
+        key: group?.id || '',
         props: {
-          subType,
-          groupId,
+          glossaryId,
           mode,
+          group,
           source,
-          editId,
-          handleChange,
-          setSource,
           onAddData,
+          handleChange,
           onRemove,
           disableResize,
           liveEdit,
-          glossaryId,
+          subType,
         },
       };
     });
@@ -84,11 +94,12 @@ const PreviewOrchestrator = ({
   }, [tabs, activeTab]);
 
   const componentMap = useMemo(() => {
-    return tabs.reduce((acc: GenericObject, tab: any) => {
+    console.log('redrawing component map');
+    return tabs.reduce((acc: Record<string, ComponentType<any>>, tab: any) => {
       acc[tab.name] = SubTypeFormPreview;
       return acc;
     }, {});
-  }, [subType]);
+  }, [subType, source]);
 
   const debouncedUpdate = useMemo(
     () =>

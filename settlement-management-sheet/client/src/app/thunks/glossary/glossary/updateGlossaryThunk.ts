@@ -46,7 +46,7 @@ export default function updateGlossaryThunk({
       if (Object.keys(trueUpdates).length === 0) {
         return;
       }
-      console.log('Updating glossary with:', trueUpdates);
+
       dispatch(updateGlossary({ id, updates: trueUpdates }));
       dispatch(
         addBulkDirtyKeypaths({

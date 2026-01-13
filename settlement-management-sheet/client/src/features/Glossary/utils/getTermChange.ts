@@ -23,9 +23,8 @@ export default function getTermChangeValue({
     currentTerm === value ||
     (currentTerm === null && value === defaultValue)
   ) {
-    console.log('inside term change, no changes found');
     return null; // No change needed
   }
-  console.log('inside term change, changes found', { key, value });
+
   return { key, value }; // Return the new value to update
 }

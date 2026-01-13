@@ -47,6 +47,11 @@ import {
   deleteSubTypeGroupController,
   addGroupsToSubTypeController,
   removeGroupsFromSubTypeController,
+  updateAnchorsController,
+  updateSubTypeNameController,
+  updateSubTypeContextController,
+  //backlinks
+  ignoreBacklinkController,
 } from '../controllers/glossaryController.ts';
 
 const router = express.Router();
@@ -106,5 +111,11 @@ router.patch('/subtypes/groups/update', updateSubTypeGroupController);
 router.patch('/subtypes/properties/update', updateSubTypePropertyController);
 router.post('/subtypes/addGroup', addGroupsToSubTypeController);
 router.post('/subtypes/removeGroups', removeGroupsFromSubTypeController);
+router.patch('/subtypes/anchor/update', updateAnchorsController);
+router.patch('/subtypes/name/update', updateSubTypeNameController);
+router.patch('/subtypes/context/update', updateSubTypeContextController);
+
+//backlinks
+router.patch('/backlinks/toggleIgnore', ignoreBacklinkController);
 
 export default router;

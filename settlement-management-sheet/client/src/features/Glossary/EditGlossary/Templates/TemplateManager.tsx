@@ -16,7 +16,6 @@ import useTemplateManager from './hooks/useTemplateManager.js';
 import SubTypeAnchorSelect from './components/inputs/SubTypeAnchorSelect.js';
 import SubTypeEntryType from './components/inputs/SubTypeEntryType.js';
 import { GenericContext } from '@/context/GenericContext.js';
-import updateSubTypeNameThunk from '@/app/thunks/glossary/subtypes/updateSubTypeNameThunk.js';
 import { ShellContext } from '@/context/ShellContext.js';
 import GroupOrchestrator from './components/GroupOrchestrator.js';
 import SubTypeOrchestrator from './components/SubTypeOrchestrator.js';
@@ -38,38 +37,12 @@ const SubTypeManager = () => {
     getHexValue,
     dispatch,
     getPropertyLabel,
-    handleAnchorChange,
     updateActiveGroupProperty,
     // onAddData,
     // onRemove,
     group,
     deselectGroup,
   } = useTemplateManager();
-
-  // if (subType && mode === 'preview') {
-  //   return (
-  // <ShellContext.Provider
-  //   value={{
-  //     subTypeId,
-  //     mode,
-  //     source,
-  //     setSource,
-  //     handleChange,
-  //     scrolling,
-  //     updateActiveGroupProperty,
-  //     getPropertyLabel,
-  //     onAddData,
-  //     onRemove,
-  //   }}
-  // >
-  //       <PreviewOrchestrator
-  //         subType={subType}
-  //         mode={mode}
-  //         editId={subTypeId!}
-  //       />
-  //     </ShellContext.Provider>
-  //   );
-  // }
 
   return (
     <GlossaryMainWrapper>
@@ -102,58 +75,7 @@ const SubTypeManager = () => {
                 zIndex: 10,
                 maxWidth: 800,
               }}
-            >
-              {/* <Box
-              sx={{
-                display: 'flex',
-                alignItems: { xs: 'start', xl: 'center' },
-                gap: 2,
-                flexDirection: 'column',
-                width: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
-                <TextField
-                  label="Sub-Type Name"
-                  sx={{ width: '50%' }}
-                  value={subType.name}
-                  onChange={(e) => {
-                    updateSubTypeNameThunk({
-                      subTypeId: subTypeId,
-                      name: e.target.value,
-                    });
-                  }}
-                />
-                <SubTypeEntryType
-                  subType={subType}
-                  subTypeId={subTypeId}
-                  getPropertyLabel={getPropertyLabel}
-                />
-              </Box>
-              <Box
-                sx={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: { xs: 'start', xl: 'center' },
-                }}
-              >
-                <SubTypeAnchorSelect
-                  handleAnchorChange={handleAnchorChange}
-                  subType={subType}
-                  semanticAnchors={semanticAnchors}
-                  type="primary"
-                />
-                <SubTypeAnchorSelect
-                  handleAnchorChange={handleAnchorChange}
-                  subType={subType}
-                  semanticAnchors={semanticAnchors}
-                  type="secondary"
-                />
-              </Box>
-            </Box> */}
-            </Box>
+            ></Box>
           )}
 
           <Box

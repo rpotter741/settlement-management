@@ -70,6 +70,30 @@ const useTheming = () => {
     return theme.palette[color][key];
   };
 
+  const hexValues = {
+    background: {
+      paper: getHexValue({ color: 'background', key: 'paper' }),
+      default: getHexValue({ color: 'background', key: 'default' }),
+    },
+    text: {
+      primary: getHexValue({ color: 'text', key: 'primary' }),
+      secondary: getHexValue({ color: 'text', key: 'secondary' }),
+      disabled: getHexValue({ color: 'text', key: 'disabled' }),
+    },
+    primary: {
+      main: getHexValue({ color: 'primary', key: 'main' }),
+      dark: getHexValue({ color: 'primary', key: 'dark' }),
+      light: getHexValue({ color: 'primary', key: 'light' }),
+      contrastText: getHexValue({ color: 'primary', key: 'contrastText' }),
+    },
+    secondary: {
+      main: getHexValue({ color: 'secondary', key: 'main' }),
+      dark: getHexValue({ color: 'secondary', key: 'dark' }),
+      light: getHexValue({ color: 'secondary', key: 'light' }),
+      contrastText: getHexValue({ color: 'secondary', key: 'contrastText' }),
+    },
+  };
+
   return {
     isDarkMode,
     themeMode,
@@ -78,6 +102,7 @@ const useTheming = () => {
     lightenColor,
     getBorderRipple,
     getHexValue,
+    hexValues,
   };
 };
 

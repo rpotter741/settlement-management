@@ -6,6 +6,7 @@ import {
   SubTypeState,
 } from '../slice/subTypeSlice.js';
 import { RootState } from '../store.js';
+import { cloneDeep } from 'lodash';
 
 const base = (state: RootState): SubTypeSliceState => state.subType;
 
@@ -42,6 +43,13 @@ export const selectSubTypeProperties = createSelector(
   base,
   (subTypeState: SubTypeSliceState): SubTypeProperty[] => {
     return Object.values(subTypeState.properties.edit);
+  }
+);
+
+export const selectSubTypePropertyRecord = createSelector(
+  base,
+  (subTypeState: SubTypeSliceState): Record<string, SubTypeProperty> => {
+    return cloneDeep(subTypeState.properties.edit);
   }
 );
 

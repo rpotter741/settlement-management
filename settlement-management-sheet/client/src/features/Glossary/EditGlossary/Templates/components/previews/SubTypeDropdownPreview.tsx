@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SubTypeDropdownData } from '../types.js';
-import { Close, Hail } from '@mui/icons-material';
+import { Close, ConstructionOutlined, Hail } from '@mui/icons-material';
 import getPreviewSx from './previewSxMap.js';
 import { useSelector } from 'react-redux';
 import {
@@ -24,6 +24,7 @@ import { useShellContext } from '@/context/ShellContext.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
 import { RELATIONSHIP_RANK } from '@/utility/hasParentProperty.js';
 import capitalize from '@/utility/inputs/capitalize.js';
+import { normalize } from 'path';
 
 const SubTypeDropdownPreview = ({
   property,
@@ -37,9 +38,10 @@ const SubTypeDropdownPreview = ({
   liveEdit,
   glossaryId,
   isAnchor,
+  columns,
 }: {
   property: any;
-  onChange: (value: unknown, keypath: string) => void;
+  onChange: (value: unknown, keypath: string, nukedIds?: string[]) => void;
   isPreview: boolean;
   source: SubTypeDropdownData;
   isCompound?: boolean;
@@ -49,6 +51,7 @@ const SubTypeDropdownPreview = ({
   liveEdit: boolean;
   glossaryId: string | null;
   isAnchor?: boolean;
+  columns?: 1 | 2 | 4;
 }) => {
   const { entry, inheritanceMap } = liveEdit
     ? useShellContext()
@@ -56,7 +59,13 @@ const SubTypeDropdownPreview = ({
 
   const { showModal } = useModalActions();
   const [value, setValue] = useState<unknown>(
-    source?.value || property.shape.value || ''
+    source?.value
+      ? source.value
+      : property?.shape?.defaultValue
+        ? property.shape.defaultValue
+        : property.shape.selectType === 'multi'
+          ? []
+          : ''
   );
 
   const highlighted = useRef<null | {
@@ -70,7 +79,10 @@ const SubTypeDropdownPreview = ({
   const nodeOptions: { value: string; name: string }[] = useMemo(() => {
     if (relationship && liveEdit && allNodes) {
       return allNodes
-        .filter((node) => relationship.includes(node.entryType))
+        .filter(
+          (node) =>
+            relationship.includes(node.entryType) && node.id !== entry?.id
+        )
         .map((node) => ({
           relationship: inheritanceMap?.relationships[node.id] || 'other',
           value: node.id,
@@ -78,12 +90,18 @@ const SubTypeDropdownPreview = ({
         }));
     }
     return [];
-  }, [relationship, liveEdit, allNodes]);
+  }, [relationship, liveEdit, allNodes, glossaryId, entry]);
+
+  useEffect(() => {
+    if (source?.value !== undefined && source?.value !== value) {
+      setValue(source.value);
+    }
+  }, [source?.value]);
 
   const handleChange = useCallback(
     (value: unknown, newEntryName?: string) => {
       let valueToUse = value;
-      console.log(value);
+
       if (value === 'addNewOption' && liveEdit) {
         const modalEntry = {
           id: 'addNewEntryOption',
@@ -117,7 +135,31 @@ const SubTypeDropdownPreview = ({
       if (property.shape.selectType === 'single' || !relationship) {
         setValue(valueToUse);
       }
-      onChange(valueToUse, `${keypath}.value`);
+      const nukedIds: string[] = [];
+
+      // check to see if it's a new value. If it is, we need to remove the entries at the ids of the changed values (the added / removed values).
+      if (valueToUse !== source.value && relationship) {
+        if (property.shape.selectType === 'multi') {
+          const oldValues = Array.isArray(source.value) ? source.value : [];
+          const newValues = Array.isArray(valueToUse) ? valueToUse : [];
+          // find removed values
+          oldValues.forEach((oldVal) => {
+            if (!newValues.includes(oldVal)) {
+              nukedIds.push(oldVal as string);
+            }
+          });
+          // find added values
+          newValues.forEach((newVal) => {
+            if (!oldValues.includes(newVal)) {
+              nukedIds.push(newVal as string);
+            }
+          });
+        } else {
+          nukedIds.push(source.value as string);
+          nukedIds.push(valueToUse as string);
+        }
+      }
+      onChange(valueToUse, `${keypath}.value`, nukedIds.filter(Boolean));
     },
     [
       isPreview,
@@ -127,8 +169,6 @@ const SubTypeDropdownPreview = ({
     ]
   );
 
-  console.log(property);
-
   const options = useMemo(() => {
     if (property.shape.optionType === 'list') {
       const options = (property?.shape.options || [])
@@ -137,8 +177,7 @@ const SubTypeDropdownPreview = ({
         .map((option: any) => ({
           value: option,
           name: option,
-        }))
-        .filter((option: any) => !source.value.includes(option.value));
+        }));
 
       if (isCompound && allSelectedValues && side === 'left') {
         // preserve any values currently selected in this component (single or multi)
@@ -149,8 +188,13 @@ const SubTypeDropdownPreview = ({
             !allSelectedValues.includes(option.value)
         );
       }
-      return options;
+      return property?.shape.selectType === 'multi'
+        ? options.filter(
+            (option: any) => !source?.value?.includes(option.value)
+          )
+        : options;
     }
+
     // insert logic for entry type fetching (eg, use the nodes, baby! the nodes!!!!)
     const preservedSet = new Set(
       Array.isArray(source?.value) ? source?.value : [source?.value]
@@ -159,11 +203,14 @@ const SubTypeDropdownPreview = ({
       .slice()
       .filter((option) => {
         // always remove values already selected in this component so they remain visible/editable
-        if (preservedSet.has(option.value) && property.selectType === 'multi')
+        if (
+          preservedSet.has(option.value) &&
+          property.shape.selectType === 'multi'
+        )
           return false;
 
         // when rendering the editable list (column === 4) avoid duplicates and the source entry itself
-        if (property.shape.column === 4) {
+        if (columns === 4) {
           if (option.value === entry?.id) return false;
           if (allSelectedValues?.includes(option.value)) return false;
           return true;
@@ -188,13 +235,17 @@ const SubTypeDropdownPreview = ({
 
     if (isCompound && allSelectedValues && side === 'left') {
       // preserve any values currently selected in this component (single or multi)
-      const selectedSet = new Set(Array.isArray(value) ? value : [value]);
+      const selectedSet = new Set(
+        Array.isArray(source?.value) ? source?.value : [source?.value]
+      );
+      console.log(selectedSet);
       return options.filter(
         (option: any) =>
           selectedSet.has(option.value) ||
           !allSelectedValues.includes(option.value)
       );
     }
+
     return options;
   }, [
     property?.shape.options,
@@ -214,33 +265,57 @@ const SubTypeDropdownPreview = ({
         ? val[0]
         : val;
 
-  const sx = getPreviewSx(
-    'dropdown',
-    property.shape.columns,
-    isCompound ?? false
-  );
+  const sx = getPreviewSx('dropdown', columns ?? 4, isCompound ?? false);
 
   // helpers to map between the primitive stored value(s) and the option objects used by Autocomplete
-  const findOptionByValue = (val: string | undefined) =>
-    options.find((o: any) => o.value === val) || null;
+  const findOptionByValue = (val: string | undefined) => {
+    const opt = options.find((o: any) => o.value === val) || null;
+    if (opt) {
+      return opt;
+    }
+    if (property.shape.optionType === 'list') {
+      return { value: '', name: '', relationship: 'other' };
+    }
+    if (property.shape.optionType === 'entryType') {
+      return { value: '', name: '', relationship: 'other' };
+    }
+  };
 
   const getAutocompleteValue = () => {
     if (property.shape.selectType === 'multi') {
       const vals = normalizeSelectValue(value, 'multi') as string[];
-      const valOptions = vals //uh what?!?!?!?!
-        .filter((o: any) => vals.includes(o.value))
-        .map((o: any) => ({ value: o.value, name: o.name }));
-      return valOptions;
+
+      if (property.shape.optionType !== 'list') {
+        const valOptions = vals //uh what?!?!?!?!
+          .filter((o: any) => vals.includes(o.value))
+          .map((o: any) => ({ value: o.value, name: o.name }));
+        return valOptions;
+      } else {
+        const multiList = vals.map((val) => ({ value: val, name: val }));
+
+        return multiList;
+      }
     } else if (property.shape.selectType === 'single') {
-      return findOptionByValue(source?.value as string);
+      return findOptionByValue(value as string);
     }
+    return '';
   };
 
   const valueList = useMemo(() => {
-    if (property.shape.selectType === 'multi') {
-      const vals = normalizeSelectValue(source.value, 'multi') as string[];
+    if (property.shape.selectType === 'multi' && property.shape.relationship) {
+      const vals = normalizeSelectValue(source?.value, 'multi') as string[];
       return nodeOptions.filter((o) => vals.includes(o.value));
+    } else if (
+      property.shape.selectType === 'multi' &&
+      property.shape.optionType === 'list'
+    ) {
+      const vals = normalizeSelectValue(source?.value, 'multi') as string[];
+
+      return vals.map((val: string) => {
+        return { value: val, name: capitalize(val) };
+      });
     }
+    return [];
   }, [source?.value, property.shape.selectType, nodeOptions]);
 
   const isMulti = property.shape.selectType === 'multi';
@@ -257,7 +332,7 @@ const SubTypeDropdownPreview = ({
               color: isAnchor ? 'info.main' : 'inherit',
             }}
           >
-            {property.name}
+            {property.displayName || property.name}
           </Typography>
         ) : null}
         <FormControl
@@ -269,15 +344,10 @@ const SubTypeDropdownPreview = ({
             justifyContent: 'start',
           }}
         >
-          <Autocomplete<
-            { value: string; name: string; relationship: string },
-            boolean,
-            false,
-            false
-          >
+          <Autocomplete
             sx={{
               '& .MuiAutocomplete-inputLabel': {
-                color: isAnchor ? 'primary.main' : 'inherit',
+                color: isAnchor ? 'info.main' : 'inherit',
               },
             }}
             multiple={isMulti}
@@ -286,9 +356,7 @@ const SubTypeDropdownPreview = ({
             onHighlightChange={(event, option, reason) => {
               highlighted.current = option;
             }}
-            renderTags={
-              property.shape.columns === 4 ? (value) => null : undefined
-            }
+            renderTags={() => null} // disable default tag rendering
             onChange={(event, newValue) => {
               if (!newValue) return;
               if (isMulti) {
@@ -320,7 +388,7 @@ const SubTypeDropdownPreview = ({
                 {...params}
                 label={
                   !isCompound && !sx.useSideLabel
-                    ? property.name || 'Select'
+                    ? property.displayName || property.name || 'Select'
                     : undefined
                 }
                 sx={{
@@ -387,40 +455,38 @@ const SubTypeDropdownPreview = ({
               </MenuItem>
             )}
             getOptionLabel={(option) => option.name}
-            groupBy={
-              property.relationship
-                ? (option) => capitalize(option.relationship)
-                : undefined
+            groupBy={(option) =>
+              option.relationship
+                ? capitalize(option.relationship)
+                : property.name
             }
           />
         </FormControl>
       </Box>
-      {property.shape.selectType === 'multi' &&
-      property.shape.columns === 4 &&
-      Array.isArray(source.value) ? (
+      {property.shape.selectType === 'multi' && columns === 4 && (
         <Box sx={{ mt: 1, width: '100%' }}>
-          {source.value.map((val: string, index: number) => (
-            <Box
-              key={index}
-              sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 1 }}
-            >
-              <IconButton
-                onClick={() => {
-                  const newValues = (source.value as string[]).filter(
-                    (v) => v !== val
-                  );
-                  handleChange(newValues);
-                }}
+          {valueList.map(
+            (val: { value: string; name: string }, index: number) => (
+              <Box
+                key={index}
+                sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 1 }}
               >
-                <Close fontSize="small" />
-              </IconButton>
-              <Typography>
-                {valueList?.find((o) => o.value === val)?.name || val}
-              </Typography>
-            </Box>
-          ))}
+                <IconButton
+                  onClick={() => {
+                    const newValues = (source.value as string[]).filter(
+                      (v) => v !== val.value
+                    );
+                    handleChange(newValues);
+                  }}
+                >
+                  <Close fontSize="small" />
+                </IconButton>
+                <Typography>{val?.name}</Typography>
+              </Box>
+            )
+          )}
         </Box>
-      ) : null}
+      )}
     </>
   );
 };

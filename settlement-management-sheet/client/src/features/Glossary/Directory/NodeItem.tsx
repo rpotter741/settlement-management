@@ -19,6 +19,8 @@ import {
 import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import { v4 as newId } from 'uuid';
 import { useDrag, useDrop } from 'react-dnd';
+import reparentNodesThunk from '@/app/thunks/glossary/nodes/reparentNodesThunk.js';
+import { useDragContext } from '@/context/DnD/DragContext.js';
 
 const NodeItem = ({
   id,
@@ -142,11 +144,10 @@ const NodeItem = ({
     drop: (item: { kind: 'node'; node: GlossaryNode }) => {
       //handle drop logic here
       if (accept.includes(item.node.entryType)) {
-        console.log('dropping', item, 'on', data);
         dispatch(
-          reparentNodes({
+          reparentNodesThunk({
             glossaryId,
-            movedNodes: [item.node],
+            nodes: [item.node],
             newParentId: data.id,
           })
         );
@@ -275,3 +276,52 @@ const NodeItem = ({
 };
 
 export default NodeItem;
+
+export const RootNode = ({
+  setHoverId,
+  hoverId,
+  glossaryId,
+  id,
+}: {
+  setHoverId: (id: string | null) => void;
+  hoverId: string | null;
+  glossaryId: string;
+  id: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const accept = ['continent', ...dragAcceptMap['continent']];
+  const [, drop] = useDrop({
+    accept,
+    hover: (item: { kind: 'node'; node: GlossaryNode }) => {
+      if (accept.includes(item.node.entryType)) {
+        setHoverId(id);
+      }
+    },
+    drop: (item: { kind: 'node'; node: GlossaryNode }) => {
+      //handle drop logic here
+      if (accept.includes(item.node.entryType)) {
+        dispatch(
+          reparentNodesThunk({
+            glossaryId,
+            nodes: [item.node],
+            newParentId: null,
+          })
+        );
+      }
+    },
+  });
+
+  drop(ref);
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: hoverId === id ? 'success.main' : 'transparent',
+        height: '15px',
+        minHeight: '5px',
+        position: 'relative',
+      }}
+      ref={ref}
+    />
+  );
+};

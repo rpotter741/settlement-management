@@ -40,7 +40,6 @@ export default async function getTools(req: any, res: any) {
       select: toolSelectMap[tool as keyof typeof toolSelectMap] || {},
     });
     if (dependency === 'true') {
-      console.log("shit's true!");
       const validDependencies = await getValidDependencies(items, depId);
       return res.json({
         items: validDependencies,

@@ -54,17 +54,20 @@ const useSubTypeCreator = ({
   const allGroups = useSelector(selectSubTypeGroups);
 
   const filteredGroups = useMemo(() => {
-    const firstFilter = allGroups.filter((group) => {
-      const matchesSearch = group.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesContentType =
-        contentFilters.length === 0 ||
-        (contentFilters.includes('system') && group.contentType === 'system') ||
-        (contentFilters.includes('custom') && group.contentType === 'custom');
+    const firstFilter = allGroups
+      .filter((group) => {
+        const matchesSearch = group.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesContentType =
+          contentFilters.length === 0 ||
+          (contentFilters.includes('system') &&
+            group.contentType === 'system') ||
+          (contentFilters.includes('custom') && group.contentType === 'custom');
 
-      return matchesSearch && matchesContentType;
-    });
+        return matchesSearch && matchesContentType;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
     if (subtype) {
       return firstFilter.filter(
         (group) =>

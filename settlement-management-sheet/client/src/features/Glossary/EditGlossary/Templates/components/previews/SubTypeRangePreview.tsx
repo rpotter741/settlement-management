@@ -50,8 +50,14 @@ const SubTypeRangePreview = ({
     >
       {!isCompound && (
         <Box sx={{ ...sx?.textBox }}>
-          <Typography sx={{ width: '100%', ...sx.text }}>
-            {`${property.name} ${isAnchor ? '*' : ''}`}
+          <Typography
+            sx={{
+              width: '100%',
+              ...sx.text,
+              color: isAnchor ? 'info.main' : 'inherit',
+            }}
+          >
+            {`${property.displayName || property.name}`}
           </Typography>
         </Box>
       )}

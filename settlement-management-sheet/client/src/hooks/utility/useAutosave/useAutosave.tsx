@@ -35,7 +35,6 @@ export function useAutosave<T extends object>({
       await batchSaveFn();
 
       if (flushing) {
-        console.log(`Flushing autosave for ${name}`);
       }
 
       isSavingRef.current = false;

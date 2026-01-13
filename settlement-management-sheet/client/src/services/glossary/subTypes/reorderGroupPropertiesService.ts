@@ -13,7 +13,6 @@ export default async function reorderPropertyFromGroupService({
       newOrder,
     })
     .then((res: any) => {
-      console.log(res.message);
       return res.data;
     });
 }

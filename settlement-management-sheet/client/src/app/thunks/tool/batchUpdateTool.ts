@@ -3,7 +3,7 @@ import { AppThunk } from '../glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { batchUpdateById } from '@/app/slice/toolSlice.js';
 import { ToolName } from '@/app/types/ToolTypes.js';
-import { clearDirtyKeypaths } from '@/app/slice/tabSlice.js';
+// import { clearDirtyKeypaths } from '@/app/slice/tabSlice.js';
 import { cloneDeep, get } from 'lodash';
 import { GenericObject } from '../../../../../shared/types/common.js';
 import toolServices from '@/services/toolServices.js';
@@ -42,11 +42,11 @@ export default function batchUpdateToolThunk({
     dispatch(
       batchUpdateById({ tool, id, updates: { ...updates, version: 1 } })
     );
-    dispatch(
-      clearDirtyKeypaths({
-        tabId,
-      })
-    );
+    // dispatch(
+    //   clearDirtyKeypaths({
+    //     tabId,
+    //   })
+    // );
     try {
       if (editTool.version === 0) {
         await toolServices.saveTool({

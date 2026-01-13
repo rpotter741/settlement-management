@@ -4,8 +4,9 @@ import {
 } from '@/features/Glossary/utils/generatePropertyValue.js';
 import { Box, Divider, Menu, MenuItem, Typography } from '@mui/material';
 import subTypePreviewMap from './SubTypePreviewMap.jsx';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
+  SubType,
   SubTypeGroup,
   SubTypeProperty,
   SubTypePropertyLink,
@@ -15,6 +16,7 @@ import { updateSubTypeGroupThunk } from '@/app/thunks/glossary/subtypes/groups/u
 import { dispatch } from '@/app/constants.js';
 import { useSelector } from 'react-redux';
 import { selectSubTypeProperties } from '@/app/selectors/subTypeSelectors.js';
+import { cloneDeep, get } from 'lodash';
 // import updateSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/updateSubTypePropertyThunk.js';
 
 const SubTypeFormPreview = ({
@@ -27,6 +29,7 @@ const SubTypeFormPreview = ({
   onRemove,
   disableResize = false,
   liveEdit = false,
+  subType,
 }: {
   glossaryId: string | null;
   mode: SubTypeModes;
@@ -37,6 +40,7 @@ const SubTypeFormPreview = ({
   onRemove: (groupId: string, propertyId: string, id: string) => void;
   disableResize?: boolean;
   liveEdit?: boolean;
+  subType?: SubType;
 }) => {
   const [contextMenu, setContextMenu] = useState<{
     mouseX: number;
@@ -51,7 +55,7 @@ const SubTypeFormPreview = ({
 
   const handleContextMenu = (event: MouseEvent, property: SubTypeProperty) => {
     event.preventDefault();
-    console.log(property);
+
     setContextMenu({
       mouseX: event.clientX + 2,
       mouseY: event.clientY - 6,
@@ -65,13 +69,10 @@ const SubTypeFormPreview = ({
     setContextMenu(null);
   };
 
-  console.log(group);
-
   const handleResizeColumn = (size: number, propertyId: string) => {
     dispatch(
       updateSubTypeGroupThunk({
         groupId: group.id,
-        property: allProperties?.find((p) => p.id === propertyId)!,
         updates: {
           display: {
             ...group.display,
@@ -86,6 +87,14 @@ const SubTypeFormPreview = ({
     closeContextMenu();
   };
 
+  const sortedProperties = useMemo(() => {
+    return cloneDeep(properties).sort((a, b) => {
+      return a.order - b.order;
+    });
+  }, [properties]);
+
+  // because when we pull, they're not automatically sorted by order
+
   return (
     <Box
       sx={{
@@ -95,16 +104,16 @@ const SubTypeFormPreview = ({
         alignItems: 'center',
       }}
     >
-      {properties?.map((propertyLink: SubTypePropertyLink) => {
+      {sortedProperties?.map((propertyLink: SubTypePropertyLink) => {
         const property = allProperties.find(
           (p) => p.id === propertyLink.propertyId
         )! as SubTypeProperty;
-        console.log(property);
         const Component = subTypePreviewMap[property.inputType];
-        // const keypath = `groups.${groupId}.properties.${pId}`;
-        // const isAnchor =
-        //   subType.anchors?.primary === keypath ||
-        //   subType.anchors?.secondary === keypath;
+        const keypath = `groups.${group.id}.properties.${property.id}`;
+        const value = get(source, `${keypath}`, undefined);
+        const isAnchor =
+          subType?.anchors?.primary === property.id ||
+          subType?.anchors?.secondary === property.id;
         return (
           <Box
             key={property.id}
@@ -136,14 +145,16 @@ const SubTypeFormPreview = ({
                 property={property}
                 onChange={handleChange}
                 isPreview={false}
-                source={{}}
-                onAddData={() => {}}
+                source={value}
+                onAddData={() => {
+                  onAddData(property, group.id, property.id);
+                }}
                 columns={group.display?.[property.id]?.columns || 4}
-                keypath={''}
+                keypath={keypath}
                 onRemove={onRemove}
                 liveEdit={liveEdit}
                 glossaryId={glossaryId}
-                isAnchor={false}
+                isAnchor={isAnchor}
               />
             </Box>
             {property.type === 'compound' && <Divider sx={{ my: 2 }} />}

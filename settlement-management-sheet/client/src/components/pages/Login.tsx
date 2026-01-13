@@ -11,7 +11,6 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      console.log('o');
       const { data } = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/user/login`,
         credentials

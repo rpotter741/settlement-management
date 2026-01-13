@@ -326,7 +326,7 @@ const health = new Health();
 
 health.damage(20); // Reduce health by 20
 health.heal(10); // Increase health by 10
-console.log(health.totalMaxHealth()); // Get the total maximum health
+ // Get the total maximum health
 
 ```
 

@@ -16,6 +16,7 @@ import {
   IconButton,
   ButtonGroup,
   Tooltip,
+  Button,
 } from '@mui/material';
 import {
   Folder as FolderIcon,
@@ -58,8 +59,9 @@ import { GlossaryDirectoryProps } from '@/app/types/GlossaryTypes.js';
 import { find, set } from 'lodash';
 import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 import { SelectionObject } from '@/app/types/SelectionTypes.js';
-import getTerm from '../utils/getTerm.js';
-import NodeItem from './NodeItem.js';
+import NodeItem, { RootNode } from './NodeItem.js';
+import { usePropertyLabel } from '../utils/getPropertyLabel.js';
+import seedWorld from '@/helpers/seedWorld.js';
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
@@ -97,6 +99,8 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   const glossaryId = useSelector(selectActiveId());
   const glossary = useSelector(selectEditGlossaryById(glossaryId || ''));
   const renderState = useSelector(glossaryRenderState(glossaryId));
+
+  const { getPropertyLabel } = usePropertyLabel();
 
   //click delineation
   const visibleNodeList = useMemo(() => {
@@ -224,6 +228,15 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           </IconButton>
         </Tooltip>
       </ButtonGroup>
+      <Button onClick={() => (glossaryId ? seedWorld({ glossaryId }) : null)}>
+        Seed World
+      </Button>
+      <RootNode
+        setHoverId={setHoverId}
+        hoverId={hoverId}
+        glossaryId={glossaryId || ''}
+        id={'root-top'}
+      />
       {visibleNodeList &&
         visibleNodeList.map((entry: any) => {
           const node = nodeMap[entry.id];
@@ -251,6 +264,12 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
             />
           );
         })}
+      <RootNode
+        setHoverId={setHoverId}
+        hoverId={hoverId}
+        glossaryId={glossaryId || ''}
+        id={'root-bottom'}
+      />
       {/* Context menu */}
       <Menu
         open={Boolean(contextMenu)}
@@ -395,10 +414,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
             {entryTypeIcons[type] || (
               <FolderIcon sx={{ color: 'primary.main' }} />
             )}
-            {getTerm({
-              glossary,
-              key: type,
-            })}
+            {getPropertyLabel(type).label}
           </MenuItem>
         ))}
       </Menu>
@@ -447,10 +463,7 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
               {entryTypeIcons[type] || (
                 <FolderIcon sx={{ color: 'primary.main' }} />
               )}
-              {getTerm({
-                glossary,
-                key: type,
-              })}
+              {getPropertyLabel(type).label}
             </MenuItem>
           );
         })}

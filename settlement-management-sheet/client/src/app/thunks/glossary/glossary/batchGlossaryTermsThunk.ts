@@ -43,7 +43,6 @@ export default function batchGlossaryTermsThunk({
       const updates = Object.keys(dirtyState || {})
         .map((keypath) => {
           if (!keypath.startsWith('integrationState')) {
-            console.log('skipping keypath:', keypath);
             return null; // Skip non-term keypaths
           }
           const staticValue = get(staticGlossary, keypath);
@@ -87,7 +86,6 @@ export default function batchGlossaryTermsThunk({
           });
           dispatch(clearDirtyKeypaths({ scope: 'glossary', id }));
           dispatch(syncGlossaryIntegrationState({ id }));
-          console.log(updates, 'updates');
         } catch (error) {
           console.error('Error updating glossary terms:', error);
           dispatch(

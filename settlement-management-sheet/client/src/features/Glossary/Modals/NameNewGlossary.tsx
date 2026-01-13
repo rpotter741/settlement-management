@@ -69,7 +69,6 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
               subGenre,
             })
             .then((response) => {
-              console.log('Glossary created:', response.glossary);
               return response.glossary;
             });
           closeModal();

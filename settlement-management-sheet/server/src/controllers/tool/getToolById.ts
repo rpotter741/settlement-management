@@ -5,7 +5,6 @@ import requireFields from '../../utils/requireFields.ts';
 
 export default async function getToolById(req: any, res: any) {
   try {
-    console.log('getToolById called with query:', req.query);
     const { tool, id, refId } = req.query;
     if (!requireFields(['tool', 'id', 'refId'], req.query, res)) return;
     const model = (prisma as any)[tool];

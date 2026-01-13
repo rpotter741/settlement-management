@@ -3,6 +3,7 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import serverAction from '@/services/glossaryServices.js';
 import {
+  addGlossaryEntry,
   addGlossaryNode,
   removeGlossaryNode,
   toggleExpand,
@@ -14,7 +15,8 @@ import { genericSubTypeIds } from '@/features/Glossary/EditGlossary/components/G
 import updateEntryById from './updateEntryById.js';
 import { addTab } from '@/app/slice/tabSlice.js';
 import { TabTools } from '@/app/types/TabTypes.js';
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
+import { initializeRelay } from '@/app/slice/relaySlice.js';
 
 export default function createAndAppendEntryThunk({
   node,
@@ -28,30 +30,31 @@ export default function createAndAppendEntryThunk({
   newTab: boolean;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const { id, name, entryType, parentId, glossaryId, fileType } = node;
+    const { id, name, entryType, parentId, glossaryId, fileType, subTypeId } =
+      node;
     const state = getState();
-    const integrationState =
-      state.glossary.glossaries.edit.byId[glossaryId]?.integrationState;
-    const subTypeId =
-      integrationState.system?.[entryType]?.default ||
-      genericSubTypeIds[entryType];
-    if (!subTypeId) {
-      console.error('No default subTypeId found for entryType:', entryType);
-      return;
-    }
-    dispatch(
-      addGlossaryNode({
-        glossaryId,
-        nodeId: id,
-        nodeData: { ...node, subTypeId },
-      })
-    );
 
     try {
       const newEntry = await serverAction.createNodeAndEntry({
         entryData: { ...node, subTypeId },
       });
-      const { entry } = newEntry;
+      const { entry, node: newNode } = newEntry;
+
+      dispatch(
+        addGlossaryNode({
+          glossaryId,
+          nodeId: newNode.id,
+          nodeData: cloneDeep(newNode),
+        })
+      );
+      dispatch(
+        addGlossaryEntry({
+          glossaryId,
+          entryId: entry.id,
+          entryData: cloneDeep(entry),
+        })
+      );
+
       if (parentId) {
         dispatch(
           toggleExpand({ glossaryId, nodeId: parentId, expanded: true })
@@ -99,6 +102,19 @@ export default function createAndAppendEntryThunk({
           })
         );
       }
+      dispatch(
+        initializeRelay({
+          id: 'smart-link-spawner',
+          data: {
+            data: {
+              entryId: entry.id,
+              glossaryId: glossaryId,
+            },
+          },
+          status: 'complete',
+          sourceId: 'createAndAppendEntryThunk',
+        })
+      );
     } catch (error) {
       console.error('Error adding node:', error);
       dispatch(removeGlossaryNode({ glossaryId, nodeId: id }));

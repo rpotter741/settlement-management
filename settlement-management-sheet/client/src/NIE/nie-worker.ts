@@ -28,7 +28,7 @@ const DIRECT_WEIGHT = 1.0;
 const INDIRECT_WEIGHT = 1.5;
 
 self.onmessage = (event) => {
-  console.log('Worker got message'); // Does this log?
+  // Does this log?
 };
 
 self.addEventListener('error', (event) => {

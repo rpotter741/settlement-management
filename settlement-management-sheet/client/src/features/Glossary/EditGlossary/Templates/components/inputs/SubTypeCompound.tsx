@@ -105,6 +105,7 @@ const SubTypeCompound = ({
             property={property.shape.left}
             subPropertySide={'left'}
             subPropertyParent={property}
+            hasSmartSync={property.smartSync ? true : false}
           />
         </Box>
         <Divider
@@ -125,6 +126,7 @@ const SubTypeCompound = ({
             property={property.shape.right}
             subPropertySide={'right'}
             subPropertyParent={property}
+            hasSmartSync={property.smartSync ? true : false}
           />
         </Box>
       </Box>

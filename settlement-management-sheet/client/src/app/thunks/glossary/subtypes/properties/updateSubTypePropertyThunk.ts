@@ -74,7 +74,6 @@ export default function updateSubTypePropertyThunk({
   property: SubTypeProperty;
   updates: Partial<SubTypeProperty>;
 }) {
-  console.log(property);
   dispatch(
     updateSubTypePropertyThunkRoot({
       propertyId,

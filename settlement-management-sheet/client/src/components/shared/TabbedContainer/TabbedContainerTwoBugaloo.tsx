@@ -112,7 +112,6 @@ const TabbedContainer: React.FC = () => {
 
   const moveLTR = useCallback(
     (entry: TabDataPayload, dropIndex: number) => {
-      console.log('moveLTR', entry);
       if (preventSplit) {
         dispatch(
           showSnackbar({

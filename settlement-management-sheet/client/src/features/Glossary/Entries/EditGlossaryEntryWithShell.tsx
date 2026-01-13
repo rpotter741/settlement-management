@@ -17,6 +17,7 @@ const EditGlossaryEntryForm: React.FC<EditGlossaryEntryFormProps> = ({
   height = '100%',
 }) => {
   const { id, node, entry } = useShellContext();
+
   const subType = useSelector(selectSubTypeById(node?.subTypeId || ''));
   if (!subType) return null;
 

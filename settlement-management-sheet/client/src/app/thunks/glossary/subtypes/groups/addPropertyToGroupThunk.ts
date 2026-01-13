@@ -38,8 +38,6 @@ export function addPropertyToGroupThunk({
         throw new Error('No created property returned from service.');
       }
 
-      console.log('Created Property:', createdProperty);
-
       dispatch(addPropertyToGroup({ groupId, property: createdProperty }));
 
       dispatch(

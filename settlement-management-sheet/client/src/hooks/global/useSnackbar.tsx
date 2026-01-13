@@ -9,12 +9,16 @@ const useSnackbar = () => {
     message,
     type,
     duration = 3000,
+    componentKey,
+    props,
   }: {
     message: string;
     type: 'success' | 'error' | 'info' | 'warning';
     duration?: number;
+    componentKey?: string;
+    props?: Record<string, any>;
   }) => {
-    dispatch(showSnackbar({ message, type, duration }));
+    dispatch(showSnackbar({ message, type, duration, componentKey, props }));
   };
 
   return { makeSnackbar };
