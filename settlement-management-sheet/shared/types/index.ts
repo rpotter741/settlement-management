@@ -1,4 +1,3 @@
-export * from './common.js';
 export * from './conditions.js';
 export * from './tools/apt.js';
 export * from './tools/action.js';

@@ -4,7 +4,7 @@ import prisma from '../../../db/db.ts';
 import glossaryModelMap from '../../../utils/glossaryModelMap.ts';
 import isDetailFileType from '../../../utils/isDetailFileType.ts';
 import requireFields from '../../../utils/requireFields.ts';
-import generateFormSource from '@/utils/generateFormSource.ts';
+import generateFormSource from '../../../utils/generateFormSource.ts';
 
 export default async function getEntriesById(req: any, res: any) {
   try {

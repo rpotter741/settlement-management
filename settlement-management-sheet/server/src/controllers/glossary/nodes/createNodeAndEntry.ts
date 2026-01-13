@@ -2,7 +2,7 @@ import prisma from '../../../db/db.ts';
 import isAdminUserId from '../../../utils/isAdminUserId.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import { generateFormSource } from '../../../../../client/src/features/Glossary/utils/generatePropertyValue.ts';
-import capitalize from '@/utils/capitalize.ts';
+import capitalize from '../../../utils/capitalize.ts';
 
 export default async function createNodeAndEntry(req: any, res: any) {
   try {

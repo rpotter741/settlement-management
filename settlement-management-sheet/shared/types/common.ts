@@ -1,19 +1,17 @@
-import {
-  GlossaryEntryType,
-  APT,
-  Action,
-  Attribute,
-  Category,
-  BuildingTool,
-  KeyTool,
-  KitTool,
-  ListenerPack,
-  SettlementTool,
-  StoryThreadTool,
-  TradeHubTool,
-  UpgradeTree,
-  StatusTool,
-} from './index.js';
+import type { GlossaryEntryType } from './glossaryEntry.js';
+import type { APT } from './tools/apt.js';
+import type { Action } from './tools/action.js';
+import type { Attribute } from './tools/attribute.js';
+import type { Category } from './tools/category.js';
+import type { BuildingTool } from './tools/building.js';
+import type { KeyTool } from './tools/key.js';
+import type { KitTool } from './tools/kit.js';
+import type { ListenerPack } from './tools/listener.js';
+import type { SettlementTool } from './tools/settlement.js';
+import type { StoryThreadTool } from './tools/storyThread.js';
+import type { TradeHubTool } from './tools/tradeHub.js';
+import type { UpgradeTree } from './tools/upgrade.js';
+import type { StatusTool } from './tools/status.js';
 
 export type UUID = string;
 export type Timestamp = string; // ISO 8601 format
