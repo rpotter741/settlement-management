@@ -5,53 +5,53 @@ import { verifyAuth } from '../middleware/authMiddleware.ts';
 
 import {
   // glossary actions
-  createGlossary,
-  deleteGlossary,
-  getGlossaries,
-  getGlossaryById,
-  updateGlossary,
-  updateGlossaryTerm,
-  batchUpdateTerms,
+  createGlossary, // rusty
+  deleteGlossary, //rusty
+  getGlossaries, // rusty
+  getGlossaryById, // rusty
+  updateGlossary, //rusty
+  updateGlossaryTerm, //rusty -> just use updateGlossary, integrationState only update. Duh.
+  batchUpdateTerms, // rusty --> see above
   // node actions
-  getNodes,
-  renameNodeAndEntry,
-  updateNodeParentId,
-  updateNodeSortIndices,
-  createNodeAndEntry,
+  getNodes, // rusty
+  renameNodeAndEntry, //rusty -> also, backlink updates and name tracking removed. Was unnecessary complexity.
+  updateNodeParentId, // rusty
+  updateNodeSortIndices, // rusty
+  createNodeAndEntry, // rusty
   // entry actions
-  deleteNodeAndEntry,
-  getEntryById,
+  deleteNodeAndEntry, // rusty
+  getEntryById, // rusty
   getOptionsByProperty,
-  updateNode,
-  updateEntry,
-  changeEntrySubTypeController,
-  getEntriesById,
+  updateNode, // rusty --> aka, not used anywhere
+  updateEntry, // rusty, kind of --> only handles groups! will need a few more commands to handle the other entry updates
+  changeEntrySubTypeController, // rusty
+  getEntriesById, //rusty
   //subType actions
-  createSubType,
-  fetchSubTypesByUserId,
-  fetchSystemSubTypes,
-  batchUpdateSubType,
-  deleteSubType,
-  forkSubType,
+  createSubType, //rusty
+  fetchSubTypesByUserId, // rusty
+  fetchSystemSubTypes, // don't need ig
+  batchUpdateSubType, // rusty --> going to use ProgressRail and looped updates to backend
+  deleteSubType, // rusty
+  forkSubType, // old and useless with new format
   //new stuff here
-  fetchSubTypePropertiesController,
-  createSubTypeProperty,
-  createSubTypeGroup,
-  fetchSubTypeGroupsController,
-  deleteSubTypePropertyController,
-  createSubTypeGroupPropertyController,
-  removeGroupPropertyController,
-  reorderGroupPropertiesController,
-  updateSubTypeGroupController,
-  updateSubTypePropertyController,
-  deleteSubTypeGroupController,
-  addGroupsToSubTypeController,
-  removeGroupsFromSubTypeController,
-  updateAnchorsController,
-  updateSubTypeNameController,
-  updateSubTypeContextController,
+  fetchSubTypePropertiesController, // rusty
+  createSubTypeProperty, // rusty
+  createSubTypeGroup, // rusty
+  fetchSubTypeGroupsController, // rusty
+  deleteSubTypePropertyController, // rusty
+  createSubTypeGroupPropertyController, // rusty
+  removeGroupPropertyController, // rusty
+  reorderGroupPropertiesController, //rusty
+  updateSubTypeGroupController, // rusty
+  updateSubTypePropertyController, // rusty
+  deleteSubTypeGroupController, // rusty
+  addGroupsToSubTypeController, // rusty
+  removeGroupsFromSubTypeController, //rusty
+  updateAnchorsController, //rusty
+  updateSubTypeNameController, //rusty --> merged into above
+  updateSubTypeContextController, // rusty --> merged into above
   //backlinks
-  ignoreBacklinkController,
+  ignoreBacklinkController, // rusty
 } from '../controllers/glossaryController.ts';
 
 const router = express.Router();

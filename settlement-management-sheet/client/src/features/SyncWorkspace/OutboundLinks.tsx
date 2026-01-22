@@ -65,7 +65,7 @@ const OutboundLinks = ({
         endTime - startTime
       } ms`
     );
-    console.log(suggestions);
+
     if (Object.keys(suggestions).length > 0) {
       const modalEntry: ModalQueueEntry = {
         id: `smart-link-${property.id}-${entry.id}`,
@@ -93,7 +93,7 @@ const OutboundLinks = ({
     const startTime = performance.now();
     const allSuggestions = crawler.getSuggestions(entry.id, [...relationships]);
     const endTime = performance.now();
-    console.log(`Smart link crawl took ${(endTime - startTime).toFixed(2)} ms`);
+    console.log(`Smart link crawl took ${(endTime - startTime).toFixed(9)} ms`);
     console.log(allSuggestions);
     const modalEntry: ModalQueueEntry = {
       id: 'all-smart-links',
@@ -110,6 +110,8 @@ const OutboundLinks = ({
     showModal({ entry: modalEntry });
   }
 
+  console.log(relationships);
+
   return (
     <>
       <Typography variant="h5" sx={{ textAlign: 'start' }}>
@@ -123,6 +125,7 @@ const OutboundLinks = ({
         {relationships.map((property, index: number) => {
           const keypath = `groups.${property.groupId}.properties.${property.id}`;
           const entryProp = get(entry, keypath);
+          console.log(entryProp.value);
           return (
             <Box
               key={property.id}

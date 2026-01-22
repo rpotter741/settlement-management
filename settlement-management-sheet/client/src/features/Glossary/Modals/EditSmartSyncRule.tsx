@@ -20,7 +20,7 @@ export interface SmartSyncRule {
   target: 'Child' | 'Sibling' | 'Parent' | 'Backlink' | 'Entry Type';
   depth: number;
   parameters: {
-    types?: GlossaryEntryType[];
+    types: GlossaryEntryType[];
     propertyMatch?: boolean;
     scope?: 'Branch' | 'Global';
     limit?: number;
@@ -35,7 +35,9 @@ function getRule(
   if (Object.keys(rule).length > 0) {
     return rule;
   } else {
-    const parameters = {} as GenericObject;
+    const parameters = { types: [] } as GenericObject & {
+      types: GlossaryEntryType[];
+    };
     if (property.inputType === 'dropdown') {
       const { relationship } = property.shape;
       if (relationship) {

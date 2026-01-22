@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  GenericObject,
-  GlossaryEntryType,
-} from '../../../../shared/types/index.js';
+import { GlossaryEntryType } from '../../../../shared/types/index.js';
 import { cloneDeep, set } from 'lodash';
 import { SmartSyncRule } from '@/features/Glossary/Modals/EditSmartSyncRule.js';
 

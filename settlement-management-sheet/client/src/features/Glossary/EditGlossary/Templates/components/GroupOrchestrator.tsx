@@ -33,6 +33,7 @@ const GroupOrchestrator = ({
   group: SubTypeGroup;
   deselectGroup: () => void;
 }) => {
+  console.log(group);
   const allProperties = useSelector(selectSubTypeProperties);
 
   const { getAlphaColor, lightenColor } = useTheming();

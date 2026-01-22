@@ -52,12 +52,13 @@ export default async function getOptionsByProperty(req, res) {
     const allEntries: any = [];
     for (const [entryType, ids] of Object.entries(entryTypeMap)) {
       if (!(ids as string[]).length) continue;
-      const model = glossaryModelMap[entryType];
+      const model =
+        glossaryModelMap[entryType as keyof typeof glossaryModelMap];
       if (!model) {
         console.warn(`No model found for entry type: ${entryType}`);
         continue;
       }
-      const shape = glossaryTypeMap[entryType];
+      const shape = glossaryTypeMap[entryType as keyof typeof glossaryTypeMap];
       if (!shape || !(property in shape)) {
         console.warn(
           `Property ${property} not found in model for ${entryType}`
@@ -76,7 +77,7 @@ export default async function getOptionsByProperty(req, res) {
     }
     const fallback = fallbackPropertyMap[property] || [];
     const allProperties = new Map();
-    type Entry = { id: string; name: string; [key: string]: any };
+    type Entry = { id: string; name: string };
     const results: {
       inherited: Entry[];
       nearby: Entry[];

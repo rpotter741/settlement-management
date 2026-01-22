@@ -18,6 +18,7 @@ import getPreviewSx from './previewSxMap.js';
 import { useSelector } from 'react-redux';
 import {
   selectActiveId,
+  selectGlossaryNodes,
   selectGlossaryStructure,
 } from '@/app/selectors/glossarySelectors.js';
 import { useShellContext } from '@/context/ShellContext.js';
@@ -25,6 +26,7 @@ import { useModalActions } from '@/hooks/global/useModal.js';
 import { RELATIONSHIP_RANK } from '@/utility/hasParentProperty.js';
 import capitalize from '@/utility/inputs/capitalize.js';
 import { normalize } from 'path';
+import useTypesByIds from '@/cache/entryType/typeByIds.tsx';
 
 const SubTypeDropdownPreview = ({
   property,
@@ -76,6 +78,7 @@ const SubTypeDropdownPreview = ({
 
   const { relationship } = property.shape || {};
   const allNodes = useSelector(selectGlossaryStructure(glossaryId ?? ''));
+  const nodeMap = useSelector(selectGlossaryNodes(glossaryId ?? ''));
   const nodeOptions: { value: string; name: string }[] = useMemo(() => {
     if (relationship && liveEdit && allNodes) {
       return allNodes
@@ -157,6 +160,9 @@ const SubTypeDropdownPreview = ({
         } else {
           nukedIds.push(source.value as string);
           nukedIds.push(valueToUse as string);
+        }
+        if (Array.isArray(valueToUse)) {
+          valueToUse = valueToUse.filter((id) => nodeMap[id]); //filter out any ids that don't exist anymore
         }
       }
       onChange(valueToUse, `${keypath}.value`, nukedIds.filter(Boolean));

@@ -1,6 +1,7 @@
 import { v4 as newId } from 'uuid';
 import createNodeAndEntry from '@/services/glossary/nodes/createNodeAndEntry.js';
 import { genericSubTypeIds } from '@/features/Glossary/EditGlossary/components/GlossaryPropertyLabels.js';
+import { invoke } from '@tauri-apps/api/core';
 
 export default async function seedWorld({
   glossaryId,
@@ -81,4 +82,38 @@ export default async function seedWorld({
   }
 
   console.log('Generated 4,220 nodes');
+}
+
+export async function loadGlossaries(userId: string = 'robbiepottsdm') {
+  try {
+    const glossaries = await invoke('get_glossaries', {
+      userId: userId, // Note: camelCase in TS becomes snake_case param in Rust
+    });
+
+    console.log('Got glossaries:', glossaries);
+    return glossaries;
+  } catch (error) {
+    console.error('Failed to load glossaries:', error);
+  }
+}
+
+export async function createGlossary() {
+  try {
+    const glossaryId = newId();
+    const glossary = await invoke('create_glossary', {
+      input: {
+        id: glossaryId,
+        name: 'new Glossary',
+        genre: 'Fantasy',
+        sub_genre: 'Generic',
+        description: 'I\m a description',
+        created_by: 'robbiepottsdm',
+        content_type: 'CUSTOM',
+      },
+    });
+    console.log(glossary);
+    return glossary;
+  } catch (error) {
+    console.log(error);
+  }
 }

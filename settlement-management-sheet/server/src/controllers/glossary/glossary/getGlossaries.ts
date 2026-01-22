@@ -7,17 +7,6 @@ export default async function getGlossaries(req: any, res: any) {
     const glossaries = await prisma.glossary.findMany({
       where: { createdBy: userId },
       orderBy: [{ updatedAt: 'desc' }],
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        visibility: true,
-        genre: true,
-        subGenre: true,
-        integrationState: true,
-        theme: true,
-        subTypes: true,
-      },
     });
 
     return res.json(glossaries);

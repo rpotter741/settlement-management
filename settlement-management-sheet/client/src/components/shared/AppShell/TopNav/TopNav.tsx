@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { panelOpen } from '@/app/selectors/panelSelectors.js';
 import TabNumberAndNav from './widgets/TabNumberAndNav.js';
 import { useMediaQuery } from '@mui/system';
+import ProgressRail from '@/features/ProgressRail/ProgressRail.tsx';
 
 const TopNav = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const TopNav = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: 48,
+        maxHeight: 48,
         borderBottom: '1px solid',
         borderColor: 'primary.dark',
       }}
@@ -42,10 +44,11 @@ const TopNav = () => {
       <Box
         role="separator"
         sx={{
-          width: '348px',
+          width: '100px',
           transition: 'width 0.3s ease',
         }}
       />
+      <ProgressRail queue={1} />
       <Box
         sx={{
           display: 'flex',
@@ -55,49 +58,10 @@ const TopNav = () => {
           my: 1,
         }}
       >
-        {/* <Select
-          sx={{ width: 300, p: 0 }}
-          variant="standard"
-          value={location.pathname}
-          onChange={(e) => navigate(e.target.value)}
-          renderValue={(value) => {
-            const route = pageRoutes.find((r) => r.path === value);
-            return route ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  justifyContent: 'start',
-                  ml: 2,
-                }}
-              >
-                <Icon sx={{ fontSize: '1.5rem' }}>{route.icon}</Icon>
-                <Typography variant="body2">{route.label}</Typography>
-              </Box>
-            ) : (
-              'Select Page'
-            );
-          }}
-        >
-          {pageRoutes.map((route) => {
-            return route.sidebarNav ? (
-              <MenuItem
-                key={route.path}
-                value={route.path}
-                // onClick={() => navigate(route.path)}
-                sx={{ display: 'flex', alignItems: 'center', gap: 4 }}
-              >
-                <Icon fontSize="small">{route.icon}</Icon>
-                <Typography variant="body2">{route.label}</Typography>
-              </MenuItem>
-            ) : null;
-          })}
-        </Select> */}
         <TextField
           size="small"
           placeholder="Search..."
-          sx={{ width: 450, my: 1 }}
+          sx={{ maxWidth: 450, my: 1, width: '100%' }}
           slotProps={{
             input: {
               startAdornment: <Search fontSize="small" sx={{ mr: 1 }} />,

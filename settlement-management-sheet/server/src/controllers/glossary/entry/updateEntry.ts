@@ -1,4 +1,3 @@
-import { GenericObject } from '../../../../../shared/types/index.ts';
 import prisma from '../../../db/db.ts';
 import requireFields from '../../../utils/requireFields.ts';
 import _ from 'lodash';
@@ -139,7 +138,6 @@ export default async function updateEntry(req: any, res: any) {
     console.table([...toAdd, 'toAdd', ...toRemove, 'toRemove']);
 
     const toAddArray = toAdd.map((data) => data.id).filter(Boolean);
-    const toRemoveArray = toRemove.map((data) => data.id);
 
     const newGroups: any = _.cloneDeep(entry.groups);
     if (!newGroups) {
@@ -156,8 +154,6 @@ export default async function updateEntry(req: any, res: any) {
     const nameMap = Object.fromEntries(
       targetEntries.map((e) => [e.id, e.name])
     );
-
-    // futhermore, for the sync workspace, we'll grab all backlinks where sourceId === entryId OR targetId === entryId. By doing this, rendering the sync workspace has everything needed (name, property) to showcase the backlinks in either direction without further queries. Add an `ignoredAt` field to the backlinkIndex instead of an isIgnored boolean, so that we can maybe filter by ignored date. Probably don't need a badge unless 'unanswered' backlinks exceeds a certain number (eg, 5) but we'll see.
 
     const { newEntry, backlinksTo, backlinksFrom } = await prisma.$transaction(
       async (tx) => {
@@ -250,21 +246,6 @@ export default async function updateEntry(req: any, res: any) {
     return res.status(500).json({ message: 'Internal server error' });
   }
 }
-
-function extractIdsFromCompound(
-  sourceData: Record<string, any>,
-  side: 'left' | 'right'
-): string[] {
-  return Object.values(sourceData)
-    .flatMap((compValue: any) => {
-      const value = compValue[side]?.value;
-      return Array.isArray(value) ? value : [value];
-    })
-    .filter(Boolean);
-}
-
-// need to update this shit with all properties and groups and all that jazz so that I can
-// actually recognize the properties and their relationship definitions
 
 function extractAllRelationshipIds(
   groups: Record<string, any>,
@@ -372,17 +353,3 @@ export type BackLinkShape = {
   propertyId: string;
   type: 'direct' | 'indirect' | 'hierarchal' | 'directCompound';
 };
-
-function verifyBacklinkIntegrity(
-  oldLink: BackLinkShape,
-  newLink: BackLinkShape
-): Partial<BackLinkShape> | false {
-  if (oldLink.id !== newLink.id) return false;
-  const updates: Partial<BackLinkShape> = {};
-  (Object.keys(oldLink) as (keyof BackLinkShape)[]).forEach((key) => {
-    if (oldLink[key] !== newLink[key] && oldLink[key] !== undefined) {
-      updates[key] = newLink[key] as any;
-    }
-  });
-  return Object.keys(updates).length === 0 ? false : updates;
-}

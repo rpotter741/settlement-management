@@ -6,7 +6,7 @@ export default async function removeGroupsFromSubTypeController(
   res: any
 ) {
   try {
-    const { linkIds, subtypeId } = req.body;
+    const { linkIds } = req.body;
     if (!requireFields(['linkIds', 'subtypeId'], req.body, res)) return;
 
     await prisma.$transaction(async (prisma) => {

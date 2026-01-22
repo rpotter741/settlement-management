@@ -61,7 +61,10 @@ import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 import { SelectionObject } from '@/app/types/SelectionTypes.js';
 import NodeItem, { RootNode } from './NodeItem.js';
 import { usePropertyLabel } from '../utils/getPropertyLabel.js';
-import seedWorld from '@/helpers/seedWorld.js';
+import seedWorld, {
+  loadGlossaries,
+  createGlossary,
+} from '@/helpers/seedWorld.js';
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
@@ -176,7 +179,9 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
 
   const doubleClick = useCallback(
     (e: MouseEvent, nodeId: string) => {
+      console.log('double click', nodeId);
       if (nodeMap[nodeId].entryType === null) return;
+      console.log('opening tab for', nodeMap[nodeId].name);
       addNewTab({
         name: nodeMap[nodeId].name,
         id: nodeId,
@@ -228,8 +233,13 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           </IconButton>
         </Tooltip>
       </ButtonGroup>
-      <Button onClick={() => (glossaryId ? seedWorld({ glossaryId }) : null)}>
-        Seed World
+      <Button
+        onClick={() => (glossaryId ? loadGlossaries('robbiepottsdm') : null)}
+      >
+        tauri test
+      </Button>
+      <Button onClick={() => (glossaryId ? createGlossary() : null)}>
+        add new glossary
       </Button>
       <RootNode
         setHoverId={setHoverId}

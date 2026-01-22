@@ -20,6 +20,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           width: 'calc(100vw)',
           overflowY: 'hidden',
           overflowX: 'hidden',
+          minWidth: 800,
         }}
       >
         {/* width: 348px */}

@@ -15,7 +15,6 @@ import SubTypeDropDown from './inputs/SubTypeDropDown.js';
 import SubTypeCheckbox from './inputs/SubTypeCheckbox.js';
 import SubTypeRange from './inputs/SubTypeRange.js';
 import SubTypeCompound from './inputs/SubTypeCompound.js';
-import updateSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/updateSubTypePropertyThunk.js';
 
 const FormOrchestrator = ({
   glossaryId,

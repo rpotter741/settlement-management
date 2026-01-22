@@ -12,7 +12,7 @@ const useProtectedRoute = () => {
 
   const goToLogin = () => <Navigate to="/login" />;
 
-  return { authenticated, goToLogin };
+  return { authenticated: true, goToLogin };
 };
 
 export default useProtectedRoute;

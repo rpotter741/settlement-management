@@ -62,7 +62,7 @@ const CreateGlossaryShell: React.FC<CreateGlossaryShellProps> = ({
   if (!glossaryId) return null;
 
   const { node, entry } = useNodeEditor(glossaryId, id);
-  console.log(entry, 'entry in shell');
+  console.log(node, 'entry in shell');
 
   const nodeStructure = useSelector(selectGlossaryNodes(glossaryId));
 

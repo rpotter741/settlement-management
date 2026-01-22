@@ -12,18 +12,28 @@ import {
   SwapHoriz,
 } from '@mui/icons-material';
 
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import MotionBox from '../Layout/Motion/MotionBox.js';
 import EditGlossary from '@/features/Glossary/EditGlossary/EditGlossary.js';
 import DefaultSidebar from './Sidebar/DefaultSidebar.js';
 import TemplateManager from '@/features/Glossary/EditGlossary/Templates/TemplateManager.js';
 import MainNIEParser from '@/features/SidePanel/NIE/MainNIEParser.js';
+import { Box, Button } from '@mui/material';
 
 const withAuth = ({ Component }: { Component: React.ComponentType }) => (
-  <ProtectedRoute>
-    <Component />
-  </ProtectedRoute>
+  // <ProtectedRoute>
+  <Component />
+  // </ProtectedRoute>
 );
+
+const LostPage = () => {
+  const navigate = useNavigate();
+  return (
+    <Box>
+      Whoops! <Button onClick={() => navigate('/login')}>Go to login</Button>
+    </Box>
+  );
+};
 
 const TestCase = () => {
   return (
@@ -40,15 +50,15 @@ const TestCase = () => {
 };
 
 export const pageRoutes = [
-  {
-    path: '/',
-    element: <Navigate to="/dashboard" />,
-    label: 'Home',
-    icon: <Dashboard />,
-    sidebar: DefaultSidebar,
-    sidebarProps: {},
-    sidebarNav: false,
-  },
+  // {
+  //   path: '/',
+  //   element: <Navigate to="/dashboard" />,
+  //   label: 'Home',
+  //   icon: <Dashboard />,
+  //   sidebar: DefaultSidebar,
+  //   sidebarProps: {},
+  //   sidebarNav: false,
+  // },
   {
     path: '/dashboard',
     element: withAuth({ Component: TestCase }),
@@ -81,7 +91,7 @@ export const pageRoutes = [
   },
   {
     path: '/customCreation',
-    element: withAuth({ Component: CustomCreation }),
+    element: <CustomCreation />,
     label: 'Custom Creation',
     icon: <DesignServices />,
     sidebar: DefaultSidebar,
@@ -125,7 +135,7 @@ export const pageRoutes = [
   },
   {
     path: '*',
-    element: <p>404: Page not found</p>,
+    element: <LostPage />,
     label: 'Not Found',
     icon: null,
     sidebar: null,

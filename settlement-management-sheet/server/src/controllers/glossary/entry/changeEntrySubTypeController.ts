@@ -69,12 +69,6 @@ export default async function changeEntrySubTypeController(req: any, res: any) {
         (p: any) => (allFormerProperties[p.id] = p)
       );
     });
-    const allNewProperties: Record<string, any> = {};
-    Object.values(groups).forEach((group: any) => {
-      Object.values(group.properties).forEach(
-        (p: any) => (allNewProperties[p.id] = p)
-      );
-    });
 
     let primaryAnchorValue = '';
     let secondaryAnchorValue = '';
