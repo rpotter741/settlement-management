@@ -7,7 +7,7 @@ import {
 } from '../generics/genericContinent.js';
 import { propertyTypeLabelMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
 import { createDefaultPropertyThunk } from '@/app/thunks/glossary/subtypes/properties/createDefaultPropertyThunk.js';
-import { createDefaultSubPropertyThunk } from '@/app/thunks/glossary/subtypes/properties/createDefaultSubPropertyThunk.js';
+
 import { SubTypeModes } from '@/features/SidePanel/Glossary/SubTypeManager/SubTypeSidebarOrchestrator.js';
 import { dispatch } from '@/app/constants.js';
 import { SubTypeProperty } from '@/app/slice/subTypeSlice.js';

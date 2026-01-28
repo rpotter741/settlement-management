@@ -61,10 +61,6 @@ import { getOptionsContextMaps } from '@/utility/hasParentProperty.js';
 import { SelectionObject } from '@/app/types/SelectionTypes.js';
 import NodeItem, { RootNode } from './NodeItem.js';
 import { usePropertyLabel } from '../utils/getPropertyLabel.js';
-import seedWorld, {
-  loadGlossaries,
-  createGlossary,
-} from '@/helpers/seedWorld.js';
 
 const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
   structure,
@@ -233,14 +229,6 @@ const GlossaryDirectory: React.FC<GlossaryDirectoryProps> = ({
           </IconButton>
         </Tooltip>
       </ButtonGroup>
-      <Button
-        onClick={() => (glossaryId ? loadGlossaries('robbiepottsdm') : null)}
-      >
-        tauri test
-      </Button>
-      <Button onClick={() => (glossaryId ? createGlossary() : null)}>
-        add new glossary
-      </Button>
       <RootNode
         setHoverId={setHoverId}
         hoverId={hoverId}

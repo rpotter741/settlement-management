@@ -2,9 +2,9 @@ import { dispatch } from '@/app/constants.js';
 import { SubTypeGroup, SubTypeProperty } from '@/app/slice/subTypeSlice.js';
 import { addPropertyToGroupThunk } from '@/app/thunks/glossary/subtypes/groups/addPropertyToGroupThunk.js';
 import { removeGroupPropertyThunk } from '@/app/thunks/glossary/subtypes/groups/removeGroupPropertyThunk.js';
-import { reorderGroupPropertiesThunk } from '@/app/thunks/glossary/subtypes/groups/reorderGroupPropertiesThunk.js';
+import { useDnDContext } from '@/context/DnD/GlobalDndContext.tsx';
 import { propertyTypeIconMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
-import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
+import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
 import useTheming from '@/hooks/layout/useTheming.js';
 import { Delete, DragHandle } from '@mui/icons-material';
 import {
@@ -52,44 +52,26 @@ const DraggablePropertyEntry = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const { lightenColor, getAlphaColor } = useTheming();
-  const { ref, draggedType } = useGlobalDrag({
+  const { dragType } = useDnDContext();
+  const { ref, canAccept, isOver, dragHandleProps } = useGlobalDrag({
+    id: property.id,
+    dropType: 'subtype-group-property',
     interaction: 'both',
     types: ['subtype-group-property', 'subtype-property'],
     item: {
+      groupId: group.id,
       id: property.id,
       index,
     },
-    onHover: (item) => {
-      item.id !== property.id ? setHoverIndex(index) : setHoverIndex(null);
-    },
-    onDrop: (item) => {
-      if (draggedType === 'subtype-property') {
-        dispatch(
-          addPropertyToGroupThunk({
-            groupId: group.id,
-            propertyId: item.id,
-          })
-        );
-      } else if (draggedType === 'subtype-group-property') {
-        //reordering within group handled in DraggablePropertyEntry
-        if (item.index === index) return;
-        const newOrder = [...group.properties].map((p) => p.propertyId);
-        newOrder.splice(item.index, 1);
-        newOrder.splice(index, 0, item.id);
-        dispatch(
-          reorderGroupPropertiesThunk({
-            groupId: group.id,
-            newOrder: newOrder,
-          })
-        );
-      }
-    },
-    onEnd: () => {},
     index,
     type: 'subtype-group-property',
   });
+
+  if (!ref) return null;
+
   return (
     <Box
+      {...dragHandleProps}
       ref={ref}
       key={property.id}
       sx={{
@@ -101,20 +83,19 @@ const DraggablePropertyEntry = ({
         width: '100%',
         position: 'relative',
         cursor: 'grab',
-        backgroundColor:
-          hoverIndex === index
-            ? getAlphaColor({
-                color: 'success',
-                key: 'light',
-                opacity: 0.3,
+        backgroundColor: isOver
+          ? getAlphaColor({
+              color: 'success',
+              key: 'light',
+              opacity: 0.3,
+            })
+          : index % 2 === 0
+            ? lightenColor({
+                color: 'background',
+                key: 'default',
+                amount: 0.1,
               })
-            : index % 2 === 0
-              ? lightenColor({
-                  color: 'background',
-                  key: 'default',
-                  amount: 0.1,
-                })
-              : 'background.default',
+            : 'background.default',
       }}
       onMouseEnter={() => {
         setIsHover(true);

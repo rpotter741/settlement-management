@@ -4,6 +4,7 @@ import { initializeGlossary } from '@/app/slice/glossarySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.js';
 import { addSubType } from '@/app/slice/subTypeSlice.js';
+import { invoke } from '@tauri-apps/api/core';
 
 export default function getGlossariesThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -13,7 +14,10 @@ export default function getGlossariesThunk(): AppThunk {
         // Glossaries already exist in state, no need to fetch again
         return;
       }
-      const glossaries = await serverAction.getGlossaries();
+      // const glossaries = await serverAction.getGlossaries();
+      const glossaries: GlossaryStateEntry[] = await invoke('get_glossaries', {
+        userId: 'robbiepottsdm',
+      });
       const existingState = getState().glossary.glossaries.edit.byId;
 
       glossaries.forEach((glossary: GlossaryStateEntry) => {

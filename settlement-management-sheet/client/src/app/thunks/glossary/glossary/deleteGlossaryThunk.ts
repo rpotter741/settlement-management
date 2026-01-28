@@ -11,6 +11,7 @@ import {
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { findAndDeleteTab } from '@/app/thunks/tabThunks.js';
 import { removeTab } from '@/app/slice/tabSlice.js';
+import { invoke } from '@tauri-apps/api/core';
 
 export default function deleteEntryThunk({
   glossaryId,
@@ -26,7 +27,8 @@ export default function deleteEntryThunk({
         throw new Error(`Glossary with ID ${glossaryId} not found`);
       }
       dispatch(findAndDeleteTab(glossaryId));
-      await serverAction.deleteGlossary({ glossaryId });
+      // await serverAction.deleteGlossary({ glossaryId });
+      await invoke('delete_glossary', { id: glossaryId });
       dispatch(removeGlossary({ glossaryId }));
       dispatch(setActiveGlossaryId({ glossaryId: null }));
       dispatch(
@@ -34,7 +36,6 @@ export default function deleteEntryThunk({
           message: `${glossary.name} successfully deleted.`,
           type: 'success',
           duration: 3000,
-          component: undefined,
           props: {},
         })
       );

@@ -8,6 +8,7 @@ import {
   updateSubTypeGroup,
 } from '@/app/slice/subTypeSlice.js';
 import updateSubTypeGroupService from '@/services/glossary/subTypes/updateSubTypeGroupService.js';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function updateSubTypeGroupThunk({
   groupId,
@@ -38,9 +39,18 @@ export function updateSubTypeGroupThunk({
       );
 
       //service for updating group
-      await updateSubTypeGroupService({
-        groupId,
-        updates,
+      // await updateSubTypeGroupService({
+      //   groupId,
+      //   updates,
+      // });
+      await subTypeCommands.updateSubTypeGroup({
+        id: groupId,
+        name: updates?.name,
+        refId: updates?.refId,
+        version: updates?.version,
+        displayName: updates?.displayName,
+        display: updates?.display,
+        description: updates?.description,
       });
 
       dispatch(

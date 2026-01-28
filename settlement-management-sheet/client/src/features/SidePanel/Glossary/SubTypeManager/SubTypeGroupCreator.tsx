@@ -5,8 +5,15 @@ import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';
 import { ArrowBack, Close } from '@mui/icons-material';
 import SidebarProperty from './components/SidebarProperty.js';
 import { AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SidebarGroup from './components/SidebarGroup.js';
+import { SortableContext } from '@dnd-kit/sortable';
+import {
+  DragOverlay,
+  useDndContext,
+  defaultDropAnimationSideEffects,
+} from '@dnd-kit/core';
+import DragPreview from '@/context/DnD/preview/DragPreview.tsx';
 
 const SubTypeGroupCreator = ({
   openRelay,
@@ -33,6 +40,9 @@ const SubTypeGroupCreator = ({
     searchProperties,
     setSearchProperties,
   } = useSubTypeGroupCreator({ activeGroup, setActiveGroup, openRelay });
+  const { active } = useDndContext();
+
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   return (
     <AnimatePresence mode="popLayout">
@@ -152,14 +162,27 @@ const SubTypeGroupCreator = ({
               },
             }}
           />
-          {filteredAvailableProperties.map((property, index) => (
-            <SidebarProperty
-              key={property.id}
-              index={index}
-              handlePropertyClick={() => {}}
-              propertyId={property.id}
-            />
-          ))}
+          <SortableContext items={filteredAvailableProperties.map((p) => p.id)}>
+            {filteredAvailableProperties.map((property, index) => (
+              <SidebarProperty
+                key={property.id}
+                index={index}
+                handlePropertyClick={() => {}}
+                propertyId={property.id}
+              />
+            ))}
+            <DragPreview>
+              {/* Overlay content can be added here if needed */}
+              {active ? (
+                <SidebarProperty
+                  key={active.id.toString()}
+                  index={0}
+                  handlePropertyClick={() => {}}
+                  propertyId={active.id.toString()}
+                />
+              ) : null}
+            </DragPreview>
+          </SortableContext>
         </MotionBox>
       </MotionBox>
     </AnimatePresence>

@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use crate::types::*;
 use sea_orm::{DatabaseConnection, DeriveDisplay, EntityTrait};
 
-use crate::entities::{entry_sub_type, sub_type_property};
+use crate::entities::{user_sub_type, user_sub_type_property};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BasicGroup {
@@ -107,7 +107,9 @@ pub fn shape_to_property_config(
                     .unwrap_or(serde_json::Value::Null)
             }
         }
-        NonCompoundPropertyShape::Checkbox(s) => serde_json::Value::Bool(s.default_checked != 0),
+        NonCompoundPropertyShape::Checkbox(s) => {
+            serde_json::Value::Bool(s.default_checked != false)
+        }
         NonCompoundPropertyShape::Date(_s) => serde_json::Value::String(String::new()),
         NonCompoundPropertyShape::Range(_s) => 0.into(),
     };
@@ -120,7 +122,7 @@ pub fn shape_to_property_config(
 }
 
 pub fn generate_property_value(
-    property: &sub_type_property::Model,
+    property: &user_sub_type_property::Model,
 ) -> Result<PropertyConfig, String> {
     let shape = property.parsed_shape().unwrap();
 
@@ -155,7 +157,7 @@ pub fn generate_property_value(
 }
 
 pub fn generate_compound_property_value(
-    property: &sub_type_property::Model,
+    property: &user_sub_type_property::Model,
     property_id: String,
 ) -> Result<CompoundPropertyConfig, String> {
     let shape = property.parsed_shape().unwrap();
@@ -219,7 +221,7 @@ pub async fn generate_form_source(
     sub_type_id: String,
     db: &DatabaseConnection,
 ) -> Result<FormSource, String> {
-    let sub_type = entry_sub_type::Entity::find_by_id(sub_type_id)
+    let sub_type = user_sub_type::Entity::find_by_id(sub_type_id)
         .one(db)
         .await
         .map_err(|e| e.to_string())?

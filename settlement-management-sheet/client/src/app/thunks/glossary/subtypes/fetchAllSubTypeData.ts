@@ -9,6 +9,11 @@ import {
 import fetchSubTypeGroupsService from '@/services/glossary/subTypes/fetchSubTypeGroupsService.js';
 import fetchSubTypePropertiesService from '@/services/glossary/subTypes/fetchSubTypePropertiesService.js';
 import fetchSubTypesByUserId from '@/services/glossary/subTypes/fetchSubTypesByUserId.js';
+import {
+  getSubTypeGroups,
+  getSubTypeProperties,
+  getSubTypes,
+} from '@/app/commands/subtype.ts';
 
 export default function fetchAllSubTypeData(): AppThunk {
   return async (dispatch, getState) => {
@@ -17,7 +22,8 @@ export default function fetchAllSubTypeData(): AppThunk {
     const existingProperties = getState().subType.properties.edit;
     try {
       if (Object.keys(existingSubTypes).length === 0) {
-        const subTypes = await fetchSubTypesByUserId({
+        const subTypes = await getSubTypes({
+          userId: 'robbiepottsdm',
           system: true,
         });
 
@@ -29,7 +35,8 @@ export default function fetchAllSubTypeData(): AppThunk {
       }
 
       if (Object.keys(existingGroups).length === 0) {
-        const subTypeGroups = await fetchSubTypeGroupsService({
+        const subTypeGroups = await getSubTypeGroups({
+          userId: 'robbiepottsdm',
           system: true,
         });
 
@@ -37,7 +44,8 @@ export default function fetchAllSubTypeData(): AppThunk {
       }
 
       if (Object.keys(existingProperties).length === 0) {
-        const subTypeProperties = await fetchSubTypePropertiesService({
+        const subTypeProperties = await getSubTypeProperties({
+          userId: 'robbiepottsdm',
           system: true,
         });
 

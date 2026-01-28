@@ -9,6 +9,8 @@ import {
   updateSubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import updateSubTypePropertyService from '@/services/glossary/subTypes/updateSubTypePropertyService.js';
+import { cloneDeep } from 'lodash';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function updateSubTypePropertyThunkRoot({
   propertyId,
@@ -40,9 +42,19 @@ export function updateSubTypePropertyThunkRoot({
         })
       );
 
-      await updateSubTypePropertyService({
-        propertyId,
-        updates,
+      // await updateSubTypePropertyService({
+      //   propertyId,
+      //   updates,
+      // });
+      await subTypeCommands.updateSubTypeProperty({
+        id: propertyId,
+        refId: updates?.refId,
+        version: updates?.version,
+        name: updates?.name,
+        inputType: updates?.inputType,
+        shape: updates?.shape,
+        displayName: updates?.displayName,
+        smartSync: updates?.smartSync,
       });
 
       dispatch(

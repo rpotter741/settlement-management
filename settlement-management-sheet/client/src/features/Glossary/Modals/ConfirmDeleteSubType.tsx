@@ -2,7 +2,7 @@ import { useModalActions } from '@/hooks/global/useModal.js';
 import { Box, Button, Divider, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { usePropertyLabel } from '../utils/getPropertyLabel.js';
-import deleteSubTypeThunk from '@/app/thunks/glossary/subtypes/deleteSubTypeThunk.js';
+import deleteSubTypeThunk from '@/app/thunks/glossary/subtypes/schemas/deleteSubTypeThunk.ts';
 import { useRelayChannel } from '@/hooks/global/useRelay.js';
 
 const ConfirmDeleteSubType = ({ subType }: { subType: any }) => {

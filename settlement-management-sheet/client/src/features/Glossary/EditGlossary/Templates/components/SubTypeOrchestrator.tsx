@@ -93,6 +93,7 @@ const SubTypeOrchestrator = ({
     },
     name: 'Context Pointer',
   };
+  //@ts-ignore
   contextProperty.shape.selectType = 'multi';
   contextProperty.name = 'Context Pointer';
 

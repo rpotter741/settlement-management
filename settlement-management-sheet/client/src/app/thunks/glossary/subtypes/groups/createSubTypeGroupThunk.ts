@@ -6,6 +6,7 @@ import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { addSubTypeGroup, SubTypeGroup } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
 import createSubTypeGroupService from '@/services/glossary/subTypes/createSubTypeGroupService.js';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function createSubTypeGroupThunk({
   group,
@@ -23,7 +24,12 @@ export function createSubTypeGroupThunk({
         })
       );
 
-      await createSubTypeGroupService({ group: customGroup });
+      await subTypeCommands.createSubTypeGroup({
+        name: customGroup.name,
+        id: customGroup.id,
+        createdBy: 'robbiepottsdm',
+        contentType: 'CUSTOM',
+      });
 
       dispatch(
         addDirtyKeypath({

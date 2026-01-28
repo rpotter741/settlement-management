@@ -11,6 +11,7 @@ import {
 import { cloneDeep } from 'lodash';
 import createSubTypeGroupService from '@/services/glossary/subTypes/createSubTypeGroupService.js';
 import removePropertyFromGroupService from '@/services/glossary/subTypes/removePropertyFromGroupService.js';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function removeGroupPropertyThunk({
   groupId,
@@ -49,14 +50,20 @@ export function removeGroupPropertyThunk({
       }
 
       const newGroupDisplay = cloneDeep(group.display);
-      delete newGroupDisplay[linkId];
+      delete newGroupDisplay[propertyId];
 
-      dispatch(reorderGroupProperties({ groupId, newOrder }));
+      dispatch(
+        reorderGroupProperties({
+          groupId,
+          newOrder,
+          newDisplay: newGroupDisplay,
+        })
+      );
 
-      await removePropertyFromGroupService({
+      await subTypeCommands.removeGroupProperty({
         linkId,
-        newGroupDisplay,
         groupId,
+        newGroupDisplay,
       });
 
       dispatch(

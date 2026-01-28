@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomCreation from '@/components/pages/CustomCreation.js';
 import LoginPage from '@/components/pages/Login.js';
 import Register from '@/components/pages/Register.js';
@@ -28,6 +28,9 @@ const withAuth = ({ Component }: { Component: React.ComponentType }) => (
 
 const LostPage = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/customCreation');
+  }, []);
   return (
     <Box>
       Whoops! <Button onClick={() => navigate('/login')}>Go to login</Button>

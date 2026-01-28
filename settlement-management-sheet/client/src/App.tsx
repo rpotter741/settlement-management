@@ -14,10 +14,11 @@ import { ThemeProvider } from './context/ThemeContext.js';
 
 import AppShell from './components/shared/AppShell/AppShell.js';
 import pageRoutes from './components/shared/AppShell/routes.js';
-import { DragProvider } from './context/DnD/GlobalDrag.js';
+import { DndContext } from '@dnd-kit/core';
 import { useEffect } from 'react';
 import { dispatch } from './app/constants.js';
 import fetchAllSubTypeData from './app/thunks/glossary/subtypes/fetchAllSubTypeData.js';
+import GlobalDndContext from './context/DnD/GlobalDndContext.tsx';
 
 const App = () => {
   useEffect(() => {
@@ -28,7 +29,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <DragProvider>
+          <GlobalDndContext>
             <Router>
               <AppShell>
                 <Routes>
@@ -42,7 +43,7 @@ const App = () => {
                 </Routes>
               </AppShell>
             </Router>
-          </DragProvider>
+          </GlobalDndContext>
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>

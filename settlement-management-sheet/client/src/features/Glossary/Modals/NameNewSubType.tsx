@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 import { selectAllSubTypes } from '@/app/selectors/subTypeSelectors.js';
 import forkSubTypeThunk from '@/app/thunks/glossary/subtypes/forkSubTypeThunk.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
-import addSubTypeThunk from '@/app/thunks/glossary/subtypes/addSubTypeThunk.js';
+import addSubTypeThunk from '@/app/thunks/glossary/subtypes/schemas/addSubTypeThunk.ts';
 
 const NameNewSubType = () => {
   const { openRelay } = useRelayChannel({ id: 'create-new-subtype' });

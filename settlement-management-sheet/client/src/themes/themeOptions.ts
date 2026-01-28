@@ -68,7 +68,7 @@ const themeOptions = {
       },
 
       action: {
-        active: '#7A1D1E', // Color for active elements
+        active: '#C65B59', // Color for active elements
         hover: '#b74445',
         hoverOpacity: 0.08,
         selected: '#881c1d',

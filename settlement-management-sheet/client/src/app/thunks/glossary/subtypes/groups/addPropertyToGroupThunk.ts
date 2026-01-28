@@ -5,6 +5,8 @@ import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubTypeGroupPropertyService.js';
 import { addPropertyToGroup } from '@/app/slice/subTypeSlice.js';
+import subTypeCommands from '@/app/commands/subtype.ts';
+import { v4 as newId } from 'uuid';
 
 export function addPropertyToGroupThunk({
   groupId,
@@ -28,7 +30,8 @@ export function addPropertyToGroupThunk({
     try {
       const order = group.properties ? group.properties.length : 0;
 
-      const { createdProperty } = await addSubTypeGroupPropertyService({
+      const createdProperty = await subTypeCommands.createGroupProperty({
+        id: newId(),
         groupId,
         propertyId,
         order,
@@ -37,6 +40,8 @@ export function addPropertyToGroupThunk({
       if (!createdProperty) {
         throw new Error('No created property returned from service.');
       }
+
+      console.log('Created Property:', createdProperty);
 
       dispatch(addPropertyToGroup({ groupId, property: createdProperty }));
 

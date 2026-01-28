@@ -14,7 +14,7 @@ import { selectSubTypeGroupById } from '@/app/selectors/subTypeSelectors.js';
 import { RelayStatus } from '@/hooks/global/useRelay.js';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
+import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
 import useTheming from '@/hooks/layout/useTheming.js';
 
 const SidebarGroup = ({
@@ -51,21 +51,17 @@ const SidebarGroup = ({
 
   const { getAlphaColor, lightenColor } = useTheming();
 
-  const { ref, draggedType, isDragging, matchesDragType } = useGlobalDrag({
+  const dragContext = useGlobalDrag({
+    id: group.id,
+    dropType: 'subtype-group',
     interaction: 'both',
     types: ['subtype-group', 'subtype-group-reorder'],
     type: 'subtype-group-reorder',
     item: { kind: 'subtype-group-reorder', groupId, index },
-    onDrop: () => {
-      setHoverIndex(null);
-    },
-    onHover: (item, monitor) => {
-      if (item.kind === 'subtype-group-reorder') {
-        handleGroupReorder(item, hoverIndex);
-      }
-    },
     index,
   });
+
+  const { ref, canAccept, isOver } = dragContext || {};
 
   const [isHover, setIsHover] = useState(false);
 

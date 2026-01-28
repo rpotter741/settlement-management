@@ -19,7 +19,7 @@ const TargetAutocomplete = ({
       onChange={(newValue: string) => {
         setRuleState((prev) => ({
           ...prev,
-          target: newValue as SmartSyncRule['target'],
+          target: StringToCamelCase(newValue) as SmartSyncRule['target'],
         }));
       }}
       value={getTarget(ruleState.target)}
@@ -36,3 +36,13 @@ const TargetAutocomplete = ({
 };
 
 export default TargetAutocomplete;
+
+function StringToCamelCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) =>
+      index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join('');
+}

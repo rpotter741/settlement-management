@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { Genre } from 'types/index.js';
 import { clearDirtyKeypaths } from '@/app/slice/dirtySlice.js';
 import { SubModelTypes } from '@/features/Glossary/utils/getPropertyLabel.js';
+import { invoke } from '@tauri-apps/api/core';
 
 function decipherGlossTermKeypathUpdate(keypath: string, value: any) {
   const splitKeypath = keypath.split('.');
@@ -29,10 +30,8 @@ function decipherGlossTermKeypathUpdate(keypath: string, value: any) {
 
 export default function batchGlossaryTermsThunk({
   id,
-  genre,
 }: {
   id: string;
-  genre: Genre;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
@@ -80,9 +79,13 @@ export default function batchGlossaryTermsThunk({
       }
       if (updates.length > 0) {
         try {
-          await serverAction.batchUpdateTerms({
+          // await serverAction.batchUpdateTerms({
+          //   id,
+          //   updates,
+          // });
+          await invoke('update_glossary', {
             id,
-            updates,
+            input: { integrationState: editGlossary.integrationState },
           });
           dispatch(clearDirtyKeypaths({ scope: 'glossary', id }));
           dispatch(syncGlossaryIntegrationState({ id }));

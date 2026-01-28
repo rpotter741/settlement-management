@@ -64,6 +64,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const mode = selectedTheme.palette?.mode as 'light' | 'dark';
     let glossaryAdjustments = {};
     if (staticTheme && typeof staticTheme === 'object') {
+      console.log('Applying static theme adjustments:', staticTheme[mode]);
       glossaryAdjustments = {
         ...staticTheme[mode],
       };

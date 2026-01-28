@@ -7,7 +7,7 @@ import {
 import NameEditor from '@/components/shared/DynamicForm/NameEditor.js';
 import TermEditor from '@/components/shared/DynamicForm/TermEditor.js';
 import { propertyTypeIconMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
-import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
+import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
 import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import SubTypeFormPreview from './previews/SubTypeFormPreview.js';
@@ -19,12 +19,12 @@ import { Delete, DragHandle } from '@mui/icons-material';
 import { removeGroupPropertyThunk } from '@/app/thunks/glossary/subtypes/groups/removeGroupPropertyThunk.js';
 import DraggablePropertyEntry from './DnD/DraggablePropertyEntry.js';
 import useTheming from '@/hooks/layout/useTheming.js';
-import { reorderGroupPropertiesThunk } from '@/app/thunks/glossary/subtypes/groups/reorderGroupPropertiesThunk.js';
 import { cloneDeep } from 'lodash';
 import { updateSubTypeGroupThunk } from '@/app/thunks/glossary/subtypes/groups/updateSubTypeGroupThunk.js';
 import { deleteSubTypeGroupThunk } from '@/app/thunks/glossary/subtypes/groups/deleteSubTypeGroupThunk.js';
 import useDebouncedFieldEdit from '@/hooks/global/useDebouncedFieldEdit.js';
 import useGlobalDragUI from '@/hooks/global/useGlobalDragUI.js';
+import { SortableContext } from '@dnd-kit/sortable';
 
 const GroupOrchestrator = ({
   group,
@@ -33,7 +33,6 @@ const GroupOrchestrator = ({
   group: SubTypeGroup;
   deselectGroup: () => void;
 }) => {
-  console.log(group);
   const allProperties = useSelector(selectSubTypeProperties);
 
   const { getAlphaColor, lightenColor } = useTheming();
@@ -75,43 +74,20 @@ const GroupOrchestrator = ({
     );
   };
 
-  const { ref, matchesDragType, draggedType, isDragging } = useGlobalDrag({
+  const { ref, canAccept, isOver } = useGlobalDrag({
+    id: group.id,
+    dropType: 'subtype-group',
     types: ['subtype-property', 'subtype-group-property'],
     interaction: 'drop',
-    onDrop: (item) => {
-      if (draggedType === 'subtype-property') {
-        dispatch(
-          addPropertyToGroupThunk({
-            groupId: group.id,
-            propertyId: item.id,
-          })
-        );
-      } else if (draggedType === 'subtype-group-property') {
-        //reordering within group handled in DraggablePropertyEntry
-        const order = group?.properties.length || 0;
-        const newOrder = [...group.properties].map((p) => p.propertyId);
-        newOrder.splice(item.index, 1);
-        newOrder.splice(order, 0, item.id);
-        dispatch(
-          reorderGroupPropertiesThunk({
-            groupId: group.id,
-            newOrder: newOrder,
-          })
-        );
-      }
-    },
-    onHover: (item) => {
-      setHoverIndex(group.properties.length);
-    },
     index: group.properties ? group.properties.length : 0,
   });
 
-  // clear hover index when not dragging
-  useEffect(() => {
-    if (!isDragging && hoverIndex !== null) {
-      setHoverIndex(null);
-    }
-  }, [isDragging, hoverIndex]);
+  // // clear hover index when not dragging
+  // useEffect(() => {
+  //   if (!isDragging && hoverIndex !== null) {
+  //     setHoverIndex(null);
+  //   }
+  // }, [isDragging, hoverIndex]);
 
   const sortedProperties = useMemo(() => {
     return cloneDeep(group.properties).sort((a, b) => {
@@ -258,52 +234,54 @@ const GroupOrchestrator = ({
         Properties
       </Typography>
 
-      <Box sx={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
-        {group.properties &&
-          sortedProperties.map((propertyLink, index) => {
-            const property = allProperties.find(
-              (p) => p.id === propertyLink.propertyId
-            );
-            if (!property) return null;
-            return (
-              <DraggablePropertyEntry
-                key={property.id}
-                property={property}
-                group={group}
-                index={index}
-                hoverIndex={hoverIndex}
-                setHoverIndex={setHoverIndex}
-                updateWidth={updateWidth}
-                columnSize={group.display?.[property.id]?.columns || 4}
-              />
-            );
-          })}
-      </Box>
-      {group.properties.length < 10 && (
-        <Box
-          sx={{
-            height: '45px',
-            width: '100%',
-            mt: 2,
-            border: 1,
-            borderColor: matchesDragType ? 'primary.main' : 'transparent',
-            borderStyle: 'dashed',
-            borderRadius: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor:
-              hoverIndex === group.properties.length
+      <SortableContext items={sortedProperties.map((p) => p.propertyId)}>
+        <Box sx={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+          {group.properties &&
+            sortedProperties.map((propertyLink, index) => {
+              const property = allProperties.find(
+                (p) => p.id === propertyLink.propertyId
+              );
+              if (!property) return null;
+              return (
+                <DraggablePropertyEntry
+                  key={property.id}
+                  property={property}
+                  group={group}
+                  index={index}
+                  hoverIndex={hoverIndex}
+                  setHoverIndex={setHoverIndex}
+                  updateWidth={updateWidth}
+                  columnSize={group.display?.[property.id]?.columns || 4}
+                />
+              );
+            })}
+        </Box>
+
+        {group.properties.length < 10 && (
+          <Box
+            sx={{
+              height: '45px',
+              width: '100%',
+              mt: 2,
+              border: 1,
+              borderColor: canAccept ? 'primary.main' : 'transparent',
+              borderStyle: 'dashed',
+              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isOver
                 ? getAlphaColor({
                     color: 'success',
                     key: 'light',
                     opacity: 0.3,
                   })
                 : 'transparent',
-          }}
-          ref={ref}
-        />
-      )}
+            }}
+            ref={ref}
+          />
+        )}
+      </SortableContext>
     </Box>
   );
 };

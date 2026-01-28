@@ -50,7 +50,7 @@ const LabelAndAutocomplete = ({
           )}
           value={value}
           onChange={(event, newValue) => {
-            onChange(newValue?.label || 'Child');
+            onChange(newValue?.label.toLowerCase() || 'child');
           }}
         />
         {getTargetTooltip && (

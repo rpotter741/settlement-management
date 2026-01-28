@@ -4,7 +4,7 @@ import SelectGlossary from './SelectGlossary.js';
 import useGlossaryManager from '@/hooks/glossary/useGlossaryManager.js';
 import { dispatch } from '@/app/constants.js';
 import fetchSubTypesByUserId from '@/services/glossary/subTypes/fetchSubTypesByUserId.js';
-import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/fetchSubTypesByUserIdThunk.js';
+import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/schemas/fetchSubTypesByUserIdThunk.ts';
 
 const GlossarySidePanelWrapper = ({
   children,
@@ -12,7 +12,7 @@ const GlossarySidePanelWrapper = ({
   children: React.ReactNode;
 }) => {
   const { handleSelect, glossary } = useGlossaryManager();
-  dispatch(fetchSubTypesByUserIdThunk());
+  // dispatch(fetchSubTypesByUserIdThunk());
 
   return (
     <MotionBox

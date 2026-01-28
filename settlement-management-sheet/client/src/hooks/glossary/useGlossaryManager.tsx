@@ -18,8 +18,6 @@ const useGlossaryManager = () => {
   const glossaries = useSelector(selectAllEditGlossaries());
   const glossary = useSelector(selectEditGlossaryById(glossaryId || ''));
 
-  console.log(glossary);
-
   const nodes = useSelector(selectGlossaryStructure(glossaryId || ''));
 
   useEffect(() => {

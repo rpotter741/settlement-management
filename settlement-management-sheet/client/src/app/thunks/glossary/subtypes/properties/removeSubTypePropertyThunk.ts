@@ -11,6 +11,7 @@ import {
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import deleteSubTypePropertyService from '@/services/glossary/subTypes/deleteSubTypePropertyService.js';
+import { deleteSubTypeProperty } from '@/app/commands/subtype.ts';
 
 export function deleteSubTypePropertyThunkRoot({
   propertyId,
@@ -37,7 +38,7 @@ export function deleteSubTypePropertyThunkRoot({
         })
       );
 
-      deleteSubTypePropertyService({ propertyId });
+      await deleteSubTypeProperty({ id: propertyId });
 
       dispatch(
         addDirtyKeypath({

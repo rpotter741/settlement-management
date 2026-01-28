@@ -11,15 +11,28 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute_unprepared(
                 r#"
+DROP TABLE IF EXISTS "GlossaryMetaData";
+DROP TABLE IF EXISTS "UserGlossary";
+DROP TABLE IF EXISTS "SystemGlossary";
+DROP TABLE IF EXISTS "UserSettings";
+DROP TABLE IF EXISTS "Devices";
+DROP TABLE IF EXISTS "UserTiers";
+DROP TABLE IF EXISTS "Users";
 DROP TABLE IF EXISTS "BacklinkIndex";
-DROP TABLE IF EXISTS "SubTypeSchemaGroup";
-DROP TABLE IF EXISTS "SubTypeGroupProperty";
-DROP TABLE IF EXISTS "GlossaryEntry";
+DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
+DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
+DROP TABLE IF EXISTS "UserSubTypeGroupProperty";
+DROP TABLE IF EXISTS "UserGlossaryEntry";
+DROP TABLE IF EXISTS "UserSubType";
+DROP TABLE IF EXISTS "UserSubTypeGroup";
+DROP TABLE IF EXISTS "UserSubTypeProperty";
+DROP TABLE IF EXISTS "UserGlossaryNode";
+DROP TABLE IF EXISTS "SystemGlossaryNode";
+DROP TABLE IF EXISTS "SystemSubType";
+DROP TABLE IF EXISTS "SystemSubTypeGroup";
+DROP TABLE IF EXISTS "SystemSubTypeProperty";
+DROP TABLE IF EXISTS "SystemGlossaryEntry";
 DROP TABLE IF EXISTS "EntrySubType";
-DROP TABLE IF EXISTS "SubTypeGroup";
-DROP TABLE IF EXISTS "SubTypeProperty";
-DROP TABLE IF EXISTS "GlossaryNode";
-DROP TABLE IF EXISTS "Glossary";
 "#,
             )
             .await?;
@@ -30,58 +43,153 @@ DROP TABLE IF EXISTS "Glossary";
             .execute_unprepared(
                 r#"
 
+-- Users table
+CREATE TABLE "Users" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "username" TEXT NOT NULL UNIQUE,
+  "email" TEXT NOT NULL UNIQUE,
+  "role" TEXT NOT NULL DEFAULT 'user',
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
--- Glossary table
-CREATE TABLE "Glossary" (
+CREATE INDEX "Users_username_idx" ON "Users"("username");
+CREATE INDEX "Users_email_idx" ON "Users"("email");
+
+-- UserTiers table
+CREATE TABLE "UserTiers" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "user_id" TEXT NOT NULL,
+  "tier" TEXT NOT NULL,
+  "started_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "ended_at" TEXT,
+  "expires_at" TEXT,
+  FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE CASCADE
+);
+
+-- Devices table
+CREATE TABLE "Devices" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "user_id" TEXT,
+  "device_uuid" TEXT NOT NULL UNIQUE,
+  "last_seen" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE SET NULL
+);
+
+-- UserSettings table
+CREATE TABLE "UserSettings" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "user_id" TEXT NOT NULL UNIQUE,
+  "settings" TEXT NOT NULL,
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "version" INTEGER NOT NULL DEFAULT 1,
+  FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE CASCADE
+);
+
+-- SystemGlossary table
+CREATE TABLE "SystemGlossary" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "name" TEXT NOT NULL,
   "genre" TEXT NOT NULL,
   "sub_genre" TEXT NOT NULL,
-  "description" TEXT NOT NULL,
-  "created_by" TEXT NOT NULL,
-  "content_type" TEXT NOT NULL,
-  "ref_id" TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+  "description" TEXT,
+  "rt_description" TEXT,
   "version" INTEGER NOT NULL DEFAULT 1,
   "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "is_immutable" INTEGER NOT NULL DEFAULT 0,
+  "theme" TEXT,
+  UNIQUE("name", "genre", "sub_genre", "version")
+);
+
+CREATE INDEX "SystemGlossary_name_genre_sub_genre_idx" ON "SystemGlossary"("name", "genre", "sub_genre");
+
+-- UserGlossary table
+CREATE TABLE "UserGlossary" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "genre" TEXT NOT NULL,
+  "sub_genre" TEXT NOT NULL,
+  "description" TEXT,
+  "rt_description" TEXT,
+  "created_by" TEXT NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 1,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "visibility" TEXT NOT NULL DEFAULT 'standard',
-  "collaborators" TEXT,
-  "forked_by" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
   "theme" TEXT,
   "integration_state" TEXT,
-  UNIQUE("ref_id", "version")
+  FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE,
+  UNIQUE("name", "genre", "sub_genre", "created_by", "version")
 );
 
-CREATE INDEX "Glossary_content_type_idx" ON "Glossary"("content_type");
-CREATE INDEX "Glossary_ref_id_idx" ON "Glossary"("ref_id");
+CREATE INDEX "UserGlossary_id_idx" ON "UserGlossary"("id");
 
--- GlossaryNode table
-CREATE TABLE "GlossaryNode" (
+-- GlossaryMetaData table
+CREATE TABLE "GlossaryMetaData" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "ref_id" TEXT NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 1,
+  "forked_by" TEXT,
+  "collaborators" TEXT,
+  "editors" TEXT,
+  "deleted_at" TEXT,
+  FOREIGN KEY ("id") REFERENCES "UserGlossary"("id") ON DELETE CASCADE
+);
+
+CREATE INDEX "GlossaryMetaData_id_idx" ON "GlossaryMetaData"("id");
+
+-- SystemGlossaryNode table
+CREATE TABLE "SystemGlossaryNode" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "name" TEXT NOT NULL,
   "entry_type" TEXT NOT NULL,
-  "file_type" TEXT NOT NULL,
+  "glossary_id" TEXT NOT NULL,
+  "system_sub_type_id" TEXT NOT NULL,
+  "sort_index" INTEGER NOT NULL DEFAULT 0,
+  "icon" TEXT,
+  "integration_state" TEXT,
+  "parent_id" TEXT,
+  FOREIGN KEY ("glossary_id") REFERENCES "SystemGlossary"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("parent_id") REFERENCES "SystemGlossaryNode"("id") ON DELETE CASCADE
+);
+
+-- UserGlossaryNode table
+CREATE TABLE "UserGlossaryNode" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "entry_type" TEXT NOT NULL,
   "sub_type_id" TEXT NOT NULL,
   "glossary_id" TEXT NOT NULL,
   "sort_index" INTEGER NOT NULL DEFAULT 0,
   "icon" TEXT,
   "integration_state" TEXT,
   "parent_id" TEXT,
-  FOREIGN KEY ("glossary_id") REFERENCES "Glossary"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("parent_id") REFERENCES "GlossaryNode"("id") ON DELETE CASCADE
+  FOREIGN KEY ("glossary_id") REFERENCES "UserGlossary"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("parent_id") REFERENCES "UserGlossaryNode"("id") ON DELETE CASCADE
 );
 
-CREATE INDEX "GlossaryNode_id_idx" ON "GlossaryNode"("id");
+CREATE INDEX "UserGlossaryNode_id_idx" ON "UserGlossaryNode"("id");
 
--- SubTypeProperty table
-CREATE TABLE "SubTypeProperty" (
+-- SystemSubTypeProperty table
+CREATE TABLE "SystemSubTypeProperty" (
   "id" TEXT NOT NULL PRIMARY KEY,
-  "ref_id" TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+  "name" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
-  "content_type" TEXT NOT NULL,
+  "input_type" TEXT NOT NULL,
+  "shape" TEXT NOT NULL,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "display_name" TEXT,
+  "smart_sync" TEXT
+);
+
+CREATE INDEX "SystemSubTypeProperty_id_idx" ON "SystemSubTypeProperty"("id");
+
+-- UserSubTypeProperty table
+CREATE TABLE "UserSubTypeProperty" (
+  "id" TEXT NOT NULL PRIMARY KEY,
   "name" TEXT NOT NULL,
   "input_type" TEXT NOT NULL,
   "shape" TEXT NOT NULL,
@@ -91,15 +199,41 @@ CREATE TABLE "SubTypeProperty" (
   "deleted_at" TEXT,
   "display_name" TEXT,
   "smart_sync" TEXT,
-  "is_generic" INTEGER NOT NULL DEFAULT 0
+  FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE
 );
 
--- SubTypeGroup table
-CREATE TABLE "SubTypeGroup" (
+CREATE INDEX "UserSubTypeProperty_id_idx" ON "UserSubTypeProperty"("id");
+CREATE INDEX "UserSubTypeProperty_created_by_idx" ON "UserSubTypeProperty"("created_by");
+
+-- UserSubTypePropertyMetadata table
+CREATE TABLE "UserSubTypePropertyMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
-  "ref_id" TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+  "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
-  "content_type" TEXT NOT NULL,
+  "forked_by" TEXT,
+  "collaborators" TEXT,
+  "editors" TEXT,
+  "deleted_at" TEXT,
+  FOREIGN KEY ("id") REFERENCES "UserSubTypeProperty"("id") ON DELETE CASCADE
+);
+
+CREATE INDEX "UserSubTypePropertyMetadata_id_idx" ON "UserSubTypePropertyMetadata"("id");
+
+-- SystemSubTypeGroup table
+CREATE TABLE "SystemSubTypeGroup" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "display_name" TEXT,
+  "display" TEXT,
+  "description" TEXT,
+  "rt_description" TEXT,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- UserSubTypeGroup table
+CREATE TABLE "UserSubTypeGroup" (
+  "id" TEXT NOT NULL PRIMARY KEY,
   "created_by" TEXT NOT NULL,
   "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
@@ -107,115 +241,225 @@ CREATE TABLE "SubTypeGroup" (
   "name" TEXT NOT NULL,
   "display_name" TEXT,
   "display" TEXT,
-  "description" TEXT NOT NULL,
-  "is_generic" INTEGER NOT NULL DEFAULT 0
+  "description" TEXT,
+  "rt_description" TEXT,
+  FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE
 );
 
--- EntrySubType table
-CREATE TABLE "EntrySubType" (
+CREATE INDEX "UserSubTypeGroup_id_idx" ON "UserSubTypeGroup"("id");
+
+-- UserSubTypeGroupMetadata table
+CREATE TABLE "UserSubTypeGroupMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
-  "created_by" TEXT NOT NULL,
-  "name" TEXT NOT NULL,
-  "content_type" TEXT NOT NULL,
-  "ref_id" TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+  "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
   "forked_by" TEXT,
   "collaborators" TEXT,
   "editors" TEXT,
   "deleted_at" TEXT,
-  "is_immutable" INTEGER NOT NULL DEFAULT 0,
-  "entry_type" TEXT NOT NULL,
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "anchors" TEXT NOT NULL,
-  "status" TEXT NOT NULL DEFAULT 'DRAFT',
-  "is_generic" INTEGER NOT NULL DEFAULT 0,
-  "context" TEXT,
-  UNIQUE("ref_id", "version")
+  FOREIGN KEY ("id") REFERENCES "UserSubTypeGroup"("id") ON DELETE CASCADE
 );
 
-CREATE INDEX "EntrySubType_ref_id_idx" ON "EntrySubType"("ref_id");
-CREATE INDEX "EntrySubType_entry_type_idx" ON "EntrySubType"("entry_type");
-
--- GlossaryEntry table
-CREATE TABLE "GlossaryEntry" (
+-- SystemSubType table
+CREATE TABLE "SystemSubType" (
   "id" TEXT NOT NULL PRIMARY KEY,
-  "content_type" TEXT NOT NULL,
-  "created_by" TEXT NOT NULL,
-  "format" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
   "entry_type" TEXT NOT NULL,
-  "sub_type_id" TEXT NOT NULL,
-  "ref_id" TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
-  "version" INTEGER NOT NULL DEFAULT 1,
+  "anchors" TEXT NOT NULL,
   "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "version" INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX "SystemSubType_ref_id_idx" ON "SystemSubType"("ref_id");
+CREATE INDEX "SystemSubType_entry_type_idx" ON "SystemSubType"("entry_type");
+
+-- UserSubType table
+CREATE TABLE "UserSubType" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "created_by" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "entry_type" TEXT NOT NULL,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "anchors" TEXT NOT NULL,
+  "context" TEXT NOT NULL,
+  FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("context") REFERENCES "SystemSubType"("id") ON DELETE RESTRICT
+);
+
+CREATE INDEX "UserSubType_ref_id_idx" ON "UserSubType"("ref_id");
+CREATE INDEX "UserSubType_entry_type_idx" ON "UserSubType"("entry_type");
+
+-- UserSubTypeMetadata table
+CREATE TABLE "UserSubTypeMetadata" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "ref_id" TEXT NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 1,
   "forked_by" TEXT,
   "collaborators" TEXT,
   "editors" TEXT,
   "deleted_at" TEXT,
-  "is_immutable" INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY ("id") REFERENCES "UserSubType"("id") ON DELETE CASCADE
+);
+
+-- SystemGlossaryEntry table
+CREATE TABLE "SystemGlossaryEntry" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "entry_type" TEXT NOT NULL,
+  "sub_type_id" TEXT NOT NULL,
   "name" TEXT NOT NULL,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "version" INTEGER NOT NULL DEFAULT 1,
   "groups" TEXT,
+  "custom_properties" TEXT,
   "primary_anchor_id" TEXT,
   "primary_anchor_value" TEXT,
   "secondary_anchor_id" TEXT,
   "secondary_anchor_value" TEXT,
-  "tags" TEXT,
-  "integration_state" TEXT,
-  UNIQUE("ref_id", "version"),
-  FOREIGN KEY ("sub_type_id") REFERENCES "EntrySubType"("id") ON DELETE SET NULL
+  "visibility" TEXT NOT NULL DEFAULT '{}',
+  FOREIGN KEY ("sub_type_id") REFERENCES "SystemSubType"("id") ON DELETE SET NULL
 );
 
-CREATE INDEX "GlossaryEntry_ref_id_idx" ON "GlossaryEntry"("ref_id");
-CREATE INDEX "GlossaryEntry_entry_type_idx" ON "GlossaryEntry"("entry_type");
-CREATE INDEX "GlossaryEntry_sub_type_id_idx" ON "GlossaryEntry"("sub_type_id");
-CREATE INDEX "GlossaryEntry_entry_type_sub_type_id_idx" ON "GlossaryEntry"("entry_type", "sub_type_id");
-CREATE INDEX "GlossaryEntry_created_by_idx" ON "GlossaryEntry"("created_by");
+CREATE INDEX "SystemGlossaryEntry_entry_type_idx" ON "SystemGlossaryEntry"("entry_type");
+CREATE INDEX "SystemGlossaryEntry_sub_type_id_idx" ON "SystemGlossaryEntry"("sub_type_id");
+CREATE INDEX "SystemGlossaryEntry_entry_type_sub_type_id_idx" ON "SystemGlossaryEntry"("entry_type", "sub_type_id");
 
--- SubTypeGroupProperty table
-CREATE TABLE "SubTypeGroupProperty" (
+-- UserGlossaryEntry table
+CREATE TABLE "UserGlossaryEntry" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "entry_type" TEXT NOT NULL,
+  "sub_type_id" TEXT NOT NULL,
+  "created_by" TEXT NOT NULL,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "name" TEXT NOT NULL,
+  "groups" TEXT,
+  "custom_properties" TEXT,
+  "primary_anchor_id" TEXT,
+  "primary_anchor_value" TEXT,
+  "secondary_anchor_id" TEXT,
+  "secondary_anchor_value" TEXT,
+  "visibility" TEXT NOT NULL DEFAULT '{}',
+  FOREIGN KEY ("sub_type_id") REFERENCES "SystemSubType"("id") ON DELETE SET NULL,
+  FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE
+);
+
+CREATE INDEX "UserGlossaryEntry_entry_type_idx" ON "UserGlossaryEntry"("entry_type");
+CREATE INDEX "UserGlossaryEntry_sub_type_id_idx" ON "UserGlossaryEntry"("sub_type_id");
+CREATE INDEX "UserGlossaryEntry_entry_type_sub_type_id_idx" ON "UserGlossaryEntry"("entry_type", "sub_type_id");
+CREATE INDEX "UserGlossaryEntry_created_by_idx" ON "UserGlossaryEntry"("created_by");
+
+-- UserGlossaryEntryMetadata table
+CREATE TABLE "UserGlossaryEntryMetadata" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "ref_id" TEXT NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 1,
+  "forked_by" TEXT,
+  "collaborators" TEXT,
+  "editors" TEXT,
+  "deleted_at" TEXT,
+  FOREIGN KEY ("id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE
+);
+
+-- SystemSubTypeGroupProperty table
+CREATE TABLE "SystemSubTypeGroupProperty" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "group_id" TEXT NOT NULL,
   "property_id" TEXT NOT NULL,
   "order" INTEGER NOT NULL,
-  FOREIGN KEY ("group_id") REFERENCES "SubTypeGroup"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("property_id") REFERENCES "SubTypeProperty"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("group_id") REFERENCES "SystemSubTypeGroup"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("property_id") REFERENCES "SystemSubTypeProperty"("id") ON DELETE CASCADE,
   UNIQUE("group_id", "property_id")
 );
 
--- SubTypeSchemaGroup table
-CREATE TABLE "SubTypeSchemaGroup" (
+-- UserSubTypeGroupProperty table
+CREATE TABLE "UserSubTypeGroupProperty" (
   "id" TEXT NOT NULL PRIMARY KEY,
-  "schema_id" TEXT NOT NULL,
+  "group_id" TEXT NOT NULL,
+  "user_property_id" TEXT,
+  "system_property_id" TEXT,
+  "order" INTEGER NOT NULL,
+  FOREIGN KEY ("group_id") REFERENCES "UserSubTypeGroup"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("user_property_id") REFERENCES "UserSubTypeProperty"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("system_property_id") REFERENCES "SystemSubTypeProperty"("id") ON DELETE CASCADE,
+  CHECK (
+    (user_property_id IS NOT NULL AND system_property_id IS NULL) OR
+    (user_property_id IS NULL AND system_property_id IS NOT NULL)
+            ),
+  UNIQUE("group_id", "user_property_id", "system_property_id")
+);
+
+-- SystemSubTypeSchemaGroup table
+CREATE TABLE "SystemSubTypeSchemaGroup" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "subtype_id" TEXT NOT NULL,
   "group_id" TEXT NOT NULL,
   "order" INTEGER NOT NULL,
-  FOREIGN KEY ("schema_id") REFERENCES "EntrySubType"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("group_id") REFERENCES "SubTypeGroup"("id") ON DELETE CASCADE,
-  UNIQUE("schema_id", "group_id")
+  FOREIGN KEY ("subtype_id") REFERENCES "SystemSubType"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("group_id") REFERENCES "SystemSubTypeGroup"("id") ON DELETE CASCADE,
+  UNIQUE("subtype_id", "group_id")
+);
+
+-- UserSubTypeSchemaGroup table
+CREATE TABLE "UserSubTypeSchemaGroup" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "subtype_id" TEXT NOT NULL,
+  "group_id" TEXT NOT NULL,
+  "order" INTEGER NOT NULL,
+  FOREIGN KEY ("subtype_id") REFERENCES "UserSubType"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("group_id") REFERENCES "UserSubTypeGroup"("id") ON DELETE CASCADE,
+  UNIQUE("subtype_id", "group_id")
 );
 
 -- BacklinkIndex table
-CREATE TABLE "BacklinkIndex" (
+CREATE TABLE "UserBacklinkIndex" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "source_id" TEXT NOT NULL,
   "target_id" TEXT NOT NULL,
   "type" TEXT,
-  "property_id" TEXT,
+  "property_id" TEXT NOT NULL,
   "property_name" TEXT NOT NULL,
   "property_value" TEXT,
   "ignore_divergence" INTEGER NOT NULL DEFAULT 0,
   "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "target_ignore" INTEGER NOT NULL DEFAULT 0,
   "sub_property_id" TEXT,
+  "is_system_property" INTEGER NOT NULL DEFAULT 0,
   "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
   "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY ("source_id") REFERENCES "GlossaryEntry"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("target_id") REFERENCES "GlossaryEntry"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("property_id") REFERENCES "SubTypeProperty"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("source_id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("target_id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE,
   UNIQUE("source_id", "target_id", "property_id")
 );
 
-CREATE INDEX "BacklinkIndex_target_id_idx" ON "BacklinkIndex"("target_id");
-CREATE INDEX "BacklinkIndex_property_id_idx" ON "BacklinkIndex"("property_id");
+CREATE INDEX "UserBacklinkIndex_target_id_idx" ON "UserBacklinkIndex"("target_id");
+CREATE INDEX "UserBacklinkIndex_property_id_idx" ON "UserBacklinkIndex"("property_id");
+
+-- System BacklinkIndex table
+CREATE TABLE "SystemBacklinkIndex" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "source_id" TEXT NOT NULL,
+  "target_id" TEXT NOT NULL,
+  "type" TEXT,
+  "property_id" TEXT NOT NULL,
+  "property_name" TEXT NOT NULL,
+  "property_value" TEXT,
+  "ignore_divergence" INTEGER NOT NULL DEFAULT 0,
+  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "target_ignore" INTEGER NOT NULL DEFAULT 0,
+  "sub_property_id" TEXT,
+  "is_system_property" INTEGER NOT NULL DEFAULT 1,
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY ("source_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("target_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
+  UNIQUE("source_id", "target_id", "property_id")
+);
+
+CREATE INDEX "SystemBacklinkIndex_target_id_idx" ON "SystemBacklinkIndex"("target_id");
+CREATE INDEX "SystemBacklinkIndex_property_id_idx" ON "SystemBacklinkIndex"("property_id");
 "#,
             )
             .await?;
@@ -228,15 +472,28 @@ CREATE INDEX "BacklinkIndex_property_id_idx" ON "BacklinkIndex"("property_id");
             .get_connection()
             .execute_unprepared(
                 r#"
+DROP TABLE IF EXISTS "GlossaryMetaData";
+DROP TABLE IF EXISTS "UserGlossary";
+DROP TABLE IF EXISTS "SystemGlossary";
+DROP TABLE IF EXISTS "UserSettings";
+DROP TABLE IF EXISTS "Devices";
+DROP TABLE IF EXISTS "UserTiers";
+DROP TABLE IF EXISTS "Users";
 DROP TABLE IF EXISTS "BacklinkIndex";
-DROP TABLE IF EXISTS "SubTypeSchemaGroup";
-DROP TABLE IF EXISTS "SubTypeGroupProperty";
-DROP TABLE IF EXISTS "GlossaryEntry";
+DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
+DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
+DROP TABLE IF EXISTS "UserSubTypeGroupProperty";
+DROP TABLE IF EXISTS "UserGlossaryEntry";
+DROP TABLE IF EXISTS "UserSubType";
+DROP TABLE IF EXISTS "UserSubTypeGroup";
+DROP TABLE IF EXISTS "UserSubTypeProperty";
+DROP TABLE IF EXISTS "UserGlossaryNode";
+DROP TABLE IF EXISTS "SystemGlossaryNode";
+DROP TABLE IF EXISTS "SystemSubType";
+DROP TABLE IF EXISTS "SystemSubTypeGroup";
+DROP TABLE IF EXISTS "SystemSubTypeProperty";
+DROP TABLE IF EXISTS "SystemGlossaryEntry";
 DROP TABLE IF EXISTS "EntrySubType";
-DROP TABLE IF EXISTS "SubTypeGroup";
-DROP TABLE IF EXISTS "SubTypeProperty";
-DROP TABLE IF EXISTS "GlossaryNode";
-DROP TABLE IF EXISTS "Glossary";
 "#,
             )
             .await?;

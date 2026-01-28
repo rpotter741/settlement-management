@@ -31,7 +31,7 @@ import { useSelector } from 'react-redux';
 import { selectAllSubTypes } from '@/app/selectors/subTypeSelectors.js';
 import { SubType } from '@/app/slice/subTypeSlice.js';
 import { GlossaryEntryType } from '../../../../../../shared/types/index.js';
-import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/fetchSubTypesByUserIdThunk.js';
+import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/schemas/fetchSubTypesByUserIdThunk.ts';
 
 function toTitleCase(str: string) {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -240,9 +240,9 @@ const GlossaryPropertyLabels = ({ subModel }: { subModel: SubModelTypes }) => {
 
   const allSubtypes = useSelector(selectAllSubTypes);
 
-  if (allSubtypes.length === 0) {
-    dispatch(fetchSubTypesByUserIdThunk());
-  }
+  // if (allSubtypes.length === 0) {
+  //   dispatch(fetchSubTypesByUserIdThunk());
+  // }
 
   const subTypesByEntryType = useMemo(() => {
     const mapping: Record<string, SubType[]> = {};

@@ -2,7 +2,7 @@ import { useRelayChannel } from '@/hooks/global/useRelay.js';
 import { cloneDeep, get, set } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGeneratedSource } from './useGeneratedFormSource.js';
-import addSubTypeThunk from '@/app/thunks/glossary/subtypes/addSubTypeThunk.js';
+import addSubTypeThunk from '@/app/thunks/glossary/subtypes/schemas/addSubTypeThunk.ts';
 import { usePropertyLabel } from '@/features/Glossary/utils/getPropertyLabel.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';

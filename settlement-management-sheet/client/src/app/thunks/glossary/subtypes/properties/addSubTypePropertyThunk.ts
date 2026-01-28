@@ -11,6 +11,8 @@ import {
 } from '@/app/slice/subTypeSlice.js';
 import createSubTypePropertyService from '@/services/glossary/subTypes/createSubTypePropertyService.js';
 import { cloneDeep } from 'lodash';
+import subTypeCommands from '@/app/commands/subtype.ts';
+import { GenericObject } from '../../../../../../../shared/types/common.ts';
 
 export function addSubTypePropertyThunkRoot({
   property,
@@ -28,7 +30,15 @@ export function addSubTypePropertyThunkRoot({
         })
       );
 
-      await createSubTypePropertyService({ property });
+      // await createSubTypePropertyService({ property });
+      const newProperty = await subTypeCommands.createSubTypeProperty({
+        id: property.id,
+        name: property.name,
+        contentType: 'CUSTOM',
+        createdBy: 'robbiepottsdm',
+        inputType: property.inputType,
+        shape: property.shape as GenericObject,
+      });
 
       dispatch(
         addDirtyKeypath({

@@ -1,6 +1,8 @@
-import { GenericObject } from '../../../../../shared/types/index.js';
+import { SubTypeRangeDefinition } from '@/features/Glossary/EditGlossary/Templates/components/types.ts';
+import { GenericObject } from '../../../../../shared/types/common.ts';
 import {
   AllShapes,
+  SubTypeDropdownProperty,
   SubTypeGroup,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
@@ -26,6 +28,7 @@ export function createDefaultProperty(
         },
         version: 1,
         isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
       };
 
     case 'date':
@@ -36,6 +39,7 @@ export function createDefaultProperty(
         shape: {},
         version: 1,
         isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
       };
 
     case 'dropdown':
@@ -51,7 +55,8 @@ export function createDefaultProperty(
           isCompound: false,
         },
         version: 1,
-        isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        smartSync: null,
       };
 
     case 'checkbox':
@@ -64,6 +69,7 @@ export function createDefaultProperty(
         },
         version: 1,
         isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
       };
 
     case 'range':
@@ -80,6 +86,7 @@ export function createDefaultProperty(
         },
         version: 1,
         isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
       };
 
     case 'compound':
@@ -88,6 +95,7 @@ export function createDefaultProperty(
         name,
         inputType: 'compound',
         shape: {
+          //@ts-ignore
           left: {
             id: newId(),
             name: 'New Select',
@@ -102,6 +110,7 @@ export function createDefaultProperty(
               isCompound: false,
             },
           },
+          //@ts-ignore
           right: {
             id: newId(),
             name: 'New Text',
@@ -112,9 +121,11 @@ export function createDefaultProperty(
               textTransform: 'none',
             },
           },
+          isProjection: false,
         },
         version: 1,
         isAnchor: false,
+        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
       };
 
     default:
@@ -182,9 +193,11 @@ export function transformDropDownInputType(
       optionType: oldProperty.shape.optionType ?? 'list',
       isCompound: oldProperty.shape.isCompound ?? false,
     },
+    contentType: 'CUSTOM' as const,
+    smartSync: oldProperty?.smartSync ?? null,
   };
 
-  const property: SubTypeProperty = { ...base };
+  const property: SubTypeDropdownProperty = { ...base };
 
   // Add-on modifiers
   if (base.shape.selectType === 'multi') {
@@ -215,17 +228,24 @@ export function transformRangeInputType(
       isNumber: oldProperty?.shape.isNumber ?? true,
       label: oldProperty.shape.label ?? '',
     },
+    contentType: 'CUSTOM' as const,
   };
 
-  const property: SubTypeProperty = { ...base };
+  //@ts-ignore
+  const property: SubTypeRangeDefinition = { ...base };
 
   if (!base.shape.isNumber) {
+    //@ts-ignore
     property.shape.options = [];
   } else {
+    //@ts-ignore
     property.shape.min = oldProperty.min ?? 0;
+    //@ts-ignore
     property.shape.max = oldProperty.max ?? 100;
+    //@ts-ignore
     property.shape.step = oldProperty.step ?? 1;
   }
 
+  //@ts-ignore
   return property;
 }

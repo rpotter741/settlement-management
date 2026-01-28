@@ -7,10 +7,9 @@ import {
 } from '@/app/slice/subTypeSlice.js';
 import { addPropertyToGroupThunk } from '@/app/thunks/glossary/subtypes/groups/addPropertyToGroupThunk.js';
 import { removeGroupPropertyThunk } from '@/app/thunks/glossary/subtypes/groups/removeGroupPropertyThunk.js';
-import { reorderGroupPropertiesThunk } from '@/app/thunks/glossary/subtypes/groups/reorderGroupPropertiesThunk.js';
 import { removeGroupFromSubTypeThunk } from '@/app/thunks/glossary/subtypes/schemas/removeGroupFromSubTypeThunk.js';
 import { propertyTypeIconMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
-import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
+import useGlobalDrag from '@/hooks/global/useGlobalDragKit.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import { Delete, DragHandle } from '@mui/icons-material';
 import {

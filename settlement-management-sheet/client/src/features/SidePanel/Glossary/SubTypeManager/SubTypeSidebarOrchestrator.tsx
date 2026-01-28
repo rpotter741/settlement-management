@@ -10,12 +10,11 @@ import {
 import { useEffect, useState } from 'react';
 import SubTypeSelect from './SubTypeSelect.js';
 import useGlossaryManager from '@/hooks/glossary/useGlossaryManager.js';
-import SubTypeSidebarEditor from './SubTypeSidebarEditor.js';
 import { useRelayChannel } from '@/hooks/global/useRelay.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import useGlossaryEditor from '@/hooks/glossary/useGlossaryEditor.js';
 import { dispatch } from '@/app/constants.js';
-import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/fetchSubTypesByUserIdThunk.js';
+import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/schemas/fetchSubTypesByUserIdThunk.ts';
 import { selectSubTypeById } from '@/app/selectors/subTypeSelectors.js';
 import { useSelector } from 'react-redux';
 import { useModalActions } from '@/hooks/global/useModal.js';
@@ -60,7 +59,7 @@ const SubTypeSidebarOrchestrator = () => {
 
   const [showSettings, setShowSettings] = useState(false);
 
-  dispatch(fetchSubTypesByUserIdThunk());
+  // dispatch(fetchSubTypesByUserIdThunk());
 
   useEffect(() => {
     return () => {
@@ -288,16 +287,3 @@ const SubTypeSidebarOrchestrator = () => {
 };
 
 export default SubTypeSidebarOrchestrator;
-
-// <SubTypeSidebarEditor
-//   editId={editId || ''}
-//   mode={mode}
-//   setMode={setMode}
-//   openRelay={openRelay}
-//   activeGroup={activeGroup}
-//   setActiveGroup={setActiveGroup}
-//   activeProperty={activeProperty}
-//   setActiveProperty={setActiveProperty}
-//   showSettings={showSettings}
-//   setShowSettings={setShowSettings}
-// />

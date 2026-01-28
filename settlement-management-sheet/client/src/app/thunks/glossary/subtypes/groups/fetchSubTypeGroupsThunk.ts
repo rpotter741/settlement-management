@@ -1,15 +1,7 @@
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
-import serverAction from '@/services/glossaryServices.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
-import {
-  addSubType,
-  addSubTypeGroup,
-  addSubTypeProperty,
-  SubType,
-  SubTypeGroup,
-  SubTypeProperty,
-} from '@/app/slice/subTypeSlice.js';
-import fetchSubTypeGroupsService from '@/services/glossary/subTypes/fetchSubTypeGroupsService.js';
+import { addSubTypeGroup, SubTypeGroup } from '@/app/slice/subTypeSlice.js';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export default function fetchSubTypeGroupsThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -18,7 +10,11 @@ export default function fetchSubTypeGroupsThunk(): AppThunk {
       if (Object.keys(existingGroups).length !== 0) {
         return;
       }
-      const groups = await fetchSubTypeGroupsService({
+      // const groups = await fetchSubTypeGroupsService({
+      //   system: true,
+      // });
+      const groups: SubTypeGroup[] = await subTypeCommands.getSubTypeGroups({
+        userId: 'robbiepottsdm',
         system: true,
       });
 

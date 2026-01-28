@@ -7,7 +7,6 @@ import { useCallback } from 'react';
 import updateSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/properties/updateSubTypePropertyThunk.js';
 import { cloneDeep, get, set } from 'lodash';
 import { dispatch } from '@/app/constants.js';
-import updateSubTypeSubPropertyThunk from '@/app/thunks/glossary/subtypes/properties/updateSubTypeSubPropertyThunk.js';
 import { SubTypeProperty } from '@/app/slice/subTypeSlice.js';
 
 const useCompoundBridge = ({
@@ -48,6 +47,7 @@ const useCompoundBridge = ({
         };
         updateSubTypePropertyThunk({
           propertyId: subPropertyParent.id,
+          //@ts-ignore
           property: {
             ...subPropertyParent,
             shape: {

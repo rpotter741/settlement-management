@@ -1,14 +1,13 @@
+import subTypeCommands from '@/app/commands/subtype.ts';
 import { createDefaultProperty } from '@/app/dispatches/glossary/SubTypePropertyTransformations.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
-  SubTypeProperty,
   SubTypePropertyTypes,
   updateSubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import { RootState } from '@/app/store.js';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
-import updateSubTypePropertyService from '@/services/glossary/subTypes/updateSubTypePropertyService.js';
 import { cloneDeep } from 'lodash';
 import { ThunkDispatch } from 'redux-thunk';
 
@@ -35,13 +34,10 @@ export function createDefaultPropertyThunk({
         })
       );
 
-      const updates: Partial<SubTypeProperty> = {};
-      updates.inputType = property.inputType;
-      updates.shape = property.shape;
-
-      await updateSubTypePropertyService({
-        propertyId,
-        updates,
+      await subTypeCommands.updateSubTypeProperty({
+        id: propertyId,
+        inputType: property.inputType,
+        shape: property.shape,
       });
 
       dispatch(

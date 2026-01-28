@@ -1,6 +1,9 @@
 import { dispatch } from '@/app/constants.js';
 import { createDefaultGroup } from '@/app/dispatches/glossary/SubTypePropertyTransformations.js';
-import { selectSubTypeGroups } from '@/app/selectors/subTypeSelectors.js';
+import {
+  selectSubTypeGroupById,
+  selectSubTypeGroups,
+} from '@/app/selectors/subTypeSelectors.js';
 import { SubTypeGroup } from '@/app/slice/subTypeSlice.js';
 import { createSubTypeGroupThunk } from '@/app/thunks/glossary/subtypes/groups/createSubTypeGroupThunk.js';
 import fetchSubTypeGroupsThunk from '@/app/thunks/glossary/subtypes/groups/fetchSubTypeGroupsThunk.js';
@@ -29,7 +32,7 @@ const useSubTypeGroupCreator = ({
 
   // content type anchors
   const [contentAnchor, setContentAnchor] = useState<null | HTMLElement>(null);
-  const [contentFilters, setContentFilters] = useState<('system' | 'custom')[]>(
+  const [contentFilters, setContentFilters] = useState<('SYSTEM' | 'CUSTOM')[]>(
     []
   );
 
@@ -50,8 +53,13 @@ const useSubTypeGroupCreator = ({
   };
 
   // get them groups
-  dispatch(fetchSubTypeGroupsThunk());
+  // dispatch(fetchSubTypeGroupsThunk());
   const groups = useSelector(selectSubTypeGroups);
+
+  const group = useSelector(
+    selectSubTypeGroupById({ groupId: activeGroup || '' })
+  );
+
   const allGroups = useMemo(() => {
     return groups
       .filter((group) => {
@@ -60,9 +68,9 @@ const useSubTypeGroupCreator = ({
           .includes(searchTerm.toLowerCase());
         const matchesContentType =
           contentFilters.length === 0 ||
-          (contentFilters.includes('system') &&
-            group.contentType === 'system') ||
-          (contentFilters.includes('custom') && group.contentType === 'custom');
+          (contentFilters.includes('SYSTEM') &&
+            group.contentType === 'SYSTEM') ||
+          (contentFilters.includes('CUSTOM') && group.contentType === 'CUSTOM');
 
         return matchesSearch && matchesContentType;
       })
@@ -89,7 +97,6 @@ const useSubTypeGroupCreator = ({
   const { allProperties } = useSubTypePropertyCreator();
   const availableProperties = useMemo(() => {
     if (!activeGroup) return [];
-    const group = groups.find((g) => g.id === activeGroup);
     if (!group) return [];
     const assignedPropertyIds = group.properties
       ? group.properties.map((p) => p.propertyId)
@@ -97,14 +104,15 @@ const useSubTypeGroupCreator = ({
     return allProperties.filter(
       (property) => !assignedPropertyIds.includes(property.id)
     );
-  }, [activeGroup, allProperties, groups]);
+  }, [activeGroup, allProperties, group]);
 
   const [searchProperties, setSearchProperties] = useState('');
+
   const filteredAvailableProperties = useMemo(() => {
     return availableProperties.filter((property) =>
       property.name.toLowerCase().includes(searchProperties.toLowerCase())
     );
-  }, [availableProperties, searchProperties]);
+  }, [availableProperties, searchProperties, activeGroup]);
 
   return {
     searchTerm,

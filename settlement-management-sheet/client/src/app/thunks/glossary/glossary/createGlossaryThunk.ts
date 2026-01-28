@@ -38,6 +38,8 @@ export default function createGlossaryThunk({
           description: glossary.description,
           genre: glossary.genre,
           subGenre: glossary.subGenre,
+          integrationState: glossary.integrationState,
+          theme: glossary.theme,
         })
       );
     } catch (error) {

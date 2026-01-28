@@ -4,7 +4,7 @@ import {
   selectSubTypeById,
   selectSubTypeGroups,
 } from '@/app/selectors/subTypeSelectors.js';
-import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/fetchSubTypesByUserIdThunk.js';
+import fetchSubTypesByUserIdThunk from '@/app/thunks/glossary/subtypes/schemas/fetchSubTypesByUserIdThunk.ts';
 import fetchSubTypeGroupsThunk from '@/app/thunks/glossary/subtypes/groups/fetchSubTypeGroupsThunk.js';
 import useGlobalDragUI from '@/hooks/global/useGlobalDragUI.js';
 import { useMemo, useState } from 'react';
@@ -28,7 +28,7 @@ const useSubTypeCreator = ({
 
   // content type anchors
   const [contentAnchor, setContentAnchor] = useState<null | HTMLElement>(null);
-  const [contentFilters, setContentFilters] = useState<('system' | 'custom')[]>(
+  const [contentFilters, setContentFilters] = useState<('SYSTEM' | 'CUSTOM')[]>(
     []
   );
 
@@ -48,8 +48,8 @@ const useSubTypeCreator = ({
     setContentAnchor(null);
   };
 
-  dispatch(fetchSubTypesByUserIdThunk()); // subtypes
-  dispatch(fetchSubTypeGroupsThunk()); // groups
+  // dispatch(fetchSubTypesByUserIdThunk()); // subtypes
+  // dispatch(fetchSubTypeGroupsThunk()); // groups
   const allSubTypes = useSelector(selectAllSubTypes);
   const allGroups = useSelector(selectSubTypeGroups);
 
@@ -61,9 +61,9 @@ const useSubTypeCreator = ({
           .includes(searchTerm.toLowerCase());
         const matchesContentType =
           contentFilters.length === 0 ||
-          (contentFilters.includes('system') &&
-            group.contentType === 'system') ||
-          (contentFilters.includes('custom') && group.contentType === 'custom');
+          (contentFilters.includes('SYSTEM') &&
+            group.contentType === 'SYSTEM') ||
+          (contentFilters.includes('CUSTOM') && group.contentType === 'CUSTOM');
 
         return matchesSearch && matchesContentType;
       })

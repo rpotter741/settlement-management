@@ -16,6 +16,10 @@ interface SubTypePropertyBase {
   name: string;
   isAnchor?: boolean;
   version?: number;
+  refId?: string;
+  contentType: 'SYSTEM' | 'CUSTOM';
+  smartSync?: SmartSyncRule | null;
+  displayName?: string;
 }
 
 interface TextShape {
@@ -123,7 +127,7 @@ export interface SubTypeGroup {
   description: string;
   version: number;
   properties: SubTypePropertyLink[];
-  contentType: 'system' | 'custom';
+  contentType: 'SYSTEM' | 'CUSTOM';
   schemaGroups?: string[];
   display: Record<string, Record<'columns' | string, any>>;
 }
@@ -257,16 +261,22 @@ const subTypeSlice = createSlice({
       }>
     ) => {
       const { groupId, property } = action.payload;
+      console.log(property);
       const group = state.groups.edit[groupId];
-      if (group && Array.isArray(group.properties)) {
-        group.properties.push(cloneDeep(property));
-      } else {
-        group.properties = [cloneDeep(property)];
+      if (group) {
+        let properties = cloneDeep(group?.properties);
+        if (Array.isArray(properties)) {
+          properties.push(property);
+        } else {
+          properties = [property];
+        }
+        let display = cloneDeep(group?.display || {});
+        if (!display[property.propertyId]) {
+          display[property.propertyId] = { columns: 4 };
+        }
+        group.properties = properties;
+        group.display = display;
       }
-      if (!group.display) {
-        group.display = {};
-      }
-      group.display[property.id] = { columns: 4 };
     },
     updateSubTypeGroup: (
       state,
@@ -289,9 +299,10 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         groupId: string;
         newOrder: string[]; // array of property ids
+        newDisplay: Record<string, Record<'columns' | string, any>>;
       }>
     ) => {
-      const { groupId, newOrder } = action.payload;
+      const { groupId, newOrder, newDisplay } = action.payload;
       const group = state.groups.edit[groupId];
       if (group && Array.isArray(group.properties)) {
         const reordered = newOrder.reduce((acc, propertyId, index) => {
@@ -306,6 +317,7 @@ const subTypeSlice = createSlice({
           return acc;
         }, [] as SubTypePropertyLink[]);
         group.properties = reordered;
+        group.display = newDisplay;
       }
     },
     reorderSubTypeGroups: (

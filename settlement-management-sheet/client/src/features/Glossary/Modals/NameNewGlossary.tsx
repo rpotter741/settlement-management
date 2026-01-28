@@ -8,9 +8,11 @@ import { useModalActions } from '@/hooks/global/useModal.js';
 import { AppDispatch } from '@/app/store.js';
 import { useDispatch } from 'react-redux';
 import Editor from '@/components/shared/TipTap/Editor.js';
-import GenreSelect, {
-  Genre,
-} from '@/components/shared/Metadata/GenreSelect.js';
+import GenreSelect from '@/components/shared/Metadata/GenreSelect.js';
+import { Genre } from '../../../../../shared/types/index.ts';
+import { invoke } from '@tauri-apps/api/core';
+import { createGlossary } from '@/helpers/seedWorld.ts';
+import { GlossaryStateEntry } from '@/app/types/GlossaryTypes.ts';
 
 interface NameNewGlossaryProps {}
 
@@ -56,24 +58,24 @@ const NameNewGlossary: React.FC<NameNewGlossaryProps> = () => {
         color="primary"
         onClick={async () => {
           // Handle the creation of the new glossary here
-          const id = newId();
-          const newGloss = await actions
-            .createGlossary({
-              id,
+          try {
+            const glossary: GlossaryStateEntry = await createGlossary({
+              id: newId(),
               name: glossaryName.trim(),
-              description: {
-                markdown: description,
-                string: descString,
-              },
               genre,
-              subGenre,
-            })
-            .then((response) => {
-              return response.glossary;
+              sub_genre: subGenre || '',
+              description: descString,
+              created_by: 'robbiepottsdm',
+              content_type: 'SYSTEM',
             });
-          closeModal();
+            closeModal();
 
-          dispatch(glossaryThunks.addAndActivateGlossary({ ...newGloss }));
+            console.log('New Glossary Created:', glossary);
+
+            dispatch(glossaryThunks.addAndActivateGlossary({ ...glossary }));
+          } catch (error) {
+            console.error('Error creating glossary:', error);
+          }
         }}
       >
         Create Glossary

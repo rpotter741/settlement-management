@@ -14,10 +14,9 @@ const ScopeDropDown = ({
     <LabelAndDropdown
       multiple={false}
       name="Scope"
-      value={ruleState.parameters.scope || 'Branch'}
-      options={['Branch', 'Global']}
+      value={capitalize(ruleState.parameters.scope || 'branch')}
+      options={['branch', 'global'].map((option) => capitalize(option))}
       onChange={(newValue) => {
-        console.log(newValue);
         const val = Array.isArray(newValue)
           ? (newValue[0] ?? '')
           : (newValue ?? '');
@@ -25,7 +24,7 @@ const ScopeDropDown = ({
           ...prev,
           parameters: {
             ...prev.parameters,
-            scope: capitalize(val) as 'Branch' | 'Global',
+            scope: val.toLowerCase() as 'branch' | 'global',
           },
         }));
       }}

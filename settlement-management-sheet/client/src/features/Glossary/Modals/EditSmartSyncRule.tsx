@@ -17,12 +17,12 @@ import LimitInput from '@/features/SyncWorkspace/SyncRules/LimitInput.js';
 
 export interface SmartSyncRule {
   operand: 'Add' | 'Remove';
-  target: 'Child' | 'Sibling' | 'Parent' | 'Backlink' | 'Entry Type';
+  target: 'child' | 'sibling' | 'parent' | 'backlink' | 'entryType';
   depth: number;
   parameters: {
     types: GlossaryEntryType[];
     propertyMatch?: boolean;
-    scope?: 'Branch' | 'Global';
+    scope?: 'branch' | 'global';
     limit?: number;
     closest?: boolean;
   };
@@ -47,7 +47,7 @@ function getRule(
 
     return {
       operand: 'Add',
-      target: 'Child',
+      target: 'child',
       depth: 1,
       parameters,
     };
@@ -56,15 +56,15 @@ function getRule(
 
 function getTarget(option: string): { group: string; label: string } {
   switch (option) {
-    case 'Child':
+    case 'child':
       return { group: 'Relationship', label: 'Child' };
-    case 'Sibling':
+    case 'sibling':
       return { group: 'Relationship', label: 'Sibling' };
-    case 'Parent':
+    case 'parent':
       return { group: 'Relationship', label: 'Parent' };
-    case 'Backlink':
+    case 'backlink':
       return { group: 'Structure', label: 'Backlink' };
-    case 'Entry Type':
+    case 'entryType':
       return { group: 'Structure', label: 'Entry Type' };
     default:
       return { group: '', label: '' };
@@ -72,7 +72,7 @@ function getTarget(option: string): { group: string; label: string } {
 }
 
 const showDepth = (target: string): boolean => {
-  if (target === 'Backlink' || target === 'Sibling') return false;
+  if (target === 'backlink' || target === 'sibling') return false;
   return true;
 };
 
@@ -114,7 +114,7 @@ const EditSmartSyncRule = ({
         Edit Smart Sync Rule
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-        <MethodDropDown ruleState={ruleState} setRuleState={setRuleState} />
+        {/* <MethodDropDown ruleState={ruleState} setRuleState={setRuleState} /> */}
         <TargetAutocomplete
           ruleState={ruleState}
           setRuleState={setRuleState}

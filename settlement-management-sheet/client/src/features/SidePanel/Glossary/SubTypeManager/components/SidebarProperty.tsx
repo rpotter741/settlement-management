@@ -19,7 +19,7 @@ import { useCallback, useRef, useState } from 'react';
 import { RelayStatus } from '@/hooks/global/useRelay.js';
 import { SubTypePropertyTypes } from '@/features/Glossary/EditGlossary/Templates/generics/genericContinent.js';
 import { useDrag, useDrop } from 'react-dnd';
-import useGlobalDrag from '@/hooks/global/useGlobalDrag.js';
+import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
 
 const propertyTypeIconMap: Record<string, React.ReactNode> = {
   text: <TextFields fontSize="small" />,
@@ -73,27 +73,23 @@ const SidebarProperty = ({
     })
   );
 
-  const { ref, draggedType, isDragging, matchesDragType } = useGlobalDrag({
+  const { ref, canAccept, isOver, dragHandleProps } = useGlobalDrag({
+    id: propertyId,
+    dropType: 'subtype-property',
     type: 'subtype-property',
     types: [],
     index,
     item: property,
     interaction: 'both',
-    onHover: (item: any, monitor: any) => {
-      setHoverIndex && setHoverIndex(index);
-    },
-    onDrop: (item: any, monitor: any) => {
-      setHoverIndex && setHoverIndex(null);
-    },
-    onEnd: () => {
-      setHoverIndex && setHoverIndex(null);
-    },
   });
+
+  if (!ref) return null;
 
   const [isHover, setIsHover] = useState(false);
 
   return (
     <Box
+      {...dragHandleProps}
       ref={ref}
       sx={{
         width: '100%',

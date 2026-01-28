@@ -8,6 +8,7 @@ import {
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import fetchSubTypePropertiesService from '@/services/glossary/subTypes/fetchSubTypePropertiesService.js';
+import { getSubTypeProperties } from '@/app/commands/subtype.ts';
 
 export default function fetchSubTypePropertiesThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -16,7 +17,12 @@ export default function fetchSubTypePropertiesThunk(): AppThunk {
       if (Object.keys(existingProperties).length !== 0) {
         return;
       }
-      const properties = await fetchSubTypePropertiesService({
+      // const properties = await fetchSubTypePropertiesService({
+      //   system: true,
+      // });
+
+      const properties: SubTypeProperty[] = await getSubTypeProperties({
+        userId: 'robbiepottsdm',
         system: true,
       });
 

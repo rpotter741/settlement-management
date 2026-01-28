@@ -6,6 +6,7 @@ import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { addSubTypeGroup, deleteGroup } from '@/app/slice/subTypeSlice.js';
 import deleteSubTypeGroupService from '@/services/glossary/subTypes/deleteSubTypeGroupService.js';
 import { cloneDeep } from 'lodash';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function deleteSubTypeGroupThunk({
   groupId,
@@ -26,7 +27,8 @@ export function deleteSubTypeGroupThunk({
       return;
     }
     try {
-      await deleteSubTypeGroupService({ groupId });
+      // await deleteSubTypeGroupService({ groupId });
+      await subTypeCommands.deleteSubTypeGroup({ id: groupId });
 
       dispatch(
         deleteGroup({
