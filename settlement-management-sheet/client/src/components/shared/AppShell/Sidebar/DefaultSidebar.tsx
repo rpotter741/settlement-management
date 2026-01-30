@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { Box, Tooltip, Divider, Collapse, IconButton } from '@mui/material';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import {
   MoreVert,
   Menu,

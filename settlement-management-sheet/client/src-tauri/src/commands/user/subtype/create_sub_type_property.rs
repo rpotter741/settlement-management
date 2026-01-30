@@ -3,13 +3,13 @@ use crate::{
     types::{PropertyId, PropertyShape, UserSubTypeProperty},
 };
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use tracing::error;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateSubTypePropertyInput {
     pub id: PropertyId,
     pub name: String,
-    pub content_type: String,
     pub created_by: String,
     pub input_type: String, // to bypass weird enum serialization (since tags need per-enum attributes)
     pub shape: String,      // see above comment
@@ -32,10 +32,13 @@ pub async fn create_sub_type_property(
         ..Default::default()
     };
 
-    let new_property = new_sub_type_property
-        .insert(db.inner())
-        .await
-        .map_err(|e| e.to_string())?;
+    let new_property = new_sub_type_property.insert(db.inner()).await;
 
-    Ok(UserSubTypeProperty::try_from(new_property)?)
+    match new_property {
+        Ok(property) => Ok(UserSubTypeProperty::try_from(property)?),
+        Err(e) => {
+            error!("Failed to create SubTypeProperty: {}", e);
+            Err(format!("Failed to create SubTypeProperty: {}", e))
+        }
+    }
 }

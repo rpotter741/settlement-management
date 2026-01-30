@@ -6,11 +6,15 @@ import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import {
   addPropertyToGroup,
   reorderGroupProperties,
+  SubTypeGroup,
+  SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 
-export function reorderPropertyToIndex({
+export function reorderPropertyToIndexThunk({
   groupId,
   propertyId,
   dropIndex,
@@ -19,14 +23,20 @@ export function reorderPropertyToIndex({
   propertyId: string;
   dropIndex: number;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const group = state.subType.groups.edit[groupId];
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
+
     if (!group) {
       console.error(`Group with ID ${groupId} not found.`);
       return;
     }
-    const property = state.subType.properties.edit[propertyId];
+    if (!checkAdmin(group.system)) return;
+
+    const property = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
+
     if (!property) {
       console.error(`Property with ID ${propertyId} not found.`);
       return;
@@ -48,6 +58,7 @@ export function reorderPropertyToIndex({
           groupId,
           newOrder: filtered,
           newDisplay: { ...group.display },
+          system: group.system,
         })
       );
 

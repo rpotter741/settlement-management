@@ -2,7 +2,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { AppThunk } from '../glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { TabDataPayload, ToolName } from '@/app/types/ToolTypes.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { addTool } from '@/app/slice/toolSlice.js';
 import { addTab } from '@/app/slice/tabSlice.js';
 import api from '@/services/interceptor.js';

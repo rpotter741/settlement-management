@@ -14,10 +14,6 @@ export type SubTypePropertyTypes =
 interface SubTypePropertyBase {
   id: string;
   name: string;
-  isAnchor?: boolean;
-  version?: number;
-  refId?: string;
-  contentType: 'SYSTEM' | 'CUSTOM';
   smartSync?: SmartSyncRule | null;
   displayName?: string;
 }
@@ -56,27 +52,32 @@ interface DateShape {}
 interface SubTypeTextProperty extends SubTypePropertyBase {
   inputType: 'text';
   shape: TextShape;
+  system: boolean;
 }
 
 interface SubTypeDateProperty extends SubTypePropertyBase {
   inputType: 'date';
   shape: DateShape;
+  system: boolean;
 }
 
 export interface SubTypeDropdownProperty extends SubTypePropertyBase {
   inputType: 'dropdown';
   shape: DropdownShape;
   smartSync: SmartSyncRule | null;
+  system: boolean;
 }
 
 interface SubTypeCheckboxProperty extends SubTypePropertyBase {
   inputType: 'checkbox';
   shape: CheckboxShape;
+  system: boolean;
 }
 
 interface SubTypeRangeProperty extends SubTypePropertyBase {
   inputType: 'range';
   shape: RangeShape;
+  system: boolean;
 }
 
 export type NonCompoundShapes =
@@ -104,6 +105,7 @@ export interface SubTypeCompoundProperty extends SubTypePropertyBase {
   inputType: 'compound';
   shape: CompoundShape;
   smartSync: SmartSyncRule | null;
+  system: boolean;
 }
 
 /**
@@ -125,11 +127,10 @@ export interface SubTypeGroup {
   name: string;
   displayName: string;
   description: string;
-  version: number;
   properties: SubTypePropertyLink[];
-  contentType: 'SYSTEM' | 'CUSTOM';
   schemaGroups?: string[];
   display: Record<string, Record<'columns' | string, any>>;
+  system: boolean;
 }
 
 export interface SubTypeGroupLink {
@@ -146,34 +147,82 @@ export type SemanticAnchors = {
 
 export type SubType = {
   id: string;
+  name: string;
   entryType: GlossaryEntryType;
   groups: SubTypeGroupLink[];
   anchors: {
     primary: string | null;
     secondary: string | null;
   };
-  [key: string]: any;
+  context: string[];
+  system: boolean;
 };
 
 export type SubTypeState = Record<string, SubType>;
 
 export type SubTypeSliceState = {
-  edit: SubTypeState;
-  static: SubTypeState;
-  properties: Record<'edit' | 'static', Record<string, SubTypeProperty>>;
-  groups: Record<'edit' | 'static', Record<string, SubTypeGroup>>;
+  subtypes: {
+    user: {
+      edit: SubTypeState;
+      static: SubTypeState;
+    };
+    system: {
+      edit: SubTypeState;
+      static: SubTypeState;
+    };
+  };
+  properties: {
+    user: {
+      edit: Record<string, SubTypeProperty>;
+      static: Record<string, SubTypeProperty>;
+    };
+    system: {
+      edit: Record<string, SubTypeProperty>;
+      static: Record<string, SubTypeProperty>;
+    };
+  };
+  groups: {
+    user: {
+      edit: Record<string, SubTypeGroup>;
+      static: Record<string, SubTypeGroup>;
+    };
+    system: {
+      edit: Record<string, SubTypeGroup>;
+      static: Record<string, SubTypeGroup>;
+    };
+  };
 };
 
 const initialState: SubTypeSliceState = {
-  edit: {},
-  static: {},
+  subtypes: {
+    user: {
+      edit: {},
+      static: {},
+    },
+    system: {
+      edit: {},
+      static: {},
+    },
+  },
   properties: {
-    edit: {},
-    static: {},
+    user: {
+      edit: {},
+      static: {},
+    },
+    system: {
+      edit: {},
+      static: {},
+    },
   },
   groups: {
-    edit: {},
-    static: {},
+    user: {
+      edit: {},
+      static: {},
+    },
+    system: {
+      edit: {},
+      static: {},
+    },
   },
 };
 
@@ -185,26 +234,32 @@ const subTypeSlice = createSlice({
       state,
       action: PayloadAction<{
         subType: any;
+        system: boolean;
       }>
     ) => {
-      const { subType } = action.payload;
+      const { subType, system } = action.payload;
       const { id } = subType;
-      if (!state.edit[id]) {
+      if (!state.subtypes[system ? 'system' : 'user'].edit[id]) {
         //avoid overwriting existing subTypes
-        state.edit[id] = cloneDeep(subType);
-        state.static[id] = cloneDeep(subType);
+        state.subtypes[system ? 'system' : 'user'].edit[id] =
+          cloneDeep(subType);
+        state.subtypes[system ? 'system' : 'user'].static[id] =
+          cloneDeep(subType);
       }
     },
     addSubTypeProperty: (
       state,
       action: PayloadAction<{
         properties: SubTypeProperty[];
+        system: boolean;
       }>
     ) => {
-      const { properties } = action.payload;
+      const { properties, system } = action.payload;
       properties.forEach((property) => {
-        state.properties.edit[property.id] = cloneDeep(property);
-        state.properties.static[property.id] = cloneDeep(property);
+        state.properties[system ? 'system' : 'user'].edit[property.id] =
+          cloneDeep(property);
+        state.properties[system ? 'system' : 'user'].static[property.id] =
+          cloneDeep(property);
       });
     },
     updateSubTypeProperty: (
@@ -212,12 +267,13 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         propertyId: string;
         property: SubTypeProperty;
+        system: boolean;
       }>
     ) => {
-      const { propertyId, property } = action.payload;
-      if (state.properties.edit[propertyId]) {
-        state.properties.edit[propertyId] = {
-          ...state.properties.edit[propertyId],
+      const { propertyId, property, system } = action.payload;
+      if (state.properties[system ? 'system' : 'user'].edit[propertyId]) {
+        state.properties[system ? 'system' : 'user'].edit[propertyId] = {
+          ...state.properties[system ? 'system' : 'user'].edit[propertyId],
           ...property,
         };
       }
@@ -228,15 +284,21 @@ const subTypeSlice = createSlice({
         propertyId: string;
         property: NonCompoundProperties;
         side: 'left' | 'right';
+        system: boolean;
       }>
     ) => {
-      const { propertyId, property, side } = action.payload;
-      if (state.properties.edit[propertyId]) {
-        ((state.properties.edit[propertyId] as SubTypeCompoundProperty).shape[
-          side as keyof CompoundShape
-        ] as NonCompoundProperties) = {
-          ...((state.properties.edit[propertyId] as SubTypeCompoundProperty)
-            .shape[side] as NonCompoundProperties),
+      const { propertyId, property, side, system } = action.payload;
+      if (state.properties[system ? 'system' : 'user'].edit[propertyId]) {
+        ((
+          state.properties[system ? 'system' : 'user'].edit[
+            propertyId
+          ] as SubTypeCompoundProperty
+        ).shape[side as keyof CompoundShape] as NonCompoundProperties) = {
+          ...((
+            state.properties[system ? 'system' : 'user'].edit[
+              propertyId
+            ] as SubTypeCompoundProperty
+          ).shape[side] as NonCompoundProperties),
           ...property,
         };
       }
@@ -245,12 +307,15 @@ const subTypeSlice = createSlice({
       state,
       action: PayloadAction<{
         groups: SubTypeGroup[];
+        system: boolean;
       }>
     ) => {
-      const { groups } = action.payload;
+      const { groups, system } = action.payload;
       groups.forEach((group) => {
-        state.groups.edit[group.id] = cloneDeep(group);
-        state.groups.static[group.id] = cloneDeep(group);
+        state.groups[system ? 'system' : 'user'].edit[group.id] =
+          cloneDeep(group);
+        state.groups[system ? 'system' : 'user'].static[group.id] =
+          cloneDeep(group);
       });
     },
     addPropertyToGroup: (
@@ -258,11 +323,11 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         groupId: string;
         property: SubTypePropertyLink;
+        system: boolean;
       }>
     ) => {
-      const { groupId, property } = action.payload;
-      console.log(property);
-      const group = state.groups.edit[groupId];
+      const { groupId, property, system } = action.payload;
+      const group = state.groups[system ? 'system' : 'user'].edit[groupId];
       if (group) {
         let properties = cloneDeep(group?.properties);
         if (Array.isArray(properties)) {
@@ -283,12 +348,13 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         groupId: string;
         updates: Partial<SubTypeGroup>;
+        system: boolean;
       }>
     ) => {
-      const { groupId, updates } = action.payload;
-      const group = state.groups.edit[groupId];
+      const { groupId, updates, system } = action.payload;
+      const group = state.groups[system ? 'system' : 'user'].edit[groupId];
       if (group) {
-        state.groups.edit[groupId] = {
+        state.groups[system ? 'system' : 'user'].edit[groupId] = {
           ...group,
           ...updates,
         };
@@ -300,10 +366,11 @@ const subTypeSlice = createSlice({
         groupId: string;
         newOrder: string[]; // array of property ids
         newDisplay: Record<string, Record<'columns' | string, any>>;
+        system: boolean;
       }>
     ) => {
-      const { groupId, newOrder, newDisplay } = action.payload;
-      const group = state.groups.edit[groupId];
+      const { groupId, newOrder, newDisplay, system } = action.payload;
+      const group = state.groups[system ? 'system' : 'user'].edit[groupId];
       if (group && Array.isArray(group.properties)) {
         const reordered = newOrder.reduce((acc, propertyId, index) => {
           const propLink = group.properties.find(
@@ -320,48 +387,39 @@ const subTypeSlice = createSlice({
         group.display = newDisplay;
       }
     },
-    reorderSubTypeGroups: (
-      state,
-      action: PayloadAction<{
-        subTypeId: string;
-        newGroupOrder: string[];
-      }>
-    ) => {
-      const { subTypeId, newGroupOrder } = action.payload;
-      const subType = state.edit[subTypeId];
-      if (subType) {
-        subType.groupOrder = [...newGroupOrder];
-      }
-    },
     deleteProperty: (
       state,
       action: PayloadAction<{
         propertyId: string;
+        system: boolean;
       }>
     ) => {
-      const { propertyId } = action.payload;
-      delete state.properties.edit[propertyId];
-      delete state.properties.static[propertyId];
+      const { propertyId, system } = action.payload;
+      delete state.properties[system ? 'system' : 'user'].edit[propertyId];
+      delete state.properties[system ? 'system' : 'user'].static[propertyId];
     },
     deleteGroup: (
       state,
       action: PayloadAction<{
         groupId: string;
+        system: boolean;
       }>
     ) => {
-      const { groupId } = action.payload;
-      delete state.groups.edit[groupId];
-      delete state.groups.static[groupId];
+      const { groupId, system } = action.payload;
+      delete state.groups[system ? 'system' : 'user'].edit[groupId];
+      delete state.groups[system ? 'system' : 'user'].static[groupId];
     },
     addGroupsToSubType: (
       state,
       action: PayloadAction<{
         subTypeId: string;
         groups: SubTypeGroupLink[];
+        system: boolean;
       }>
     ) => {
-      const { subTypeId, groups } = action.payload;
-      const subType = state.edit[subTypeId];
+      const { subTypeId, groups, system } = action.payload;
+      const subType =
+        state.subtypes[system ? 'system' : 'user'].edit[subTypeId];
       if (subType && Array.isArray(subType.groups)) {
         subType.groups.push(...groups.map((group) => cloneDeep(group)));
       } else if (subType) {
@@ -373,10 +431,12 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         subTypeId: string;
         linkIds: string[];
+        system: boolean;
       }>
     ) => {
-      const { subTypeId, linkIds } = action.payload;
-      const subType = state.edit[subTypeId];
+      const { subTypeId, linkIds, system } = action.payload;
+      const subType =
+        state.subtypes[system ? 'system' : 'user'].edit[subTypeId];
       if (subType && Array.isArray(subType.groups)) {
         subType.groups = subType.groups.filter(
           (group) => !linkIds.includes(group.id)
@@ -388,10 +448,12 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         subtypeId: string;
         anchors: SemanticAnchors;
+        system: boolean;
       }>
     ) => {
-      const { subtypeId, anchors } = action.payload;
-      const subtype = state.edit[subtypeId];
+      const { subtypeId, anchors, system } = action.payload;
+      const subtype =
+        state.subtypes[system ? 'system' : 'user'].edit[subtypeId];
       if (subtype) {
         subtype.anchors = anchors;
       }
@@ -401,10 +463,12 @@ const subTypeSlice = createSlice({
       action: PayloadAction<{
         subtypeId: string;
         name: string;
+        system: boolean;
       }>
     ) => {
-      const { subtypeId, name } = action.payload;
-      const subtype = state.edit[subtypeId];
+      const { subtypeId, name, system } = action.payload;
+      const subtype =
+        state.subtypes[system ? 'system' : 'user'].edit[subtypeId];
       if (subtype) {
         subtype.name = name;
       }
@@ -417,7 +481,7 @@ const subTypeSlice = createSlice({
       }>
     ) => {
       const { subtypeId, context } = action.payload;
-      const subtype = state.edit[subtypeId];
+      const subtype = state.subtypes.user.edit[subtypeId];
       if (subtype) {
         subtype.context = context;
       }
@@ -441,7 +505,6 @@ export const {
   addSubTypeGroup,
   addPropertyToGroup,
   reorderGroupProperties,
-  reorderSubTypeGroups,
   deleteProperty,
   updateSubTypeGroup,
   deleteGroup,
@@ -451,7 +514,6 @@ export const {
   updateSubTypeName,
   updateSubTypeContext,
   // addSubTypeGroup,
-  // reorderSubTypeGroups,
   // updateSubTypeProperty,
   // changeSubTypeProperty,
   // updateSubTypeAnchor,

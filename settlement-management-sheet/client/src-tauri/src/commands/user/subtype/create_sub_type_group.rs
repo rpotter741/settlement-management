@@ -10,7 +10,6 @@ pub struct CreateSubTypeGroupInput {
     pub id: GroupId,
     pub name: String,
     pub created_by: String,
-    pub content_type: String,
 }
 
 #[tauri::command]

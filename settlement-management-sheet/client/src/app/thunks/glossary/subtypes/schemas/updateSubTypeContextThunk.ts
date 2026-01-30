@@ -8,6 +8,7 @@ import {
   addGroupsToSubType,
   addPropertyToGroup,
   SemanticAnchors,
+  SubType,
   updateSubTypeAnchors,
   updateSubTypeContext,
   updateSubTypeName,
@@ -18,6 +19,9 @@ import { cloneDeep } from 'lodash';
 import updateSubTypeAnchorService from '@/services/glossary/subTypes/updateSubTypeAnchorService.js';
 import updateSubTypeNameService from '@/services/glossary/subTypes/updateSubTypeNameService.js';
 import updateSubTypeContextService from '@/services/glossary/subTypes/updateSubTypeContextService.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function updateSubTypeContextThunk({
   subtypeId,
@@ -27,20 +31,24 @@ export function updateSubTypeContextThunk({
   context: string[];
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const subtype = state.subType.edit[subtypeId];
+    const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      console.error(`SubType with ID ${subtypeId} not found.`);
+      showSnackbar({
+        message: "Can't find the subtype you're looking for.",
+        type: 'error',
+      });
       return;
     }
+    if (!checkAdmin(subtype.system)) return;
+
     const oldContext = cloneDeep(subtype.context || []);
 
     try {
       dispatch(updateSubTypeContext({ subtypeId: subtypeId, context }));
 
-      await updateSubTypeContextService({
-        subtypeId,
-        context,
+      await subTypeCommands.updateSubType({
+        id: subtypeId,
+        context: context.join(','),
       });
 
       dispatch(
@@ -51,7 +59,7 @@ export function updateSubTypeContextThunk({
         })
       );
     } catch (error) {
-      console.error('Error updating subtype anchors:', error);
+      console.error('Error updating subtype context:', error);
       // Revert to old anchors on error
       dispatch(
         updateSubTypeContext({
@@ -61,7 +69,8 @@ export function updateSubTypeContextThunk({
       );
       dispatch(
         showSnackbar({
-          message: 'Error updating semantic anchors. Try again later.',
+          message:
+            "Context is everything in a story. Too bad we couldn't save it.",
           type: 'error',
           duration: 3000,
         })

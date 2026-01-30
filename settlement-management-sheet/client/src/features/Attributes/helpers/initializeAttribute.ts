@@ -1,6 +1,6 @@
 import { SPCs, Thresholds } from 'types/common.js';
 import iconList from '../../../components/shared/IconSelector/iconList.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { scale } from 'framer-motion';
 
 const defaultThresholds: Array<string> = [

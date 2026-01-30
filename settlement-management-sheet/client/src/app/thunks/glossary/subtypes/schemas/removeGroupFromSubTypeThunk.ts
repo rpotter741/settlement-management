@@ -8,9 +8,12 @@ import {
   addGroupsToSubType,
   addPropertyToGroup,
   removeGroupsFromSubtype,
+  SubType,
 } from '@/app/slice/subTypeSlice.js';
 import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSubTypeService.js';
 import removeGroupsFromSubTypeService from '@/services/glossary/subTypes/removeGroupFromSubTypeService.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function removeGroupFromSubTypeThunk({
   subtypeId,
@@ -20,19 +23,31 @@ export function removeGroupFromSubTypeThunk({
   linkIds: string[];
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const subtype = state.subType.edit[subtypeId];
+    const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      console.error(`SubType with ID ${subtypeId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'Tell your subtype to take off its invisibility cloak.',
+          type: 'error',
+        })
+      );
       return;
     }
-    try {
-      dispatch(removeGroupsFromSubtype({ subTypeId: subtypeId, linkIds }));
+    if (!checkAdmin(subtype.system)) return;
 
-      await removeGroupsFromSubTypeService({
-        linkIds,
-        subtypeId,
-      });
+    try {
+      dispatch(
+        removeGroupsFromSubtype({
+          subTypeId: subtypeId,
+          linkIds,
+          system: subtype.system,
+        })
+      );
+
+      // await removeGroupsFromSubTypeService({
+      //   linkIds,
+      //   subtypeId,
+      // });
 
       dispatch(
         addDirtyKeypath({
@@ -45,7 +60,7 @@ export function removeGroupFromSubTypeThunk({
       console.error('Error linking subtype property:', error);
       dispatch(
         showSnackbar({
-          message: 'Error linking subtype property. Try again later.',
+          message: 'That group was stubborn and refused to be removed.',
           type: 'error',
           duration: 3000,
         })

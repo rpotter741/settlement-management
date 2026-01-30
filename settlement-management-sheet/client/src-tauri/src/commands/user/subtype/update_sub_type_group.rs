@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use crate::entities::user_sub_type_group;
-use crate::types::{get_now, DisplayColumn, PropertyId, UserSubTypeGroup};
+use crate::types::{DisplayColumn, PropertyId, UserSubTypeGroup};
+use crate::utility::get_now;
 use crate::{set_if_some, some_set_if_some, some_set_json_if_some};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 

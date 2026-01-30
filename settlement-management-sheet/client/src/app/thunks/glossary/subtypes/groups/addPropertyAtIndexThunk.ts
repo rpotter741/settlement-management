@@ -3,13 +3,16 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubTypeGroupPropertyService.js';
 import {
   addPropertyToGroup,
   reorderGroupProperties,
+  SubTypeGroup,
+  SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function addPropertyAtIndexThunk({
   groupId,
@@ -20,16 +23,31 @@ export function addPropertyAtIndexThunk({
   propertyId: string;
   dropIndex: number;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const group = state.subType.groups.edit[groupId];
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'No group found to add property to at index.',
+          type: 'error',
+        })
+      );
       return;
     }
-    const property = state.subType.properties.edit[propertyId];
+    if (!checkAdmin(group.system)) return;
+
+    const property = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
+
     if (!property) {
-      console.error(`Property with ID ${propertyId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'No property found to add to group at index.',
+          type: 'error',
+        })
+      );
       return;
     }
     try {
@@ -47,7 +65,13 @@ export function addPropertyAtIndexThunk({
         throw new Error('No created property returned from service.');
       }
 
-      dispatch(addPropertyToGroup({ groupId, property: createdProperty }));
+      dispatch(
+        addPropertyToGroup({
+          groupId,
+          property: createdProperty,
+          system: group.system,
+        })
+      );
 
       await subTypeCommands.reorderGroupProperties({
         groupId,
@@ -59,6 +83,7 @@ export function addPropertyAtIndexThunk({
           groupId,
           newOrder: order,
           newDisplay: { ...group.display },
+          system: group.system,
         })
       );
 
@@ -73,7 +98,7 @@ export function addPropertyAtIndexThunk({
       console.error('Error linking subtype property:', error);
       dispatch(
         showSnackbar({
-          message: 'Error linking subtype property. Try again later.',
+          message: 'Error linking subtype property. Thanks, backend.',
           type: 'error',
           duration: 3000,
         })

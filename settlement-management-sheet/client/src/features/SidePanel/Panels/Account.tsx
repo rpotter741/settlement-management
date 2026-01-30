@@ -14,7 +14,7 @@ import {
   IconButton,
   MenuItem,
 } from '@mui/material';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { Logout, Settings } from '@mui/icons-material';
 import AccountMenu from '@/components/shared/Layout/AvatarWithMenu.js';
 

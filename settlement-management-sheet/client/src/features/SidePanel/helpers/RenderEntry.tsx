@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useSidePanel } from '@/hooks/global/useSidePanel.js';
 import getTrail from '@/features/SidePanel/getTrail.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import structure from '../structure.js';
 import { ToolName } from '@/app/types/ToolTypes.js';
 import { AnimatePresence } from 'framer-motion';

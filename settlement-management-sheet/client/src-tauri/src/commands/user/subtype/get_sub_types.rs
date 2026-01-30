@@ -14,8 +14,8 @@ pub struct GetSubTypesInput {
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetSubTypeReturn {
-    pub user_sub_types: Vec<UserSubType>,
-    pub system_sub_types: Vec<SystemSubType>,
+    pub user: Vec<UserSubType>,
+    pub system: Vec<SystemSubType>,
 }
 
 #[tauri::command]
@@ -25,8 +25,10 @@ pub async fn get_sub_types(
 ) -> Result<GetSubTypeReturn, String> {
     let system_input = input.system.unwrap_or(false);
     let mut system_sub_types = Vec::new();
+
     if system_input {
-        system_sub_types = get_system_sub_types(db.clone()).await?;
+        // Pass the inner connection reference, not the State
+        system_sub_types = get_system_sub_types(db.inner()).await?;
     }
 
     let query =
@@ -44,19 +46,16 @@ pub async fn get_sub_types(
         .collect::<Result<Vec<UserSubType>, String>>()?;
 
     Ok(GetSubTypeReturn {
-        user_sub_types,
-        system_sub_types,
+        user: user_sub_types,
+        system: system_sub_types,
     })
 }
 
-pub async fn get_system_sub_types(
-    db: tauri::State<'_, DatabaseConnection>,
-) -> Result<Vec<SystemSubType>, String> {
-    let query = system_sub_type::Entity::find();
-
-    let result = query
+// Helper takes &DatabaseConnection, not State
+pub async fn get_system_sub_types(db: &DatabaseConnection) -> Result<Vec<SystemSubType>, String> {
+    let result = system_sub_type::Entity::find()
         .order_by_desc(system_sub_type::Column::UpdatedAt)
-        .all(db.inner())
+        .all(db) // No .inner() needed here
         .await
         .map_err(|e| e.to_string())?;
 

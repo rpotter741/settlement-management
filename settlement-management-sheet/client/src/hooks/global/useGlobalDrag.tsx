@@ -1,6 +1,6 @@
 import { useGlobalDragContext } from '@/context/DnD/GlobalDrag.js';
 import { useDrag, useDrop } from 'react-dnd';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { GenericObject } from '../../../../shared/types/common.js';
 import { useEffect, useRef } from 'react';
 

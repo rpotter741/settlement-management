@@ -95,14 +95,12 @@ export async function createSubTypeGroup({
 export async function createSubTypeProperty({
   id,
   name,
-  contentType,
   createdBy,
   inputType,
   shape,
 }: {
   id: string;
   name: string;
-  contentType: string;
   createdBy: string;
   inputType: string;
   shape: AllShapes;
@@ -114,7 +112,6 @@ export async function createSubTypeProperty({
         input: {
           id,
           name,
-          contentType,
           createdBy,
           inputType,
           shape: JSON.stringify(shape), // to avoid deserialization issues with enums
@@ -211,15 +208,18 @@ export async function getSubTypeGroups({
   system?: boolean;
 }) {
   try {
-    const result: RustSubTypeGroup[] = await invoke('get_sub_type_groups', {
-      input: { userId, system },
-    });
-    console.log(
-      result.map((group) => parseGroupProperties(group as RustSubTypeGroup))
-    );
-    return result.map((group) =>
-      parseGroupProperties(group as RustSubTypeGroup)
-    );
+    const result: { user: RustSubTypeGroup[]; system: RustSubTypeGroup[] } =
+      await invoke('get_sub_type_groups', {
+        input: { userId, system },
+      });
+    return {
+      user: result.user.map((group) =>
+        parseGroupProperties(group as RustSubTypeGroup)
+      ),
+      system: result.system.map((group) =>
+        parseGroupProperties(group as RustSubTypeGroup)
+      ),
+    };
   } catch (error) {
     console.error(error);
     throw error;
@@ -245,10 +245,16 @@ export async function getSubTypeProperties({
   system?: boolean;
 }) {
   try {
-    const result: SubTypeProperty[] = await invoke('get_sub_type_properties', {
+    const result: {
+      system: RustSubtypeProperty[];
+      user: RustSubtypeProperty[];
+    } = await invoke('get_sub_type_properties', {
       input: { userId, system },
     });
-    return result.map((prop) => parseShape(prop as RustSubtypeProperty));
+    return {
+      system: result.system.map((prop) => parseShape(prop)),
+      user: result.user.map((prop) => parseShape(prop)),
+    };
   } catch (error) {
     console.error(error);
     throw error;
@@ -263,9 +269,12 @@ export async function getSubTypes({
   system?: boolean;
 }) {
   try {
-    const result: SubType[] = await invoke('get_sub_types', {
-      input: { userId, system },
-    });
+    const result: { system: SubType[]; user: SubType[] } = await invoke(
+      'get_sub_types',
+      {
+        input: { userId, system },
+      }
+    );
     return result;
   } catch (error) {
     console.error(error);

@@ -14,8 +14,8 @@ pub struct GetSubTypePropertiesInput {
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetSubTypePropertiesOutput {
-    pub user_properties: Vec<UserSubTypeProperty>,
-    pub system_properties: Vec<SystemSubTypeProperty>,
+    pub user: Vec<UserSubTypeProperty>,
+    pub system: Vec<SystemSubTypeProperty>,
 }
 
 #[tauri::command]
@@ -26,7 +26,7 @@ pub async fn get_sub_type_properties(
     let system_input = input.system.unwrap_or(false);
     let mut system_properties = Vec::new();
     if system_input {
-        system_properties = get_system_sub_type_properties(db.clone()).await?;
+        system_properties = get_system_sub_type_properties(db.inner()).await?;
     }
 
     // build query
@@ -50,17 +50,17 @@ pub async fn get_sub_type_properties(
     // return result
 
     Ok(GetSubTypePropertiesOutput {
-        user_properties: result,
-        system_properties,
+        user: result,
+        system: system_properties,
     })
 }
 
 pub async fn get_system_sub_type_properties(
-    db: tauri::State<'_, DatabaseConnection>,
+    db: &DatabaseConnection,
 ) -> Result<Vec<SystemSubTypeProperty>, String> {
     let properties = system_sub_type_property::Entity::find()
         .order_by_desc(system_sub_type_property::Column::UpdatedAt)
-        .all(db.inner())
+        .all(db)
         .await
         .map_err(|e| e.to_string())?;
 

@@ -8,11 +8,15 @@ use tauri::Manager;
 mod commands;
 mod entities;
 mod entries;
+mod logging;
 mod macros;
 mod types;
+mod utility;
 
 // Import from the migration crate, not a local module
+use logging::setup_logging;
 use migration::{Migrator, MigratorTrait};
+use tracing::{error, info, warn};
 
 async fn setup_database(
     app_handle: &tauri::AppHandle,
@@ -28,7 +32,7 @@ async fn setup_database(
 
     // Build the database path
     let db_path = app_data_dir.join("app.db");
-    let database_url = format!("sqlite:{}?mode=rwc", db_path.display());
+    let database_url = format!("sqlite://{}?mode=rwc", db_path.display());
 
     println!("Connecting to database at: {}", database_url);
 
@@ -43,11 +47,28 @@ async fn setup_database(
     Ok(db)
 }
 
+// nuke app in dev via:
+// rm ~/Library/Application\ Support/com.robbiepotts.eclorean-ledger/app.db
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle().clone();
+
+            // Get log directory
+            let app_data_dir = app
+                .path()
+                .app_data_dir()
+                .expect("Failed to get app data directory");
+
+            let log_dir = app_data_dir.join("logs");
+
+            // Initialize logging
+            setup_logging(log_dir.clone()).expect("Failed to setup logging");
+
+            info!("Application started");
+            info!("Log directory: {:?}", log_dir);
 
             // Spawn database setup on tokio runtime (non-blocking)
             tauri::async_runtime::spawn(async move {
@@ -80,6 +101,7 @@ async fn main() {
             commands::entry::get_entries_by_id,
             commands::entry::update_entry_groups,
             commands::entry::update_entry_sub_type,
+            commands::entry::search_entries,
             commands::subtype::get_sub_type_properties,
             commands::subtype::create_sub_type_property,
             commands::subtype::create_sub_type_group,
@@ -97,7 +119,11 @@ async fn main() {
             commands::subtype::update_sub_type_property,
             commands::subtype::remove_group_from_sub_type,
             commands::subtype::update_sub_type,
-            commands::backlinks::update_backlink
+            commands::backlinks::update_backlink,
+            commands::logging::get_log_path,
+            commands::logging::get_recent_logs,
+            commands::logging::log_frontend_error,
+            commands::app::init_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

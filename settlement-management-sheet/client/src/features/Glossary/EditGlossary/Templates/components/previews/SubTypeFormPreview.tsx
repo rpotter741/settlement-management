@@ -61,7 +61,7 @@ const SubTypeFormPreview = ({
       mouseY: event.clientY - 6,
       propertyId: property.id,
       propertyType: property.inputType,
-      inputType: property.shape.inputType as string,
+      inputType: property.inputType as string,
     });
   };
 
@@ -82,6 +82,7 @@ const SubTypeFormPreview = ({
             },
           },
         },
+        system: group.source === 'system',
       })
     );
     closeContextMenu();
@@ -132,7 +133,7 @@ const SubTypeFormPreview = ({
               handleContextMenu(e as any, property);
             }}
           >
-            {property.type === 'compound' && (
+            {property.inputType === 'compound' && (
               <>
                 <Typography variant="h5" sx={{ mb: 1 }}>
                   {property.name}
@@ -157,7 +158,7 @@ const SubTypeFormPreview = ({
                 isAnchor={isAnchor}
               />
             </Box>
-            {property.type === 'compound' && <Divider sx={{ my: 2 }} />}
+            {property.inputType === 'compound' && <Divider sx={{ my: 2 }} />}
           </Box>
         );
       })}

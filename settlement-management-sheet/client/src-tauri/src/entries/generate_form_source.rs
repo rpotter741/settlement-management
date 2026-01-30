@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::types::*;
-use sea_orm::{DatabaseConnection, DeriveDisplay, EntityTrait};
+use sea_orm::{DatabaseConnection, EntityTrait};
 
 use crate::entities::{user_sub_type, user_sub_type_property};
 
@@ -19,43 +19,12 @@ pub enum ConfigOption {
     Compound(CompoundPropertyConfig),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, DeriveDisplay)]
-#[serde(rename_all = "lowercase")]
-pub enum FormFormat {
-    File,
-    Folder,
-}
-
-pub fn file_or_folder(entry_type: &GlossaryEntryType) -> FormFormat {
-    match entry_type {
-        GlossaryEntryType::Continent
-        | GlossaryEntryType::Region
-        | GlossaryEntryType::Nation
-        | GlossaryEntryType::Territory
-        | GlossaryEntryType::Landmark
-        | GlossaryEntryType::Settlement
-        | GlossaryEntryType::District
-        | GlossaryEntryType::Collective => FormFormat::Folder,
-        _ => FormFormat::File,
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PropertyConfig {
     pub id: PropertyId,
     pub name: String,
     pub value: serde_json::Value,
 }
-
-// impl PropertyConfig {
-//     fn empty() -> Self {
-//         Self {
-//             id: PropertyId(String::new()),
-//             name: String::new(),
-//             value: serde_json::Value::Null,
-//         }
-//     }
-// }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CompoundPropertyConfig {
@@ -70,15 +39,6 @@ pub struct CompoundPropertyValue {
     pub left: Box<PropertyConfig>,
     pub right: Box<PropertyConfig>,
 }
-
-// impl CompoundPropertyValue {
-//     fn empty() -> Self {
-//         Self {
-//             left: Box::new(PropertyConfig::empty()),
-//             right: Box::new(PropertyConfig::empty()),
-//         }
-//     }
-// }
 
 pub fn shape_to_property_config(
     shape: &NonCompoundPropertyShape,
@@ -169,17 +129,17 @@ pub fn generate_compound_property_value(
             value: HashMap::new(),
         };
 
-        let row_id = uuid::Uuid::new_v4().to_string();
+        let row_id = ulid::Ulid::new().to_string();
         compound_config.order.push(row_id.clone());
 
         let left_vals = shape_to_property_config(
             &compound_shape.left.shape,
-            uuid::Uuid::new_v4().to_string(),
+            ulid::Ulid::new().to_string(),
             compound_shape.left.name.to_string(),
         );
         let right_vals = shape_to_property_config(
             &compound_shape.right.shape,
-            uuid::Uuid::new_v4().to_string(),
+            ulid::Ulid::new().to_string(),
             compound_shape.right.name.to_string(),
         );
 
@@ -202,7 +162,6 @@ pub fn generate_compound_property_value(
 #[derive(Clone)]
 pub struct FormSource {
     pub name: String,
-    pub format: FormFormat,
     pub entry_type: GlossaryEntryType,
     pub groups: HashMap<String, BasicGroup>,
     pub primary_anchor_id: Option<String>,
@@ -227,7 +186,7 @@ pub async fn generate_form_source(
         .map_err(|e| e.to_string())?
         .ok_or_else(|| "SubType not found".to_string())?;
 
-    let sub_type_obj: SubType = sub_type
+    let sub_type_obj: UserSubType = sub_type
         .clone()
         .try_into()
         .map_err(|e| format!("Failed to convert sub type: {}", e))?;
@@ -273,7 +232,6 @@ pub async fn generate_form_source(
 
     Ok(FormSource {
         name: "New Entry".to_string(),
-        format: file_or_folder(&sub_type_obj.entry_type),
         entry_type: sub_type_obj.entry_type.clone(),
         groups: result,
         primary_anchor_id: Some(anchors.primary.0),

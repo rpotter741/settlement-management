@@ -14,7 +14,7 @@ import { tabSelectors as select } from '@/app/selectors/tabSelectors.js';
 import { TabDataPayload } from '@/app/types/ToolTypes.js';
 import { OptionObject, TabTools } from '@/app/types/TabTypes.js';
 import { set } from 'lodash';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export type SidePanelSide = 'left' | 'right';
 

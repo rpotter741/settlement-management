@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { filterNodesByEntryType } from '../utils/glossaryConstants.js';
 import { useModalActions } from '@/hooks/global/useModal.js';
 import isDetailFileType from '@/app/../../../server/src/utils/isDetailFileType.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { useEffect, useMemo, useState } from 'react';
 import { usePropertyLabel } from '../utils/getPropertyLabel.js';
 import { selectAllSubTypes } from '@/app/selectors/subTypeSelectors.js';

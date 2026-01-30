@@ -10,10 +10,14 @@ import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function createSubTypeGroupThunk({
   group,
+  system = false,
 }: {
   group: SubTypeGroup;
+  system?: boolean;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
+    const state = getState();
+    const user = state.user;
     try {
       const customGroup = cloneDeep(group);
       customGroup.displayName = customGroup.name;
@@ -21,13 +25,14 @@ export function createSubTypeGroupThunk({
       dispatch(
         addSubTypeGroup({
           groups: [{ ...customGroup, properties: [] }],
+          system: user.role === 'admin' ? true : false,
         })
       );
 
       await subTypeCommands.createSubTypeGroup({
         name: customGroup.name,
         id: customGroup.id,
-        createdBy: 'robbiepottsdm',
+        createdBy: user.username ?? user.device,
         contentType: 'CUSTOM',
       });
 

@@ -55,3 +55,27 @@ macro_rules! impl_parse_json {
         )+
     };
 }
+
+#[macro_export]
+macro_rules! impl_metadata_try_from {
+    ($model_type:ty) => {
+        impl TryFrom<$model_type> for ContentMetaData {
+            type Error = String;
+
+            fn try_from(model: $model_type) -> Result<Self, Self::Error> {
+                Ok(ContentMetaData {
+                    id: model.id,
+                    ref_id: model.ref_id,
+                    version: model.version,
+                    published_at: $crate::utility::parse_optional_datetime(model.published_at),
+                    download_count: model.download_count,
+                    fork_count: model.fork_count,
+                    forked_from: model.forked_from,
+                    forked_by: $crate::utility::parse_csv_list(model.forked_by),
+                    deleted_at: $crate::utility::parse_optional_datetime(model.deleted_at),
+                    status: model.status,
+                })
+            }
+        }
+    };
+}

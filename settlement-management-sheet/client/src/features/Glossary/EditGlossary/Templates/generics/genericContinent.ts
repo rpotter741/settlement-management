@@ -1,5 +1,5 @@
 import { property } from 'lodash';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
 
 export type SubTypePropertyTypes =

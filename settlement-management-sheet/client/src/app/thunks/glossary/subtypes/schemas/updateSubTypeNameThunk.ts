@@ -8,6 +8,7 @@ import {
   addGroupsToSubType,
   addPropertyToGroup,
   SemanticAnchors,
+  SubType,
   updateSubTypeAnchors,
   updateSubTypeName,
 } from '@/app/slice/subTypeSlice.js';
@@ -16,6 +17,9 @@ import { GenericObject } from '../../../../../../../shared/types/common.js';
 import { cloneDeep } from 'lodash';
 import updateSubTypeAnchorService from '@/services/glossary/subTypes/updateSubTypeAnchorService.js';
 import updateSubTypeNameService from '@/services/glossary/subTypes/updateSubTypeNameService.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function updateSubTypeNameThunk({
   subtypeId,
@@ -26,18 +30,30 @@ export function updateSubTypeNameThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const state = getState();
-    const subtype = state.subType.edit[subtypeId];
+    const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      console.error(`SubType with ID ${subtypeId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: "Can't find the subtype. Whoops!",
+          type: 'error',
+        })
+      );
       return;
     }
+    if (!checkAdmin(subtype.system)) return;
     const oldName = cloneDeep(subtype.name || '');
 
     try {
-      dispatch(updateSubTypeName({ subtypeId: subtypeId, name }));
+      dispatch(
+        updateSubTypeName({
+          subtypeId: subtypeId,
+          name,
+          system: subtype.system,
+        })
+      );
 
-      await updateSubTypeNameService({
-        subtypeId,
+      await subTypeCommands.updateSubType({
+        id: subtypeId,
         name,
       });
 
@@ -49,17 +65,18 @@ export function updateSubTypeNameThunk({
         })
       );
     } catch (error) {
-      console.error('Error updating subtype anchors:', error);
+      console.error('Error updating subtype name:', error);
       // Revert to old anchors on error
       dispatch(
         updateSubTypeName({
           subtypeId: subtypeId,
           name: oldName,
+          system: subtype.system,
         })
       );
       dispatch(
         showSnackbar({
-          message: 'Error updating semantic anchors. Try again later.',
+          message: "What's in a name? Can't update it, anyway.",
           type: 'error',
           duration: 3000,
         })

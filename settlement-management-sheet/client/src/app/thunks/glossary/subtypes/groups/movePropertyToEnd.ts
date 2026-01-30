@@ -3,10 +3,15 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import { reorderGroupProperties } from '@/app/slice/subTypeSlice.js';
+import {
+  reorderGroupProperties,
+  SubTypeGroup,
+} from '@/app/slice/subTypeSlice.js';
 import reorderGroupPropertiesService from '@/services/glossary/subTypes/reorderGroupPropertiesService.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
 import { cloneDeep } from 'lodash';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function movePropertyToEnd({
   groupId,
@@ -16,12 +21,18 @@ export function movePropertyToEnd({
   propertyId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const group = state.subType.groups.edit[groupId];
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'Group not found.',
+          type: 'error',
+          duration: 3000,
+        })
+      );
       return;
     }
+    if (!checkAdmin(group.system)) return;
     const order = group?.properties.length || 0;
     const newOrder = [...group.properties].map((p) => p.propertyId);
     newOrder.splice(newOrder.indexOf(propertyId), 1);
@@ -34,6 +45,7 @@ export function movePropertyToEnd({
           groupId,
           newOrder,
           newDisplay: cloneDeep(group.display),
+          system: group.system,
         })
       );
 

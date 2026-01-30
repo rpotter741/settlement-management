@@ -7,11 +7,14 @@ import {
   addSubTypeGroup,
   reorderGroupProperties,
   SubTypeGroup,
+  SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
 import createSubTypeGroupService from '@/services/glossary/subTypes/createSubTypeGroupService.js';
 import removePropertyFromGroupService from '@/services/glossary/subTypes/removePropertyFromGroupService.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function removeGroupPropertyThunk({
   groupId,
@@ -20,16 +23,31 @@ export function removeGroupPropertyThunk({
   groupId: string;
   propertyId: string;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const group = state.subType.groups.edit[groupId];
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'Group not found.',
+          type: 'error',
+          duration: 3000,
+        })
+      );
       return;
     }
-    const property = state.subType.properties.edit[propertyId];
+    if (!checkAdmin(group.system)) return;
+    const property = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
     if (!property) {
-      console.error(`Property with ID ${propertyId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'Property not found.',
+          type: 'error',
+          duration: 3000,
+        })
+      );
       return;
     }
     try {
@@ -43,8 +61,12 @@ export function removeGroupPropertyThunk({
         : [];
 
       if (!linkId) {
-        console.error(
-          `Link for property ID ${propertyId} not found in group ID ${groupId}.`
+        dispatch(
+          showSnackbar({
+            message: 'Group-Property Link not found.',
+            type: 'error',
+            duration: 3000,
+          })
         );
         return;
       }
@@ -57,6 +79,7 @@ export function removeGroupPropertyThunk({
           groupId,
           newOrder,
           newDisplay: newGroupDisplay,
+          system: group.system,
         })
       );
 

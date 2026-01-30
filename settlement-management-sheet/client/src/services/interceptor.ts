@@ -2,6 +2,7 @@ import axios from 'axios';
 
 declare global {
   interface ImportMetaEnv {
+    DEV: any;
     readonly VITE_BASE_URL: string;
   }
 

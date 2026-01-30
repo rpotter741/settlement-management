@@ -3,11 +3,14 @@ import { createDefaultProperty } from '@/app/dispatches/glossary/SubTypeProperty
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
+  SubTypeProperty,
   SubTypePropertyTypes,
   updateSubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import { RootState } from '@/app/store.js';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 import { cloneDeep } from 'lodash';
 import { ThunkDispatch } from 'redux-thunk';
 
@@ -21,16 +24,33 @@ export function createDefaultPropertyThunk({
   name: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const oldProperty = cloneDeep(state.subType.properties.edit[propertyId]);
+    const oldProperty = cloneDeep(
+      getSubTypeStateAtKey<SubTypeProperty>('properties', propertyId)
+    );
+    if (!oldProperty) {
+      dispatch(
+        showSnackbar({
+          message: "Ope, no old property found. Can't do it!",
+          type: 'error',
+        })
+      );
+      return;
+    }
+    if (!checkAdmin(oldProperty.system)) return;
     try {
-      const property = createDefaultProperty(propertyType, name, propertyId);
+      const property = createDefaultProperty(
+        propertyType,
+        name,
+        propertyId,
+        oldProperty.system
+      );
       if (!property) return;
 
       dispatch(
         updateSubTypeProperty({
           propertyId,
           property,
+          system: oldProperty.system,
         })
       );
 
@@ -60,6 +80,7 @@ export function createDefaultPropertyThunk({
         updateSubTypeProperty({
           propertyId,
           property: oldProperty,
+          system: oldProperty.system,
         })
       );
     }

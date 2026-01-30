@@ -8,12 +8,16 @@ import {
   addGroupsToSubType,
   addPropertyToGroup,
   SemanticAnchors,
+  SubType,
   updateSubTypeAnchors,
 } from '@/app/slice/subTypeSlice.js';
 import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSubTypeService.js';
 import { GenericObject } from '../../../../../../../shared/types/common.js';
 import { cloneDeep } from 'lodash';
 import updateSubTypeAnchorService from '@/services/glossary/subTypes/updateSubTypeAnchorService.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
+import subTypeCommands from '@/app/commands/subtype.ts';
 
 export function updateSubTypeAnchorThunk({
   subtypeId,
@@ -24,18 +28,29 @@ export function updateSubTypeAnchorThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const state = getState();
-    const subtype = state.subType.edit[subtypeId];
+    const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      console.error(`SubType with ID ${subtypeId} not found.`);
+      showSnackbar({
+        message: "Can't find the subtype you're looking for.",
+        type: 'error',
+      });
       return;
     }
+    if (!checkAdmin(subtype.system)) return;
+
     const oldAnchors = cloneDeep(subtype.anchors || {});
 
     try {
-      dispatch(updateSubTypeAnchors({ subtypeId: subtypeId, anchors }));
+      dispatch(
+        updateSubTypeAnchors({
+          subtypeId: subtypeId,
+          anchors,
+          system: subtype.system,
+        })
+      );
 
-      await updateSubTypeAnchorService({
-        subtypeId,
+      await subTypeCommands.updateSubType({
+        id: subtypeId,
         anchors,
       });
 
@@ -50,11 +65,15 @@ export function updateSubTypeAnchorThunk({
       console.error('Error updating subtype anchors:', error);
       // Revert to old anchors on error
       dispatch(
-        updateSubTypeAnchors({ subtypeId: subtypeId, anchors: oldAnchors })
+        updateSubTypeAnchors({
+          subtypeId: subtypeId,
+          anchors: oldAnchors,
+          system: subtype.system,
+        })
       );
       dispatch(
         showSnackbar({
-          message: 'Error updating semantic anchors. Try again later.',
+          message: 'Anchors keep us grounded but these are lost in the cloud.',
           type: 'error',
           duration: 3000,
         })

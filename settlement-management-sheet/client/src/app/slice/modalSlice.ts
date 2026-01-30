@@ -1,7 +1,7 @@
 import { modalMap } from '@/maps/modalMap.js';
 import { ModalQueueEntry, ModalState } from '../types/ModalTypes.js';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export const initialState: ModalState = {
   open: false,

@@ -1,22 +1,26 @@
-use crate::types::{
-    parse_datetime, CheckboxPropertyShape, CompoundPropertyShape, DatePropertyShape,
-    DropdownPropertyShape, GlossaryEntrySettings, GlossaryEntryType, GlossaryThemes, InputTypeEnum,
-    PropertyShape, RangePropertyShape, SmartLinkRulesShape, TextPropertyShape,
+use crate::{
+    entities::{
+        glossary_meta_data, user_glossary, user_glossary_entry, user_glossary_entry_metadata,
+        user_glossary_node, user_sub_type, user_sub_type_group, user_sub_type_group_metadata,
+        user_sub_type_group_property, user_sub_type_metadata, user_sub_type_property,
+        user_sub_type_property_metadata, user_sub_type_schema_group,
+    },
+    entries::BasicGroup,
+    impl_metadata_try_from,
+    types::{
+        CheckboxPropertyShape, CompoundPropertyShape, ContentMetaData, DatePropertyShape,
+        DropdownPropertyShape, GlossaryEntrySettings, GlossaryEntryType, GlossaryId,
+        GlossaryThemes, GroupId, InputTypeEnum, NodeEntryId, PropertyId, PropertyShape,
+        RangePropertyShape, SemanticAnchors, SmartLinkRulesShape, SubTypeId, TextPropertyShape,
+    },
+    utility::parse_datetime,
 };
+
 use chrono::{DateTime as ChronoDateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::str::FromStr;
-
-use crate::{
-    entities::{
-        user_glossary, user_glossary_entry, user_glossary_node, user_sub_type, user_sub_type_group,
-        user_sub_type_group_property, user_sub_type_property, user_sub_type_schema_group,
-    },
-    entries::BasicGroup,
-    types::{GlossaryId, GroupId, NodeEntryId, PropertyId, SubTypeId},
-};
 
 /*-------------------------------------------------------- */
 /*----------------------Glossary Node----------------------*/
@@ -72,8 +76,8 @@ pub struct UserGlossaryEntry {
     pub created_by: String,
     pub entry_type: GlossaryEntryType,
     pub sub_type_id: String,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub groups: HashMap<String, BasicGroup>,
     pub primary_anchor_id: Option<String>,
@@ -107,6 +111,9 @@ impl TryFrom<user_glossary_entry::Model> for UserGlossaryEntry {
     }
 }
 
+// for the entry metadata transformations
+impl_metadata_try_from!(user_glossary_entry_metadata::Model);
+
 /*-------------------------------------------------------- */
 /*-------------------------Glossary------------------------*/
 /*-------------------------------------------------------- */
@@ -120,8 +127,8 @@ pub struct UserGlossary {
     sub_genre: String,
     description: Option<String>,
     created_by: String,
-    created_at: DateTime,
-    updated_at: DateTime,
+    created_at: ChronoDateTime<Utc>,
+    updated_at: ChronoDateTime<Utc>,
     visibility: String,
     theme: GlossaryThemes,
     integration_state: HashMap<GlossaryEntryType, GlossaryEntrySettings>,
@@ -148,6 +155,9 @@ impl TryFrom<user_glossary::Model> for UserGlossary {
     }
 }
 
+// for the glossary metadata transformations
+impl_metadata_try_from!(glossary_meta_data::Model);
+
 /*-------------------------------------------------------- */
 /*---------------------Subtype Property--------------------*/
 /*-------------------------------------------------------- */
@@ -160,10 +170,11 @@ pub struct UserSubTypeProperty {
     pub input_type: InputTypeEnum,
     pub shape: String,
     pub created_by: String,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub display_name: Option<String>,
     pub smart_sync: Option<SmartLinkRulesShape>,
+    pub system: bool,
 }
 
 impl user_sub_type_property::Model {
@@ -214,9 +225,13 @@ impl TryFrom<user_sub_type_property::Model> for UserSubTypeProperty {
             updated_at: parse_datetime(&model.updated_at),
             display_name: model.display_name,
             smart_sync: SmartLinkRulesShape::from_json(&model.smart_sync.unwrap_or_default()).ok(),
+            system: false,
         })
     }
 }
+
+// for the property metadata transformations
+impl_metadata_try_from!(user_sub_type_property_metadata::Model);
 
 /*-------------------------------------------------------- */
 /*-------------------Subtype Property Link-----------------*/
@@ -255,13 +270,14 @@ impl TryFrom<user_sub_type_group_property::Model> for UserSubTypePropertyLink {
 pub struct UserSubTypeGroup {
     pub id: GroupId,
     pub created_by: String,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub display_name: Option<String>,
     pub display: Option<String>,
     pub description: Option<String>,
     pub properties: Option<Vec<UserSubTypePropertyLink>>,
+    pub system: bool,
 }
 
 impl TryFrom<user_sub_type_group::Model> for UserSubTypeGroup {
@@ -278,6 +294,7 @@ impl TryFrom<user_sub_type_group::Model> for UserSubTypeGroup {
             display: Some(model.display.unwrap_or_default()),
             description: model.description,
             properties: Some(Vec::new()),
+            system: false,
         })
     }
 }
@@ -299,6 +316,9 @@ impl user_sub_type_group::Model {
             .collect())
     }
 }
+
+// for the group metadata transformations
+impl_metadata_try_from!(user_sub_type_group_metadata::Model);
 
 /*-------------------------------------------------------- */
 /*--------------------Subtype Group Link-------------------*/
@@ -334,12 +354,13 @@ impl TryFrom<user_sub_type_schema_group::Model> for UserSubTypeGroupLink {
 #[serde(rename_all = "camelCase")]
 pub struct UserSubType {
     pub id: SubTypeId,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub entry_type: GlossaryEntryType,
     pub anchors: SemanticAnchors,
     pub context: Option<SubTypeId>,
+    pub system: bool,
 }
 
 impl TryFrom<user_sub_type::Model> for UserSubType {
@@ -356,6 +377,7 @@ impl TryFrom<user_sub_type::Model> for UserSubType {
             anchors: serde_json::from_str(&model.anchors)
                 .map_err(|e| format!("Failed to parse anchors: {}", e))?,
             context: Some(SubTypeId(model.context)),
+            system: false,
         })
     }
 }
@@ -406,3 +428,6 @@ impl user_sub_type::Model {
         Ok(result)
     }
 }
+
+// for the subtype metadata transformations
+impl_metadata_try_from!(user_sub_type_metadata::Model);

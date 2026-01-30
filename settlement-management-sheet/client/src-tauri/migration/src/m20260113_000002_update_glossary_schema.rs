@@ -18,7 +18,8 @@ DROP TABLE IF EXISTS "UserSettings";
 DROP TABLE IF EXISTS "Devices";
 DROP TABLE IF EXISTS "UserTiers";
 DROP TABLE IF EXISTS "Users";
-DROP TABLE IF EXISTS "BacklinkIndex";
+DROP TABLE IF EXISTS "UserBacklinkIndex";
+DROP TABLE IF EXISTS "SystemBacklinkIndex";
 DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "UserSubTypeGroupProperty";
@@ -49,8 +50,8 @@ CREATE TABLE "Users" (
   "username" TEXT NOT NULL UNIQUE,
   "email" TEXT NOT NULL UNIQUE,
   "role" TEXT NOT NULL DEFAULT 'user',
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now'))
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc'))
 );
 
 CREATE INDEX "Users_username_idx" ON "Users"("username");
@@ -61,7 +62,7 @@ CREATE TABLE "UserTiers" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "user_id" TEXT NOT NULL,
   "tier" TEXT NOT NULL,
-  "started_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "started_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "ended_at" TEXT,
   "expires_at" TEXT,
   FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE CASCADE
@@ -72,8 +73,8 @@ CREATE TABLE "Devices" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "user_id" TEXT,
   "device_uuid" TEXT NOT NULL UNIQUE,
-  "last_seen" TEXT NOT NULL DEFAULT (datetime('now')),
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "last_seen" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE SET NULL
 );
 
@@ -82,7 +83,7 @@ CREATE TABLE "UserSettings" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "user_id" TEXT NOT NULL UNIQUE,
   "settings" TEXT NOT NULL,
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "version" INTEGER NOT NULL DEFAULT 1,
   FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE CASCADE
 );
@@ -96,8 +97,8 @@ CREATE TABLE "SystemGlossary" (
   "description" TEXT,
   "rt_description" TEXT,
   "version" INTEGER NOT NULL DEFAULT 1,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "theme" TEXT,
   UNIQUE("name", "genre", "sub_genre", "version")
 );
@@ -114,8 +115,8 @@ CREATE TABLE "UserGlossary" (
   "rt_description" TEXT,
   "created_by" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "visibility" TEXT NOT NULL DEFAULT 'standard',
   "deleted_at" TEXT,
   "theme" TEXT,
@@ -131,10 +132,13 @@ CREATE TABLE "GlossaryMetaData" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
+  "published_at" TEXT,
+  "download_count" INTEGER NOT NULL DEFAULT 0,
+  "fork_count" INTEGER NOT NULL DEFAULT 0,
+  "forked_from" TEXT,
   "forked_by" TEXT,
-  "collaborators" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
+  "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserGlossary"("id") ON DELETE CASCADE
 );
 
@@ -179,8 +183,8 @@ CREATE TABLE "SystemSubTypeProperty" (
   "version" INTEGER NOT NULL DEFAULT 1,
   "input_type" TEXT NOT NULL,
   "shape" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "display_name" TEXT,
   "smart_sync" TEXT
 );
@@ -194,8 +198,8 @@ CREATE TABLE "UserSubTypeProperty" (
   "input_type" TEXT NOT NULL,
   "shape" TEXT NOT NULL,
   "created_by" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "deleted_at" TEXT,
   "display_name" TEXT,
   "smart_sync" TEXT,
@@ -210,10 +214,13 @@ CREATE TABLE "UserSubTypePropertyMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
+  "published_at" TEXT,
+  "download_count" INTEGER NOT NULL DEFAULT 0,
+  "fork_count" INTEGER NOT NULL DEFAULT 0,
+  "forked_from" TEXT,
   "forked_by" TEXT,
-  "collaborators" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
+  "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserSubTypeProperty"("id") ON DELETE CASCADE
 );
 
@@ -227,16 +234,16 @@ CREATE TABLE "SystemSubTypeGroup" (
   "display" TEXT,
   "description" TEXT,
   "rt_description" TEXT,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now'))
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc'))
 );
 
 -- UserSubTypeGroup table
 CREATE TABLE "UserSubTypeGroup" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "created_by" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "deleted_at" TEXT,
   "name" TEXT NOT NULL,
   "display_name" TEXT,
@@ -253,10 +260,13 @@ CREATE TABLE "UserSubTypeGroupMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
+  "published_at" TEXT,
+  "download_count" INTEGER NOT NULL DEFAULT 0,
+  "fork_count" INTEGER NOT NULL DEFAULT 0,
+  "forked_from" TEXT,
   "forked_by" TEXT,
-  "collaborators" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
+  "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserSubTypeGroup"("id") ON DELETE CASCADE
 );
 
@@ -266,8 +276,8 @@ CREATE TABLE "SystemSubType" (
   "name" TEXT NOT NULL,
   "entry_type" TEXT NOT NULL,
   "anchors" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "version" INTEGER NOT NULL DEFAULT 1
 );
 
@@ -280,8 +290,8 @@ CREATE TABLE "UserSubType" (
   "created_by" TEXT NOT NULL,
   "name" TEXT NOT NULL,
   "entry_type" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "anchors" TEXT NOT NULL,
   "context" TEXT NOT NULL,
   FOREIGN KEY ("created_by") REFERENCES "Users"("id") ON DELETE CASCADE,
@@ -296,10 +306,13 @@ CREATE TABLE "UserSubTypeMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
+  "published_at" TEXT,
+  "download_count" INTEGER NOT NULL DEFAULT 0,
+  "fork_count" INTEGER NOT NULL DEFAULT 0,
+  "forked_from" TEXT,
   "forked_by" TEXT,
-  "collaborators" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
+  "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserSubType"("id") ON DELETE CASCADE
 );
 
@@ -309,8 +322,8 @@ CREATE TABLE "SystemGlossaryEntry" (
   "entry_type" TEXT NOT NULL,
   "sub_type_id" TEXT NOT NULL,
   "name" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "version" INTEGER NOT NULL DEFAULT 1,
   "groups" TEXT,
   "custom_properties" TEXT,
@@ -332,8 +345,8 @@ CREATE TABLE "UserGlossaryEntry" (
   "entry_type" TEXT NOT NULL,
   "sub_type_id" TEXT NOT NULL,
   "created_by" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "name" TEXT NOT NULL,
   "groups" TEXT,
   "custom_properties" TEXT,
@@ -356,10 +369,13 @@ CREATE TABLE "UserGlossaryEntryMetadata" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "ref_id" TEXT NOT NULL,
   "version" INTEGER NOT NULL DEFAULT 1,
+  "published_at" TEXT,
+  "download_count" INTEGER NOT NULL DEFAULT 0,
+  "fork_count" INTEGER NOT NULL DEFAULT 0,
+  "forked_from" TEXT,
   "forked_by" TEXT,
-  "collaborators" TEXT,
-  "editors" TEXT,
   "deleted_at" TEXT,
+  "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE
 );
 
@@ -423,12 +439,12 @@ CREATE TABLE "UserBacklinkIndex" (
   "property_name" TEXT NOT NULL,
   "property_value" TEXT,
   "ignore_divergence" INTEGER NOT NULL DEFAULT 0,
-  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "target_ignore" INTEGER NOT NULL DEFAULT 0,
   "sub_property_id" TEXT,
   "is_system_property" INTEGER NOT NULL DEFAULT 0,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   FOREIGN KEY ("source_id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE,
   FOREIGN KEY ("target_id") REFERENCES "UserGlossaryEntry"("id") ON DELETE CASCADE,
   UNIQUE("source_id", "target_id", "property_id")
@@ -447,12 +463,12 @@ CREATE TABLE "SystemBacklinkIndex" (
   "property_name" TEXT NOT NULL,
   "property_value" TEXT,
   "ignore_divergence" INTEGER NOT NULL DEFAULT 0,
-  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   "target_ignore" INTEGER NOT NULL DEFAULT 0,
   "sub_property_id" TEXT,
   "is_system_property" INTEGER NOT NULL DEFAULT 1,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now')),
+  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
   FOREIGN KEY ("source_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
   FOREIGN KEY ("target_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
   UNIQUE("source_id", "target_id", "property_id")
@@ -460,6 +476,35 @@ CREATE TABLE "SystemBacklinkIndex" (
 
 CREATE INDEX "SystemBacklinkIndex_target_id_idx" ON "SystemBacklinkIndex"("target_id");
 CREATE INDEX "SystemBacklinkIndex_property_id_idx" ON "SystemBacklinkIndex"("property_id");
+
+-- FTS5 virtual table for glossary entries
+CREATE VIRTUAL TABLE "UserGlossaryEntryFTS" USING fts5(
+  id UNINDEXED,
+  name,
+  groups,
+  entry_type UNINDEXED,
+  tokenize = 'porter unicode61'
+);
+
+-- Triggers to keep FTS in sync
+CREATE TRIGGER "UserGlossaryEntry_ai" AFTER INSERT ON "UserGlossaryEntry" BEGIN
+  INSERT INTO "UserGlossaryEntryFTS"(id, name, groups, entry_type)
+  VALUES (new.id, new.name, new.groups, new.entry_type);
+END;
+
+CREATE TRIGGER "UserGlossaryEntry_au" AFTER UPDATE ON "UserGlossaryEntry" BEGIN
+  UPDATE "UserGlossaryEntryFTS"
+  SET name = new.name, groups = new.groups, entry_type = new.entry_type
+  WHERE id = new.id;
+END;
+
+CREATE TRIGGER "UserGlossaryEntry_ad" AFTER DELETE ON "UserGlossaryEntry" BEGIN
+  DELETE FROM "UserGlossaryEntryFTS" WHERE id = old.id;
+END;
+
+-- Optional: Populate existing data
+INSERT INTO "UserGlossaryEntryFTS"(id, name, groups, entry_type)
+SELECT id, name, groups, entry_type FROM "UserGlossaryEntry";
 "#,
             )
             .await?;
@@ -479,7 +524,8 @@ DROP TABLE IF EXISTS "UserSettings";
 DROP TABLE IF EXISTS "Devices";
 DROP TABLE IF EXISTS "UserTiers";
 DROP TABLE IF EXISTS "Users";
-DROP TABLE IF EXISTS "BacklinkIndex";
+DROP TABLE IF EXISTS "UserBacklinkIndex";
+DROP TABLE IF EXISTS "SystemBacklinkIndex";
 DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "UserSubTypeGroupProperty";

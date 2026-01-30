@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { useTools } from '@/hooks/tools/useTools.jsx';
 
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';
 import EditDependency from '@/components/shared/Metadata/EditDependency.jsx';

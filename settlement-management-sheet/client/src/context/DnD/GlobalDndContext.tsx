@@ -31,7 +31,7 @@ import {
 import DragPreview from './preview/DragPreview.tsx';
 import { addPropertyAtIndexThunk } from '@/app/thunks/glossary/subtypes/groups/addPropertyAtIndexThunk.ts';
 import { showSnackbar } from '@/app/slice/snackbarSlice.ts';
-import { reorderPropertyToIndex } from '@/app/thunks/glossary/subtypes/groups/reorderPropertyToIndexThunk.ts';
+import { reorderPropertyToIndexThunk } from '@/app/thunks/glossary/subtypes/groups/reorderPropertyToIndexThunk.ts';
 
 interface DnDContextType {
   matches: MutableRefObject<boolean>;
@@ -217,7 +217,7 @@ const subTypeGroupPropertyAcceptMap: Record<
       return;
     }
     dispatch(
-      reorderPropertyToIndex({
+      reorderPropertyToIndexThunk({
         groupId,
         propertyId,
         dropIndex,

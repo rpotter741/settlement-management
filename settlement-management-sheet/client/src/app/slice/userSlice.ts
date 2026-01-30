@@ -1,10 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { cloneDeep, set } from 'lodash';
+import { ulid as newId } from 'ulid';
 
 export interface User {
   id: string | null; // Typically the 'sub' from the JWT
+  username: string | null; // Username from token or DB
+  device: string; // device id for non-subbed users
   email: string | null; // Email from token or DB
-  role: 'freemium' | 'premium' | 'premiumPlus' | 'admin' | null;
+  tier: 'free' | 'basic' | 'premium' | 'admin';
+  role: 'user' | 'moderator' | 'admin' | null; // User role for permission
   features: string[]; // Optional custom claims (like "ai_export")
   token: string | null; // Raw JWT
   isAuthenticated: boolean; // Easy flag for gating UI
@@ -14,8 +18,11 @@ export interface User {
 
 const initialState: User = {
   id: null,
+  username: null,
+  device: newId(),
   email: null,
-  role: null,
+  tier: 'free',
+  role: 'user',
   features: [],
   token: null,
   isAuthenticated: false,
@@ -28,19 +35,25 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<User>) => {
-      const { id, email, role, features, token } = action.payload;
+      const { id, username, email, tier, role, features, token, device } =
+        action.payload;
       state.id = id;
+      state.username = username;
       state.email = email;
+      state.tier = tier;
       state.role = role;
       state.features = features || [];
       state.token = token || null;
       state.isAuthenticated = !!id; // Set authenticated if id exists
       state.loading = false; // Reset loading state on successful login
       state.error = null; // Clear any previous errors
+      state.device = device || newId();
     },
     clearUser: (state) => {
       state.id = null;
+      state.username = null;
       state.email = null;
+      state.tier = 'free';
       state.role = null;
       state.features = [];
       state.token = null;

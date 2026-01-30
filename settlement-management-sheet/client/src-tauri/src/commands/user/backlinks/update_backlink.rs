@@ -1,5 +1,5 @@
 use crate::types::UserBacklinkIndex;
-use crate::{entities::user_backlink_index, types::get_now};
+use crate::{entities::user_backlink_index, utility::get_now};
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 
 #[derive(serde::Deserialize)]

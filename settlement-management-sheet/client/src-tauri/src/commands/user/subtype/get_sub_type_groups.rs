@@ -21,8 +21,8 @@ pub struct GetSubTypeGroupInput {
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetSubTypeGroupOutput {
-    pub user_groups: Vec<UserSubTypeGroup>,
-    pub system_groups: Vec<SystemSubTypeGroup>,
+    pub user: Vec<UserSubTypeGroup>,
+    pub system: Vec<SystemSubTypeGroup>,
 }
 
 //only get propertyl ink here
@@ -35,7 +35,7 @@ pub async fn get_sub_type_groups(
     let system_input = input.system.unwrap_or(false);
     let mut system_groups = Vec::new();
     if system_input {
-        system_groups = get_system_sub_type_groups(db.clone()).await?;
+        system_groups = get_system_sub_type_groups(db.inner()).await?;
     }
 
     // Fetch groups
@@ -50,8 +50,8 @@ pub async fn get_sub_type_groups(
 
     if groups.is_empty() {
         let output: GetSubTypeGroupOutput = GetSubTypeGroupOutput {
-            user_groups: Vec::new(),
-            system_groups,
+            user: Vec::new(),
+            system: system_groups,
         };
         return Ok(output);
     }
@@ -74,8 +74,8 @@ pub async fn get_sub_type_groups(
             .map_err(|e| e.to_string());
 
         let output: GetSubTypeGroupOutput = GetSubTypeGroupOutput {
-            user_groups: user_groups?,
-            system_groups,
+            user: user_groups?,
+            system: system_groups,
         };
         return Ok(output);
     }
@@ -121,19 +121,19 @@ pub async fn get_sub_type_groups(
         .map_err(|e: String| e)?;
 
     let output: GetSubTypeGroupOutput = GetSubTypeGroupOutput {
-        user_groups,
-        system_groups,
+        user: user_groups,
+        system: system_groups,
     };
 
     Ok(output)
 }
 
 pub async fn get_system_sub_type_groups(
-    db: tauri::State<'_, DatabaseConnection>,
+    db: &DatabaseConnection,
 ) -> Result<Vec<SystemSubTypeGroup>, String> {
     let groups = system_sub_type_group::Entity::find()
         .order_by_desc(system_sub_type_group::Column::UpdatedAt)
-        .all(db.inner())
+        .all(db)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -141,7 +141,7 @@ pub async fn get_system_sub_type_groups(
 
     let junctions = system_sub_type_group_property::Entity::find()
         .filter(system_sub_type_group_property::Column::GroupId.is_in(group_ids))
-        .all(db.inner())
+        .all(db)
         .await
         .map_err(|e| e.to_string())?;
 

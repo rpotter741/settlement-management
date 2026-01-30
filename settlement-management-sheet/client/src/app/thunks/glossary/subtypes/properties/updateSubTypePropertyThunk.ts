@@ -8,9 +8,9 @@ import {
   SubTypeProperty,
   updateSubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import updateSubTypePropertyService from '@/services/glossary/subTypes/updateSubTypePropertyService.js';
-import { cloneDeep } from 'lodash';
 import subTypeCommands from '@/app/commands/subtype.ts';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function updateSubTypePropertyThunkRoot({
   propertyId,
@@ -21,31 +21,30 @@ export function updateSubTypePropertyThunkRoot({
   property: SubTypeProperty;
   updates: Partial<SubTypeProperty>;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const oldProperty = state.subType.properties.edit[propertyId];
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const oldProperty = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
     if (!oldProperty) {
       dispatch(
         showSnackbar({
-          message: 'SubType not found.',
+          message: 'Nope. No property found with that ID.',
           type: 'error',
-          duration: 3000,
         })
       );
       return;
     }
+    if (!checkAdmin(oldProperty.system)) return;
     try {
       dispatch(
         updateSubTypeProperty({
           propertyId,
           property,
+          system: oldProperty.system,
         })
       );
 
-      // await updateSubTypePropertyService({
-      //   propertyId,
-      //   updates,
-      // });
       await subTypeCommands.updateSubTypeProperty({
         id: propertyId,
         refId: updates?.refId,

@@ -1,5 +1,6 @@
 use crate::entities::user_sub_type_property;
-use crate::types::{get_now, UserSubTypeProperty};
+use crate::types::UserSubTypeProperty;
+use crate::utility::get_now;
 use crate::{set_if_some, some_set_if_some};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -7,8 +8,6 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 #[serde(rename_all = "camelCase")]
 pub struct UpdateSubTypePropertyInput {
     pub id: String,
-    pub ref_id: Option<String>,
-    pub version: Option<i32>,
     pub name: Option<String>,
     pub input_type: Option<String>,
     pub shape: Option<String>,

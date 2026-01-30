@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField } from '@mui/material';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 import actions from '@/services/glossaryServices.js';
 import glossaryThunks from '@/app/thunks/glossaryThunks.js';

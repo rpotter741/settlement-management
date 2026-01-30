@@ -10,7 +10,7 @@ import { AppDispatch } from '@/app/store.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { GenericObject } from '../../../../shared/types/common.js';
 
 export type RelayStatus = 'pending' | 'complete' | 'error';

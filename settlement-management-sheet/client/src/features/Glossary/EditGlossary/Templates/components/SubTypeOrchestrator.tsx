@@ -1,8 +1,3 @@
-import {
-  selectAllSubTypes,
-  selectSubTypeGroups,
-  selectSubTypeProperties,
-} from '@/app/selectors/subTypeSelectors.js';
 import { SubType } from '@/app/slice/subTypeSlice.js';
 import NameEditor from '@/components/shared/DynamicForm/NameEditor.js';
 import MotionBox from '@/components/shared/Layout/Motion/MotionBox.js';

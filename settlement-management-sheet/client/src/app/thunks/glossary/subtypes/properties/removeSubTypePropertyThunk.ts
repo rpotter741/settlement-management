@@ -12,6 +12,8 @@ import {
 } from '@/app/slice/subTypeSlice.js';
 import deleteSubTypePropertyService from '@/services/glossary/subTypes/deleteSubTypePropertyService.js';
 import { deleteSubTypeProperty } from '@/app/commands/subtype.ts';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function deleteSubTypePropertyThunkRoot({
   propertyId,
@@ -19,22 +21,27 @@ export function deleteSubTypePropertyThunkRoot({
   propertyId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const property = state.subType.properties.edit[propertyId];
+    const property = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
     if (!property) {
       dispatch(
         showSnackbar({
-          message: 'Property not found.',
+          message: 'How can I delete nothing? Property not found.',
           type: 'error',
           duration: 3000,
         })
       );
       return;
     }
+    if (!checkAdmin(property.system)) return;
+
     try {
       dispatch(
         deleteProperty({
           propertyId,
+          system: property.system,
         })
       );
 
@@ -48,7 +55,9 @@ export function deleteSubTypePropertyThunkRoot({
         })
       );
     } catch (error) {
-      dispatch(addSubTypeProperty({ properties: [property] }));
+      dispatch(
+        addSubTypeProperty({ properties: [property], system: property.system })
+      );
       dispatch(
         showSnackbar({
           message: 'Error removing property. Try again later.',

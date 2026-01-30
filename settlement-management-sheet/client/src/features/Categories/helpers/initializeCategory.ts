@@ -1,4 +1,4 @@
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 const initializeCategory = () => {
   const maxThresholds = [9, 29, 49, 69, 84, 99, 100];

@@ -1,36 +1,38 @@
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
-import serverAction from '@/services/glossaryServices.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
-  addSubType,
   addSubTypeProperty,
-  SubType,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import fetchSubTypePropertiesService from '@/services/glossary/subTypes/fetchSubTypePropertiesService.js';
 import { getSubTypeProperties } from '@/app/commands/subtype.ts';
 
 export default function fetchSubTypePropertiesThunk(): AppThunk {
   return async (dispatch, getState) => {
     try {
-      const existingProperties = getState().subType.properties.edit;
-      if (Object.keys(existingProperties).length !== 0) {
-        return;
-      }
-      // const properties = await fetchSubTypePropertiesService({
-      //   system: true,
-      // });
+      const state = getState();
+      const user = state.user;
+      // i don't think we need to check existing length first, but we'll see
+      const systemProperties = state.subType.properties.system.edit;
+      const userProperties = state.subType.properties.user.edit;
 
-      const properties: SubTypeProperty[] = await getSubTypeProperties({
-        userId: 'robbiepottsdm',
-        system: true,
-      });
+      const properties: { user: SubTypeProperty[]; system: SubTypeProperty[] } =
+        await getSubTypeProperties({
+          userId: user.id ?? user.device,
+          system: true,
+        });
 
-      const filteredProperties = properties.filter(
-        (p: SubTypeProperty) => !existingProperties[p.id]
+      const filteredSystem = properties.system.filter(
+        (p: SubTypeProperty) => !systemProperties[p.id]
       );
 
-      dispatch(addSubTypeProperty({ properties: filteredProperties }));
+      const filteredUser = properties.user.filter(
+        (p: SubTypeProperty) => !userProperties[p.id]
+      );
+
+      dispatch(
+        addSubTypeProperty({ properties: filteredSystem, system: true })
+      );
+      dispatch(addSubTypeProperty({ properties: filteredUser, system: false }));
     } catch (error) {
       console.error('Error fetching subTypes:', error);
       dispatch(

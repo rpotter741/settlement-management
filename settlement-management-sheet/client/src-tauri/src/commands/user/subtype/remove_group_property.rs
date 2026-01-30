@@ -2,7 +2,8 @@
 
 use crate::{
     entities::{user_sub_type_group, user_sub_type_group_property},
-    types::{get_now, UserSubTypeGroup},
+    types::UserSubTypeGroup,
+    utility::get_now,
 };
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,

@@ -8,4 +8,3 @@ pub use glossary_common::*;
 pub use newtypes::*;
 pub use system_glossary::*;
 pub use user_glossary::*;
-pub use users::*;

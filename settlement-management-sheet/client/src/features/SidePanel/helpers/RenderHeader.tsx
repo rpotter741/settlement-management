@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Divider, Chip } from '@mui/material';
 import RenderEntry from './RenderEntry.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 const RenderHeader = ({ entry, index, setActive, active, setTool }) => {
   return (

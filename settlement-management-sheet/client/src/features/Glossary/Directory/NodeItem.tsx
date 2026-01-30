@@ -17,7 +17,7 @@ import {
   selectEditNodeById,
 } from '@/app/selectors/glossarySelectors.js';
 import { useSidePanel } from '@/hooks/global/useSidePanel.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import { useDrag, useDrop } from 'react-dnd';
 import reparentNodesThunk from '@/app/thunks/glossary/nodes/reparentNodesThunk.js';
 import { useDragContext } from '@/context/DnD/DragContext.js';

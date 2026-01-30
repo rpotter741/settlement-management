@@ -1,10 +1,7 @@
 import { useShellContext } from '@/context/ShellContext.js';
 import PreviewOrchestrator from '../EditGlossary/Templates/components/PreviewOrchestrator.js';
 import { useSelector } from 'react-redux';
-import {
-  selectAllSubTypes,
-  selectSubTypeById,
-} from '@/app/selectors/subTypeSelectors.js';
+import { selectSubTypeById } from '@/app/selectors/subTypeSelectors.js';
 import { GenericContext } from '@/context/GenericContext.js';
 import { useAutosave } from '@/hooks/utility/useAutosave/useAutosave.js';
 import glossaryEntryAutosaveConfig from '@/hooks/utility/useAutosave/configs/glossaryEntryConfig.js';

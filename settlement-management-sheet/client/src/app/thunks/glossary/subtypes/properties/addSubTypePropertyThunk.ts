@@ -19,23 +19,24 @@ export function addSubTypePropertyThunkRoot({
 }: {
   property: SubTypeProperty;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
+    const state = getState();
+    const user = state.user;
     try {
       const customProperty = cloneDeep(property);
 
-      customProperty.contentType = 'custom';
       dispatch(
         addSubTypeProperty({
           properties: [customProperty],
+          system: user.role === 'admin' ? true : false,
         })
       );
 
-      // await createSubTypePropertyService({ property });
+      // should probably do something with this, huh?
       const newProperty = await subTypeCommands.createSubTypeProperty({
         id: property.id,
         name: property.name,
-        contentType: 'CUSTOM',
-        createdBy: 'robbiepottsdm',
+        createdBy: user.id as string,
         inputType: property.inputType,
         shape: property.shape as GenericObject,
       });

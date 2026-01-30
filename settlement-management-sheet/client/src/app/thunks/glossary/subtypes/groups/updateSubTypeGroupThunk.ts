@@ -3,12 +3,10 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import {
-  SubTypeProperty,
-  updateSubTypeGroup,
-} from '@/app/slice/subTypeSlice.js';
-import updateSubTypeGroupService from '@/services/glossary/subTypes/updateSubTypeGroupService.js';
+import { SubTypeGroup, updateSubTypeGroup } from '@/app/slice/subTypeSlice.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 
 export function updateSubTypeGroupThunk({
   groupId,
@@ -17,41 +15,45 @@ export function updateSubTypeGroupThunk({
   groupId: string;
   updates: any;
 }): AppThunk {
-  return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const oldGroup = state.subType.groups.edit[groupId];
+  return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
+    const oldGroup = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!oldGroup) {
       dispatch(
         showSnackbar({
-          message: 'SubType not found.',
+          message: 'Group not found.',
           type: 'error',
           duration: 3000,
         })
       );
       return;
     }
+    if (!checkAdmin(oldGroup.system)) return;
     try {
       dispatch(
         updateSubTypeGroup({
           groupId,
           updates,
+          system: oldGroup.system,
         })
       );
 
-      //service for updating group
-      // await updateSubTypeGroupService({
-      //   groupId,
-      //   updates,
-      // });
-      await subTypeCommands.updateSubTypeGroup({
-        id: groupId,
-        name: updates?.name,
-        refId: updates?.refId,
-        version: updates?.version,
-        displayName: updates?.displayName,
-        display: updates?.display,
-        description: updates?.description,
-      });
+      if (!oldGroup.system) {
+        await subTypeCommands.updateSubTypeGroup({
+          id: groupId,
+          name: updates?.name,
+          displayName: updates?.displayName,
+          display: updates?.display,
+          description: updates?.description,
+        });
+      } else {
+        // await systemSubTypeCommands.updateSubTypeGroup({
+        //   id: groupId,
+        //   name: updates?.name,
+        //   displayName: updates?.displayName,
+        //   display: updates?.display,
+        //   description: updates?.description,
+        // });
+      }
 
       dispatch(
         addDirtyKeypath({

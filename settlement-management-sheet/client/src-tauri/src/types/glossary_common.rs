@@ -528,34 +528,20 @@ impl FromStr for BacklinkType {
 }
 
 /*-------------------------------------------------------- */
-/*-------------------------Utilities-----------------------*/
+/*-------------------------Metadata------------------------*/
 /*-------------------------------------------------------- */
-pub fn parse_csv_list(s: Option<String>) -> Vec<String> {
-    s.unwrap_or_default()
-        .split(',')
-        .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
-        .collect()
-}
 
-pub fn parse_datetime(s: &str) -> DateTime {
-    ChronoDateTime::parse_from_rfc3339(s)
-        .map(|dt| dt.naive_utc())
-        .unwrap_or_else(|_| Utc::now().naive_utc())
-}
-
-pub fn bool_to_sqlite(b: bool) -> i32 {
-    if b {
-        1
-    } else {
-        0
-    }
-}
-
-pub fn sqlite_to_bool(i: i32) -> bool {
-    i != 0
-}
-
-pub fn get_now() -> String {
-    chrono::Utc::now().to_rfc3339()
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentMetaData {
+    pub id: String,
+    pub ref_id: String,
+    pub version: i32,
+    pub published_at: Option<ChronoDateTime<Utc>>,
+    pub download_count: i32,
+    pub fork_count: i32,
+    pub forked_from: Option<String>,
+    pub forked_by: Vec<String>,
+    pub deleted_at: Option<ChronoDateTime<Utc>>,
+    pub status: String,
 }

@@ -5,7 +5,7 @@ import { addSubTypePropertyThunkRoot } from '@/app/thunks/glossary/subtypes/prop
 import fetchSubTypePropertiesThunk from '@/app/thunks/glossary/subtypes/properties/fetchSubTypePropertiesThunk.js';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export type SubtypePropertyTypes =
   | 'text'
@@ -65,7 +65,7 @@ const useSubTypePropertyCreator = () => {
   };
 
   // get them properties
-  dispatch(fetchSubTypePropertiesThunk());
+  // dispatch(fetchSubTypePropertiesThunk());
   const properties = useSelector(selectSubTypeProperties);
   const allProperties = properties
     .filter((property) => {

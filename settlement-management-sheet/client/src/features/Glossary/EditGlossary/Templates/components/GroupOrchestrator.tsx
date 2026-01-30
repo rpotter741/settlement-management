@@ -1,22 +1,13 @@
 import { dispatch } from '@/app/constants.js';
-import {
-  addPropertyToGroup,
-  SubTypeGroup,
-  SubTypeProperty,
-} from '@/app/slice/subTypeSlice.js';
+import { SubTypeGroup } from '@/app/slice/subTypeSlice.js';
 import NameEditor from '@/components/shared/DynamicForm/NameEditor.js';
-import TermEditor from '@/components/shared/DynamicForm/TermEditor.js';
-import { propertyTypeIconMap } from '@/features/SidePanel/Glossary/SubTypeManager/components/SidebarProperty.js';
 import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
 import SubTypeFormPreview from './previews/SubTypeFormPreview.js';
 import PageBox from '@/components/shared/Layout/PageBox/PageBox.js';
-import { addPropertyToGroupThunk } from '@/app/thunks/glossary/subtypes/groups/addPropertyToGroupThunk.js';
 import { useSelector } from 'react-redux';
 import { selectSubTypeProperties } from '@/app/selectors/subTypeSelectors.js';
-import { Delete, DragHandle } from '@mui/icons-material';
-import { removeGroupPropertyThunk } from '@/app/thunks/glossary/subtypes/groups/removeGroupPropertyThunk.js';
 import DraggablePropertyEntry from './DnD/DraggablePropertyEntry.js';
 import useTheming from '@/hooks/layout/useTheming.js';
 import { cloneDeep } from 'lodash';

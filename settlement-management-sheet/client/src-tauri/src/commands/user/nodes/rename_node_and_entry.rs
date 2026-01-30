@@ -1,6 +1,7 @@
 use crate::{
     entities::{user_glossary_entry, user_glossary_node},
-    types::{get_now, UserGlossaryEntry, UserGlossaryNode},
+    types::{UserGlossaryEntry, UserGlossaryNode},
+    utility::get_now,
 };
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,

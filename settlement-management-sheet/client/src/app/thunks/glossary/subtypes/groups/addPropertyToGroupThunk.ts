@@ -4,9 +4,15 @@ import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubTypeGroupPropertyService.js';
-import { addPropertyToGroup } from '@/app/slice/subTypeSlice.js';
+import {
+  addPropertyToGroup,
+  SubTypeGroup,
+  SubTypeProperty,
+} from '@/app/slice/subTypeSlice.js';
 import subTypeCommands from '@/app/commands/subtype.ts';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function addPropertyToGroupThunk({
   groupId,
@@ -16,15 +22,28 @@ export function addPropertyToGroupThunk({
   propertyId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const group = state.subType.groups.edit[groupId];
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'No group found to add property to.',
+          type: 'error',
+        })
+      );
       return;
     }
-    const property = state.subType.properties.edit[propertyId];
+    if (!checkAdmin(group.system)) return;
+    const property = getSubTypeStateAtKey<SubTypeProperty>(
+      'properties',
+      propertyId
+    );
     if (!property) {
-      console.error(`Property with ID ${propertyId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'No property found to add to group.',
+          type: 'error',
+        })
+      );
       return;
     }
     try {
@@ -38,12 +57,22 @@ export function addPropertyToGroupThunk({
       });
 
       if (!createdProperty) {
-        throw new Error('No created property returned from service.');
+        dispatch(
+          showSnackbar({
+            message: 'EVERYONE PANIC! NOTHING RETURNED FROM BACKEND!',
+            type: 'error',
+          })
+        );
+        return;
       }
 
-      console.log('Created Property:', createdProperty);
-
-      dispatch(addPropertyToGroup({ groupId, property: createdProperty }));
+      dispatch(
+        addPropertyToGroup({
+          groupId,
+          property: createdProperty,
+          system: group.system,
+        })
+      );
 
       dispatch(
         addDirtyKeypath({

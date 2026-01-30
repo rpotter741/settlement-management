@@ -6,50 +6,77 @@ import {
   addSubTypeProperty,
   SubType,
 } from '@/app/slice/subTypeSlice.js';
-import fetchSubTypeGroupsService from '@/services/glossary/subTypes/fetchSubTypeGroupsService.js';
-import fetchSubTypePropertiesService from '@/services/glossary/subTypes/fetchSubTypePropertiesService.js';
-import fetchSubTypesByUserId from '@/services/glossary/subTypes/fetchSubTypesByUserId.js';
 import {
   getSubTypeGroups,
   getSubTypeProperties,
   getSubTypes,
 } from '@/app/commands/subtype.ts';
 
+let initial_load = true;
+
 export default function fetchAllSubTypeData(): AppThunk {
   return async (dispatch, getState) => {
-    const existingSubTypes = getState().subType.edit;
-    const existingGroups = getState().subType.groups.edit;
-    const existingProperties = getState().subType.properties.edit;
+    if (!initial_load) return;
+    const user = getState().user;
+    if (!user.id) return;
+    initial_load = false;
+    const existingSubTypes = getState().subType.subtypes;
+    const existingGroups = getState().subType.groups;
+    const existingProperties = getState().subType.properties;
     try {
-      if (Object.keys(existingSubTypes).length === 0) {
-        const subTypes = await getSubTypes({
-          userId: 'robbiepottsdm',
+      /* GET THEM SUBTYPES */
+      if (
+        Object.keys(existingSubTypes.user.edit).length === 0 ||
+        Object.keys(existingSubTypes.system.edit).length === 0
+      ) {
+        const subTypeMap = await getSubTypes({
+          userId: user.id as string,
           system: true,
         });
 
-        subTypes.forEach((subType: SubType) => {
-          if (!existingSubTypes[subType.id]) {
-            dispatch(addSubType({ subType }));
+        subTypeMap.system.forEach((subType: SubType) => {
+          if (!existingSubTypes.system.edit[subType.id]) {
+            dispatch(addSubType({ subType, system: true }));
+          }
+        });
+        subTypeMap.user.forEach((subType: SubType) => {
+          if (!existingSubTypes.user.edit[subType.id]) {
+            dispatch(addSubType({ subType, system: false }));
           }
         });
       }
 
-      if (Object.keys(existingGroups).length === 0) {
-        const subTypeGroups = await getSubTypeGroups({
-          userId: 'robbiepottsdm',
+      /* GET THEM GROUPS */
+
+      if (
+        Object.keys(existingGroups.system.edit).length === 0 ||
+        Object.keys(existingGroups.user.edit).length === 0
+      ) {
+        const groupMap = await getSubTypeGroups({
+          userId: user.id as string,
           system: true,
         });
 
-        dispatch(addSubTypeGroup({ groups: subTypeGroups }));
+        dispatch(addSubTypeGroup({ groups: groupMap.system, system: true }));
+        dispatch(addSubTypeGroup({ groups: groupMap.user, system: false }));
       }
 
-      if (Object.keys(existingProperties).length === 0) {
-        const subTypeProperties = await getSubTypeProperties({
-          userId: 'robbiepottsdm',
+      /* GET THEM PROPERTIES */
+
+      if (
+        Object.keys(existingProperties.system.edit).length === 0 ||
+        Object.keys(existingProperties.user.edit).length === 0
+      ) {
+        const propertyMap = await getSubTypeProperties({
+          userId: user.id as string,
           system: true,
         });
-
-        dispatch(addSubTypeProperty({ properties: subTypeProperties }));
+        dispatch(
+          addSubTypeProperty({ properties: propertyMap.system, system: true })
+        );
+        dispatch(
+          addSubTypeProperty({ properties: propertyMap.user, system: false })
+        );
       }
     } catch (error) {
       console.error('Error fetching subTypes:', error);
@@ -61,6 +88,13 @@ export default function fetchAllSubTypeData(): AppThunk {
         })
       );
     } finally {
+      dispatch(
+        showSnackbar({
+          message: 'Finished fetching subtype data.',
+          type: 'info',
+          duration: 2000,
+        })
+      );
     }
   };
 }

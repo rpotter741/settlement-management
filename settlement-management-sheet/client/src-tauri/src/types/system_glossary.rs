@@ -12,7 +12,9 @@ use crate::{
     entries::BasicGroup,
     types::glossary_common::*,
     types::newtypes::*,
+    utility::parse_datetime,
 };
+use chrono::{DateTime as ChronoDateTime, Utc};
 
 /*-------------------------------------------------------- */
 /*----------------------Glossary Node----------------------*/
@@ -68,8 +70,8 @@ pub struct GlossaryEntry {
     pub id: String,
     pub entry_type: GlossaryEntryType,
     pub sub_type_id: String,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub groups: HashMap<String, BasicGroup>,
     pub primary_anchor_id: Option<String>,
@@ -113,8 +115,8 @@ pub struct Glossary {
     sub_genre: String,
     description: Option<String>,
     created_by: String,
-    created_at: DateTime,
-    updated_at: DateTime,
+    created_at: ChronoDateTime<Utc>,
+    updated_at: ChronoDateTime<Utc>,
     visibility: String,
     theme: GlossaryThemes,
     integration_state: HashMap<GlossaryEntryType, GlossaryEntrySettings>,
@@ -151,10 +153,11 @@ pub struct SystemSubTypeProperty {
     pub name: String,
     pub input_type: InputTypeEnum,
     pub shape: String,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub display_name: Option<String>,
     pub smart_sync: Option<SmartLinkRulesShape>,
+    pub system: bool,
 }
 
 impl system_sub_type_property::Model {
@@ -204,6 +207,7 @@ impl TryFrom<system_sub_type_property::Model> for SystemSubTypeProperty {
             updated_at: parse_datetime(&model.updated_at),
             display_name: model.display_name,
             smart_sync: SmartLinkRulesShape::from_json(&model.smart_sync.unwrap_or_default()).ok(),
+            system: true,
         })
     }
 }
@@ -244,13 +248,14 @@ impl TryFrom<system_sub_type_group_property::Model> for SystemSubTypePropertyLin
 #[serde(rename_all = "camelCase")]
 pub struct SystemSubTypeGroup {
     pub id: GroupId,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub display_name: Option<String>,
     pub display: Option<String>,
     pub description: Option<String>,
     pub properties: Option<Vec<SystemSubTypePropertyLink>>,
+    pub system: bool,
 }
 
 impl TryFrom<system_sub_type_group::Model> for SystemSubTypeGroup {
@@ -266,6 +271,7 @@ impl TryFrom<system_sub_type_group::Model> for SystemSubTypeGroup {
             display: Some(model.display.unwrap_or_default()),
             description: model.description,
             properties: Some(Vec::new()),
+            system: true,
         })
     }
 }
@@ -294,18 +300,18 @@ impl system_sub_type_group::Model {
 
 #[derive(Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct SubTypeGroupLink {
+pub struct SystemSubTypeGroupLink {
     pub id: String,
     pub group_id: GroupId,
     pub subtype_id: SubTypeId,
     pub order: i32,
 }
 
-impl TryFrom<system_sub_type_schema_group::Model> for SubTypeGroupLink {
+impl TryFrom<system_sub_type_schema_group::Model> for SystemSubTypeGroupLink {
     type Error = String;
 
     fn try_from(model: system_sub_type_schema_group::Model) -> Result<Self, Self::Error> {
-        Ok(SubTypeGroupLink {
+        Ok(SystemSubTypeGroupLink {
             id: model.id,
             group_id: GroupId(model.group_id),
             subtype_id: SubTypeId(model.subtype_id),
@@ -322,13 +328,14 @@ impl TryFrom<system_sub_type_schema_group::Model> for SubTypeGroupLink {
 #[serde(rename_all = "camelCase")]
 pub struct SystemSubType {
     pub id: SubTypeId,
-    pub created_at: DateTime,
+    pub created_at: ChronoDateTime<Utc>,
     pub created_by: String,
-    pub updated_at: DateTime,
+    pub updated_at: ChronoDateTime<Utc>,
     pub name: String,
     pub entry_type: GlossaryEntryType,
     pub anchors: SemanticAnchors,
-    pub context: String,
+    pub context: Option<String>,
+    pub system: bool,
 }
 
 impl TryFrom<system_sub_type::Model> for SystemSubType {
@@ -345,7 +352,8 @@ impl TryFrom<system_sub_type::Model> for SystemSubType {
                 .unwrap_or(GlossaryEntryType::Item),
             anchors: serde_json::from_str(&model.anchors)
                 .map_err(|e| format!("Failed to parse anchors: {}", e))?,
-            context: "".to_string(),
+            context: None,
+            system: true,
         })
     }
 }
@@ -413,9 +421,9 @@ pub struct UserBacklinkIndex {
     pub ignore_divergence: bool,
     pub target_ignore: bool,
     pub sub_property_id: Option<String>,
-    pub last_synced_at: DateTime,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub last_synced_at: ChronoDateTime<Utc>,
+    pub created_at: ChronoDateTime<Utc>,
+    pub updated_at: ChronoDateTime<Utc>,
 }
 
 impl TryFrom<user_backlink_index::Model> for UserBacklinkIndex {

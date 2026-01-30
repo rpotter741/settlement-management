@@ -11,13 +11,17 @@ pub struct Model {
     pub ref_id: String,
     pub version: i32,
     #[sea_orm(column_type = "Text", nullable)]
+    pub published_at: Option<String>,
+    pub download_count: i32,
+    pub fork_count: i32,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub forked_from: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
     pub forked_by: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
-    pub collaborators: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub editors: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
     pub deleted_at: Option<String>,
+    #[sea_orm(column_type = "Text")]
+    pub status: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

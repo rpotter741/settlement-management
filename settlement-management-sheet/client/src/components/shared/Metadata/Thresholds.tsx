@@ -8,7 +8,7 @@ import { SnackbarType } from '@/app/types/SnackbarTypes.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { useDispatch } from 'react-redux';
 
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import resolveDuplicates from '@/features/Attributes/helpers/resolveDuplicates.js';
 
 import { Box, Typography, Tooltip, Button } from '@mui/material';

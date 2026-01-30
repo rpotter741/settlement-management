@@ -4,8 +4,11 @@ import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { dispatch } from '@/app/constants.js';
-import { addSubType } from '@/app/slice/subTypeSlice.js';
+import { addSubType, SubType } from '@/app/slice/subTypeSlice.js';
 import deleteSubTypeService from '@/services/glossary/subTypes/deleteSubType.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import subTypeCommands from '@/app/commands/subtype.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function deleteSubTypeThunkRoot({
   subTypeId,
@@ -13,27 +16,31 @@ export function deleteSubTypeThunkRoot({
   subTypeId: string;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const subTypeState = state.subType.edit;
+    const subType = getSubTypeStateAtKey<SubType>('subtypes', subTypeId);
+    if (!subType) {
+      dispatch(
+        showSnackbar({
+          message:
+            "It's like dividing by zero; I can't delete what doesn't exist.",
+          type: 'error',
+        })
+      );
+      return;
+    }
+    if (!checkAdmin(subType.system)) return;
 
-    const subType = subTypeState[subTypeId];
     try {
-      // dispatch(
-      //   deleteSubType({
-      //     subTypeId,
-      //   })
-      // );
-
-      await deleteSubTypeService({
-        subTypeId,
+      await subTypeCommands.deleteSubType({
+        id: subTypeId,
       });
     } catch (error) {
       console.error('Error deleting SubType:', error);
-      // dispatch(
-      //   addSubType({
-      //     subType,
-      //   })
-      // );
+      dispatch(
+        addSubType({
+          subType,
+          system: subType.system,
+        })
+      );
       dispatch(
         showSnackbar({
           message: 'Error deleting SubType. Try again later.',

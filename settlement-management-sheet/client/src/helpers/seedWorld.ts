@@ -1,4 +1,4 @@
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import createNodeAndEntry from '@/services/glossary/nodes/createNodeAndEntry.js';
 import { genericSubTypeIds } from '@/features/Glossary/EditGlossary/components/GlossaryPropertyLabels.js';
 import { invoke } from '@tauri-apps/api/core';

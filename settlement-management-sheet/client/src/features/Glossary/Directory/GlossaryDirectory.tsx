@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import {
   Box,
   Typography,

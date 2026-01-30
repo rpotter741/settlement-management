@@ -9,7 +9,7 @@ import { createSubTypeGroupThunk } from '@/app/thunks/glossary/subtypes/groups/c
 import fetchSubTypeGroupsThunk from '@/app/thunks/glossary/subtypes/groups/fetchSubTypeGroupsThunk.js';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 import useSubTypePropertyCreator from './useSubTypePropertyCreator.js';
 
 const useSubTypeGroupCreator = ({
@@ -68,9 +68,8 @@ const useSubTypeGroupCreator = ({
           .includes(searchTerm.toLowerCase());
         const matchesContentType =
           contentFilters.length === 0 ||
-          (contentFilters.includes('SYSTEM') &&
-            group.contentType === 'SYSTEM') ||
-          (contentFilters.includes('CUSTOM') && group.contentType === 'CUSTOM');
+          (contentFilters.includes('SYSTEM') && group.system === true) ||
+          (contentFilters.includes('CUSTOM') && group.system === false);
 
         return matchesSearch && matchesContentType;
       })

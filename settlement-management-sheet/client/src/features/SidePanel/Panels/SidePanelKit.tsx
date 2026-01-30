@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 import { loadTool } from '@/app/thunks/toolThunks.js';
 import { useSidePanel } from '@/hooks/global/useSidePanel.jsx';

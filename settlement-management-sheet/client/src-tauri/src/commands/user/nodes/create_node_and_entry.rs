@@ -1,16 +1,20 @@
 // Create a new glossary entry in the database
 use crate::{
-    entities::{user_glossary_entry, user_glossary_node},
-    types::{UserGlossaryEntry, UserGlossaryNode},
+    entities::{
+        prelude::UserGlossaryEntryMetadata, user_glossary_entry, user_glossary_entry_metadata,
+        user_glossary_node,
+    },
+    impl_metadata_try_from,
+    types::{ContentMetaData, UserGlossaryEntry, UserGlossaryNode},
 };
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set, TransactionTrait};
+use ulid::Ulid;
 
 #[derive(serde::Deserialize)]
 pub struct CreateNodeAndEntryInput {
     pub id: String,
     pub name: String,
     pub entry_type: String,
-    pub file_type: String,
     pub sub_type_id: String,
     pub glossary_id: String,
     pub sort_index: i32,
@@ -24,6 +28,7 @@ pub struct CreateNodeAndEntryInput {
 pub struct CreateNodeAndEntryOutput {
     glossary_node: UserGlossaryNode,
     glossary_entry: UserGlossaryEntry,
+    entry_meta_data: ContentMetaData,
 }
 
 #[tauri::command]
@@ -60,13 +65,26 @@ pub async fn create_node_and_entry(
 
     let inserted_entry = new_entry.insert(&txn).await.map_err(|e| e.to_string())?;
 
+    let entry_meta_data = user_glossary_entry_metadata::ActiveModel {
+        id: Set(inserted_entry.id.clone()),
+        ref_id: Set(Ulid::new().to_string()),
+        ..Default::default()
+    };
+
+    let entry_metadata = entry_meta_data
+        .insert(&txn)
+        .await
+        .map_err(|e| e.to_string())?;
+
     txn.commit().await.map_err(|e| e.to_string())?;
 
     let node = UserGlossaryNode::try_from(inserted_node)?;
     let entry = UserGlossaryEntry::try_from(inserted_entry)?;
+    let metadata = ContentMetaData::try_from(entry_metadata)?;
 
     Ok(CreateNodeAndEntryOutput {
         glossary_node: node,
         glossary_entry: entry,
+        entry_meta_data: metadata,
     })
 }

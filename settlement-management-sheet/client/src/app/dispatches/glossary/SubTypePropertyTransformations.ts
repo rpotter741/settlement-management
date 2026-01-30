@@ -1,19 +1,18 @@
 import { SubTypeRangeDefinition } from '@/features/Glossary/EditGlossary/Templates/components/types.ts';
 import { GenericObject } from '../../../../../shared/types/common.ts';
 import {
-  AllShapes,
   SubTypeDropdownProperty,
   SubTypeGroup,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
 import { SubTypePropertyTypes } from '@/features/Glossary/EditGlossary/Templates/generics/genericContinent.js';
-import isAdmin from '@/utility/isAdmin.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export function createDefaultProperty(
   type: SubTypePropertyTypes,
   name: string,
-  propertyId: string
+  propertyId: string,
+  system: boolean
 ): SubTypeProperty | null {
   switch (type) {
     case 'text':
@@ -26,9 +25,7 @@ export function createDefaultProperty(
           defaultValue: '',
           textTransform: 'none',
         },
-        version: 1,
-        isAnchor: false,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        system,
       };
 
     case 'date':
@@ -37,9 +34,7 @@ export function createDefaultProperty(
         name,
         inputType: 'date',
         shape: {},
-        version: 1,
-        isAnchor: false,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        system,
       };
 
     case 'dropdown':
@@ -54,11 +49,9 @@ export function createDefaultProperty(
           options: [],
           isCompound: false,
         },
-        version: 1,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
         smartSync: null,
+        system,
       };
-
     case 'checkbox':
       return {
         id: propertyId,
@@ -67,9 +60,7 @@ export function createDefaultProperty(
         shape: {
           defaultChecked: false,
         },
-        version: 1,
-        isAnchor: false,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        system,
       };
 
     case 'range':
@@ -84,9 +75,7 @@ export function createDefaultProperty(
           step: 1,
           label: '',
         },
-        version: 1,
-        isAnchor: false,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        system,
       };
 
     case 'compound':
@@ -123,9 +112,7 @@ export function createDefaultProperty(
           },
           isProjection: false,
         },
-        version: 1,
-        isAnchor: false,
-        contentType: isAdmin([]) ? 'SYSTEM' : 'CUSTOM',
+        system,
       };
 
     default:
@@ -136,16 +123,14 @@ export function createDefaultProperty(
 export function createDefaultGroup(
   name: string,
   groupId: string
-): SubTypeGroup {
-  //@ts-ignore
+): Omit<SubTypeGroup, 'system'> {
   return {
     id: groupId,
     name,
     description: '',
-    version: 1,
-    contentType: isAdmin([]) ? 'system' : 'custom',
     displayName: name,
     display: {},
+    properties: [],
   };
 }
 
@@ -193,8 +178,8 @@ export function transformDropDownInputType(
       optionType: oldProperty.shape.optionType ?? 'list',
       isCompound: oldProperty.shape.isCompound ?? false,
     },
-    contentType: 'CUSTOM' as const,
     smartSync: oldProperty?.smartSync ?? null,
+    system: oldProperty.system,
   };
 
   const property: SubTypeDropdownProperty = { ...base };

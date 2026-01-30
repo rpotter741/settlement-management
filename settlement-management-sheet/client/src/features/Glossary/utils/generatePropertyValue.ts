@@ -5,7 +5,7 @@ import {
   SubTypeProperty,
   SubTypePropertyLink,
 } from '@/app/slice/subTypeSlice.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 // import {
 //   SubTypeCompoundData,
 //   SubTypeCompoundDefinition,

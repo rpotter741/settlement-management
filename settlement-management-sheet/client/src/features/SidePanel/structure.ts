@@ -17,7 +17,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import ToolsIcon from '@mui/icons-material/Build';
 import KitIcon from '@mui/icons-material/HomeRepairService';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export const getTabInfo = (tool) => {
   return {

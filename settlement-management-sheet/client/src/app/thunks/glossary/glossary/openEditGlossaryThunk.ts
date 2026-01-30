@@ -4,7 +4,7 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addTab } from '@/app/slice/tabSlice.js';
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 export default function openEditGlossaryThunk(): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {

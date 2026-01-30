@@ -1,4 +1,4 @@
-import { v4 as newId } from 'uuid';
+import { ulid as newId } from 'ulid';
 
 const defaultSettlement = {
   refId: newId(),

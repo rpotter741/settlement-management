@@ -1,8 +1,5 @@
-use crate::types::PropertyId;
 use chrono::{DateTime as ChronoDateTime, Utc};
-use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 /*-------------------------------------------------------- */
 /*-------------------------Glossary------------------------*/

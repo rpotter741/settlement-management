@@ -7,8 +7,12 @@ import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubT
 import {
   addGroupsToSubType,
   addPropertyToGroup,
+  SubType,
+  SubTypeGroup,
 } from '@/app/slice/subTypeSlice.js';
 import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSubTypeService.js';
+import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import checkAdmin from '@/utility/security/checkAdmin.ts';
 
 export function addGroupToSubTypeThunk({
   groupId,
@@ -19,16 +23,28 @@ export function addGroupToSubTypeThunk({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const state = getState();
-    const group = state.subType.groups.edit[groupId];
+    const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      dispatch(
+        showSnackbar({
+          message: 'Group not found. Did it wander off?',
+          type: 'error',
+        })
+      );
       return;
     }
-    const subtype = state.subType.edit[subtypeId];
+    const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      console.error(`SubType with ID ${subtypeId} not found.`);
+      dispatch(
+        showSnackbar({
+          message:
+            'Subtype not found. Did it take a wrong turn? Did... did I lose it?',
+          type: 'error',
+        })
+      );
       return;
     }
+    if (!checkAdmin(subtype.system)) return;
     try {
       const order = subtype.groups ? subtype.groups.length : 0;
 
@@ -43,7 +59,11 @@ export function addGroupToSubTypeThunk({
       }
 
       dispatch(
-        addGroupsToSubType({ subTypeId: subtypeId, groups: [groupLink] })
+        addGroupsToSubType({
+          subTypeId: subtypeId,
+          groups: [groupLink],
+          system: subtype.system,
+        })
       );
 
       dispatch(

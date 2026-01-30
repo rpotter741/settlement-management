@@ -1,6 +1,7 @@
 use crate::entities::user_sub_type;
 use crate::set_if_some;
-use crate::types::{get_now, SemanticAnchors, UserSubType};
+use crate::types::{SemanticAnchors, UserSubType};
+use crate::utility::get_now;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 #[derive(serde::Deserialize)]
@@ -8,9 +9,6 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 pub struct UpdateSubTypeInput {
     pub id: String,
     pub name: Option<String>,
-    pub ref_id: Option<String>,
-    pub version: Option<i32>,
-    pub editors: Option<Vec<String>>,
     pub anchors: Option<SemanticAnchors>,
     pub context: Option<String>,
 }

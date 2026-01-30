@@ -12,6 +12,7 @@ import dirtyReducer from './slice/dirtySlice.js';
 import relayReducer from './slice/relaySlice.js';
 import subTypeReducer from './slice/subTypeSlice.js';
 import clipboardReducer from './slice/clipboardSlice.js';
+import userReducer from './slice/userSlice.js';
 import { relayTimerMiddleware } from './middleware/relayTTLMiddleware.js';
 
 export const store = configureStore({
@@ -29,6 +30,7 @@ export const store = configureStore({
     dirty: dirtyReducer,
     relay: relayReducer,
     subType: subTypeReducer,
+    user: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([relayTimerMiddleware()]),
