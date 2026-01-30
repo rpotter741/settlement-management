@@ -8,9 +8,11 @@ import {
   SubTypeProperty,
   updateSubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysUpdateSubTypeProperty } from '@/app/commands/sysSubtype.ts';
 
 export function updateSubTypePropertyThunkRoot({
   propertyId,
@@ -29,10 +31,17 @@ export function updateSubTypePropertyThunkRoot({
     if (!oldProperty) {
       dispatch(
         showSnackbar({
-          message: 'Nope. No property found with that ID.',
-          type: 'error',
+          message: 'KNOCK KNOCK.',
+          type: 'info',
         })
       );
+      dispatch(
+        showSnackbar({
+          message: "Who's there?",
+          type: 'warning',
+        })
+      );
+      logger.snError('Not your property, apparently. Please report this bug.');
       return;
     }
     if (!checkAdmin(oldProperty.system)) return;
@@ -45,16 +54,25 @@ export function updateSubTypePropertyThunkRoot({
         })
       );
 
-      await subTypeCommands.updateSubTypeProperty({
-        id: propertyId,
-        refId: updates?.refId,
-        version: updates?.version,
-        name: updates?.name,
-        inputType: updates?.inputType,
-        shape: updates?.shape,
-        displayName: updates?.displayName,
-        smartSync: updates?.smartSync,
-      });
+      if (oldProperty.system) {
+        await sysUpdateSubTypeProperty({
+          id: propertyId,
+          name: updates?.name,
+          inputType: updates?.inputType,
+          shape: updates?.shape,
+          displayName: updates?.displayName,
+          smartSync: updates?.smartSync,
+        });
+      } else {
+        await subTypeCommands.updateSubTypeProperty({
+          id: propertyId,
+          name: updates?.name,
+          inputType: updates?.inputType,
+          shape: updates?.shape,
+          displayName: updates?.displayName,
+          smartSync: updates?.smartSync,
+        });
+      }
 
       dispatch(
         addDirtyKeypath({
@@ -64,13 +82,16 @@ export function updateSubTypePropertyThunkRoot({
         })
       );
     } catch (error) {
-      console.error('Error updating subtype property:', error);
       dispatch(
-        showSnackbar({
-          message: 'Error updating subtype property. Try again later.',
-          type: 'error',
-          duration: 3000,
+        updateSubTypeProperty({
+          propertyId,
+          property: oldProperty,
+          system: oldProperty.system,
         })
+      );
+      logger.snError(
+        'You have every right to be disappointed in the server. I am too. Please report.',
+        { error }
       );
     }
   };

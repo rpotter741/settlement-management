@@ -28,7 +28,6 @@ const SubTypeEntryType = ({
           updateSubTypeEntryTypeThunk({
             subTypeId: subTypeId!,
             entryType: e.target.value as GlossaryEntryType,
-            system: subType.system,
           });
         }}
         label="Entry Type"

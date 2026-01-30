@@ -1,7 +1,6 @@
 import { selectSubTypePropertyById } from '@/app/selectors/subTypeSelectors.js';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
 import SubTypeText from './inputs/SubTypeText.js';
 import SubTypeDropdown from './inputs/SubTypeDropDown.js';
 import SubTypeCheckbox from './inputs/SubTypeCheckbox.js';
@@ -15,6 +14,7 @@ import { useRelayChannel } from '@/hooks/global/useRelay.js';
 import { SmartSyncRule } from '@/features/Glossary/Modals/EditSmartSyncRule.js';
 import { cloneDeep, set } from 'lodash';
 import updateSubTypePropertyThunk from '@/app/thunks/glossary/subtypes/properties/updateSubTypePropertyThunk.js';
+import { SubTypeProperty } from '@/app/slice/subTypeSlice.ts';
 
 export const propertyTypeComponentMap: Record<
   SubTypePropertyTypes,
@@ -44,11 +44,18 @@ const PropertyOrchestrator = ({
     })
   );
 
-  console.log(property);
+  useRelayChannel({
+    id: 'property-smart-sync-rules',
+    onComplete: (data: unknown) => {
+      saveRule(data as SmartSyncRule & { sourceId: string });
+    },
+  });
+
+  if (!property) return null;
 
   const saveRule = (data: SmartSyncRule & { sourceId: string }) => {
     const { sourceId, ...rest } = data;
-    const updatedProperty = cloneDeep(property);
+    const updatedProperty = cloneDeep(property as SubTypeProperty);
     set(updatedProperty, 'smartSync', rest);
     const updates = {
       smartSync: rest,
@@ -59,15 +66,6 @@ const PropertyOrchestrator = ({
       updates,
     });
   };
-
-  useRelayChannel({
-    id: 'property-smart-sync-rules',
-    onComplete: (data: unknown) => {
-      saveRule(data as SmartSyncRule & { sourceId: string });
-    },
-  });
-
-  if (!property) return null;
 
   const Component =
     propertyTypeComponentMap[property.inputType as SubTypePropertyTypes] || Box;

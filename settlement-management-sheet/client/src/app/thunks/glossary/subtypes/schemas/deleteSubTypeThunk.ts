@@ -7,8 +7,10 @@ import { dispatch } from '@/app/constants.js';
 import { addSubType, SubType } from '@/app/slice/subTypeSlice.js';
 import deleteSubTypeService from '@/services/glossary/subTypes/deleteSubType.js';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysDeleteSubType } from '@/app/commands/sysSubtype.ts';
 
 export function deleteSubTypeThunkRoot({
   subTypeId,
@@ -18,35 +20,31 @@ export function deleteSubTypeThunkRoot({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const subType = getSubTypeStateAtKey<SubType>('subtypes', subTypeId);
     if (!subType) {
-      dispatch(
-        showSnackbar({
-          message:
-            "It's like dividing by zero; I can't delete what doesn't exist.",
-          type: 'error',
-        })
+      logger.snError(
+        "It's like dividing by zero; I can't delete what doesn't exist."
       );
       return;
     }
     if (!checkAdmin(subType.system)) return;
 
     try {
-      await subTypeCommands.deleteSubType({
-        id: subTypeId,
-      });
+      if (subType.system) {
+        await sysDeleteSubType({ id: subTypeId });
+      } else {
+        await subTypeCommands.deleteSubType({
+          id: subTypeId,
+        });
+      }
     } catch (error) {
-      console.error('Error deleting SubType:', error);
       dispatch(
         addSubType({
           subType,
           system: subType.system,
         })
       );
-      dispatch(
-        showSnackbar({
-          message: 'Error deleting SubType. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        '"YOU THINK YOU CAN DEFEAT ME?!" - The subtype, probably. Could not delete. Please report.',
+        { error }
       );
     }
   };

@@ -1,7 +1,8 @@
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addSubType } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export default function fetchSubTypesByUserIdThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -38,26 +39,10 @@ export default function fetchSubTypesByUserIdThunk(): AppThunk {
           })
         );
       });
-      const totalFetched = filteredSystem.length + filteredUser.length;
-      if (totalFetched > 0) {
-        dispatch(
-          showSnackbar({
-            message: `Fetched ${totalFetched} new subType${
-              totalFetched > 1 ? 's' : ''
-            }.`,
-            type: 'success',
-            duration: 2000,
-          })
-        );
-      }
     } catch (error) {
-      console.error('Error fetching subTypes:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error fetching subTypes. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Hmm, couldn't fetch the subtypes. The server seems to be having a moment. Please report.",
+        { error }
       );
     }
   };

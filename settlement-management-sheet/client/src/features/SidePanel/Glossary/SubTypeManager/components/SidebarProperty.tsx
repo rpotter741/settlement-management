@@ -5,7 +5,6 @@ import {
   CheckBox,
   Close,
   Description,
-  DragHandle,
   LinearScale,
   List,
   LooksOne,
@@ -14,12 +13,10 @@ import {
 } from '@mui/icons-material';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
-import { useCallback, useRef, useState } from 'react';
-import { RelayStatus } from '@/hooks/global/useRelay.js';
+import { useState } from 'react';
 import { SubTypePropertyTypes } from '@/features/Glossary/EditGlossary/Templates/generics/genericContinent.js';
-import { useDrag, useDrop } from 'react-dnd';
 import useGlobalDrag from '@/hooks/global/useGlobalDragKit.tsx';
+import useUser from '@/hooks/auth/useUser.tsx';
 
 const propertyTypeIconMap: Record<string, React.ReactNode> = {
   text: <TextFields fontSize="small" />,
@@ -66,6 +63,7 @@ const SidebarProperty = ({
   isActive?: boolean;
   handlePropertyDeletion?: (propertyId: string) => void;
 }) => {
+  const { user } = useUser();
   const { darkenColor, lightenColor, getAlphaColor } = useTheming();
   const property = useSelector(
     selectSubTypePropertyById({
@@ -86,6 +84,8 @@ const SidebarProperty = ({
   if (!ref) return null;
 
   const [isHover, setIsHover] = useState(false);
+
+  console.log(property);
 
   return (
     <Box
@@ -132,7 +132,7 @@ const SidebarProperty = ({
           }
         >
           <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            {propertyTypeIconMap[property?.inputType]}
+            {propertyTypeIconMap[property?.inputType!]}
           </Box>
         </Tooltip>
         <Box
@@ -151,11 +151,30 @@ const SidebarProperty = ({
             variant="caption"
             sx={{ color: isActive ? 'success.main' : 'text.secondary', mr: 4 }}
           >
-            {property?.contentType}
+            {property?.system ? '(S)' : '(U)'}
           </Typography>
         </Box>
       </Button>
-      {handlePropertyDeletion && property.contentType !== 'SYSTEM' && (
+      {user.role === 'admin' && handlePropertyDeletion && (
+        <IconButton
+          size="small"
+          sx={{
+            color: 'error.main',
+            bgcolor: 'transparent',
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+          }}
+          onClick={() => handlePropertyDeletion(propertyId)}
+        >
+          <Close
+            fontSize="small"
+            sx={{ color: isHover ? 'warning.main' : 'transparent' }}
+          />
+        </IconButton>
+      )}
+      {user.role !== 'admin' && handlePropertyDeletion && !property?.system && (
         <IconButton
           size="small"
           sx={{

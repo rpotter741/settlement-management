@@ -3,25 +3,12 @@ import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubTypeGroupPropertyService.js';
-import {
-  addGroupsToSubType,
-  addPropertyToGroup,
-  SemanticAnchors,
-  SubType,
-  updateSubTypeAnchors,
-  updateSubTypeContext,
-  updateSubTypeName,
-} from '@/app/slice/subTypeSlice.js';
-import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSubTypeService.js';
-import { GenericObject } from '../../../../../../../shared/types/common.js';
+import { SubType, updateSubTypeContext } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
-import updateSubTypeAnchorService from '@/services/glossary/subTypes/updateSubTypeAnchorService.js';
-import updateSubTypeNameService from '@/services/glossary/subTypes/updateSubTypeNameService.js';
-import updateSubTypeContextService from '@/services/glossary/subTypes/updateSubTypeContextService.js';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export function updateSubTypeContextThunk({
   subtypeId,
@@ -46,10 +33,16 @@ export function updateSubTypeContextThunk({
     try {
       dispatch(updateSubTypeContext({ subtypeId: subtypeId, context }));
 
-      await subTypeCommands.updateSubType({
-        id: subtypeId,
-        context: context.join(','),
-      });
+      if (subtype.system) {
+        logger.snError(
+          "Um, what are you doing? System subtypes don't have context. BRUH."
+        );
+      } else {
+        await subTypeCommands.updateSubType({
+          id: subtypeId,
+          context: context.join(','),
+        });
+      }
 
       dispatch(
         addDirtyKeypath({
@@ -59,21 +52,15 @@ export function updateSubTypeContextThunk({
         })
       );
     } catch (error) {
-      console.error('Error updating subtype context:', error);
-      // Revert to old anchors on error
       dispatch(
         updateSubTypeContext({
           subtypeId: subtypeId,
           context: oldContext,
         })
       );
-      dispatch(
-        showSnackbar({
-          message:
-            "Context is everything in a story. Too bad we couldn't save it.",
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Context is everything in a story. Too bad we couldn't save it.",
+        { error }
       );
     }
   };

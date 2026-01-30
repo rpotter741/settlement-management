@@ -10,7 +10,7 @@ import {
   getSubTypeGroups,
   getSubTypeProperties,
   getSubTypes,
-} from '@/app/commands/subtype.ts';
+} from '@/app/commands/userSubtype.ts';
 
 let initial_load = true;
 

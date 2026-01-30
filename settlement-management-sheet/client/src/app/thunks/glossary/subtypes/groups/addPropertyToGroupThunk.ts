@@ -8,11 +8,14 @@ import {
   addPropertyToGroup,
   SubTypeGroup,
   SubTypeProperty,
+  SubTypePropertyLink,
 } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import { ulid as newId } from 'ulid';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { sysCreateGroupProperty } from '@/app/commands/sysSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export function addPropertyToGroupThunk({
   groupId,
@@ -24,11 +27,8 @@ export function addPropertyToGroupThunk({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      dispatch(
-        showSnackbar({
-          message: 'No group found to add property to.',
-          type: 'error',
-        })
+      logger.snError(
+        "What is this, math? I can't add a something to nothing! (No group found)"
       );
       return;
     }
@@ -38,31 +38,31 @@ export function addPropertyToGroupThunk({
       propertyId
     );
     if (!property) {
-      dispatch(
-        showSnackbar({
-          message: 'No property found to add to group.',
-          type: 'error',
-        })
-      );
+      logger.snError('Hard to add nothing to something! (No property found)');
       return;
     }
     try {
       const order = group.properties ? group.properties.length : 0;
 
-      const createdProperty = await subTypeCommands.createGroupProperty({
-        id: newId(),
-        groupId,
-        propertyId,
-        order,
-      });
+      let createdProperty: SubTypePropertyLink;
+      if (group.system) {
+        createdProperty = await sysCreateGroupProperty({
+          id: newId(),
+          groupId,
+          propertyId,
+          order,
+        });
+      } else {
+        createdProperty = await subTypeCommands.createGroupProperty({
+          id: newId(),
+          groupId,
+          propertyId,
+          order,
+        });
+      }
 
       if (!createdProperty) {
-        dispatch(
-          showSnackbar({
-            message: 'EVERYONE PANIC! NOTHING RETURNED FROM BACKEND!',
-            type: 'error',
-          })
-        );
+        logger.snError('EVERYONE PANIC! NOTHING RETURNED FROM BACKEND!');
         return;
       }
 
@@ -82,13 +82,9 @@ export function addPropertyToGroupThunk({
         })
       );
     } catch (error) {
-      console.error('Error linking subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error linking subtype property. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Couldn't add that property to the group. The server is being difficult.",
+        { error }
       );
     }
   };

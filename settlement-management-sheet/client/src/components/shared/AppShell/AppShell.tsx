@@ -1,14 +1,17 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { Box, Button } from '@mui/material';
 import TopNav from './TopNav/TopNav.js';
 import GlobalModal from './GlobalModal.js';
 import { AnimatePresence } from 'framer-motion';
 import SidebarOrchestrator from './SidebarOrchestrator.js';
+import store from '@/app/store.ts';
+import sysSubTypeCommands from '@/app/commands/sysSubtype.ts';
+import { dispatch } from '@/app/constants.ts';
+import { addSubTypePropertyThunkRoot } from '@/app/thunks/glossary/subtypes/properties/addSubTypePropertyThunk.ts';
 
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
+  const state = store.getState();
+  const user = state.user;
   return (
     <>
       <TopNav />

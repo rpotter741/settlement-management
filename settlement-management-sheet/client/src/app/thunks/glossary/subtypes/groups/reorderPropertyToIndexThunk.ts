@@ -9,10 +9,12 @@ import {
   SubTypeGroup,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import { ulid as newId } from 'ulid';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysReorderGroupProperties } from '@/app/commands/sysSubtype.ts';
 
 export function reorderPropertyToIndexThunk({
   groupId,
@@ -27,7 +29,9 @@ export function reorderPropertyToIndexThunk({
     const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
 
     if (!group) {
-      console.error(`Group with ID ${groupId} not found.`);
+      logger.snError(
+        "You try reordering nothing. Yeah! It's hard! (Also, I'm sorry please report)"
+      );
       return;
     }
     if (!checkAdmin(group.system)) return;
@@ -38,7 +42,9 @@ export function reorderPropertyToIndexThunk({
     );
 
     if (!property) {
-      console.error(`Property with ID ${propertyId} not found.`);
+      logger.snError(
+        "Reordering the void again? The property doesn't exist. Please report this bug."
+      );
       return;
     }
     try {
@@ -48,10 +54,17 @@ export function reorderPropertyToIndexThunk({
       const filtered = order.filter((pid) => pid !== null) as string[];
       filtered.splice(dropIndex, 0, propertyId);
 
-      await subTypeCommands.reorderGroupProperties({
-        groupId,
-        newOrder: filtered,
-      });
+      if (group.system) {
+        await sysReorderGroupProperties({
+          groupId,
+          newOrder: filtered,
+        });
+      } else {
+        await subTypeCommands.reorderGroupProperties({
+          groupId,
+          newOrder: filtered,
+        });
+      }
 
       dispatch(
         reorderGroupProperties({
@@ -70,13 +83,9 @@ export function reorderPropertyToIndexThunk({
         })
       );
     } catch (error) {
-      console.error('Error linking subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error linking subtype property. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        'Sometimes bad things happen to good people. The server rejected our request to reorder that property. Please report.',
+        { error }
       );
     }
   };

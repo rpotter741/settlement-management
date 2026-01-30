@@ -8,10 +8,12 @@ import {
   SubTypeGroup,
 } from '@/app/slice/subTypeSlice.js';
 import reorderGroupPropertiesService from '@/services/glossary/subTypes/reorderGroupPropertiesService.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import { cloneDeep } from 'lodash';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysReorderGroupProperties } from '@/app/commands/sysSubtype.ts';
 
 export function movePropertyToEnd({
   groupId,
@@ -23,13 +25,7 @@ export function movePropertyToEnd({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      dispatch(
-        showSnackbar({
-          message: 'Group not found.',
-          type: 'error',
-          duration: 3000,
-        })
-      );
+      logger.snError("Can't move what does not exist! Please report this bug.");
       return;
     }
     if (!checkAdmin(group.system)) return;
@@ -39,6 +35,19 @@ export function movePropertyToEnd({
     newOrder.splice(order, 0, propertyId);
 
     try {
+      //call the service to persist the new order
+      if (group.system) {
+        await sysReorderGroupProperties({
+          groupId,
+          newOrder,
+        });
+      } else {
+        await subTypeCommands.reorderGroupProperties({
+          groupId,
+          newOrder,
+        });
+      }
+
       // Reorder properties in the group locally
       dispatch(
         reorderGroupProperties({
@@ -49,13 +58,6 @@ export function movePropertyToEnd({
         })
       );
 
-      //call the service to persist the new order
-      // await reorderGroupPropertiesService({ groupId, newOrder });
-      await subTypeCommands.reorderGroupProperties({
-        groupId,
-        newOrder,
-      });
-
       dispatch(
         addDirtyKeypath({
           scope: 'subType',
@@ -64,13 +66,9 @@ export function movePropertyToEnd({
         })
       );
     } catch (error) {
-      console.error('Error reordering subtype properties:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error reordering subtype properties. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        'Immovable object meets... stoppable force? The server rejected our request to move that property. Please report.',
+        { error }
       );
     }
   };

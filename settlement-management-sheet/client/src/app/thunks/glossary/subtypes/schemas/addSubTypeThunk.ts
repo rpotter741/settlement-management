@@ -5,8 +5,11 @@ import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { dispatch } from '@/app/constants.js';
 import { addSubType, SubType } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import verifyUserAdmin from '@/hooks/auth/verifyUserAdmin.ts';
+import { sysCreateEntrySubType } from '@/app/commands/sysSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export function addSubTypeThunkRoot({
   subType,
@@ -15,57 +18,48 @@ export function addSubTypeThunkRoot({
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     try {
-      const state = getState();
-      const existingSubType = getSubTypeStateAtKey<SubType>(
-        'subtypes',
-        subType.id
-      );
-      if (existingSubType) {
-        dispatch(
-          showSnackbar({
-            message:
-              "2 ULIDs walk into a bar... The second one says, 'I think we already exist!'",
-            type: 'error',
-            duration: 3000,
-          })
+      const user = getState().user;
+      const isSystem = verifyUserAdmin();
+
+      let newSubtype: SubType;
+      if (isSystem) {
+        newSubtype = await sysCreateEntrySubType({
+          id: subType.id,
+          name: subType.name,
+          entryType: subType.entryType,
+        });
+      } else {
+        newSubtype = await subTypeCommands.createEntrySubType({
+          id: subType.id,
+          name: subType.name,
+          createdBy: user.id as string,
+          entryType: subType.entryType,
+        });
+      }
+
+      if (!newSubtype) {
+        logger.snError(
+          'We seem to have misplaced the new subtype! Please report this bug.'
         );
+        return;
       }
 
       dispatch(
         addSubType({
-          subType: {
-            ...subType,
-            groups: [],
-            system: state.user.role === 'admin' ? true : false,
-          },
-          system: state.user.role === 'admin' ? true : false,
+          subType: newSubtype,
+          system: newSubtype.system,
         })
       );
-
-      if (!existingSubType) {
-        await subTypeCommands.createEntrySubType({
-          id: subType.id,
-          name: subType.name,
-          createdBy: 'robbiepottsdm',
-          contentType: 'SYSTEM',
-          entryType: subType.entryType,
-        });
-      }
     } catch (error) {
-      console.error('Error adding SubType:', error);
-      dispatch(
-        showSnackbar({
-          message:
-            'Sometimes the server can be a little... rusty. Aka, something went wrong.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        'Sometimes the server can be a little... rusty. Aka, something went wrong.',
+        { error }
       );
     }
   };
 }
 
-export default function addSubTypeThunk({ subType }: { subType: any }) {
+export default function addSubTypeThunk({ subType }: { subType: SubType }) {
   return dispatch(
     addSubTypeThunkRoot({
       subType,

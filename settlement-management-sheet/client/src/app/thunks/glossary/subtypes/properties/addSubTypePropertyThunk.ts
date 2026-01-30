@@ -1,18 +1,17 @@
 import { ThunkDispatch } from 'redux-thunk';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
-import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import { dispatch } from '@/app/constants.js';
-import { GlossaryEntryType } from '../../../../../../../shared/types/index.js';
 import {
   addSubTypeProperty,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import createSubTypePropertyService from '@/services/glossary/subTypes/createSubTypePropertyService.js';
 import { cloneDeep } from 'lodash';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import userSubTypeCommands from '@/app/commands/userSubtype.ts';
 import { GenericObject } from '../../../../../../../shared/types/common.ts';
+import { sysCreateSubTypeProperty } from '@/app/commands/sysSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import verifyUserAdmin from '@/hooks/auth/verifyUserAdmin.ts';
 
 export function addSubTypePropertyThunkRoot({
   property,
@@ -22,24 +21,47 @@ export function addSubTypePropertyThunkRoot({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const state = getState();
     const user = state.user;
+    const isSystem = verifyUserAdmin();
     try {
       const customProperty = cloneDeep(property);
 
       dispatch(
         addSubTypeProperty({
           properties: [customProperty],
-          system: user.role === 'admin' ? true : false,
+          system: isSystem,
         })
       );
 
-      // should probably do something with this, huh?
-      const newProperty = await subTypeCommands.createSubTypeProperty({
-        id: property.id,
-        name: property.name,
-        createdBy: user.id as string,
-        inputType: property.inputType,
-        shape: property.shape as GenericObject,
-      });
+      let newProperty: SubTypeProperty;
+      if (isSystem) {
+        newProperty = await sysCreateSubTypeProperty({
+          id: property.id,
+          name: property.name,
+          inputType: property.inputType,
+          shape: property.shape as GenericObject,
+        });
+      } else {
+        newProperty = await userSubTypeCommands.createSubTypeProperty({
+          id: property.id,
+          name: property.name,
+          createdBy: user.id as string,
+          inputType: property.inputType,
+          shape: property.shape as GenericObject,
+        });
+      }
+
+      if (!newProperty) {
+        logger.snError(
+          'We need a detective for the case of the missing property!'
+        );
+      }
+
+      dispatch(
+        addSubTypeProperty({
+          properties: [newProperty],
+          system: newProperty.system,
+        })
+      );
 
       dispatch(
         addDirtyKeypath({
@@ -49,13 +71,9 @@ export function addSubTypePropertyThunkRoot({
         })
       );
     } catch (error) {
-      console.error('Error creating subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error creating subtype property. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Server said, 'New phone, who dis?' What a jerk. Report that bug!",
+        { error }
       );
     }
   };

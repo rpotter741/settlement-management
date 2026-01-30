@@ -6,35 +6,50 @@ import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { addSubTypeGroup, SubTypeGroup } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
 import createSubTypeGroupService from '@/services/glossary/subTypes/createSubTypeGroupService.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
+import { sysCreateSubTypeGroup } from '@/app/commands/sysSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import verifyUserAdmin from '@/hooks/auth/verifyUserAdmin.ts';
 
 export function createSubTypeGroupThunk({
   group,
-  system = false,
 }: {
   group: SubTypeGroup;
-  system?: boolean;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    const state = getState();
-    const user = state.user;
+    const user = getState().user;
+    const isSystem = verifyUserAdmin();
     try {
       const customGroup = cloneDeep(group);
       customGroup.displayName = customGroup.name;
 
+      let newGroup: SubTypeGroup;
+      if (isSystem) {
+        newGroup = await sysCreateSubTypeGroup({
+          id: customGroup.id,
+          name: customGroup.name,
+        });
+      } else {
+        newGroup = await subTypeCommands.createSubTypeGroup({
+          name: customGroup.name,
+          id: customGroup.id,
+          createdBy: user.username ?? user.device,
+        });
+      }
+
+      if (!newGroup) {
+        logger.snError(
+          'We seem to have misplaced the new subtype group! Please report this bug.'
+        );
+        return;
+      }
+
       dispatch(
         addSubTypeGroup({
-          groups: [{ ...customGroup, properties: [] }],
-          system: user.role === 'admin' ? true : false,
+          groups: [newGroup],
+          system: newGroup.system,
         })
       );
-
-      await subTypeCommands.createSubTypeGroup({
-        name: customGroup.name,
-        id: customGroup.id,
-        createdBy: user.username ?? user.device,
-        contentType: 'CUSTOM',
-      });
 
       dispatch(
         addDirtyKeypath({
@@ -44,14 +59,9 @@ export function createSubTypeGroupThunk({
         })
       );
     } catch (error) {
-      console.error('Error creating subtype group:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error creating subtype group. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
-      );
+      logger.snError('Server said no. Who are we to argue? Please report.', {
+        error,
+      });
     }
   };
 }

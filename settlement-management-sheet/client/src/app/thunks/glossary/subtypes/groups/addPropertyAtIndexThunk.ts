@@ -8,11 +8,17 @@ import {
   reorderGroupProperties,
   SubTypeGroup,
   SubTypeProperty,
+  SubTypePropertyLink,
 } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import { ulid as newId } from 'ulid';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import {
+  sysCreateGroupProperty,
+  sysReorderGroupProperties,
+} from '@/app/commands/sysSubtype.ts';
 
 export function addPropertyAtIndexThunk({
   groupId,
@@ -26,11 +32,13 @@ export function addPropertyAtIndexThunk({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      dispatch(
-        showSnackbar({
-          message: 'No group found to add property to at index.',
-          type: 'error',
-        })
+      logger.snError(
+        'How did this happen? No group found to add property to.',
+        {
+          groupId,
+          propertyId,
+          dropIndex,
+        }
       );
       return;
     }
@@ -42,11 +50,13 @@ export function addPropertyAtIndexThunk({
     );
 
     if (!property) {
-      dispatch(
-        showSnackbar({
-          message: 'No property found to add to group at index.',
-          type: 'error',
-        })
+      logger.snError(
+        'How did this happen? No property found to add to group.',
+        {
+          groupId,
+          propertyId,
+          dropIndex,
+        }
       );
       return;
     }
@@ -54,15 +64,29 @@ export function addPropertyAtIndexThunk({
       const order = group.properties.map((p) => p.propertyId);
       order.splice(dropIndex, 0, propertyId);
 
-      const createdProperty = await subTypeCommands.createGroupProperty({
-        id: newId(),
-        groupId,
-        propertyId,
-        order: group.properties.length,
-      });
+      let createdProperty: SubTypePropertyLink;
+
+      if (group.system) {
+        createdProperty = await sysCreateGroupProperty({
+          id: newId(),
+          groupId,
+          propertyId,
+          order: group.properties.length,
+        });
+      } else {
+        createdProperty = await subTypeCommands.createGroupProperty({
+          id: newId(),
+          groupId,
+          propertyId,
+          order: group.properties.length,
+        });
+      }
 
       if (!createdProperty) {
-        throw new Error('No created property returned from service.');
+        logger.snError(
+          'The binary broke or your RAM is dying! Please report this bug. (No link returned)'
+        );
+        return;
       }
 
       dispatch(
@@ -73,10 +97,17 @@ export function addPropertyAtIndexThunk({
         })
       );
 
-      await subTypeCommands.reorderGroupProperties({
-        groupId,
-        newOrder: order,
-      });
+      if (group.system) {
+        await sysReorderGroupProperties({
+          groupId,
+          newOrder: order,
+        });
+      } else {
+        await subTypeCommands.reorderGroupProperties({
+          groupId,
+          newOrder: order,
+        });
+      }
 
       dispatch(
         reorderGroupProperties({
@@ -95,13 +126,9 @@ export function addPropertyAtIndexThunk({
         })
       );
     } catch (error) {
-      console.error('Error linking subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error linking subtype property. Thanks, backend.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        'Error linking subtype property. Thanks for nothing, backend.',
+        { error }
       );
     }
   };

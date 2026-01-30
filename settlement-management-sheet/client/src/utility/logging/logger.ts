@@ -1,3 +1,5 @@
+import { dispatch } from '@/app/constants.ts';
+import { showSnackbar } from '@/app/slice/snackbarSlice.ts';
 import { invoke } from '@tauri-apps/api/core';
 
 type LogLevel = 'info' | 'warn' | 'error';
@@ -36,6 +38,16 @@ class Logger {
 
   error(message: string, context?: LogContext) {
     this.log('error', message, context);
+  }
+
+  snError(message: string, context?: LogContext) {
+    this.log('error', message, context);
+    dispatch(
+      showSnackbar({
+        message,
+        type: 'error',
+      })
+    );
   }
 
   // Special method for catching errors with stack traces

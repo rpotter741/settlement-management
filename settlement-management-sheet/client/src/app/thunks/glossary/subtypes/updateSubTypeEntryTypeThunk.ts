@@ -4,35 +4,38 @@ import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { dispatch } from '@/app/constants.js';
-import {} from '@/app/slice/subTypeSlice.js';
+import { SubType } from '@/app/slice/subTypeSlice.js';
 import { GlossaryEntryType } from '../../../../../../shared/types/index.js';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import { sysUpdateSubType } from '@/app/commands/sysSubtype.ts';
 
 export function updateSubTypeEntryTypeThunkRoot({
   subTypeId,
   entryType,
-  system,
 }: {
   subTypeId: string;
-  system: boolean;
   entryType: GlossaryEntryType;
 }): AppThunk {
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
-    if (!checkAdmin(system)) return;
+    const subType = getSubTypeStateAtKey<SubType>('subtypes', subTypeId);
+    if (!subType) {
+      dispatch(
+        showSnackbar({
+          message: 'Are we sure that subtype exists?',
+          type: 'error',
+        })
+      );
+      return;
+    }
+    if (!checkAdmin(subType.system)) return;
     try {
-      const subType = getSubTypeStateAtKey('subtypes', subTypeId);
-      if (!subType) {
-        dispatch(
-          showSnackbar({
-            message: 'SubType not found.',
-            type: 'error',
-            duration: 3000,
-          })
-        );
-        return;
-      }
-
+      dispatch(
+        showSnackbar({
+          message: 'Bro this would be crazy to allow. Just clone!',
+          type: 'warning',
+        })
+      );
       // dispatch(
       //   updateSubTypeEntryType({
       //     subTypeId,
@@ -63,17 +66,14 @@ export function updateSubTypeEntryTypeThunkRoot({
 export default function updateSubTypeEntryTypeThunk({
   subTypeId,
   entryType,
-  system,
 }: {
   subTypeId: string;
   entryType: GlossaryEntryType;
-  system: boolean;
 }) {
   return dispatch(
     updateSubTypeEntryTypeThunkRoot({
       subTypeId,
       entryType,
-      system,
     })
   );
 }

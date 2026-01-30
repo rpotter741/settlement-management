@@ -5,29 +5,29 @@ import {
   AllShapes,
   SubType,
   SubTypeGroup,
+  SubTypeGroupLink,
   SubTypeProperty,
   SubTypePropertyLink,
 } from '../slice/subTypeSlice.ts';
-import { S } from 'node_modules/framer-motion/dist/types.d-CtuPurYT.js';
 import { SmartSyncRule } from '@/features/Glossary/Modals/EditSmartSyncRule.tsx';
 
 export async function addGroupToSubType({
   id,
   groupId,
-  schemaId,
+  subtypeId,
   order,
 }: {
   id: string;
   groupId: string;
-  schemaId: string;
+  subtypeId: string;
   order: number;
 }) {
   try {
-    const result = await invoke('add_group_to_subtype', {
+    const result: SubTypeGroupLink = await invoke('add_group_to_subtype', {
       input: {
         id,
         groupId,
-        schemaId,
+        subtypeId,
         order,
       },
     });
@@ -69,20 +69,17 @@ export async function createSubTypeGroup({
   id,
   name,
   createdBy,
-  contentType,
 }: {
   id: string;
   name: string;
   createdBy: string;
-  contentType: string;
 }) {
   try {
-    const result = await invoke('create_sub_type_group', {
+    const result: SubTypeGroup = await invoke('create_sub_type_group', {
       input: {
         id,
         name,
         createdBy,
-        contentType,
       },
     });
     return result;
@@ -144,22 +141,19 @@ export async function createEntrySubType({
   id,
   name,
   createdBy,
-  contentType,
   entryType,
 }: {
   id: string;
   name: string;
   createdBy: string;
-  contentType: string;
   entryType: GlossaryEntryType;
 }) {
   try {
-    const result = await invoke('create_sub_type', {
+    const result: SubType = await invoke('create_sub_type', {
       input: {
         id,
         name,
         createdBy,
-        contentType,
         entryType,
       },
     });
@@ -226,11 +220,13 @@ export async function getSubTypeGroups({
   }
 }
 
-interface RustSubTypeGroup extends Omit<SubTypeGroup, 'display'> {
+export interface RustSubTypeGroup extends Omit<SubTypeGroup, 'display'> {
   display: string;
 }
 
-function parseGroupProperties(SubTypeGroup: RustSubTypeGroup): SubTypeGroup {
+export function parseGroupProperties(
+  SubTypeGroup: RustSubTypeGroup
+): SubTypeGroup {
   return {
     ...SubTypeGroup,
     display: JSON.parse(SubTypeGroup.display || '{}'),
@@ -346,16 +342,12 @@ export async function reorderGroupProperties({
 export async function updateSubTypeGroup({
   id,
   name,
-  refId,
-  version,
   displayName,
   display,
   description,
 }: {
   id: string;
   name?: string;
-  refId?: string;
-  version?: number;
   displayName?: string;
   display?: GenericObject;
   description?: string;
@@ -365,8 +357,6 @@ export async function updateSubTypeGroup({
       input: {
         id,
         name,
-        refId,
-        version,
         displayName,
         display,
         description,
@@ -381,8 +371,6 @@ export async function updateSubTypeGroup({
 
 export async function updateSubTypeProperty({
   id,
-  refId,
-  version,
   name,
   inputType,
   shape,
@@ -390,8 +378,6 @@ export async function updateSubTypeProperty({
   smartSync,
 }: {
   id: string;
-  refId?: string;
-  version?: number;
   name?: string;
   inputType?: string;
   shape?: AllShapes;
@@ -403,8 +389,6 @@ export async function updateSubTypeProperty({
     const result = await invoke('update_sub_type_property', {
       input: {
         id,
-        refId,
-        version,
         name,
         inputType,
         shape: shape ? JSON.stringify(shape) : undefined, // thanks serialization!
@@ -422,17 +406,11 @@ export async function updateSubTypeProperty({
 export async function updateSubType({
   id,
   name,
-  refId,
-  version,
-  editors,
   anchors,
   context,
 }: {
   id: string;
   name?: string;
-  refId?: string;
-  version?: number;
-  editors?: string[];
   anchors?: GenericObject;
   context?: string;
 }) {
@@ -441,9 +419,6 @@ export async function updateSubType({
       input: {
         id,
         name,
-        refId,
-        version,
-        editors,
         anchors,
         context,
       },

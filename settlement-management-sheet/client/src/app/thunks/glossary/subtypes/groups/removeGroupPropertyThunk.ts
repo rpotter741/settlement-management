@@ -12,9 +12,11 @@ import {
 import { cloneDeep } from 'lodash';
 import createSubTypeGroupService from '@/services/glossary/subTypes/createSubTypeGroupService.js';
 import removePropertyFromGroupService from '@/services/glossary/subTypes/removePropertyFromGroupService.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysRemoveGroupProperty } from '@/app/commands/sysSubtype.ts';
 
 export function removeGroupPropertyThunk({
   groupId,
@@ -26,12 +28,8 @@ export function removeGroupPropertyThunk({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     const group = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!group) {
-      dispatch(
-        showSnackbar({
-          message: 'Group not found.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Take my eyes but not the group! They must not be working anyway, because I can't find that group. Please report this bug."
       );
       return;
     }
@@ -41,12 +39,8 @@ export function removeGroupPropertyThunk({
       propertyId
     );
     if (!property) {
-      dispatch(
-        showSnackbar({
-          message: 'Property not found.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Put out an APB on that property! It's on the run (because I can't find it). Please report this bug."
       );
       return;
     }
@@ -61,18 +55,28 @@ export function removeGroupPropertyThunk({
         : [];
 
       if (!linkId) {
-        dispatch(
-          showSnackbar({
-            message: 'Group-Property Link not found.',
-            type: 'error',
-            duration: 3000,
-          })
+        logger.snError(
+          "They must be soul mates because that link is invisible. I can't find it. Please report this bug."
         );
         return;
       }
 
       const newGroupDisplay = cloneDeep(group.display);
       delete newGroupDisplay[propertyId];
+
+      if (group.system) {
+        await sysRemoveGroupProperty({
+          linkId,
+          groupId,
+          newGroupDisplay,
+        });
+      } else {
+        await subTypeCommands.removeGroupProperty({
+          linkId,
+          groupId,
+          newGroupDisplay,
+        });
+      }
 
       dispatch(
         reorderGroupProperties({
@@ -83,12 +87,6 @@ export function removeGroupPropertyThunk({
         })
       );
 
-      await subTypeCommands.removeGroupProperty({
-        linkId,
-        groupId,
-        newGroupDisplay,
-      });
-
       dispatch(
         addDirtyKeypath({
           scope: 'subType',
@@ -97,13 +95,9 @@ export function removeGroupPropertyThunk({
         })
       );
     } catch (error) {
-      console.error('Error removing property from group:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error removing property from group. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Success is overrated! At least, that's what the server says. It rejected our request to remove that property. Please report.",
+        { error }
       );
     }
   };

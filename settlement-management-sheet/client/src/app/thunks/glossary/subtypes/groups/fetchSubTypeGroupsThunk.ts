@@ -1,7 +1,7 @@
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addSubTypeGroup, SubTypeGroup } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 
 export default function fetchSubTypeGroupsThunk(): AppThunk {
   return async (dispatch, getState) => {

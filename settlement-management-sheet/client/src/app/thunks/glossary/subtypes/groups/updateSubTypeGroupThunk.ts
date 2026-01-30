@@ -4,9 +4,11 @@ import { RootState } from '@/app/store.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { SubTypeGroup, updateSubTypeGroup } from '@/app/slice/subTypeSlice.js';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysUpdateSubTypeGroup } from '@/app/commands/sysSubtype.ts';
 
 export function updateSubTypeGroupThunk({
   groupId,
@@ -18,12 +20,8 @@ export function updateSubTypeGroupThunk({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>) => {
     const oldGroup = getSubTypeStateAtKey<SubTypeGroup>('groups', groupId);
     if (!oldGroup) {
-      dispatch(
-        showSnackbar({
-          message: 'Group not found.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "You ever try catching a fart? That's how I feel about updating a group that doesn't exist. Please report this bug."
       );
       return;
     }
@@ -37,8 +35,8 @@ export function updateSubTypeGroupThunk({
         })
       );
 
-      if (!oldGroup.system) {
-        await subTypeCommands.updateSubTypeGroup({
+      if (oldGroup.system) {
+        await sysUpdateSubTypeGroup({
           id: groupId,
           name: updates?.name,
           displayName: updates?.displayName,
@@ -46,13 +44,13 @@ export function updateSubTypeGroupThunk({
           description: updates?.description,
         });
       } else {
-        // await systemSubTypeCommands.updateSubTypeGroup({
-        //   id: groupId,
-        //   name: updates?.name,
-        //   displayName: updates?.displayName,
-        //   display: updates?.display,
-        //   description: updates?.description,
-        // });
+        await subTypeCommands.updateSubTypeGroup({
+          id: groupId,
+          name: updates?.name,
+          displayName: updates?.displayName,
+          display: updates?.display,
+          description: updates?.description,
+        });
       }
 
       dispatch(
@@ -63,13 +61,9 @@ export function updateSubTypeGroupThunk({
         })
       );
     } catch (error) {
-      console.error('Error updating group:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error updating group. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "You did a good job. Let's not take that away. It's the server who let us down. Please report.",
+        { error }
       );
     }
   };

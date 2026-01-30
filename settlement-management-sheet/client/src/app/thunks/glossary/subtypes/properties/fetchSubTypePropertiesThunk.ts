@@ -1,10 +1,10 @@
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
-import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import {
   addSubTypeProperty,
   SubTypeProperty,
 } from '@/app/slice/subTypeSlice.js';
-import { getSubTypeProperties } from '@/app/commands/subtype.ts';
+import { getSubTypeProperties } from '@/app/commands/userSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export default function fetchSubTypePropertiesThunk(): AppThunk {
   return async (dispatch, getState) => {
@@ -34,13 +34,9 @@ export default function fetchSubTypePropertiesThunk(): AppThunk {
       );
       dispatch(addSubTypeProperty({ properties: filteredUser, system: false }));
     } catch (error) {
-      console.error('Error fetching subTypes:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error fetching subTypes. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Whoa! Those properties didn't wanna show up! The server rejected our request. Please report.",
+        { error }
       );
     }
   };

@@ -1,4 +1,5 @@
-import subTypeCommands from '@/app/commands/subtype.ts';
+import { sysUpdateSubTypeProperty } from '@/app/commands/sysSubtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import { createDefaultProperty } from '@/app/dispatches/glossary/SubTypePropertyTransformations.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
 import { showSnackbar } from '@/app/slice/snackbarSlice.js';
@@ -10,6 +11,7 @@ import {
 import { RootState } from '@/app/store.js';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
+import { logger } from '@/utility/logging/logger.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
 import { cloneDeep } from 'lodash';
 import { ThunkDispatch } from 'redux-thunk';
@@ -28,11 +30,8 @@ export function createDefaultPropertyThunk({
       getSubTypeStateAtKey<SubTypeProperty>('properties', propertyId)
     );
     if (!oldProperty) {
-      dispatch(
-        showSnackbar({
-          message: "Ope, no old property found. Can't do it!",
-          type: 'error',
-        })
+      logger.snError(
+        'Ope! Property must be playing hide and seek! Please report this bug.'
       );
       return;
     }
@@ -53,12 +52,19 @@ export function createDefaultPropertyThunk({
           system: oldProperty.system,
         })
       );
-
-      await subTypeCommands.updateSubTypeProperty({
-        id: propertyId,
-        inputType: property.inputType,
-        shape: property.shape,
-      });
+      if (oldProperty.system) {
+        await sysUpdateSubTypeProperty({
+          id: propertyId,
+          inputType: property.inputType,
+          shape: property.shape,
+        });
+      } else {
+        await subTypeCommands.updateSubTypeProperty({
+          id: propertyId,
+          inputType: property.inputType,
+          shape: property.shape,
+        });
+      }
 
       dispatch(
         addDirtyKeypath({
@@ -68,13 +74,9 @@ export function createDefaultPropertyThunk({
         })
       );
     } catch (error) {
-      console.error('Error creating subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'Error creating subtype property. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "Well, this is awkward. The server has an 'opinion' and said 'no' to our request. Please report.",
+        { error }
       );
       dispatch(
         updateSubTypeProperty({

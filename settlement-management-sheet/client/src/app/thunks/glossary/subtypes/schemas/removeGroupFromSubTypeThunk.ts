@@ -14,6 +14,9 @@ import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSub
 import removeGroupsFromSubTypeService from '@/services/glossary/subTypes/removeGroupFromSubTypeService.js';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
+import { sysRemoveGroupFromSubType } from '@/app/commands/sysSubtype.ts';
 
 export function removeGroupFromSubTypeThunk({
   subtypeId,
@@ -25,17 +28,24 @@ export function removeGroupFromSubTypeThunk({
   return async (dispatch: ThunkDispatch<RootState, unknown, any>, getState) => {
     const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      dispatch(
-        showSnackbar({
-          message: 'Tell your subtype to take off its invisibility cloak.',
-          type: 'error',
-        })
+      logger.snError(
+        "Tell your subtype to take off it's invisibility cloak, please."
       );
       return;
     }
     if (!checkAdmin(subtype.system)) return;
 
     try {
+      if (subtype.system) {
+        await sysRemoveGroupFromSubType({
+          linkIds,
+        });
+      } else {
+        await subTypeCommands.removeGroupFromSubType({
+          linkIds,
+        });
+      }
+
       dispatch(
         removeGroupsFromSubtype({
           subTypeId: subtypeId,
@@ -43,11 +53,6 @@ export function removeGroupFromSubTypeThunk({
           system: subtype.system,
         })
       );
-
-      // await removeGroupsFromSubTypeService({
-      //   linkIds,
-      //   subtypeId,
-      // });
 
       dispatch(
         addDirtyKeypath({
@@ -57,13 +62,9 @@ export function removeGroupFromSubTypeThunk({
         })
       );
     } catch (error) {
-      console.error('Error linking subtype property:', error);
-      dispatch(
-        showSnackbar({
-          message: 'That group was stubborn and refused to be removed.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        'That group (or groups) refused to be removed. Please report.',
+        { error }
       );
     }
   };

@@ -19,6 +19,7 @@ import { panelOpen } from '@/app/selectors/panelSelectors.js';
 import TabNumberAndNav from './widgets/TabNumberAndNav.js';
 import { useMediaQuery } from '@mui/system';
 import ProgressRail from '@/features/ProgressRail/ProgressRail.tsx';
+import store from '@/app/store.ts';
 
 const TopNav = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const TopNav = () => {
   const showNumbers = location.pathname !== '/customCreation';
 
   const sideBarOpen = useSelector(panelOpen);
+  const user = store.getState().user;
 
   return (
     <Box
@@ -49,6 +51,12 @@ const TopNav = () => {
         }}
       />
       <ProgressRail queue={1} />
+      <Typography
+        variant="caption"
+        sx={{ position: 'absolute', top: 16, left: 4 }}
+      >
+        {user.role} mode
+      </Typography>
       <Box
         sx={{
           display: 'flex',

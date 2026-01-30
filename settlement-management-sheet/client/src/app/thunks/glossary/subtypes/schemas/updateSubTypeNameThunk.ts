@@ -1,25 +1,14 @@
 import { ThunkDispatch } from 'redux-thunk';
 import { AppThunk } from '@/app/thunks/glossaryThunks.js';
 import { RootState } from '@/app/store.js';
-import { showSnackbar } from '@/app/slice/snackbarSlice.js';
 import { addDirtyKeypath } from '@/app/slice/dirtySlice.js';
-import addSubTypeGroupPropertyService from '@/services/glossary/subTypes/addSubTypeGroupPropertyService.js';
-import {
-  addGroupsToSubType,
-  addPropertyToGroup,
-  SemanticAnchors,
-  SubType,
-  updateSubTypeAnchors,
-  updateSubTypeName,
-} from '@/app/slice/subTypeSlice.js';
-import addGroupToSubTypeService from '@/services/glossary/subTypes/addGroupToSubTypeService.js';
-import { GenericObject } from '../../../../../../../shared/types/common.js';
+import { SubType, updateSubTypeName } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
-import updateSubTypeAnchorService from '@/services/glossary/subTypes/updateSubTypeAnchorService.js';
-import updateSubTypeNameService from '@/services/glossary/subTypes/updateSubTypeNameService.js';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
+import { sysUpdateSubType } from '@/app/commands/sysSubtype.ts';
 
 export function updateSubTypeNameThunk({
   subtypeId,
@@ -32,11 +21,8 @@ export function updateSubTypeNameThunk({
     const state = getState();
     const subtype = getSubTypeStateAtKey<SubType>('subtypes', subtypeId);
     if (!subtype) {
-      dispatch(
-        showSnackbar({
-          message: "Can't find the subtype. Whoops!",
-          type: 'error',
-        })
+      logger.snError(
+        "It's not working and this is like... my 60th error message today. Subtype gone, alright? Please report."
       );
       return;
     }
@@ -52,10 +38,17 @@ export function updateSubTypeNameThunk({
         })
       );
 
-      await subTypeCommands.updateSubType({
-        id: subtypeId,
-        name,
-      });
+      if (subtype.system) {
+        await sysUpdateSubType({
+          id: subtypeId,
+          name,
+        });
+      } else {
+        await subTypeCommands.updateSubType({
+          id: subtypeId,
+          name,
+        });
+      }
 
       dispatch(
         addDirtyKeypath({
@@ -65,8 +58,6 @@ export function updateSubTypeNameThunk({
         })
       );
     } catch (error) {
-      console.error('Error updating subtype name:', error);
-      // Revert to old anchors on error
       dispatch(
         updateSubTypeName({
           subtypeId: subtypeId,
@@ -74,13 +65,7 @@ export function updateSubTypeNameThunk({
           system: subtype.system,
         })
       );
-      dispatch(
-        showSnackbar({
-          message: "What's in a name? Can't update it, anyway.",
-          type: 'error',
-          duration: 3000,
-        })
-      );
+      logger.snError("What's in a name? Can't update it, anyway.", { error });
     }
   };
 }

@@ -9,9 +9,11 @@ import {
   SubTypeGroup,
 } from '@/app/slice/subTypeSlice.js';
 import { cloneDeep } from 'lodash';
-import subTypeCommands from '@/app/commands/subtype.ts';
+import subTypeCommands from '@/app/commands/userSubtype.ts';
 import getSubTypeStateAtKey from '@/utility/dataTransformation/getSubTypeStateAtKey.ts';
 import checkAdmin from '@/utility/security/checkAdmin.ts';
+import { sysDeleteSubTypeGroup } from '@/app/commands/sysSubtype.ts';
+import { logger } from '@/utility/logging/logger.ts';
 
 export function deleteSubTypeGroupThunk({
   groupId,
@@ -23,18 +25,12 @@ export function deleteSubTypeGroupThunk({
       getSubTypeStateAtKey<SubTypeGroup>('groups', groupId)
     );
     if (!group) {
-      dispatch(
-        showSnackbar({
-          message: 'Group not found.',
-          type: 'error',
-          duration: 3000,
-        })
+      logger.snError(
+        "How can on delete that which does not exist? That's one for the ages... and the logs. Please report."
       );
       return;
     }
-
     if (!checkAdmin(group.system)) return;
-
     try {
       dispatch(
         deleteGroup({
@@ -42,17 +38,16 @@ export function deleteSubTypeGroupThunk({
           system: group.system,
         })
       );
-
-      await subTypeCommands.deleteSubTypeGroup({ id: groupId });
+      if (group.system) {
+        await sysDeleteSubTypeGroup({ id: groupId });
+      } else {
+        await subTypeCommands.deleteSubTypeGroup({ id: groupId });
+      }
     } catch (error) {
       dispatch(addSubTypeGroup({ groups: [group], system: group.system }));
-      dispatch(
-        showSnackbar({
-          message: 'Error removing group. Try again later.',
-          type: 'error',
-          duration: 3000,
-        })
-      );
+      logger.snError('Group said no. Who are we to argue? Please report.', {
+        error,
+      });
     }
   };
 }
