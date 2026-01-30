@@ -13,26 +13,23 @@ impl MigrationTrait for Migration {
                 r#"
 DROP TABLE IF EXISTS "GlossaryMetaData";
 DROP TABLE IF EXISTS "UserGlossary";
-DROP TABLE IF EXISTS "SystemGlossary";
 DROP TABLE IF EXISTS "UserSettings";
 DROP TABLE IF EXISTS "Devices";
 DROP TABLE IF EXISTS "UserTiers";
 DROP TABLE IF EXISTS "Users";
 DROP TABLE IF EXISTS "UserBacklinkIndex";
-DROP TABLE IF EXISTS "SystemBacklinkIndex";
 DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
-DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "UserSubTypeGroupProperty";
 DROP TABLE IF EXISTS "UserGlossaryEntry";
 DROP TABLE IF EXISTS "UserSubType";
 DROP TABLE IF EXISTS "UserSubTypeGroup";
 DROP TABLE IF EXISTS "UserSubTypeProperty";
 DROP TABLE IF EXISTS "UserGlossaryNode";
-DROP TABLE IF EXISTS "SystemGlossaryNode";
+DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "SystemSubType";
 DROP TABLE IF EXISTS "SystemSubTypeGroup";
 DROP TABLE IF EXISTS "SystemSubTypeProperty";
-DROP TABLE IF EXISTS "SystemGlossaryEntry";
+DROP TABLE IF EXISTS "SystemSubTypeGroupProperty";
 DROP TABLE IF EXISTS "EntrySubType";
 "#,
             )
@@ -88,23 +85,6 @@ CREATE TABLE "UserSettings" (
   FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE CASCADE
 );
 
--- SystemGlossary table
-CREATE TABLE "SystemGlossary" (
-  "id" TEXT NOT NULL PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "genre" TEXT NOT NULL,
-  "sub_genre" TEXT NOT NULL,
-  "description" TEXT,
-  "rt_description" TEXT,
-  "version" INTEGER NOT NULL DEFAULT 1,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "theme" TEXT,
-  UNIQUE("name", "genre", "sub_genre", "version")
-);
-
-CREATE INDEX "SystemGlossary_name_genre_sub_genre_idx" ON "SystemGlossary"("name", "genre", "sub_genre");
-
 -- UserGlossary table
 CREATE TABLE "UserGlossary" (
   "id" TEXT NOT NULL PRIMARY KEY,
@@ -143,21 +123,6 @@ CREATE TABLE "GlossaryMetaData" (
 );
 
 CREATE INDEX "GlossaryMetaData_id_idx" ON "GlossaryMetaData"("id");
-
--- SystemGlossaryNode table
-CREATE TABLE "SystemGlossaryNode" (
-  "id" TEXT NOT NULL PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "entry_type" TEXT NOT NULL,
-  "glossary_id" TEXT NOT NULL,
-  "system_sub_type_id" TEXT NOT NULL,
-  "sort_index" INTEGER NOT NULL DEFAULT 0,
-  "icon" TEXT,
-  "integration_state" TEXT,
-  "parent_id" TEXT,
-  FOREIGN KEY ("glossary_id") REFERENCES "SystemGlossary"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("parent_id") REFERENCES "SystemGlossaryNode"("id") ON DELETE CASCADE
-);
 
 -- UserGlossaryNode table
 CREATE TABLE "UserGlossaryNode" (
@@ -281,7 +246,6 @@ CREATE TABLE "SystemSubType" (
   "version" INTEGER NOT NULL DEFAULT 1
 );
 
-CREATE INDEX "SystemSubType_ref_id_idx" ON "SystemSubType"("ref_id");
 CREATE INDEX "SystemSubType_entry_type_idx" ON "SystemSubType"("entry_type");
 
 -- UserSubType table
@@ -298,7 +262,6 @@ CREATE TABLE "UserSubType" (
   FOREIGN KEY ("context") REFERENCES "SystemSubType"("id") ON DELETE RESTRICT
 );
 
-CREATE INDEX "UserSubType_ref_id_idx" ON "UserSubType"("ref_id");
 CREATE INDEX "UserSubType_entry_type_idx" ON "UserSubType"("entry_type");
 
 -- UserSubTypeMetadata table
@@ -315,29 +278,6 @@ CREATE TABLE "UserSubTypeMetadata" (
   "status" TEXT NOT NULL DEFAULT "draft",
   FOREIGN KEY ("id") REFERENCES "UserSubType"("id") ON DELETE CASCADE
 );
-
--- SystemGlossaryEntry table
-CREATE TABLE "SystemGlossaryEntry" (
-  "id" TEXT NOT NULL PRIMARY KEY,
-  "entry_type" TEXT NOT NULL,
-  "sub_type_id" TEXT NOT NULL,
-  "name" TEXT NOT NULL,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "version" INTEGER NOT NULL DEFAULT 1,
-  "groups" TEXT,
-  "custom_properties" TEXT,
-  "primary_anchor_id" TEXT,
-  "primary_anchor_value" TEXT,
-  "secondary_anchor_id" TEXT,
-  "secondary_anchor_value" TEXT,
-  "visibility" TEXT NOT NULL DEFAULT '{}',
-  FOREIGN KEY ("sub_type_id") REFERENCES "SystemSubType"("id") ON DELETE SET NULL
-);
-
-CREATE INDEX "SystemGlossaryEntry_entry_type_idx" ON "SystemGlossaryEntry"("entry_type");
-CREATE INDEX "SystemGlossaryEntry_sub_type_id_idx" ON "SystemGlossaryEntry"("sub_type_id");
-CREATE INDEX "SystemGlossaryEntry_entry_type_sub_type_id_idx" ON "SystemGlossaryEntry"("entry_type", "sub_type_id");
 
 -- UserGlossaryEntry table
 CREATE TABLE "UserGlossaryEntry" (
@@ -383,11 +323,12 @@ CREATE TABLE "UserGlossaryEntryMetadata" (
 CREATE TABLE "SystemSubTypeGroupProperty" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "group_id" TEXT NOT NULL,
-  "property_id" TEXT NOT NULL,
+  "user_property_id" TEXT, -- always NULL for system properties
+  "system_property_id" TEXT NOT NULL,
   "order" INTEGER NOT NULL,
   FOREIGN KEY ("group_id") REFERENCES "SystemSubTypeGroup"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("property_id") REFERENCES "SystemSubTypeProperty"("id") ON DELETE CASCADE,
-  UNIQUE("group_id", "property_id")
+  FOREIGN KEY ("system_property_id") REFERENCES "SystemSubTypeProperty"("id") ON DELETE CASCADE,
+  UNIQUE("group_id", "system_property_id")
 );
 
 -- UserSubTypeGroupProperty table
@@ -453,30 +394,6 @@ CREATE TABLE "UserBacklinkIndex" (
 CREATE INDEX "UserBacklinkIndex_target_id_idx" ON "UserBacklinkIndex"("target_id");
 CREATE INDEX "UserBacklinkIndex_property_id_idx" ON "UserBacklinkIndex"("property_id");
 
--- System BacklinkIndex table
-CREATE TABLE "SystemBacklinkIndex" (
-  "id" TEXT NOT NULL PRIMARY KEY,
-  "source_id" TEXT NOT NULL,
-  "target_id" TEXT NOT NULL,
-  "type" TEXT,
-  "property_id" TEXT NOT NULL,
-  "property_name" TEXT NOT NULL,
-  "property_value" TEXT,
-  "ignore_divergence" INTEGER NOT NULL DEFAULT 0,
-  "last_synced_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "target_ignore" INTEGER NOT NULL DEFAULT 0,
-  "sub_property_id" TEXT,
-  "is_system_property" INTEGER NOT NULL DEFAULT 1,
-  "created_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  "updated_at" TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
-  FOREIGN KEY ("source_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
-  FOREIGN KEY ("target_id") REFERENCES "SystemGlossaryEntry"("id") ON DELETE CASCADE,
-  UNIQUE("source_id", "target_id", "property_id")
-);
-
-CREATE INDEX "SystemBacklinkIndex_target_id_idx" ON "SystemBacklinkIndex"("target_id");
-CREATE INDEX "SystemBacklinkIndex_property_id_idx" ON "SystemBacklinkIndex"("property_id");
-
 -- FTS5 virtual table for glossary entries
 CREATE VIRTUAL TABLE "UserGlossaryEntryFTS" USING fts5(
   id UNINDEXED,
@@ -519,26 +436,23 @@ SELECT id, name, groups, entry_type FROM "UserGlossaryEntry";
                 r#"
 DROP TABLE IF EXISTS "GlossaryMetaData";
 DROP TABLE IF EXISTS "UserGlossary";
-DROP TABLE IF EXISTS "SystemGlossary";
 DROP TABLE IF EXISTS "UserSettings";
 DROP TABLE IF EXISTS "Devices";
 DROP TABLE IF EXISTS "UserTiers";
 DROP TABLE IF EXISTS "Users";
 DROP TABLE IF EXISTS "UserBacklinkIndex";
-DROP TABLE IF EXISTS "SystemBacklinkIndex";
 DROP TABLE IF EXISTS "UserSubTypeSchemaGroup";
-DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "UserSubTypeGroupProperty";
 DROP TABLE IF EXISTS "UserGlossaryEntry";
 DROP TABLE IF EXISTS "UserSubType";
 DROP TABLE IF EXISTS "UserSubTypeGroup";
 DROP TABLE IF EXISTS "UserSubTypeProperty";
 DROP TABLE IF EXISTS "UserGlossaryNode";
-DROP TABLE IF EXISTS "SystemGlossaryNode";
+DROP TABLE IF EXISTS "SystemSubTypeSchemaGroup";
 DROP TABLE IF EXISTS "SystemSubType";
 DROP TABLE IF EXISTS "SystemSubTypeGroup";
 DROP TABLE IF EXISTS "SystemSubTypeProperty";
-DROP TABLE IF EXISTS "SystemGlossaryEntry";
+DROP TABLE IF EXISTS "SystemSubTypeGroupProperty";
 DROP TABLE IF EXISTS "EntrySubType";
 "#,
             )

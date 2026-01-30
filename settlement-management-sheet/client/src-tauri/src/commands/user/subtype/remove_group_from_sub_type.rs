@@ -1,5 +1,3 @@
-// Create a new glossary entry in the database
-
 use crate::entities::user_sub_type_schema_group;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait};
 

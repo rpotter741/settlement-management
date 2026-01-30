@@ -1,146 +1,17 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::{
     entities::{
-        system_glossary, system_glossary_entry, system_glossary_node, system_sub_type,
-        system_sub_type_group, system_sub_type_group_property, system_sub_type_property,
-        system_sub_type_schema_group, user_backlink_index,
+        system_sub_type, system_sub_type_group, system_sub_type_group_property,
+        system_sub_type_property, system_sub_type_schema_group, user_backlink_index,
     },
-    entries::BasicGroup,
     types::glossary_common::*,
     types::newtypes::*,
     utility::parse_datetime,
 };
 use chrono::{DateTime as ChronoDateTime, Utc};
-
-/*-------------------------------------------------------- */
-/*----------------------Glossary Node----------------------*/
-/*-------------------------------------------------------- */
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SystemGlossaryNode {
-    pub id: NodeEntryId,
-    pub name: String,
-    pub entry_type: GlossaryEntryType,
-    pub sub_type_id: SubTypeId,
-    pub glossary_id: GlossaryId,
-    pub sort_index: u32,
-    pub icon: Option<String>, //for custom icon support eventually
-    pub integration_state: Option<String>, // Still not sure how that's going to go one day.
-    pub parent_id: Option<NodeEntryId>,
-}
-
-impl TryFrom<system_glossary_node::Model> for SystemGlossaryNode {
-    type Error = String;
-
-    fn try_from(model: system_glossary_node::Model) -> Result<Self, Self::Error> {
-        Ok(SystemGlossaryNode {
-            id: NodeEntryId(model.id),
-            name: model.name,
-            entry_type: GlossaryEntryType::from_str(&model.entry_type)
-                .map_err(|_| "Invalid entry type".to_string())?,
-            sub_type_id: SubTypeId(model.system_sub_type_id),
-            glossary_id: GlossaryId(model.glossary_id),
-            sort_index: model.sort_index as u32,
-            icon: model.icon,
-            integration_state: model.integration_state,
-            parent_id: model.parent_id.map(NodeEntryId),
-        })
-    }
-}
-
-/*-------------------------------------------------------- */
-/*----------------------Glossary Entry---------------------*/
-/*-------------------------------------------------------- */
-
-// COME BACK HERE WHEN THE INTEGRATION STATE IS DEFINED
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// #[serde(rename_all = "camelCase")]
-// pub struct GlossaryEntryIntegrationState {
-
-// }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GlossaryEntry {
-    pub id: String,
-    pub entry_type: GlossaryEntryType,
-    pub sub_type_id: String,
-    pub created_at: ChronoDateTime<Utc>,
-    pub updated_at: ChronoDateTime<Utc>,
-    pub name: String,
-    pub groups: HashMap<String, BasicGroup>,
-    pub primary_anchor_id: Option<String>,
-    pub primary_anchor_value: Option<String>,
-    pub secondary_anchor_id: Option<String>,
-    pub secondary_anchor_value: Option<String>,
-}
-
-impl TryFrom<system_glossary_entry::Model> for GlossaryEntry {
-    type Error = String;
-
-    fn try_from(model: system_glossary_entry::Model) -> Result<Self, Self::Error> {
-        Ok(GlossaryEntry {
-            id: model.id,
-            entry_type: GlossaryEntryType::from_str(&model.entry_type)
-                .map_err(|_| "Invalid entry type".to_string())?,
-            sub_type_id: model.sub_type_id,
-            created_at: parse_datetime(&model.created_at),
-            updated_at: parse_datetime(&model.updated_at),
-            name: model.name,
-            groups: serde_json::from_str(&model.groups.unwrap_or_default())
-                .map_err(|_| "Invalid groups".to_string())?,
-            primary_anchor_id: model.primary_anchor_id,
-            primary_anchor_value: model.primary_anchor_value,
-            secondary_anchor_id: model.secondary_anchor_id,
-            secondary_anchor_value: model.secondary_anchor_value,
-        })
-    }
-}
-
-/*-------------------------------------------------------- */
-/*-------------------------Glossary------------------------*/
-/*-------------------------------------------------------- */
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Glossary {
-    id: GlossaryId,
-    name: String,
-    genre: String,
-    sub_genre: String,
-    description: Option<String>,
-    created_by: String,
-    created_at: ChronoDateTime<Utc>,
-    updated_at: ChronoDateTime<Utc>,
-    visibility: String,
-    theme: GlossaryThemes,
-    integration_state: HashMap<GlossaryEntryType, GlossaryEntrySettings>,
-}
-
-impl TryFrom<system_glossary::Model> for Glossary {
-    type Error = String;
-
-    fn try_from(model: system_glossary::Model) -> Result<Self, Self::Error> {
-        Ok(Glossary {
-            id: GlossaryId(model.id),
-            name: model.name,
-            genre: model.genre,
-            created_by: String::new(),
-            sub_genre: model.sub_genre,
-            description: model.description,
-            created_at: parse_datetime(&model.created_at),
-            updated_at: parse_datetime(&model.updated_at),
-            visibility: "{}".to_string(),
-            theme: serde_json::from_str(&model.theme.unwrap_or_default()).unwrap_or_default(),
-            integration_state: HashMap::new(),
-        })
-    }
-}
 
 /*-------------------------------------------------------- */
 /*---------------------Subtype Property--------------------*/
@@ -234,7 +105,7 @@ impl TryFrom<system_sub_type_group_property::Model> for SystemSubTypePropertyLin
             id: model.id,
             group_id: GroupId(model.group_id),
             property_id: None,
-            system_property_id: Some(PropertyId(model.property_id)),
+            system_property_id: Some(PropertyId(model.system_property_id)),
             order: model.order,
         })
     }

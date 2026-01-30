@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use sea_orm::{Database, DatabaseConnection};
+use sea_orm::{Database, DatabaseConnection, EntityTrait, PaginatorTrait};
 use std::fs;
 use tauri::Manager;
 
@@ -17,6 +17,8 @@ mod utility;
 use logging::setup_logging;
 use migration::{Migrator, MigratorTrait};
 use tracing::{error, info, warn};
+
+use crate::{commands::utility::seed_system_content, entities::system_sub_type};
 
 async fn setup_database(
     app_handle: &tauri::AppHandle,
@@ -42,6 +44,18 @@ async fn setup_database(
     // Run migrations
     println!("Running migrations...");
     Migrator::up(&db, None).await?;
+    /*-------------------------------------------------------------------------- */
+    /*-----------Check if system content needs seeding and then seed------------ */
+    /*-------------------------------------------------------------------------- */
+    let count = system_sub_type::Entity::find().count(&db).await?;
+
+    // if count == 0 {
+    //     info!("No system content found, seeding from JSON...");
+    //     seed_system_content(&db).await?;
+    // } else {
+    //     info!("System content already present, skipping seeding.");
+    // }
+
     println!("Migrations complete");
 
     Ok(db)
@@ -102,23 +116,39 @@ async fn main() {
             commands::entry::update_entry_groups,
             commands::entry::update_entry_sub_type,
             commands::entry::search_entries,
-            commands::subtype::get_sub_type_properties,
-            commands::subtype::create_sub_type_property,
-            commands::subtype::create_sub_type_group,
-            commands::subtype::get_sub_type_groups,
-            commands::subtype::create_sub_type,
-            commands::subtype::get_sub_types,
-            commands::subtype::create_group_property,
-            commands::subtype::add_group_to_subtype,
-            commands::subtype::delete_sub_type,
-            commands::subtype::delete_sub_type_property,
-            commands::subtype::delete_sub_type_group,
-            commands::subtype::remove_group_property,
-            commands::subtype::reorder_group_properties,
-            commands::subtype::update_sub_type_group,
-            commands::subtype::update_sub_type_property,
-            commands::subtype::remove_group_from_sub_type,
-            commands::subtype::update_sub_type,
+            commands::entry::search_fts,
+            commands::user::subtype::get_sub_type_properties,
+            commands::user::subtype::create_sub_type_property,
+            commands::user::subtype::create_sub_type_group,
+            commands::user::subtype::get_sub_type_groups,
+            commands::user::subtype::create_sub_type,
+            commands::user::subtype::get_sub_types,
+            commands::user::subtype::create_group_property,
+            commands::user::subtype::add_group_to_subtype,
+            commands::user::subtype::delete_sub_type,
+            commands::user::subtype::delete_sub_type_property,
+            commands::user::subtype::delete_sub_type_group,
+            commands::user::subtype::remove_group_property,
+            commands::user::subtype::reorder_group_properties,
+            commands::user::subtype::update_sub_type_group,
+            commands::user::subtype::update_sub_type_property,
+            commands::user::subtype::remove_group_from_sub_type,
+            commands::user::subtype::update_sub_type,
+            commands::system::subtype::sys_create_group_property,
+            commands::system::subtype::sys_add_group_to_subtype,
+            commands::system::subtype::sys_create_sub_type_group,
+            commands::system::subtype::sys_create_sub_type_property,
+            commands::system::subtype::sys_create_sub_type,
+            commands::system::subtype::sys_delete_sub_type_group,
+            commands::system::subtype::sys_delete_sub_type_property,
+            commands::system::subtype::sys_delete_sub_type,
+            commands::system::subtype::sys_remove_group_from_sub_type,
+            commands::system::subtype::sys_remove_group_property,
+            commands::system::subtype::sys_reorder_group_properties,
+            commands::system::subtype::sys_update_sub_type_group,
+            commands::system::subtype::sys_update_sub_type_property,
+            commands::system::subtype::sys_update_sub_type,
+            commands::system::utility::admin_export_sys_content,
             commands::backlinks::update_backlink,
             commands::logging::get_log_path,
             commands::logging::get_recent_logs,

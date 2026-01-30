@@ -4,6 +4,7 @@ use crate::{
 };
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
 
+#[cfg(debug_assertions)]
 #[tauri::command]
 pub async fn sys_add_group_to_subtype(
     db: tauri::State<'_, DatabaseConnection>,

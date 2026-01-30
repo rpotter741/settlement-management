@@ -4,10 +4,6 @@ pub mod prelude;
 
 pub mod devices;
 pub mod glossary_meta_data;
-pub mod system_backlink_index;
-pub mod system_glossary;
-pub mod system_glossary_entry;
-pub mod system_glossary_node;
 pub mod system_sub_type;
 pub mod system_sub_type_group;
 pub mod system_sub_type_group_property;

@@ -2,10 +2,6 @@
 
 pub use super::devices::Entity as Devices;
 pub use super::glossary_meta_data::Entity as GlossaryMetaData;
-pub use super::system_backlink_index::Entity as SystemBacklinkIndex;
-pub use super::system_glossary::Entity as SystemGlossary;
-pub use super::system_glossary_entry::Entity as SystemGlossaryEntry;
-pub use super::system_glossary_node::Entity as SystemGlossaryNode;
 pub use super::system_sub_type::Entity as SystemSubType;
 pub use super::system_sub_type_group::Entity as SystemSubTypeGroup;
 pub use super::system_sub_type_group_property::Entity as SystemSubTypeGroupProperty;
@@ -14,6 +10,7 @@ pub use super::system_sub_type_schema_group::Entity as SystemSubTypeSchemaGroup;
 pub use super::user_backlink_index::Entity as UserBacklinkIndex;
 pub use super::user_glossary::Entity as UserGlossary;
 pub use super::user_glossary_entry::Entity as UserGlossaryEntry;
+
 pub use super::user_glossary_entry_metadata::Entity as UserGlossaryEntryMetadata;
 pub use super::user_glossary_node::Entity as UserGlossaryNode;
 pub use super::user_settings::Entity as UserSettings;
